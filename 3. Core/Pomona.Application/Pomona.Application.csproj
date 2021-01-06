@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="10.1.1" />
+    <PackageReference Include="NLog" Version="4.7.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\4. Infraestructure\Pomona.Infrastructure\Pomona.Infrastructure.csproj" />
+    <ProjectReference Include="..\Pomona.Domain\Pomona.Domain.csproj" />
+    <ProjectReference Include="..\Pomona.Protos\Pomona.Protos.csproj" />
+  </ItemGroup>
+
+</Project>

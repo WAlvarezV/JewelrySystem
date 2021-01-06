@@ -1,0 +1,12 @@
+F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Models\bin\Debug\net5.0\Pomona.Models.deps.json
+F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Models\bin\Debug\net5.0\Pomona.Models.dll
+F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Models\bin\Debug\net5.0\ref\Pomona.Models.dll
+F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Models\bin\Debug\net5.0\Pomona.Models.pdb
+F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Models\obj\Debug\net5.0\Pomona.Models.csprojAssemblyReference.cache
+F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Models\obj\Debug\net5.0\Pomona.Models.GeneratedMSBuildEditorConfig.editorconfig
+F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Models\obj\Debug\net5.0\Pomona.Models.AssemblyInfoInputs.cache
+F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Models\obj\Debug\net5.0\Pomona.Models.AssemblyInfo.cs
+F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Models\obj\Debug\net5.0\Pomona.Models.csproj.CoreCompileInputs.cache
+F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Models\obj\Debug\net5.0\Pomona.Models.dll
+F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Models\obj\Debug\net5.0\ref\Pomona.Models.dll
+F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Models\obj\Debug\net5.0\Pomona.Models.pdb

@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "dgSpecHash": "cuN5lG+h9RJup9JrKR1/x1L0oIqlkKJtnA6qCy8TR9nzyUkjdQKvH366v+VAHmKrFiVGJBO5croCdt9TXpsdtQ==",
+  "success": true,
+  "projectFilePath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\WAlvarezV\\.nuget\\packages\\google.protobuf\\3.14.0\\google.protobuf.3.14.0.nupkg.sha512",
+    "C:\\Users\\WAlvarezV\\.nuget\\packages\\grpc.core.api\\2.33.1\\grpc.core.api.2.33.1.nupkg.sha512",
+    "C:\\Users\\WAlvarezV\\.nuget\\packages\\grpc.net.client\\2.33.1\\grpc.net.client.2.33.1.nupkg.sha512",
+    "C:\\Users\\WAlvarezV\\.nuget\\packages\\grpc.net.common\\2.33.1\\grpc.net.common.2.33.1.nupkg.sha512",
+    "C:\\Users\\WAlvarezV\\.nuget\\packages\\grpc.tools\\2.33.1\\grpc.tools.2.33.1.nupkg.sha512",
+    "C:\\Users\\WAlvarezV\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\3.0.3\\microsoft.extensions.logging.abstractions.3.0.3.nupkg.sha512",
+    "C:\\Users\\WAlvarezV\\.nuget\\packages\\system.diagnostics.diagnosticsource\\4.5.1\\system.diagnostics.diagnosticsource.4.5.1.nupkg.sha512",
+    "C:\\Users\\WAlvarezV\\.nuget\\packages\\system.memory\\4.5.3\\system.memory.4.5.3.nupkg.sha512",
+    "C:\\Users\\WAlvarezV\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\4.5.2\\system.runtime.compilerservices.unsafe.4.5.2.nupkg.sha512"
+  ],
+  "logs": []
+}

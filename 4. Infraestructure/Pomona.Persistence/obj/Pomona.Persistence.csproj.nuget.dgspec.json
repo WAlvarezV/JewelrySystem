@@ -1,0 +1,199 @@
+{
+  "format": 1,
+  "restore": {
+    "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\Pomona.Persistence.csproj": {}
+  },
+  "projects": {
+    "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj",
+        "projectName": "Pomona.Domain",
+        "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj",
+        "packagesPath": "C:\\Users\\WAlvarezV\\.nuget\\packages\\",
+        "outputPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\WAlvarezV\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://nuget.devexpress.com/V9Tlzvj8EwgLuFAiA19nMbykdDvkEIukAM4HKuhz2B6jtnprdA/api": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.101\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\Pomona.Persistence.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\Pomona.Persistence.csproj",
+        "projectName": "Pomona.Persistence",
+        "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\Pomona.Persistence.csproj",
+        "packagesPath": "C:\\Users\\WAlvarezV\\.nuget\\packages\\",
+        "outputPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\WAlvarezV\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://nuget.devexpress.com/V9Tlzvj8EwgLuFAiA19nMbykdDvkEIukAM4HKuhz2B6jtnprdA/api": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {
+              "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj": {
+                "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj"
+              },
+              "F:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj": {
+                "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "dependencies": {
+            "Microsoft.AspNetCore.Http.Abstractions": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[5.0.1, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.101\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "F:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj",
+        "projectName": "Pomona.Utilities",
+        "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj",
+        "packagesPath": "C:\\Users\\WAlvarezV\\.nuget\\packages\\",
+        "outputPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\WAlvarezV\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://nuget.devexpress.com/V9Tlzvj8EwgLuFAiA19nMbykdDvkEIukAM4HKuhz2B6jtnprdA/api": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.101\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\bin\Debug\net5.0\Pomona.Persistence.deps.json
+F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\bin\Debug\net5.0\Pomona.Persistence.dll
+F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\bin\Debug\net5.0\ref\Pomona.Persistence.dll
+F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\bin\Debug\net5.0\Pomona.Persistence.pdb
+F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\bin\Debug\net5.0\Pomona.Domain.dll
+F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\bin\Debug\net5.0\Pomona.Utilities.dll
+F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\bin\Debug\net5.0\Pomona.Domain.pdb
+F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\bin\Debug\net5.0\Pomona.Utilities.pdb
+F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\obj\Debug\net5.0\Pomona.Persistence.csprojAssemblyReference.cache
+F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\obj\Debug\net5.0\Pomona.Persistence.GeneratedMSBuildEditorConfig.editorconfig
+F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\obj\Debug\net5.0\Pomona.Persistence.AssemblyInfoInputs.cache
+F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\obj\Debug\net5.0\Pomona.Persistence.AssemblyInfo.cs
+F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\obj\Debug\net5.0\Pomona.Persistence.csproj.CoreCompileInputs.cache
+F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\obj\Debug\net5.0\Pomona.Persistence.csproj.CopyComplete
+F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\obj\Debug\net5.0\Pomona.Persistence.dll
+F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\obj\Debug\net5.0\ref\Pomona.Persistence.dll
+F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\obj\Debug\net5.0\Pomona.Persistence.pdb

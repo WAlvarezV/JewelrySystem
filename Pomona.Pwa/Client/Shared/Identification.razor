@@ -1,0 +1,28 @@
+﻿<div class="form-group col-md-3">
+    <label for="rolename">Tipo de Identificación</label>
+    <select disabled="@IsDisabled" class="form-control mb-2 mr-sm-2" @bind="Id.TypeId">
+        <option value="0">-- Seleccione una opción --</option>
+        @foreach (var item in IdentificationTypes)
+        {
+            <option value="@item.Id">@item.Name</option>
+        }
+    </select>
+</div>
+<div class="form-group col-md-3">
+    <label for="identification">Número de identificación</label>
+    <input disabled="@IsDisabled" type="text" class="form-control" id="identification" placeholder="Número de Identificación"
+           @bind-value="Id.Number" @bind-value:event="oninput"
+           @onblur="((FocusEventArgs e) => OnBlur.InvokeAsync(e))" />
+</div>
+
+@code{
+    [Parameter] public IdentificationProto Id { get; set; }
+    [Parameter] public EventCallback<FocusEventArgs> OnBlur { get; set; }
+    [Parameter] public bool IsDisabled { get; set; }
+    IEnumerable<TypeProto> IdentificationTypes { get; set; }
+
+    protected override void OnInitialized()
+    {
+        IdentificationTypes = new TypeProto[] { new TypeProto { Id = "1", Name = "CEDULA DE CIUDADANIA" }, new TypeProto { Id = "2", Name = "NIT" } };
+    }
+}

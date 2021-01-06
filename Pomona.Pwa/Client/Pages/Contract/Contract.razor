@@ -1,0 +1,75 @@
+﻿@inherits ContractBase
+<EditForm Model="@Contract" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="form-row">
+        @if (EditMode)
+        {
+            <Identification Id="Id" IsDisabled="IsDisabled" />
+        }
+        else
+        {
+            <Identification Id="Id" OnBlur="OnBlur" FullList="false" IsDisabled="IsDisabled" />
+        }
+        <div class="form-group col-md-6">
+            <label for="fullname">Nombre Completo</label>
+            <InputText disabled="@EditMode" class="form-control" @bind-Value="Contract.FullName"
+                       placeholder="Nombre Completo">Nombre Completo</InputText>
+            <ValidationMessage For="@(() => Contract.FullName)" />
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="cellphone">Celular</label>
+            <InputText disabled class="form-control" @bind-Value="Contract.CellPhone">Celular</InputText>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-3">
+            <label for="number">Número de Contrato</label>
+            <InputNumber style="color:red" placaholder="0000" class="form-control" @bind-Value="Contract.Number" />
+        </div>
+        <div class="form-group col-md-3">
+            <label for="number">Valor de Contrato</label>
+            <InputNumber class="form-control" @bind-Value="Contract.Value" />
+        </div>
+        <div class="form-group col-md-3">
+            <label for="number">Fecha de Contrato</label>
+            <InputDate disabled class="form-control" @bind-Value="Contract.Date" />
+        </div>
+        <div class="form-group col-md-3">
+            <label for="number">Fecha de Entrega</label>
+            <InputDate class="form-control" @bind-Value="Contract.DeliveryDate" />
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-3">
+            <label for="number">Número de Contrato</label>
+            <InputNumber class="form-control" @bind-Value="Contract.Number" />
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-12">
+            <label for="number">Descripción del Contrato</label>
+            <InputTextArea class="form-control" @bind-Value="Contract.Description" />
+        </div>
+    </div>
+
+    <div class="card-footer bg-transparent">
+        <div class="d-flex justify-content-end">
+            <div class="form-group col-md-2">
+                <a class="btn btn-outline-secondary btn-block" href="/users">Atrás</a>
+            </div>
+            @if (!EditMode)
+            {
+                <div class="form-group col-md-2">
+                    <button class="btn btn-outline-primary btn-block" @onclick="ClearForm">Limpiar</button>
+                </div>
+            }
+            <div class="form-group col-md-2">
+                <button disabled="@DisabledButton" type="submit" class="btn btn-primary btn-block">Guardar</button>
+            </div>
+        </div>
+    </div>
+</EditForm>

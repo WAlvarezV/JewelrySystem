@@ -1,0 +1,44 @@
+﻿@page "/contratos"
+@inherits ContractsBase
+
+<div class="card">
+    <div class="card-header">
+        <h3>Contratos</h3>
+    </div>
+    <div class="form-group card-body">
+        <a class="btn btn-primary" href="contrato/registrar">Nuevo Contrato</a>
+    </div>
+
+    @if (Contracts.Any())
+    {
+        <text>No hay registros para mostrar.</text>
+    }
+    else
+    {
+        <table class="table table-sm table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Número</th>
+                    <th>Estado</th>
+                    <th>Fecha</th>
+                    <th>Fecha Entrega</th>
+                    <th>Valor</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Contracts)
+                {
+                    <tr>
+                        <td>
+                            <a class="btn btn-link" href="/contrato/@item.Id">@item.Number</a>
+                        </td>
+                        <td>@item.State</td>
+                        <td>@item.Date</td>
+                        <td>@item.DeliveryDate</td>
+                        <td>@item.Value</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

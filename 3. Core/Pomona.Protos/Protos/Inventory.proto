@@ -1,0 +1,32 @@
+syntax = "proto3";
+option csharp_namespace = "Pomona.Protos";
+package Pomona;
+
+// import "google/protobuf/wrappers.proto";
+// import "google/protobuf/timestamp.proto";
+
+service InventorySrv {
+    rpc RegisterItem (ItemProto) returns (ItemResponse);
+    
+}
+
+message ItemProto{ 
+    int32 AssignedItems = 1;
+	int32 QualifiedItems = 2;
+	int32 ItemsQualifying = 3;
+	int32 PendingItems = 4;
+	int32 DebtItems = 5;
+    int32 DebtState = 6;
+	string ClaimedValue = 7;
+	string AcceptedValue = 8;
+	string AuditValue = 9;
+    repeated int32 QulificationIds = 10;
+    bool IsQualified = 11;
+}
+
+message ItemResponse { 
+    repeated string ItemsList = 1;
+    int32 Pages = 2;
+    string UserId = 3;
+    int32 QualificationTypeId = 4;
+}

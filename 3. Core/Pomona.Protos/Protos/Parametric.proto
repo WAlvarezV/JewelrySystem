@@ -1,0 +1,102 @@
+syntax = "proto3";
+option csharp_namespace = "Pomona.Protos";
+package Pomona;
+
+import "google/protobuf/empty.proto";
+
+service ParametricSrv {
+	rpc GetDocumentTypes (google.protobuf.Empty) returns (TypesResponse);
+	rpc GetParametricData (google.protobuf.Empty) returns (ParametricResponse);
+	rpc GetDebtTypes (google.protobuf.Empty) returns (DebtTypesResponse);
+	rpc GetControls (google.protobuf.Empty) returns (ControlsResponse);
+	rpc GetHeaderFormat (HeaderFormatRequest) returns (HeaderFormatResponse);
+	rpc GetAuthorizationTypes (google.protobuf.Empty) returns (AuthorizationTypesResponse);
+}
+
+message TypesResponse {
+	repeated TypeProto Types = 1;
+}
+
+message DebtTypesResponse {
+	repeated TipoDeudaProto DebtTypes = 1;
+}
+
+message ControlsResponse {
+	repeated ControlRolProto Controls = 1;
+}
+
+message HeaderFormatRequest {
+	int32 DebtTypeId = 1;
+}
+
+message HeaderFormatResponse {
+	string Header = 1;
+}
+
+message ParametricResponse {
+	repeated TypeProto IdentificationTypes = 1;
+	repeated TypeProto RegimeTypes = 2;
+	repeated TypeProto BusinessTypes = 3;
+	repeated TypeProto LegalNatureTypes = 4;
+	repeated DepartmentProto Departments = 5;
+	repeated TipoDeudaProto DebtTypes = 6;
+	repeated ControlRolProto Controls = 7;
+	repeated Parameter Parameters = 8;
+	repeated TypeProto DebtStates = 9;
+	repeated ItemFormat ItemsFormat = 10;	
+}
+
+message ItemTypeProto { 
+	string Id = 1;
+	string Name = 2;
+}
+
+
+message TypeProto { 
+	string Id = 1;
+	string Name = 2;
+}
+
+message ControlRolProto { 
+	string Control = 1;
+	string AssignedRoles = 2;
+}
+
+message DepartmentProto { 
+	TypeProto Department = 1;
+	repeated TypeProto Municipalities = 2;
+}
+
+message TipoDeudaProto {
+	int32 Id = 1;
+	string Codigo = 2;
+	string Nombre = 3;
+	int32 SubGrupoId = 4;
+	string CodigoAnterior = 5;
+}
+
+message Parameter { 
+	string Key = 1;
+	string Value = 2;
+	string Description = 3;
+}
+
+message ItemFormat { 
+	int32 Id = 1;
+	string Header = 2;
+	int32 DebtTypeId = 3;
+	string Duplicity = 4;
+	string Prescription = 5;
+	string TitleValue = 6;
+	string KeyField = 7;
+}
+
+message AuthorizationTypeProto {
+	int32 Id = 1;
+	string Name = 2;
+	string AuthorizingRoles = 3;
+}
+
+message AuthorizationTypesResponse {
+	repeated AuthorizationTypeProto AuthorizationTypes = 1;
+}

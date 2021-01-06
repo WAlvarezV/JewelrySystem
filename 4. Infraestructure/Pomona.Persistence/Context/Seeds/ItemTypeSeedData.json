@@ -1,0 +1,30 @@
+[
+  {
+    "Id": 1,
+    "Nombre": "Anillo"
+  },
+  {
+    "Id": 2,
+    "Nombre": "Arete"
+  },
+  {
+    "Id": 3,
+    "Nombre": "Cadena"
+  },
+  {
+    "Id": 4,
+    "Nombre": "Pulsera"
+  },
+  {
+    "Id": 5,
+    "Nombre": "Reloj"
+  },
+  {
+    "Id": 6,
+    "Nombre": "Bateria"
+  },
+  {
+    "Id": 7,
+    "Nombre": "Topo Perforada"
+  }
+]
