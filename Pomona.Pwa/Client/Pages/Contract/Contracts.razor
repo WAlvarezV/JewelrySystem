@@ -11,34 +11,55 @@
 
     @if (Contracts.Any())
     {
-        <text>No hay registros para mostrar.</text>
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Estado</th>
+                        <th>Fecha Contrato</th>
+                        <th>Fecha Entrega</th>
+                        <th>Vence En</th>
+                        <th>Valor</th>
+                        <th>Saldo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Contracts)
+                    {
+                        var days = item.DeliveryDate.ToDateTime().Subtract(DateTime.Today).Days;
+                        var color = "black";
+                        if (days <= 1)
+                        {
+                            color = "red";
+                        }
+                        else if (days > 1 && days <= 7)
+                        {
+                            color = "orange";
+                        }
+                        else if (days > 7 && days <= 15)
+                        {
+                            color = "green";
+                        }
+
+                        <tr style="color:@color">
+                            <td>
+                                <a class="btn btn-link" href="/contrato/@item.Id">@item.Number</a>
+                            </td>
+                            <td>@item.State</td>
+                            <td>@item.Date.ToDateTime().ToString("dd-MMMM-yyyy")</td>
+                            <td>@item.DeliveryDate.ToDateTime().ToString("dd-MMMM-yyyy")</td>
+                            <td>@days días</td>
+                            <td>@item.Value.ToString("C0", CultureInfo)</td>
+                            <td>@item.Balance.ToString("C0", CultureInfo)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     }
     else
     {
-        <table class="table table-sm table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th>Número</th>
-                    <th>Estado</th>
-                    <th>Fecha</th>
-                    <th>Fecha Entrega</th>
-                    <th>Valor</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Contracts)
-                {
-                    <tr>
-                        <td>
-                            <a class="btn btn-link" href="/contrato/@item.Id">@item.Number</a>
-                        </td>
-                        <td>@item.State</td>
-                        <td>@item.Date</td>
-                        <td>@item.DeliveryDate</td>
-                        <td>@item.Value</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <text>No hay registros para mostrar.</text>
     }
 </div>

@@ -21,3 +21,5 @@ F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Application\obj\Debug\net5.0\Pom
 F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Application\obj\Debug\net5.0\Pomona.Application.dll
 F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Application\obj\Debug\net5.0\ref\Pomona.Application.dll
 F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Application\obj\Debug\net5.0\Pomona.Application.pdb
+F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Application\bin\Debug\net5.0\Context\Seeds\IdentificationTypeSeedData.json
+F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Application\bin\Debug\net5.0\Context\Seeds\ItemTypeSeedData.json

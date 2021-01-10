@@ -15,3 +15,5 @@ F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\obj\Debug
 F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\obj\Debug\net5.0\Pomona.Persistence.dll
 F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\obj\Debug\net5.0\ref\Pomona.Persistence.dll
 F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\obj\Debug\net5.0\Pomona.Persistence.pdb
+F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\bin\Debug\net5.0\Context\Seeds\IdentificationTypeSeedData.json
+F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Persistence\bin\Debug\net5.0\Context\Seeds\ItemTypeSeedData.json

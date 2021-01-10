@@ -8,9 +8,9 @@
         }
     </select>
 </div>
-<div class="form-group col-md-3">
-    <label for="identification">Número de identificación</label>
-    <input disabled="@IsDisabled" type="text" class="form-control" id="identification" placeholder="Número de Identificación"
+<div class="form-group col-md-2">
+    <label for="identification">Número Identificación</label>
+    <input disabled="@IsDisabled" type="text" class="form-control" id="identification"
            @bind-value="Id.Number" @bind-value:event="oninput"
            @onblur="((FocusEventArgs e) => OnBlur.InvokeAsync(e))" />
 </div>

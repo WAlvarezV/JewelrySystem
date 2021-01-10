@@ -1,0 +1,14 @@
+[
+  {
+    "Id": 1,
+    "Name": "Cedula de Ciudadanía"
+  },
+  {
+    "Id": 2,
+    "Name": "Nit"
+  },
+  {
+    "Id": 3,
+    "Name": "Cedula de Extranjería"
+  }
+]

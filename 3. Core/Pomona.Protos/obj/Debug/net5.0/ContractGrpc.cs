@@ -44,6 +44,8 @@ namespace Pomona.Protos {
 
     static readonly grpc::Marshaller<global::Pomona.Protos.ContractProto> __Marshaller_Pomona_ContractProto = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Pomona.Protos.ContractProto.Parser));
     static readonly grpc::Marshaller<global::Pomona.Protos.ContractResponse> __Marshaller_Pomona_ContractResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Pomona.Protos.ContractResponse.Parser));
+    static readonly grpc::Marshaller<global::Pomona.Protos.PaymentProto> __Marshaller_Pomona_PaymentProto = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Pomona.Protos.PaymentProto.Parser));
+    static readonly grpc::Marshaller<global::Pomona.Protos.IdProto> __Marshaller_Pomona_IdProto = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Pomona.Protos.IdProto.Parser));
     static readonly grpc::Marshaller<global::Google.Protobuf.WellKnownTypes.Empty> __Marshaller_google_protobuf_Empty = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Google.Protobuf.WellKnownTypes.Empty.Parser));
     static readonly grpc::Marshaller<global::Pomona.Protos.ContractsResponse> __Marshaller_Pomona_ContractsResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Pomona.Protos.ContractsResponse.Parser));
 
@@ -52,6 +54,20 @@ namespace Pomona.Protos {
         __ServiceName,
         "RegisterContract",
         __Marshaller_Pomona_ContractProto,
+        __Marshaller_Pomona_ContractResponse);
+
+    static readonly grpc::Method<global::Pomona.Protos.PaymentProto, global::Pomona.Protos.ContractResponse> __Method_RegisterPayment = new grpc::Method<global::Pomona.Protos.PaymentProto, global::Pomona.Protos.ContractResponse>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "RegisterPayment",
+        __Marshaller_Pomona_PaymentProto,
+        __Marshaller_Pomona_ContractResponse);
+
+    static readonly grpc::Method<global::Pomona.Protos.IdProto, global::Pomona.Protos.ContractResponse> __Method_GetContractById = new grpc::Method<global::Pomona.Protos.IdProto, global::Pomona.Protos.ContractResponse>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "GetContractById",
+        __Marshaller_Pomona_IdProto,
         __Marshaller_Pomona_ContractResponse);
 
     static readonly grpc::Method<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.ContractsResponse> __Method_GetContracts = new grpc::Method<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.ContractsResponse>(
@@ -72,6 +88,16 @@ namespace Pomona.Protos {
     public abstract partial class ContractSrvBase
     {
       public virtual global::System.Threading.Tasks.Task<global::Pomona.Protos.ContractResponse> RegisterContract(global::Pomona.Protos.ContractProto request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      public virtual global::System.Threading.Tasks.Task<global::Pomona.Protos.ContractResponse> RegisterPayment(global::Pomona.Protos.PaymentProto request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      public virtual global::System.Threading.Tasks.Task<global::Pomona.Protos.ContractResponse> GetContractById(global::Pomona.Protos.IdProto request, grpc::ServerCallContext context)
       {
         throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
       }
@@ -122,6 +148,38 @@ namespace Pomona.Protos {
       {
         return CallInvoker.AsyncUnaryCall(__Method_RegisterContract, null, options, request);
       }
+      public virtual global::Pomona.Protos.ContractResponse RegisterPayment(global::Pomona.Protos.PaymentProto request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return RegisterPayment(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual global::Pomona.Protos.ContractResponse RegisterPayment(global::Pomona.Protos.PaymentProto request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_RegisterPayment, null, options, request);
+      }
+      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.ContractResponse> RegisterPaymentAsync(global::Pomona.Protos.PaymentProto request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return RegisterPaymentAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.ContractResponse> RegisterPaymentAsync(global::Pomona.Protos.PaymentProto request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_RegisterPayment, null, options, request);
+      }
+      public virtual global::Pomona.Protos.ContractResponse GetContractById(global::Pomona.Protos.IdProto request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return GetContractById(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual global::Pomona.Protos.ContractResponse GetContractById(global::Pomona.Protos.IdProto request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_GetContractById, null, options, request);
+      }
+      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.ContractResponse> GetContractByIdAsync(global::Pomona.Protos.IdProto request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return GetContractByIdAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.ContractResponse> GetContractByIdAsync(global::Pomona.Protos.IdProto request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_GetContractById, null, options, request);
+      }
       public virtual global::Pomona.Protos.ContractsResponse GetContracts(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
       {
         return GetContracts(request, new grpc::CallOptions(headers, deadline, cancellationToken));
@@ -151,6 +209,8 @@ namespace Pomona.Protos {
     {
       return grpc::ServerServiceDefinition.CreateBuilder()
           .AddMethod(__Method_RegisterContract, serviceImpl.RegisterContract)
+          .AddMethod(__Method_RegisterPayment, serviceImpl.RegisterPayment)
+          .AddMethod(__Method_GetContractById, serviceImpl.GetContractById)
           .AddMethod(__Method_GetContracts, serviceImpl.GetContracts).Build();
     }
 
@@ -161,6 +221,8 @@ namespace Pomona.Protos {
     public static void BindService(grpc::ServiceBinderBase serviceBinder, ContractSrvBase serviceImpl)
     {
       serviceBinder.AddMethod(__Method_RegisterContract, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Pomona.Protos.ContractProto, global::Pomona.Protos.ContractResponse>(serviceImpl.RegisterContract));
+      serviceBinder.AddMethod(__Method_RegisterPayment, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Pomona.Protos.PaymentProto, global::Pomona.Protos.ContractResponse>(serviceImpl.RegisterPayment));
+      serviceBinder.AddMethod(__Method_GetContractById, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Pomona.Protos.IdProto, global::Pomona.Protos.ContractResponse>(serviceImpl.GetContractById));
       serviceBinder.AddMethod(__Method_GetContracts, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.ContractsResponse>(serviceImpl.GetContracts));
     }
 

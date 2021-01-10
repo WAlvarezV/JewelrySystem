@@ -1,0 +1,5 @@
+﻿@page "/contrato/{Id:int}"
+@inherits EditContractBase
+<div class="card">
+    <Contract Contract="@Contract" OnValidSubmit="Save" ContractId="Id" EditMode="true" />
+</div>

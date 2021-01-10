@@ -1,14 +1,5 @@
-﻿@page "/contrato/nuevo"
+﻿@page "/contrato/registrar"
 @inherits CreateContractBase
 <div class="card">
-    <div class="card-header">
-        <h3>Crear Contrato</h3>
-    </div>
-    <div class="card-body">
-        <Contract Contract="Contract" OnValidSubmit="Create" />
-    </div>
+    <Contract Contract="@Contract" OnValidSubmit="Create" />
 </div>
-
-@code {
-
-}

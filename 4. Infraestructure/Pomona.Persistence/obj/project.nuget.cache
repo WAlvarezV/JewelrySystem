@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "c8ZrplY8p221Wmwrqdw655CV0QKlt+GaKWDZ6IyGGrRb7XTEJEKKmyg3F2r7ywfLncHp2tNV9DyslYgYHknQEQ==",
+  "dgSpecHash": "6GMPN7P48qR42UnhqTANBUj2sLGvR46dBcJs8aiKbzOJ6LrAw6rEs2CROM+X7yH/ds6wszgwueMngFE4F3Rw5Q==",
   "success": true,
   "projectFilePath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\Pomona.Persistence.csproj",
   "expectedPackageFiles": [
@@ -17,6 +17,7 @@
     "C:\\Users\\WAlvarezV\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\5.0.0\\microsoft.extensions.logging.abstractions.5.0.0.nupkg.sha512",
     "C:\\Users\\WAlvarezV\\.nuget\\packages\\microsoft.extensions.options\\5.0.0\\microsoft.extensions.options.5.0.0.nupkg.sha512",
     "C:\\Users\\WAlvarezV\\.nuget\\packages\\microsoft.extensions.primitives\\5.0.0\\microsoft.extensions.primitives.5.0.0.nupkg.sha512",
+    "C:\\Users\\WAlvarezV\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512",
     "C:\\Users\\WAlvarezV\\.nuget\\packages\\system.collections.immutable\\5.0.0\\system.collections.immutable.5.0.0.nupkg.sha512",
     "C:\\Users\\WAlvarezV\\.nuget\\packages\\system.componentmodel.annotations\\5.0.0\\system.componentmodel.annotations.5.0.0.nupkg.sha512",
     "C:\\Users\\WAlvarezV\\.nuget\\packages\\system.diagnostics.diagnosticsource\\5.0.0\\system.diagnostics.diagnosticsource.5.0.0.nupkg.sha512",

@@ -17,3 +17,5 @@ F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Infrastructure\obj\De
 F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Infrastructure\obj\Debug\net5.0\Pomona.Infrastructure.dll
 F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Infrastructure\obj\Debug\net5.0\ref\Pomona.Infrastructure.dll
 F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Infrastructure\obj\Debug\net5.0\Pomona.Infrastructure.pdb
+F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Infrastructure\bin\Debug\net5.0\Context\Seeds\IdentificationTypeSeedData.json
+F:\Proyectos\Joyeria\repo\Pomona\4. Infraestructure\Pomona.Infrastructure\bin\Debug\net5.0\Context\Seeds\ItemTypeSeedData.json

@@ -10,6 +10,11 @@ namespace Pomona.Persistence.Context.Configuration
     {
         public void Configure(EntityTypeBuilder<Contract> builder)
         {
+            builder.Property(p => p.Number).HasMaxLength(5);
+            builder.Property(p => p.Description).HasMaxLength(2000);
+
+
+
             builder.HasIndex(p => p.Number)
                 .IsUnique();
 

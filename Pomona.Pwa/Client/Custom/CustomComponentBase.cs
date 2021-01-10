@@ -22,7 +22,8 @@ namespace Pomona.Pwa.Client.Custom
         [Inject] IAccessTokenProvider TokenProvider { get; set; }
         protected Empty Empty { get; set; } = new Empty();
         protected Metadata Header { get; set; } = new Metadata();
-        protected CultureInfo CultureInfo { get; set; } = new CultureInfo("en-US", false);
+        protected CultureInfo CultureInfo { get; set; } = new CultureInfo("es-US", false);
+        protected NumberFormatInfo NumberFormatInfo { get; set; } = new CultureInfo("es-US", false).NumberFormat;
         //protected PaginationProto PaginationProto { get; set; } = new PaginationProto
         //{
         //    Page = 1,
@@ -33,7 +34,12 @@ namespace Pomona.Pwa.Client.Custom
         protected string UserRole { get; set; } = string.Empty;
         //protected string AuthorizedRoles { get; set; } = Constant.AdministratorRole;
 
-        protected override void OnInitialized() => base.OnInitialized();
+        protected override void OnInitialized()
+        {
+            NumberFormatInfo.CurrencyPositivePattern = 2;
+            CultureInfo.NumberFormat = NumberFormatInfo;
+            base.OnInitialized();
+        }
 
         protected async Task SuccessMessage(string msg) => await JSRuntime.ShowMessage("¡Muy bien!", msg, "success");
 

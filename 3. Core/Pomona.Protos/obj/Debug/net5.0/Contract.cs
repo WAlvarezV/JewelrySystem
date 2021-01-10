@@ -24,25 +24,38 @@ namespace Pomona.Protos {
     static ContractReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Cg5Db250cmFjdC5wcm90bxIGUG9tb25hGhtnb29nbGUvcHJvdG9idWYvZW1w",
-            "dHkucHJvdG8iowEKDUNvbnRyYWN0UHJvdG8SCgoCSWQYASABKAUSDgoGTnVt",
-            "YmVyGAIgASgFEgwKBERhdGUYAyABKAkSFAoMRGVsaXZlcnlEYXRlGAQgASgJ",
-            "Eg0KBVZhbHVlGAUgASgFEg0KBVN0YXRlGAYgASgJEg8KB0JhbGFuY2UYByAB",
-            "KAUSDgoGV2VpZ2h0GAggASgBEhMKC0Rlc2NyaXB0aW9uGAkgASgJImEKEENv",
-            "bnRyYWN0UmVzcG9uc2USEQoJSXRlbXNMaXN0GAEgAygJEg0KBVBhZ2VzGAIg",
-            "ASgFEg4KBlVzZXJJZBgDIAEoCRIbChNRdWFsaWZpY2F0aW9uVHlwZUlkGAQg",
-            "ASgFIj0KEUNvbnRyYWN0c1Jlc3BvbnNlEigKCUl0ZW1zTGlzdBgBIAMoCzIV",
-            "LlBvbW9uYS5Db250cmFjdFByb3RvMpUBCgtDb250cmFjdFNydhJDChBSZWdp",
-            "c3RlckNvbnRyYWN0EhUuUG9tb25hLkNvbnRyYWN0UHJvdG8aGC5Qb21vbmEu",
+            "Cg5Db250cmFjdC5wcm90bxIGUG9tb25hGh9nb29nbGUvcHJvdG9idWYvdGlt",
+            "ZXN0YW1wLnByb3RvGhtnb29nbGUvcHJvdG9idWYvZW1wdHkucHJvdG8aDFBl",
+            "cnNvbi5wcm90bxoQUGFyYW1ldHJpYy5wcm90byLcAgoNQ29udHJhY3RQcm90",
+            "bxIKCgJJZBgBIAEoBRIOCgZOdW1iZXIYAiABKAUSKAoERGF0ZRgDIAEoCzIa",
+            "Lmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASMAoMRGVsaXZlcnlEYXRlGAQg",
+            "ASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBINCgVWYWx1ZRgFIAEo",
+            "BRINCgVTdGF0ZRgGIAEoCRIPCgdQYXltZW50GA8gASgFEg8KB0JhbGFuY2UY",
+            "ByABKAUSDgoGV2VpZ2h0GAggASgBEhMKC0Rlc2NyaXB0aW9uGAkgASgJEhwK",
+            "FElkZW50aWZpY2F0aW9uVHlwZUlkGAogASgFEhwKFElkZW50aWZpY2F0aW9u",
+            "TnVtYmVyGAsgASgJEhAKCEZ1bGxOYW1lGAwgASgJEhEKCUNlbGxQaG9uZRgN",
+            "IAEoCRINCgVFbWFpbBgOIAEoCSJ1ChBDb250cmFjdFJlc3BvbnNlEhAKCFJl",
+            "c3BvbnNlGAEgASgJEicKCENvbnRyYWN0GAIgASgLMhUuUG9tb25hLkNvbnRy",
+            "YWN0UHJvdG8SJgoIUGF5bWVudHMYAyADKAsyFC5Qb21vbmEuUGF5bWVudFBy",
+            "b3RvIj0KEUNvbnRyYWN0c1Jlc3BvbnNlEigKCUl0ZW1zTGlzdBgBIAMoCzIV",
+            "LlBvbW9uYS5Db250cmFjdFByb3RvIooBCgxQYXltZW50UHJvdG8SCgoCSWQY",
+            "ASABKAUSDgoGTnVtYmVyGAIgASgFEigKBERhdGUYAyABKAsyGi5nb29nbGUu",
+            "cHJvdG9idWYuVGltZXN0YW1wEg0KBVZhbHVlGAQgASgFEhAKCEVudGl0eUlk",
+            "GAYgASgFEhMKC1BheW1lbnRUeXBlGAcgASgJMpYCCgtDb250cmFjdFNydhJD",
+            "ChBSZWdpc3RlckNvbnRyYWN0EhUuUG9tb25hLkNvbnRyYWN0UHJvdG8aGC5Q",
+            "b21vbmEuQ29udHJhY3RSZXNwb25zZRJBCg9SZWdpc3RlclBheW1lbnQSFC5Q",
+            "b21vbmEuUGF5bWVudFByb3RvGhguUG9tb25hLkNvbnRyYWN0UmVzcG9uc2US",
+            "PAoPR2V0Q29udHJhY3RCeUlkEg8uUG9tb25hLklkUHJvdG8aGC5Qb21vbmEu",
             "Q29udHJhY3RSZXNwb25zZRJBCgxHZXRDb250cmFjdHMSFi5nb29nbGUucHJv",
             "dG9idWYuRW1wdHkaGS5Qb21vbmEuQ29udHJhY3RzUmVzcG9uc2VCEKoCDVBv",
             "bW9uYS5Qcm90b3NiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Google.Protobuf.WellKnownTypes.EmptyReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Google.Protobuf.WellKnownTypes.TimestampReflection.Descriptor, global::Google.Protobuf.WellKnownTypes.EmptyReflection.Descriptor, global::Pomona.Protos.PersonReflection.Descriptor, global::Pomona.Protos.ParametricReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Pomona.Protos.ContractProto), global::Pomona.Protos.ContractProto.Parser, new[]{ "Id", "Number", "Date", "DeliveryDate", "Value", "State", "Balance", "Weight", "Description" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Pomona.Protos.ContractResponse), global::Pomona.Protos.ContractResponse.Parser, new[]{ "ItemsList", "Pages", "UserId", "QualificationTypeId" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Pomona.Protos.ContractsResponse), global::Pomona.Protos.ContractsResponse.Parser, new[]{ "ItemsList" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Pomona.Protos.ContractProto), global::Pomona.Protos.ContractProto.Parser, new[]{ "Id", "Number", "Date", "DeliveryDate", "Value", "State", "Payment", "Balance", "Weight", "Description", "IdentificationTypeId", "IdentificationNumber", "FullName", "CellPhone", "Email" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Pomona.Protos.ContractResponse), global::Pomona.Protos.ContractResponse.Parser, new[]{ "Response", "Contract", "Payments" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Pomona.Protos.ContractsResponse), global::Pomona.Protos.ContractsResponse.Parser, new[]{ "ItemsList" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Pomona.Protos.PaymentProto), global::Pomona.Protos.PaymentProto.Parser, new[]{ "Id", "Number", "Date", "Value", "EntityId", "PaymentType" }, null, null, null, null)
           }));
     }
     #endregion
@@ -80,13 +93,19 @@ namespace Pomona.Protos {
     public ContractProto(ContractProto other) : this() {
       id_ = other.id_;
       number_ = other.number_;
-      date_ = other.date_;
-      deliveryDate_ = other.deliveryDate_;
+      date_ = other.date_ != null ? other.date_.Clone() : null;
+      deliveryDate_ = other.deliveryDate_ != null ? other.deliveryDate_.Clone() : null;
       value_ = other.value_;
       state_ = other.state_;
+      payment_ = other.payment_;
       balance_ = other.balance_;
       weight_ = other.weight_;
       description_ = other.description_;
+      identificationTypeId_ = other.identificationTypeId_;
+      identificationNumber_ = other.identificationNumber_;
+      fullName_ = other.fullName_;
+      cellPhone_ = other.cellPhone_;
+      email_ = other.email_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -119,23 +138,23 @@ namespace Pomona.Protos {
 
     /// <summary>Field number for the "Date" field.</summary>
     public const int DateFieldNumber = 3;
-    private string date_ = "";
+    private global::Google.Protobuf.WellKnownTypes.Timestamp date_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string Date {
+    public global::Google.Protobuf.WellKnownTypes.Timestamp Date {
       get { return date_; }
       set {
-        date_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+        date_ = value;
       }
     }
 
     /// <summary>Field number for the "DeliveryDate" field.</summary>
     public const int DeliveryDateFieldNumber = 4;
-    private string deliveryDate_ = "";
+    private global::Google.Protobuf.WellKnownTypes.Timestamp deliveryDate_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string DeliveryDate {
+    public global::Google.Protobuf.WellKnownTypes.Timestamp DeliveryDate {
       get { return deliveryDate_; }
       set {
-        deliveryDate_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+        deliveryDate_ = value;
       }
     }
 
@@ -158,6 +177,17 @@ namespace Pomona.Protos {
       get { return state_; }
       set {
         state_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "Payment" field.</summary>
+    public const int PaymentFieldNumber = 15;
+    private int payment_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int Payment {
+      get { return payment_; }
+      set {
+        payment_ = value;
       }
     }
 
@@ -194,6 +224,61 @@ namespace Pomona.Protos {
       }
     }
 
+    /// <summary>Field number for the "IdentificationTypeId" field.</summary>
+    public const int IdentificationTypeIdFieldNumber = 10;
+    private int identificationTypeId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int IdentificationTypeId {
+      get { return identificationTypeId_; }
+      set {
+        identificationTypeId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "IdentificationNumber" field.</summary>
+    public const int IdentificationNumberFieldNumber = 11;
+    private string identificationNumber_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string IdentificationNumber {
+      get { return identificationNumber_; }
+      set {
+        identificationNumber_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "FullName" field.</summary>
+    public const int FullNameFieldNumber = 12;
+    private string fullName_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string FullName {
+      get { return fullName_; }
+      set {
+        fullName_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "CellPhone" field.</summary>
+    public const int CellPhoneFieldNumber = 13;
+    private string cellPhone_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string CellPhone {
+      get { return cellPhone_; }
+      set {
+        cellPhone_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "Email" field.</summary>
+    public const int EmailFieldNumber = 14;
+    private string email_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Email {
+      get { return email_; }
+      set {
+        email_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as ContractProto);
@@ -209,13 +294,19 @@ namespace Pomona.Protos {
       }
       if (Id != other.Id) return false;
       if (Number != other.Number) return false;
-      if (Date != other.Date) return false;
-      if (DeliveryDate != other.DeliveryDate) return false;
+      if (!object.Equals(Date, other.Date)) return false;
+      if (!object.Equals(DeliveryDate, other.DeliveryDate)) return false;
       if (Value != other.Value) return false;
       if (State != other.State) return false;
+      if (Payment != other.Payment) return false;
       if (Balance != other.Balance) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(Weight, other.Weight)) return false;
       if (Description != other.Description) return false;
+      if (IdentificationTypeId != other.IdentificationTypeId) return false;
+      if (IdentificationNumber != other.IdentificationNumber) return false;
+      if (FullName != other.FullName) return false;
+      if (CellPhone != other.CellPhone) return false;
+      if (Email != other.Email) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -224,13 +315,19 @@ namespace Pomona.Protos {
       int hash = 1;
       if (Id != 0) hash ^= Id.GetHashCode();
       if (Number != 0) hash ^= Number.GetHashCode();
-      if (Date.Length != 0) hash ^= Date.GetHashCode();
-      if (DeliveryDate.Length != 0) hash ^= DeliveryDate.GetHashCode();
+      if (date_ != null) hash ^= Date.GetHashCode();
+      if (deliveryDate_ != null) hash ^= DeliveryDate.GetHashCode();
       if (Value != 0) hash ^= Value.GetHashCode();
       if (State.Length != 0) hash ^= State.GetHashCode();
+      if (Payment != 0) hash ^= Payment.GetHashCode();
       if (Balance != 0) hash ^= Balance.GetHashCode();
       if (Weight != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(Weight);
       if (Description.Length != 0) hash ^= Description.GetHashCode();
+      if (IdentificationTypeId != 0) hash ^= IdentificationTypeId.GetHashCode();
+      if (IdentificationNumber.Length != 0) hash ^= IdentificationNumber.GetHashCode();
+      if (FullName.Length != 0) hash ^= FullName.GetHashCode();
+      if (CellPhone.Length != 0) hash ^= CellPhone.GetHashCode();
+      if (Email.Length != 0) hash ^= Email.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -255,13 +352,13 @@ namespace Pomona.Protos {
         output.WriteRawTag(16);
         output.WriteInt32(Number);
       }
-      if (Date.Length != 0) {
+      if (date_ != null) {
         output.WriteRawTag(26);
-        output.WriteString(Date);
+        output.WriteMessage(Date);
       }
-      if (DeliveryDate.Length != 0) {
+      if (deliveryDate_ != null) {
         output.WriteRawTag(34);
-        output.WriteString(DeliveryDate);
+        output.WriteMessage(DeliveryDate);
       }
       if (Value != 0) {
         output.WriteRawTag(40);
@@ -282,6 +379,30 @@ namespace Pomona.Protos {
       if (Description.Length != 0) {
         output.WriteRawTag(74);
         output.WriteString(Description);
+      }
+      if (IdentificationTypeId != 0) {
+        output.WriteRawTag(80);
+        output.WriteInt32(IdentificationTypeId);
+      }
+      if (IdentificationNumber.Length != 0) {
+        output.WriteRawTag(90);
+        output.WriteString(IdentificationNumber);
+      }
+      if (FullName.Length != 0) {
+        output.WriteRawTag(98);
+        output.WriteString(FullName);
+      }
+      if (CellPhone.Length != 0) {
+        output.WriteRawTag(106);
+        output.WriteString(CellPhone);
+      }
+      if (Email.Length != 0) {
+        output.WriteRawTag(114);
+        output.WriteString(Email);
+      }
+      if (Payment != 0) {
+        output.WriteRawTag(120);
+        output.WriteInt32(Payment);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -300,13 +421,13 @@ namespace Pomona.Protos {
         output.WriteRawTag(16);
         output.WriteInt32(Number);
       }
-      if (Date.Length != 0) {
+      if (date_ != null) {
         output.WriteRawTag(26);
-        output.WriteString(Date);
+        output.WriteMessage(Date);
       }
-      if (DeliveryDate.Length != 0) {
+      if (deliveryDate_ != null) {
         output.WriteRawTag(34);
-        output.WriteString(DeliveryDate);
+        output.WriteMessage(DeliveryDate);
       }
       if (Value != 0) {
         output.WriteRawTag(40);
@@ -328,6 +449,30 @@ namespace Pomona.Protos {
         output.WriteRawTag(74);
         output.WriteString(Description);
       }
+      if (IdentificationTypeId != 0) {
+        output.WriteRawTag(80);
+        output.WriteInt32(IdentificationTypeId);
+      }
+      if (IdentificationNumber.Length != 0) {
+        output.WriteRawTag(90);
+        output.WriteString(IdentificationNumber);
+      }
+      if (FullName.Length != 0) {
+        output.WriteRawTag(98);
+        output.WriteString(FullName);
+      }
+      if (CellPhone.Length != 0) {
+        output.WriteRawTag(106);
+        output.WriteString(CellPhone);
+      }
+      if (Email.Length != 0) {
+        output.WriteRawTag(114);
+        output.WriteString(Email);
+      }
+      if (Payment != 0) {
+        output.WriteRawTag(120);
+        output.WriteInt32(Payment);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -343,17 +488,20 @@ namespace Pomona.Protos {
       if (Number != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(Number);
       }
-      if (Date.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(Date);
+      if (date_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Date);
       }
-      if (DeliveryDate.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(DeliveryDate);
+      if (deliveryDate_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(DeliveryDate);
       }
       if (Value != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(Value);
       }
       if (State.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(State);
+      }
+      if (Payment != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Payment);
       }
       if (Balance != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(Balance);
@@ -363,6 +511,21 @@ namespace Pomona.Protos {
       }
       if (Description.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Description);
+      }
+      if (IdentificationTypeId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(IdentificationTypeId);
+      }
+      if (IdentificationNumber.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(IdentificationNumber);
+      }
+      if (FullName.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(FullName);
+      }
+      if (CellPhone.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(CellPhone);
+      }
+      if (Email.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Email);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -381,17 +544,26 @@ namespace Pomona.Protos {
       if (other.Number != 0) {
         Number = other.Number;
       }
-      if (other.Date.Length != 0) {
-        Date = other.Date;
+      if (other.date_ != null) {
+        if (date_ == null) {
+          Date = new global::Google.Protobuf.WellKnownTypes.Timestamp();
+        }
+        Date.MergeFrom(other.Date);
       }
-      if (other.DeliveryDate.Length != 0) {
-        DeliveryDate = other.DeliveryDate;
+      if (other.deliveryDate_ != null) {
+        if (deliveryDate_ == null) {
+          DeliveryDate = new global::Google.Protobuf.WellKnownTypes.Timestamp();
+        }
+        DeliveryDate.MergeFrom(other.DeliveryDate);
       }
       if (other.Value != 0) {
         Value = other.Value;
       }
       if (other.State.Length != 0) {
         State = other.State;
+      }
+      if (other.Payment != 0) {
+        Payment = other.Payment;
       }
       if (other.Balance != 0) {
         Balance = other.Balance;
@@ -401,6 +573,21 @@ namespace Pomona.Protos {
       }
       if (other.Description.Length != 0) {
         Description = other.Description;
+      }
+      if (other.IdentificationTypeId != 0) {
+        IdentificationTypeId = other.IdentificationTypeId;
+      }
+      if (other.IdentificationNumber.Length != 0) {
+        IdentificationNumber = other.IdentificationNumber;
+      }
+      if (other.FullName.Length != 0) {
+        FullName = other.FullName;
+      }
+      if (other.CellPhone.Length != 0) {
+        CellPhone = other.CellPhone;
+      }
+      if (other.Email.Length != 0) {
+        Email = other.Email;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -425,11 +612,17 @@ namespace Pomona.Protos {
             break;
           }
           case 26: {
-            Date = input.ReadString();
+            if (date_ == null) {
+              Date = new global::Google.Protobuf.WellKnownTypes.Timestamp();
+            }
+            input.ReadMessage(Date);
             break;
           }
           case 34: {
-            DeliveryDate = input.ReadString();
+            if (deliveryDate_ == null) {
+              DeliveryDate = new global::Google.Protobuf.WellKnownTypes.Timestamp();
+            }
+            input.ReadMessage(DeliveryDate);
             break;
           }
           case 40: {
@@ -450,6 +643,30 @@ namespace Pomona.Protos {
           }
           case 74: {
             Description = input.ReadString();
+            break;
+          }
+          case 80: {
+            IdentificationTypeId = input.ReadInt32();
+            break;
+          }
+          case 90: {
+            IdentificationNumber = input.ReadString();
+            break;
+          }
+          case 98: {
+            FullName = input.ReadString();
+            break;
+          }
+          case 106: {
+            CellPhone = input.ReadString();
+            break;
+          }
+          case 114: {
+            Email = input.ReadString();
+            break;
+          }
+          case 120: {
+            Payment = input.ReadInt32();
             break;
           }
         }
@@ -475,11 +692,17 @@ namespace Pomona.Protos {
             break;
           }
           case 26: {
-            Date = input.ReadString();
+            if (date_ == null) {
+              Date = new global::Google.Protobuf.WellKnownTypes.Timestamp();
+            }
+            input.ReadMessage(Date);
             break;
           }
           case 34: {
-            DeliveryDate = input.ReadString();
+            if (deliveryDate_ == null) {
+              DeliveryDate = new global::Google.Protobuf.WellKnownTypes.Timestamp();
+            }
+            input.ReadMessage(DeliveryDate);
             break;
           }
           case 40: {
@@ -500,6 +723,30 @@ namespace Pomona.Protos {
           }
           case 74: {
             Description = input.ReadString();
+            break;
+          }
+          case 80: {
+            IdentificationTypeId = input.ReadInt32();
+            break;
+          }
+          case 90: {
+            IdentificationNumber = input.ReadString();
+            break;
+          }
+          case 98: {
+            FullName = input.ReadString();
+            break;
+          }
+          case 106: {
+            CellPhone = input.ReadString();
+            break;
+          }
+          case 114: {
+            Email = input.ReadString();
+            break;
+          }
+          case 120: {
+            Payment = input.ReadInt32();
             break;
           }
         }
@@ -538,10 +785,9 @@ namespace Pomona.Protos {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public ContractResponse(ContractResponse other) : this() {
-      itemsList_ = other.itemsList_.Clone();
-      pages_ = other.pages_;
-      userId_ = other.userId_;
-      qualificationTypeId_ = other.qualificationTypeId_;
+      response_ = other.response_;
+      contract_ = other.contract_ != null ? other.contract_.Clone() : null;
+      payments_ = other.payments_.Clone();
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -550,47 +796,36 @@ namespace Pomona.Protos {
       return new ContractResponse(this);
     }
 
-    /// <summary>Field number for the "ItemsList" field.</summary>
-    public const int ItemsListFieldNumber = 1;
-    private static readonly pb::FieldCodec<string> _repeated_itemsList_codec
-        = pb::FieldCodec.ForString(10);
-    private readonly pbc::RepeatedField<string> itemsList_ = new pbc::RepeatedField<string>();
+    /// <summary>Field number for the "Response" field.</summary>
+    public const int ResponseFieldNumber = 1;
+    private string response_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<string> ItemsList {
-      get { return itemsList_; }
-    }
-
-    /// <summary>Field number for the "Pages" field.</summary>
-    public const int PagesFieldNumber = 2;
-    private int pages_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int Pages {
-      get { return pages_; }
+    public string Response {
+      get { return response_; }
       set {
-        pages_ = value;
+        response_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
-    /// <summary>Field number for the "UserId" field.</summary>
-    public const int UserIdFieldNumber = 3;
-    private string userId_ = "";
+    /// <summary>Field number for the "Contract" field.</summary>
+    public const int ContractFieldNumber = 2;
+    private global::Pomona.Protos.ContractProto contract_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string UserId {
-      get { return userId_; }
+    public global::Pomona.Protos.ContractProto Contract {
+      get { return contract_; }
       set {
-        userId_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+        contract_ = value;
       }
     }
 
-    /// <summary>Field number for the "QualificationTypeId" field.</summary>
-    public const int QualificationTypeIdFieldNumber = 4;
-    private int qualificationTypeId_;
+    /// <summary>Field number for the "Payments" field.</summary>
+    public const int PaymentsFieldNumber = 3;
+    private static readonly pb::FieldCodec<global::Pomona.Protos.PaymentProto> _repeated_payments_codec
+        = pb::FieldCodec.ForMessage(26, global::Pomona.Protos.PaymentProto.Parser);
+    private readonly pbc::RepeatedField<global::Pomona.Protos.PaymentProto> payments_ = new pbc::RepeatedField<global::Pomona.Protos.PaymentProto>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int QualificationTypeId {
-      get { return qualificationTypeId_; }
-      set {
-        qualificationTypeId_ = value;
-      }
+    public pbc::RepeatedField<global::Pomona.Protos.PaymentProto> Payments {
+      get { return payments_; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -606,20 +841,18 @@ namespace Pomona.Protos {
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if(!itemsList_.Equals(other.itemsList_)) return false;
-      if (Pages != other.Pages) return false;
-      if (UserId != other.UserId) return false;
-      if (QualificationTypeId != other.QualificationTypeId) return false;
+      if (Response != other.Response) return false;
+      if (!object.Equals(Contract, other.Contract)) return false;
+      if(!payments_.Equals(other.payments_)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
-      hash ^= itemsList_.GetHashCode();
-      if (Pages != 0) hash ^= Pages.GetHashCode();
-      if (UserId.Length != 0) hash ^= UserId.GetHashCode();
-      if (QualificationTypeId != 0) hash ^= QualificationTypeId.GetHashCode();
+      if (Response.Length != 0) hash ^= Response.GetHashCode();
+      if (contract_ != null) hash ^= Contract.GetHashCode();
+      hash ^= payments_.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -636,19 +869,15 @@ namespace Pomona.Protos {
     #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       output.WriteRawMessage(this);
     #else
-      itemsList_.WriteTo(output, _repeated_itemsList_codec);
-      if (Pages != 0) {
-        output.WriteRawTag(16);
-        output.WriteInt32(Pages);
+      if (Response.Length != 0) {
+        output.WriteRawTag(10);
+        output.WriteString(Response);
       }
-      if (UserId.Length != 0) {
-        output.WriteRawTag(26);
-        output.WriteString(UserId);
+      if (contract_ != null) {
+        output.WriteRawTag(18);
+        output.WriteMessage(Contract);
       }
-      if (QualificationTypeId != 0) {
-        output.WriteRawTag(32);
-        output.WriteInt32(QualificationTypeId);
-      }
+      payments_.WriteTo(output, _repeated_payments_codec);
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -658,19 +887,15 @@ namespace Pomona.Protos {
     #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      itemsList_.WriteTo(ref output, _repeated_itemsList_codec);
-      if (Pages != 0) {
-        output.WriteRawTag(16);
-        output.WriteInt32(Pages);
+      if (Response.Length != 0) {
+        output.WriteRawTag(10);
+        output.WriteString(Response);
       }
-      if (UserId.Length != 0) {
-        output.WriteRawTag(26);
-        output.WriteString(UserId);
+      if (contract_ != null) {
+        output.WriteRawTag(18);
+        output.WriteMessage(Contract);
       }
-      if (QualificationTypeId != 0) {
-        output.WriteRawTag(32);
-        output.WriteInt32(QualificationTypeId);
-      }
+      payments_.WriteTo(ref output, _repeated_payments_codec);
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -680,16 +905,13 @@ namespace Pomona.Protos {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
-      size += itemsList_.CalculateSize(_repeated_itemsList_codec);
-      if (Pages != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Pages);
+      if (Response.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Response);
       }
-      if (UserId.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(UserId);
+      if (contract_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Contract);
       }
-      if (QualificationTypeId != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(QualificationTypeId);
-      }
+      size += payments_.CalculateSize(_repeated_payments_codec);
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
       }
@@ -701,16 +923,16 @@ namespace Pomona.Protos {
       if (other == null) {
         return;
       }
-      itemsList_.Add(other.itemsList_);
-      if (other.Pages != 0) {
-        Pages = other.Pages;
+      if (other.Response.Length != 0) {
+        Response = other.Response;
       }
-      if (other.UserId.Length != 0) {
-        UserId = other.UserId;
+      if (other.contract_ != null) {
+        if (contract_ == null) {
+          Contract = new global::Pomona.Protos.ContractProto();
+        }
+        Contract.MergeFrom(other.Contract);
       }
-      if (other.QualificationTypeId != 0) {
-        QualificationTypeId = other.QualificationTypeId;
-      }
+      payments_.Add(other.payments_);
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -726,19 +948,18 @@ namespace Pomona.Protos {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
           case 10: {
-            itemsList_.AddEntriesFrom(input, _repeated_itemsList_codec);
+            Response = input.ReadString();
             break;
           }
-          case 16: {
-            Pages = input.ReadInt32();
+          case 18: {
+            if (contract_ == null) {
+              Contract = new global::Pomona.Protos.ContractProto();
+            }
+            input.ReadMessage(Contract);
             break;
           }
           case 26: {
-            UserId = input.ReadString();
-            break;
-          }
-          case 32: {
-            QualificationTypeId = input.ReadInt32();
+            payments_.AddEntriesFrom(input, _repeated_payments_codec);
             break;
           }
         }
@@ -756,19 +977,18 @@ namespace Pomona.Protos {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
           case 10: {
-            itemsList_.AddEntriesFrom(ref input, _repeated_itemsList_codec);
+            Response = input.ReadString();
             break;
           }
-          case 16: {
-            Pages = input.ReadInt32();
+          case 18: {
+            if (contract_ == null) {
+              Contract = new global::Pomona.Protos.ContractProto();
+            }
+            input.ReadMessage(Contract);
             break;
           }
           case 26: {
-            UserId = input.ReadString();
-            break;
-          }
-          case 32: {
-            QualificationTypeId = input.ReadInt32();
+            payments_.AddEntriesFrom(ref input, _repeated_payments_codec);
             break;
           }
         }
@@ -930,6 +1150,367 @@ namespace Pomona.Protos {
             break;
           case 10: {
             itemsList_.AddEntriesFrom(ref input, _repeated_itemsList_codec);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  public sealed partial class PaymentProto : pb::IMessage<PaymentProto>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<PaymentProto> _parser = new pb::MessageParser<PaymentProto>(() => new PaymentProto());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<PaymentProto> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Pomona.Protos.ContractReflection.Descriptor.MessageTypes[3]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public PaymentProto() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public PaymentProto(PaymentProto other) : this() {
+      id_ = other.id_;
+      number_ = other.number_;
+      date_ = other.date_ != null ? other.date_.Clone() : null;
+      value_ = other.value_;
+      entityId_ = other.entityId_;
+      paymentType_ = other.paymentType_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public PaymentProto Clone() {
+      return new PaymentProto(this);
+    }
+
+    /// <summary>Field number for the "Id" field.</summary>
+    public const int IdFieldNumber = 1;
+    private int id_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int Id {
+      get { return id_; }
+      set {
+        id_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "Number" field.</summary>
+    public const int NumberFieldNumber = 2;
+    private int number_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int Number {
+      get { return number_; }
+      set {
+        number_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "Date" field.</summary>
+    public const int DateFieldNumber = 3;
+    private global::Google.Protobuf.WellKnownTypes.Timestamp date_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Google.Protobuf.WellKnownTypes.Timestamp Date {
+      get { return date_; }
+      set {
+        date_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "Value" field.</summary>
+    public const int ValueFieldNumber = 4;
+    private int value_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int Value {
+      get { return value_; }
+      set {
+        value_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "EntityId" field.</summary>
+    public const int EntityIdFieldNumber = 6;
+    private int entityId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int EntityId {
+      get { return entityId_; }
+      set {
+        entityId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "PaymentType" field.</summary>
+    public const int PaymentTypeFieldNumber = 7;
+    private string paymentType_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string PaymentType {
+      get { return paymentType_; }
+      set {
+        paymentType_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as PaymentProto);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(PaymentProto other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Id != other.Id) return false;
+      if (Number != other.Number) return false;
+      if (!object.Equals(Date, other.Date)) return false;
+      if (Value != other.Value) return false;
+      if (EntityId != other.EntityId) return false;
+      if (PaymentType != other.PaymentType) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Id != 0) hash ^= Id.GetHashCode();
+      if (Number != 0) hash ^= Number.GetHashCode();
+      if (date_ != null) hash ^= Date.GetHashCode();
+      if (Value != 0) hash ^= Value.GetHashCode();
+      if (EntityId != 0) hash ^= EntityId.GetHashCode();
+      if (PaymentType.Length != 0) hash ^= PaymentType.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (Id != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(Id);
+      }
+      if (Number != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(Number);
+      }
+      if (date_ != null) {
+        output.WriteRawTag(26);
+        output.WriteMessage(Date);
+      }
+      if (Value != 0) {
+        output.WriteRawTag(32);
+        output.WriteInt32(Value);
+      }
+      if (EntityId != 0) {
+        output.WriteRawTag(48);
+        output.WriteInt32(EntityId);
+      }
+      if (PaymentType.Length != 0) {
+        output.WriteRawTag(58);
+        output.WriteString(PaymentType);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (Id != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(Id);
+      }
+      if (Number != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(Number);
+      }
+      if (date_ != null) {
+        output.WriteRawTag(26);
+        output.WriteMessage(Date);
+      }
+      if (Value != 0) {
+        output.WriteRawTag(32);
+        output.WriteInt32(Value);
+      }
+      if (EntityId != 0) {
+        output.WriteRawTag(48);
+        output.WriteInt32(EntityId);
+      }
+      if (PaymentType.Length != 0) {
+        output.WriteRawTag(58);
+        output.WriteString(PaymentType);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (Id != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Id);
+      }
+      if (Number != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Number);
+      }
+      if (date_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Date);
+      }
+      if (Value != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Value);
+      }
+      if (EntityId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(EntityId);
+      }
+      if (PaymentType.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(PaymentType);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(PaymentProto other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Id != 0) {
+        Id = other.Id;
+      }
+      if (other.Number != 0) {
+        Number = other.Number;
+      }
+      if (other.date_ != null) {
+        if (date_ == null) {
+          Date = new global::Google.Protobuf.WellKnownTypes.Timestamp();
+        }
+        Date.MergeFrom(other.Date);
+      }
+      if (other.Value != 0) {
+        Value = other.Value;
+      }
+      if (other.EntityId != 0) {
+        EntityId = other.EntityId;
+      }
+      if (other.PaymentType.Length != 0) {
+        PaymentType = other.PaymentType;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            Id = input.ReadInt32();
+            break;
+          }
+          case 16: {
+            Number = input.ReadInt32();
+            break;
+          }
+          case 26: {
+            if (date_ == null) {
+              Date = new global::Google.Protobuf.WellKnownTypes.Timestamp();
+            }
+            input.ReadMessage(Date);
+            break;
+          }
+          case 32: {
+            Value = input.ReadInt32();
+            break;
+          }
+          case 48: {
+            EntityId = input.ReadInt32();
+            break;
+          }
+          case 58: {
+            PaymentType = input.ReadString();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            Id = input.ReadInt32();
+            break;
+          }
+          case 16: {
+            Number = input.ReadInt32();
+            break;
+          }
+          case 26: {
+            if (date_ == null) {
+              Date = new global::Google.Protobuf.WellKnownTypes.Timestamp();
+            }
+            input.ReadMessage(Date);
+            break;
+          }
+          case 32: {
+            Value = input.ReadInt32();
+            break;
+          }
+          case 48: {
+            EntityId = input.ReadInt32();
+            break;
+          }
+          case 58: {
+            PaymentType = input.ReadString();
             break;
           }
         }

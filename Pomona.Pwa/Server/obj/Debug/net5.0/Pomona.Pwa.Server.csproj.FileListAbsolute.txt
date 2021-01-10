@@ -91,7 +91,6 @@ F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\obj\Debug\net5.0\Pomona.Pwa.S
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\obj\Debug\net5.0\Pomona.Pwa.Server.AssemblyInfoInputs.cache
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\obj\Debug\net5.0\Pomona.Pwa.Server.AssemblyInfo.cs
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\obj\Debug\net5.0\Pomona.Pwa.Server.csproj.CoreCompileInputs.cache
-F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\obj\Debug\net5.0\Pomona.Pwa.Server.MvcApplicationPartsAssemblyInfo.cs
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\obj\Debug\net5.0\Pomona.Pwa.Server.MvcApplicationPartsAssemblyInfo.cache
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\obj\Debug\net5.0\Pomona.Pwa.Server.RazorAssemblyInfo.cache
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\obj\Debug\net5.0\Pomona.Pwa.Server.RazorAssemblyInfo.cs
@@ -137,3 +136,8 @@ F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\bin\Debug\net5.0\Pomona.Persi
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\bin\Debug\net5.0\Pomona.Models.pdb
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\bin\Debug\net5.0\Pomona.Protos.pdb
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\bin\Debug\net5.0\Pomona.Utilities.pdb
+F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\bin\Debug\net5.0\Microsoft.Bcl.AsyncInterfaces.dll
+F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\bin\Debug\net5.0\Tewr.Blazor.FileReader.dll
+F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\obj\Debug\net5.0\Pomona.Pwa.Server.MvcApplicationPartsAssemblyInfo.cs
+F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\bin\Debug\net5.0\Context\Seeds\IdentificationTypeSeedData.json
+F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\bin\Debug\net5.0\Context\Seeds\ItemTypeSeedData.json

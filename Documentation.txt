@@ -1,0 +1,10 @@
+
+2. Server
+
+Add-Migration UpdateModel -context ApplicationDbContext
+
+update-database -context ApplicationDbContext
+
+Remove-Migration -context  QualificationStage ApplicationDbContext
+
+dotnet watch run

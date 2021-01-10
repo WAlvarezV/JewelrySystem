@@ -1,30 +1,30 @@
 [
   {
     "Id": 1,
-    "Nombre": "Anillo"
+    "Name": "Anillo"
   },
   {
     "Id": 2,
-    "Nombre": "Arete"
+    "Name": "Arete"
   },
   {
     "Id": 3,
-    "Nombre": "Cadena"
+    "Name": "Cadena"
   },
   {
     "Id": 4,
-    "Nombre": "Pulsera"
+    "Name": "Pulsera"
   },
   {
     "Id": 5,
-    "Nombre": "Reloj"
+    "Name": "Reloj"
   },
   {
     "Id": 6,
-    "Nombre": "Bateria"
+    "Name": "Bateria"
   },
   {
     "Id": 7,
-    "Nombre": "Topo Perforada"
+    "Name": "Topo Perforada"
   }
 ]

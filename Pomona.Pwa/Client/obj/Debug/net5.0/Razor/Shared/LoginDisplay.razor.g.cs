@@ -45,36 +45,71 @@ using Microsoft.AspNetCore.Components.Web;
 #line hidden
 #nullable disable
 #nullable restore
-#line 7 "F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Client\_Imports.razor"
+#line 8 "F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Client\_Imports.razor"
 using Microsoft.AspNetCore.Components.Web.Virtualization;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 8 "F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Client\_Imports.razor"
+#line 9 "F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Client\_Imports.razor"
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 9 "F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Client\_Imports.razor"
+#line 10 "F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Client\_Imports.razor"
 using Microsoft.JSInterop;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 10 "F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Client\_Imports.razor"
+#line 11 "F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Client\_Imports.razor"
 using Pomona.Pwa.Client;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 11 "F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Client\_Imports.razor"
+#line 12 "F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Client\_Imports.razor"
+using Pomona.Pwa.Client.Pages.Contract;
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 13 "F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Client\_Imports.razor"
 using Pomona.Pwa.Client.Shared;
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 14 "F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Client\_Imports.razor"
+using Pomona.Pwa.Client.Extensions;
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 15 "F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Client\_Imports.razor"
+using Pomona.Protos;
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 16 "F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Client\_Imports.razor"
+using Pomona.Pwa.Client.Custom;
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 17 "F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Client\_Imports.razor"
+using System.Globalization;
 
 #line default
 #line hidden

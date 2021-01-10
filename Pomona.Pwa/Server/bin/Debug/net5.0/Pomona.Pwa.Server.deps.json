@@ -495,7 +495,7 @@
       },
       "IdentityModel/4.4.0": {
         "dependencies": {
-          "Newtonsoft.Json": "12.0.2",
+          "Newtonsoft.Json": "12.0.3",
           "System.Text.Encodings.Web": "4.7.0"
         },
         "runtime": {
@@ -514,7 +514,7 @@
           "IdentityServer4.Storage": "4.1.0",
           "Microsoft.AspNetCore.Authentication.OpenIdConnect": "3.1.0",
           "Microsoft.IdentityModel.Protocols.OpenIdConnect": "6.7.1",
-          "Newtonsoft.Json": "12.0.2"
+          "Newtonsoft.Json": "12.0.3"
         },
         "runtime": {
           "lib/netcoreapp3.1/IdentityServer4.dll": {
@@ -852,6 +852,17 @@
         },
         "compile": {
           "lib/net5.0/Microsoft.AspNetCore.Metadata.dll": {}
+        }
+      },
+      "Microsoft.Bcl.AsyncInterfaces/1.1.0": {
+        "runtime": {
+          "lib/netstandard2.1/Microsoft.Bcl.AsyncInterfaces.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "4.700.19.56404"
+          }
+        },
+        "compile": {
+          "ref/netstandard2.1/Microsoft.Bcl.AsyncInterfaces.dll": {}
         }
       },
       "Microsoft.CSharp/4.7.0": {},
@@ -1293,11 +1304,11 @@
           "Microsoft.NETCore.Platforms": "3.1.0"
         }
       },
-      "Newtonsoft.Json/12.0.2": {
+      "Newtonsoft.Json/12.0.3": {
         "runtime": {
           "lib/netstandard2.0/Newtonsoft.Json.dll": {
             "assemblyVersion": "12.0.0.0",
-            "fileVersion": "12.0.2.23222"
+            "fileVersion": "12.0.3.23909"
           }
         },
         "compile": {
@@ -1878,6 +1889,21 @@
           "System.Xml.XmlDocument": "4.3.0"
         }
       },
+      "Tewr.Blazor.FileReader/2.1.0.20274": {
+        "dependencies": {
+          "Microsoft.AspNetCore.Components.Web": "5.0.1",
+          "Microsoft.Bcl.AsyncInterfaces": "1.1.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Tewr.Blazor.FileReader.dll": {
+            "assemblyVersion": "2.1.0.20274",
+            "fileVersion": "2.1.0.20274"
+          }
+        },
+        "compile": {
+          "lib/netstandard2.0/Tewr.Blazor.FileReader.dll": {}
+        }
+      },
       "Pomona.Application/1.0.0": {
         "dependencies": {
           "AutoMapper": "10.1.1",
@@ -1894,6 +1920,9 @@
         }
       },
       "Pomona.Domain/1.0.0": {
+        "dependencies": {
+          "Newtonsoft.Json": "12.0.3"
+        },
         "runtime": {
           "Pomona.Domain.dll": {}
         },
@@ -1949,6 +1978,7 @@
       },
       "Pomona.Pwa.Client/1.0.0": {
         "dependencies": {
+          "AutoMapper.Extensions.Microsoft.DependencyInjection": "8.1.0",
           "Grpc.Net.Client.Web": "2.34.0",
           "Microsoft.AspNetCore.Components.WebAssembly": "5.0.1",
           "Microsoft.AspNetCore.Components.WebAssembly.Authentication": "5.0.1",
@@ -1956,7 +1986,8 @@
           "Pomona.Models": "1.0.0",
           "Pomona.Protos": "1.0.0",
           "Pomona.Pwa.Shared": "1.0.0",
-          "System.Net.Http.Json": "5.0.0"
+          "System.Net.Http.Json": "5.0.0",
+          "Tewr.Blazor.FileReader": "2.1.0.20274"
         },
         "runtime": {
           "Pomona.Pwa.Client.dll": {}
@@ -3883,6 +3914,13 @@
       "path": "microsoft.aspnetcore.metadata/5.0.1",
       "hashPath": "microsoft.aspnetcore.metadata.5.0.1.nupkg.sha512"
     },
+    "Microsoft.Bcl.AsyncInterfaces/1.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-1Am6l4Vpn3/K32daEqZI+FFr96OlZkgwK2LcT3pZ2zWubR5zTPW3/FkO1Rat9kb7oQOa4rxgl9LJHc5tspCWfg==",
+      "path": "microsoft.bcl.asyncinterfaces/1.1.0",
+      "hashPath": "microsoft.bcl.asyncinterfaces.1.1.0.nupkg.sha512"
+    },
     "Microsoft.CSharp/4.7.0": {
       "type": "package",
       "serviceable": true,
@@ -4177,12 +4215,12 @@
       "path": "microsoft.win32.systemevents/4.7.0",
       "hashPath": "microsoft.win32.systemevents.4.7.0.nupkg.sha512"
     },
-    "Newtonsoft.Json/12.0.2": {
+    "Newtonsoft.Json/12.0.3": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-rTK0s2EKlfHsQsH6Yx2smvcTCeyoDNgCW7FEYyV01drPlh2T243PR2DiDXqtC5N4GDm4Ma/lkxfW5a/4793vbA==",
-      "path": "newtonsoft.json/12.0.2",
-      "hashPath": "newtonsoft.json.12.0.2.nupkg.sha512"
+      "sha512": "sha512-6mgjfnRB4jKMlzHSl+VD+oUc1IebOZabkbyWj2RiTgWwYPPuaK1H97G1sHqGwPlS5npiF5Q0OrxN1wni2n5QWg==",
+      "path": "newtonsoft.json/12.0.3",
+      "hashPath": "newtonsoft.json.12.0.3.nupkg.sha512"
     },
     "NLog/4.7.6": {
       "type": "package",
@@ -4659,6 +4697,13 @@
       "sha512": "sha512-MYoTCP7EZ98RrANESW05J5ZwskKDoN0AuZ06ZflnowE50LTpbR5yRg3tHckTVm5j/m47stuGgCrCHWePyHS70Q==",
       "path": "system.xml.xmlserializer/4.3.0",
       "hashPath": "system.xml.xmlserializer.4.3.0.nupkg.sha512"
+    },
+    "Tewr.Blazor.FileReader/2.1.0.20274": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-j8uXkNgfyh/rLHTOaoZyBo4Q3j2y6c2lknidZ39V6OH1iQTj0MS5dgCBb1/A/G7oIj2bNFIX+5fKGOl7gt3J5w==",
+      "path": "tewr.blazor.filereader/2.1.0.20274",
+      "hashPath": "tewr.blazor.filereader.2.1.0.20274.nupkg.sha512"
     },
     "Pomona.Application/1.0.0": {
       "type": "project",

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "zWpQS3NOd0bfAmidT/4PjcXCGbxshi8qp75CdUh7M7L3aEwqrCIZ7M0XncrGo4W7NbsGzhPRpgy2G2qUOIUXLQ==",
+  "dgSpecHash": "4nrrGnNEJTzbRevWmwnq03FbFeZI8uk78nk7IJkDfz6Eh5zYA+ki42571fTZVwimXFzvb+ksorpsTRiYYWUucw==",
   "success": true,
   "projectFilePath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Server\\Pomona.Pwa.Server.csproj",
   "expectedPackageFiles": [
@@ -87,7 +87,7 @@
     "C:\\Users\\WAlvarezV\\.nuget\\packages\\microsoft.netcore.targets\\1.1.3\\microsoft.netcore.targets.1.1.3.nupkg.sha512",
     "C:\\Users\\WAlvarezV\\.nuget\\packages\\microsoft.win32.registry\\4.7.0\\microsoft.win32.registry.4.7.0.nupkg.sha512",
     "C:\\Users\\WAlvarezV\\.nuget\\packages\\microsoft.win32.systemevents\\4.7.0\\microsoft.win32.systemevents.4.7.0.nupkg.sha512",
-    "C:\\Users\\WAlvarezV\\.nuget\\packages\\newtonsoft.json\\12.0.2\\newtonsoft.json.12.0.2.nupkg.sha512",
+    "C:\\Users\\WAlvarezV\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512",
     "C:\\Users\\WAlvarezV\\.nuget\\packages\\nlog\\4.7.6\\nlog.4.7.6.nupkg.sha512",
     "C:\\Users\\WAlvarezV\\.nuget\\packages\\runtime.native.system\\4.3.0\\runtime.native.system.4.3.0.nupkg.sha512",
     "C:\\Users\\WAlvarezV\\.nuget\\packages\\system.collections\\4.3.0\\system.collections.4.3.0.nupkg.sha512",

@@ -3,10 +3,14 @@ option csharp_namespace = "Pomona.Protos";
 package Pomona;
 
 // import "google/protobuf/wrappers.proto";
-// import "google/protobuf/timestamp.proto";
+import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
+import "Person.proto";
+import "Parametric.proto";
 service ContractSrv {
     rpc RegisterContract (ContractProto) returns (ContractResponse);
+    rpc RegisterPayment (PaymentProto) returns (ContractResponse);
+    rpc GetContractById (IdProto) returns (ContractResponse);
     rpc GetContracts (google.protobuf.Empty) returns (ContractsResponse);
     
 }
@@ -14,22 +18,36 @@ service ContractSrv {
 message ContractProto{ 
     int32 Id = 1;
 	int32 Number = 2;
-	string Date = 3;
-	string DeliveryDate = 4;
+	google.protobuf.Timestamp Date = 3;
+	google.protobuf.Timestamp DeliveryDate = 4;
 	int32 Value = 5;
     string State = 6;
+	int32 Payment = 15;
 	int32 Balance = 7;
 	double Weight = 8;
 	string Description = 9;
+	int32 IdentificationTypeId = 10;
+	string IdentificationNumber = 11;
+	string FullName = 12;
+	string CellPhone = 13;
+    string Email = 14;
 }
 
 message ContractResponse { 
-    repeated string ItemsList = 1;
-    int32 Pages = 2;
-    string UserId = 3;
-    int32 QualificationTypeId = 4;
+    string Response = 1;
+    ContractProto Contract = 2;
+    repeated PaymentProto Payments = 3;
 }
 
 message ContractsResponse { 
     repeated ContractProto ItemsList = 1;
+}
+
+message PaymentProto{ 
+    int32 Id = 1;
+	int32 Number = 2;
+	google.protobuf.Timestamp Date = 3;
+	int32 Value = 4;
+    int32 EntityId = 6;
+	string PaymentType = 7;	
 }

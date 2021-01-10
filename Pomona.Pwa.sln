@@ -14,28 +14,31 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "5. Shared", "5. Shared", "{39B64810-ED20-4E0C-B85F-7C5C71ACB816}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "6. Documentation", "6. Documentation", "{8015D58A-2539-4F99-8379-F092C8E6FD2B}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation.txt = Documentation.txt
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "7. Test", "7. Test", "{9AC3509C-7282-4DC8-A6CA-C54C2B9F0454}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pomona.Pwa.Server", "Pomona.Pwa\Server\Pomona.Pwa.Server.csproj", "{335EC699-DDEF-4322-8D11-BA018B119AE2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pomona.Pwa.Server", "Pomona.Pwa\Server\Pomona.Pwa.Server.csproj", "{335EC699-DDEF-4322-8D11-BA018B119AE2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pomona.Pwa.Client", "Pomona.Pwa\Client\Pomona.Pwa.Client.csproj", "{9D4F743A-678B-470A-8F50-A612641350BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pomona.Pwa.Client", "Pomona.Pwa\Client\Pomona.Pwa.Client.csproj", "{9D4F743A-678B-470A-8F50-A612641350BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pomona.Pwa.Shared", "Pomona.Pwa\Shared\Pomona.Pwa.Shared.csproj", "{1B9397D1-4BC6-4804-8143-3446DFEBEA98}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pomona.Pwa.Shared", "Pomona.Pwa\Shared\Pomona.Pwa.Shared.csproj", "{1B9397D1-4BC6-4804-8143-3446DFEBEA98}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pomona.Domain", "3. Core\Pomona.Domain\Pomona.Domain.csproj", "{4F9F3D0F-9325-40ED-8472-A787640D062A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pomona.Domain", "3. Core\Pomona.Domain\Pomona.Domain.csproj", "{4F9F3D0F-9325-40ED-8472-A787640D062A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pomona.Application", "3. Core\Pomona.Application\Pomona.Application.csproj", "{205239DC-20B9-4FEF-B310-203362D477FC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pomona.Application", "3. Core\Pomona.Application\Pomona.Application.csproj", "{205239DC-20B9-4FEF-B310-203362D477FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pomona.Models", "3. Core\Pomona.Models\Pomona.Models.csproj", "{39B8701C-066D-4C13-9700-579A3F74A561}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pomona.Models", "3. Core\Pomona.Models\Pomona.Models.csproj", "{39B8701C-066D-4C13-9700-579A3F74A561}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pomona.Protos", "3. Core\Pomona.Protos\Pomona.Protos.csproj", "{94C952AD-E01A-4D68-ACA1-60FEFCBE83AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pomona.Protos", "3. Core\Pomona.Protos\Pomona.Protos.csproj", "{94C952AD-E01A-4D68-ACA1-60FEFCBE83AC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pomona.Infrastructure", "4. Infraestructure\Pomona.Infrastructure\Pomona.Infrastructure.csproj", "{B1A7DFA6-848C-4A6A-9CC6-044B5D10E55E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pomona.Infrastructure", "4. Infraestructure\Pomona.Infrastructure\Pomona.Infrastructure.csproj", "{B1A7DFA6-848C-4A6A-9CC6-044B5D10E55E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pomona.Persistence", "4. Infraestructure\Pomona.Persistence\Pomona.Persistence.csproj", "{80A58DB9-5021-4A8B-93A8-368A4AE65528}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pomona.Persistence", "4. Infraestructure\Pomona.Persistence\Pomona.Persistence.csproj", "{80A58DB9-5021-4A8B-93A8-368A4AE65528}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pomona.Utilities", "5. Shared\Pomona.Utilities\Pomona.Utilities.csproj", "{CF5A58AE-620B-4536-873E-FCC05AAFE8BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pomona.Utilities", "5. Shared\Pomona.Utilities\Pomona.Utilities.csproj", "{CF5A58AE-620B-4536-873E-FCC05AAFE8BD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

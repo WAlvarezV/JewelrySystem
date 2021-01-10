@@ -2,7 +2,6 @@ F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Shared\bin\Debug\net5.0\Pomona.Pwa.S
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Shared\bin\Debug\net5.0\Pomona.Pwa.Shared.dll
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Shared\bin\Debug\net5.0\ref\Pomona.Pwa.Shared.dll
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Shared\bin\Debug\net5.0\Pomona.Pwa.Shared.pdb
-F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Shared\obj\Debug\net5.0\Pomona.Pwa.Shared.csprojAssemblyReference.cache
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Shared\obj\Debug\net5.0\Pomona.Pwa.Shared.GeneratedMSBuildEditorConfig.editorconfig
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Shared\obj\Debug\net5.0\Pomona.Pwa.Shared.AssemblyInfoInputs.cache
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Shared\obj\Debug\net5.0\Pomona.Pwa.Shared.AssemblyInfo.cs
@@ -10,3 +9,4 @@ F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Shared\obj\Debug\net5.0\Pomona.Pwa.S
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Shared\obj\Debug\net5.0\Pomona.Pwa.Shared.dll
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Shared\obj\Debug\net5.0\ref\Pomona.Pwa.Shared.dll
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Shared\obj\Debug\net5.0\Pomona.Pwa.Shared.pdb
+F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Shared\obj\Debug\net5.0\Pomona.Pwa.Shared.csprojAssemblyReference.cache

@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "7dSNOqfM06G1pwi4PidsH5ETAWgxFDCPKR9MxTcg2luUW+QQ0i8RI4J+d6Azd6ARVZMLzDugGcqC8s569PjhFA==",
+  "dgSpecHash": "IFu3aa1Djx6jmw+AX3FXjfimCWZPRbbaE46G0TKyGatrTO3FUN+eB2GwmCj+SSvMiSE1Vn5J0Hge03AL2H+KpQ==",
   "success": true,
   "projectFilePath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\WAlvarezV\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512"
+  ],
   "logs": []
 }

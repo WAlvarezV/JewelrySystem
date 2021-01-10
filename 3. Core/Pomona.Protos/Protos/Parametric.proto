@@ -100,3 +100,7 @@ message AuthorizationTypeProto {
 message AuthorizationTypesResponse {
 	repeated AuthorizationTypeProto AuthorizationTypes = 1;
 }
+
+message IdProto { 
+	int32 Id = 1;
+}

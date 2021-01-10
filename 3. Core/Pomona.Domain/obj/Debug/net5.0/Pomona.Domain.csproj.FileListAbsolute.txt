@@ -2,7 +2,6 @@ F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Domain\bin\Debug\net5.0\Pomona.D
 F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Domain\bin\Debug\net5.0\Pomona.Domain.dll
 F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Domain\bin\Debug\net5.0\ref\Pomona.Domain.dll
 F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Domain\bin\Debug\net5.0\Pomona.Domain.pdb
-F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Domain\obj\Debug\net5.0\Pomona.Domain.csprojAssemblyReference.cache
 F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Domain\obj\Debug\net5.0\Pomona.Domain.GeneratedMSBuildEditorConfig.editorconfig
 F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Domain\obj\Debug\net5.0\Pomona.Domain.AssemblyInfoInputs.cache
 F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Domain\obj\Debug\net5.0\Pomona.Domain.AssemblyInfo.cs
@@ -10,3 +9,4 @@ F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Domain\obj\Debug\net5.0\Pomona.D
 F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Domain\obj\Debug\net5.0\Pomona.Domain.dll
 F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Domain\obj\Debug\net5.0\ref\Pomona.Domain.dll
 F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Domain\obj\Debug\net5.0\Pomona.Domain.pdb
+F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Domain\obj\Debug\net5.0\Pomona.Domain.csprojAssemblyReference.cache

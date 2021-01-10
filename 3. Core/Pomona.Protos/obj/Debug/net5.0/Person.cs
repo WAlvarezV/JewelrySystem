@@ -26,23 +26,22 @@ namespace Pomona.Protos {
           string.Concat(
             "CgxQZXJzb24ucHJvdG8SBlBvbW9uYRobZ29vZ2xlL3Byb3RvYnVmL2VtcHR5",
             "LnByb3RvIjUKE0lkZW50aWZpY2F0aW9uUHJvdG8SDgoGVHlwZUlkGAEgASgF",
-            "Eg4KBk51bWJlchgCIAEoCSKhAQoLUGVyc29uUHJvdG8SCgoCSWQYASABKAUS",
-            "DgoGTnVtYmVyGAIgASgFEgwKBERhdGUYAyABKAkSFAoMRGVsaXZlcnlEYXRl",
-            "GAQgASgJEg0KBVZhbHVlGAUgASgFEg0KBVN0YXRlGAYgASgJEg8KB0JhbGFu",
-            "Y2UYByABKAUSDgoGV2VpZ2h0GAggASgBEhMKC0Rlc2NyaXB0aW9uGAkgASgJ",
-            "Il8KDlBlcnNvblJlc3BvbnNlEhEKCUl0ZW1zTGlzdBgBIAMoCRINCgVQYWdl",
-            "cxgCIAEoBRIOCgZVc2VySWQYAyABKAkSGwoTUXVhbGlmaWNhdGlvblR5cGVJ",
-            "ZBgEIAEoBSI5Cg9QZXJzb25zUmVzcG9uc2USJgoJSXRlbXNMaXN0GAEgAygL",
-            "MhMuUG9tb25hLlBlcnNvblByb3RvMokBCglQZXJzb25TcnYSPQoOUmVnaXN0",
-            "ZXJQZXJzb24SEy5Qb21vbmEuUGVyc29uUHJvdG8aFi5Qb21vbmEuUGVyc29u",
-            "UmVzcG9uc2USPQoKR2V0UGVyc29ucxIWLmdvb2dsZS5wcm90b2J1Zi5FbXB0",
-            "eRoXLlBvbW9uYS5QZXJzb25zUmVzcG9uc2VCEKoCDVBvbW9uYS5Qcm90b3Ni",
-            "BnByb3RvMw=="));
+            "Eg4KBk51bWJlchgCIAEoCSKJAQoLUGVyc29uUHJvdG8SCgoCSWQYASABKAUS",
+            "HAoUSWRlbnRpZmljYXRpb25UeXBlSWQYAiABKAUSHAoUSWRlbnRpZmljYXRp",
+            "b25OdW1iZXIYAyABKAkSEAoIRnVsbE5hbWUYBCABKAkSEQoJQ2VsbFBob25l",
+            "GAUgASgJEg0KBUVtYWlsGAYgASgJIl8KDlBlcnNvblJlc3BvbnNlEhEKCUl0",
+            "ZW1zTGlzdBgBIAMoCRINCgVQYWdlcxgCIAEoBRIOCgZVc2VySWQYAyABKAkS",
+            "GwoTUXVhbGlmaWNhdGlvblR5cGVJZBgEIAEoBSI5Cg9QZXJzb25zUmVzcG9u",
+            "c2USJgoJSXRlbXNMaXN0GAEgAygLMhMuUG9tb25hLlBlcnNvblByb3RvMokB",
+            "CglQZXJzb25TcnYSPQoOUmVnaXN0ZXJQZXJzb24SEy5Qb21vbmEuUGVyc29u",
+            "UHJvdG8aFi5Qb21vbmEuUGVyc29uUmVzcG9uc2USPQoKR2V0UGVyc29ucxIW",
+            "Lmdvb2dsZS5wcm90b2J1Zi5FbXB0eRoXLlBvbW9uYS5QZXJzb25zUmVzcG9u",
+            "c2VCEKoCDVBvbW9uYS5Qcm90b3NiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Google.Protobuf.WellKnownTypes.EmptyReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Pomona.Protos.IdentificationProto), global::Pomona.Protos.IdentificationProto.Parser, new[]{ "TypeId", "Number" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Pomona.Protos.PersonProto), global::Pomona.Protos.PersonProto.Parser, new[]{ "Id", "Number", "Date", "DeliveryDate", "Value", "State", "Balance", "Weight", "Description" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Pomona.Protos.PersonProto), global::Pomona.Protos.PersonProto.Parser, new[]{ "Id", "IdentificationTypeId", "IdentificationNumber", "FullName", "CellPhone", "Email" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Pomona.Protos.PersonResponse), global::Pomona.Protos.PersonResponse.Parser, new[]{ "ItemsList", "Pages", "UserId", "QualificationTypeId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Pomona.Protos.PersonsResponse), global::Pomona.Protos.PersonsResponse.Parser, new[]{ "ItemsList" }, null, null, null, null)
           }));
@@ -289,14 +288,11 @@ namespace Pomona.Protos {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public PersonProto(PersonProto other) : this() {
       id_ = other.id_;
-      number_ = other.number_;
-      date_ = other.date_;
-      deliveryDate_ = other.deliveryDate_;
-      value_ = other.value_;
-      state_ = other.state_;
-      balance_ = other.balance_;
-      weight_ = other.weight_;
-      description_ = other.description_;
+      identificationTypeId_ = other.identificationTypeId_;
+      identificationNumber_ = other.identificationNumber_;
+      fullName_ = other.fullName_;
+      cellPhone_ = other.cellPhone_;
+      email_ = other.email_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -316,91 +312,58 @@ namespace Pomona.Protos {
       }
     }
 
-    /// <summary>Field number for the "Number" field.</summary>
-    public const int NumberFieldNumber = 2;
-    private int number_;
+    /// <summary>Field number for the "IdentificationTypeId" field.</summary>
+    public const int IdentificationTypeIdFieldNumber = 2;
+    private int identificationTypeId_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int Number {
-      get { return number_; }
+    public int IdentificationTypeId {
+      get { return identificationTypeId_; }
       set {
-        number_ = value;
+        identificationTypeId_ = value;
       }
     }
 
-    /// <summary>Field number for the "Date" field.</summary>
-    public const int DateFieldNumber = 3;
-    private string date_ = "";
+    /// <summary>Field number for the "IdentificationNumber" field.</summary>
+    public const int IdentificationNumberFieldNumber = 3;
+    private string identificationNumber_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string Date {
-      get { return date_; }
+    public string IdentificationNumber {
+      get { return identificationNumber_; }
       set {
-        date_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+        identificationNumber_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
-    /// <summary>Field number for the "DeliveryDate" field.</summary>
-    public const int DeliveryDateFieldNumber = 4;
-    private string deliveryDate_ = "";
+    /// <summary>Field number for the "FullName" field.</summary>
+    public const int FullNameFieldNumber = 4;
+    private string fullName_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string DeliveryDate {
-      get { return deliveryDate_; }
+    public string FullName {
+      get { return fullName_; }
       set {
-        deliveryDate_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+        fullName_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
-    /// <summary>Field number for the "Value" field.</summary>
-    public const int ValueFieldNumber = 5;
-    private int value_;
+    /// <summary>Field number for the "CellPhone" field.</summary>
+    public const int CellPhoneFieldNumber = 5;
+    private string cellPhone_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int Value {
-      get { return value_; }
+    public string CellPhone {
+      get { return cellPhone_; }
       set {
-        value_ = value;
+        cellPhone_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
-    /// <summary>Field number for the "State" field.</summary>
-    public const int StateFieldNumber = 6;
-    private string state_ = "";
+    /// <summary>Field number for the "Email" field.</summary>
+    public const int EmailFieldNumber = 6;
+    private string email_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string State {
-      get { return state_; }
+    public string Email {
+      get { return email_; }
       set {
-        state_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
-      }
-    }
-
-    /// <summary>Field number for the "Balance" field.</summary>
-    public const int BalanceFieldNumber = 7;
-    private int balance_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int Balance {
-      get { return balance_; }
-      set {
-        balance_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "Weight" field.</summary>
-    public const int WeightFieldNumber = 8;
-    private double weight_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public double Weight {
-      get { return weight_; }
-      set {
-        weight_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "Description" field.</summary>
-    public const int DescriptionFieldNumber = 9;
-    private string description_ = "";
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string Description {
-      get { return description_; }
-      set {
-        description_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+        email_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
@@ -418,14 +381,11 @@ namespace Pomona.Protos {
         return true;
       }
       if (Id != other.Id) return false;
-      if (Number != other.Number) return false;
-      if (Date != other.Date) return false;
-      if (DeliveryDate != other.DeliveryDate) return false;
-      if (Value != other.Value) return false;
-      if (State != other.State) return false;
-      if (Balance != other.Balance) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(Weight, other.Weight)) return false;
-      if (Description != other.Description) return false;
+      if (IdentificationTypeId != other.IdentificationTypeId) return false;
+      if (IdentificationNumber != other.IdentificationNumber) return false;
+      if (FullName != other.FullName) return false;
+      if (CellPhone != other.CellPhone) return false;
+      if (Email != other.Email) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -433,14 +393,11 @@ namespace Pomona.Protos {
     public override int GetHashCode() {
       int hash = 1;
       if (Id != 0) hash ^= Id.GetHashCode();
-      if (Number != 0) hash ^= Number.GetHashCode();
-      if (Date.Length != 0) hash ^= Date.GetHashCode();
-      if (DeliveryDate.Length != 0) hash ^= DeliveryDate.GetHashCode();
-      if (Value != 0) hash ^= Value.GetHashCode();
-      if (State.Length != 0) hash ^= State.GetHashCode();
-      if (Balance != 0) hash ^= Balance.GetHashCode();
-      if (Weight != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(Weight);
-      if (Description.Length != 0) hash ^= Description.GetHashCode();
+      if (IdentificationTypeId != 0) hash ^= IdentificationTypeId.GetHashCode();
+      if (IdentificationNumber.Length != 0) hash ^= IdentificationNumber.GetHashCode();
+      if (FullName.Length != 0) hash ^= FullName.GetHashCode();
+      if (CellPhone.Length != 0) hash ^= CellPhone.GetHashCode();
+      if (Email.Length != 0) hash ^= Email.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -461,37 +418,25 @@ namespace Pomona.Protos {
         output.WriteRawTag(8);
         output.WriteInt32(Id);
       }
-      if (Number != 0) {
+      if (IdentificationTypeId != 0) {
         output.WriteRawTag(16);
-        output.WriteInt32(Number);
+        output.WriteInt32(IdentificationTypeId);
       }
-      if (Date.Length != 0) {
+      if (IdentificationNumber.Length != 0) {
         output.WriteRawTag(26);
-        output.WriteString(Date);
+        output.WriteString(IdentificationNumber);
       }
-      if (DeliveryDate.Length != 0) {
+      if (FullName.Length != 0) {
         output.WriteRawTag(34);
-        output.WriteString(DeliveryDate);
+        output.WriteString(FullName);
       }
-      if (Value != 0) {
-        output.WriteRawTag(40);
-        output.WriteInt32(Value);
+      if (CellPhone.Length != 0) {
+        output.WriteRawTag(42);
+        output.WriteString(CellPhone);
       }
-      if (State.Length != 0) {
+      if (Email.Length != 0) {
         output.WriteRawTag(50);
-        output.WriteString(State);
-      }
-      if (Balance != 0) {
-        output.WriteRawTag(56);
-        output.WriteInt32(Balance);
-      }
-      if (Weight != 0D) {
-        output.WriteRawTag(65);
-        output.WriteDouble(Weight);
-      }
-      if (Description.Length != 0) {
-        output.WriteRawTag(74);
-        output.WriteString(Description);
+        output.WriteString(Email);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -506,37 +451,25 @@ namespace Pomona.Protos {
         output.WriteRawTag(8);
         output.WriteInt32(Id);
       }
-      if (Number != 0) {
+      if (IdentificationTypeId != 0) {
         output.WriteRawTag(16);
-        output.WriteInt32(Number);
+        output.WriteInt32(IdentificationTypeId);
       }
-      if (Date.Length != 0) {
+      if (IdentificationNumber.Length != 0) {
         output.WriteRawTag(26);
-        output.WriteString(Date);
+        output.WriteString(IdentificationNumber);
       }
-      if (DeliveryDate.Length != 0) {
+      if (FullName.Length != 0) {
         output.WriteRawTag(34);
-        output.WriteString(DeliveryDate);
+        output.WriteString(FullName);
       }
-      if (Value != 0) {
-        output.WriteRawTag(40);
-        output.WriteInt32(Value);
+      if (CellPhone.Length != 0) {
+        output.WriteRawTag(42);
+        output.WriteString(CellPhone);
       }
-      if (State.Length != 0) {
+      if (Email.Length != 0) {
         output.WriteRawTag(50);
-        output.WriteString(State);
-      }
-      if (Balance != 0) {
-        output.WriteRawTag(56);
-        output.WriteInt32(Balance);
-      }
-      if (Weight != 0D) {
-        output.WriteRawTag(65);
-        output.WriteDouble(Weight);
-      }
-      if (Description.Length != 0) {
-        output.WriteRawTag(74);
-        output.WriteString(Description);
+        output.WriteString(Email);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
@@ -550,29 +483,20 @@ namespace Pomona.Protos {
       if (Id != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(Id);
       }
-      if (Number != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Number);
+      if (IdentificationTypeId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(IdentificationTypeId);
       }
-      if (Date.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(Date);
+      if (IdentificationNumber.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(IdentificationNumber);
       }
-      if (DeliveryDate.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(DeliveryDate);
+      if (FullName.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(FullName);
       }
-      if (Value != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Value);
+      if (CellPhone.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(CellPhone);
       }
-      if (State.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(State);
-      }
-      if (Balance != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Balance);
-      }
-      if (Weight != 0D) {
-        size += 1 + 8;
-      }
-      if (Description.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(Description);
+      if (Email.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Email);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -588,29 +512,20 @@ namespace Pomona.Protos {
       if (other.Id != 0) {
         Id = other.Id;
       }
-      if (other.Number != 0) {
-        Number = other.Number;
+      if (other.IdentificationTypeId != 0) {
+        IdentificationTypeId = other.IdentificationTypeId;
       }
-      if (other.Date.Length != 0) {
-        Date = other.Date;
+      if (other.IdentificationNumber.Length != 0) {
+        IdentificationNumber = other.IdentificationNumber;
       }
-      if (other.DeliveryDate.Length != 0) {
-        DeliveryDate = other.DeliveryDate;
+      if (other.FullName.Length != 0) {
+        FullName = other.FullName;
       }
-      if (other.Value != 0) {
-        Value = other.Value;
+      if (other.CellPhone.Length != 0) {
+        CellPhone = other.CellPhone;
       }
-      if (other.State.Length != 0) {
-        State = other.State;
-      }
-      if (other.Balance != 0) {
-        Balance = other.Balance;
-      }
-      if (other.Weight != 0D) {
-        Weight = other.Weight;
-      }
-      if (other.Description.Length != 0) {
-        Description = other.Description;
+      if (other.Email.Length != 0) {
+        Email = other.Email;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -631,35 +546,23 @@ namespace Pomona.Protos {
             break;
           }
           case 16: {
-            Number = input.ReadInt32();
+            IdentificationTypeId = input.ReadInt32();
             break;
           }
           case 26: {
-            Date = input.ReadString();
+            IdentificationNumber = input.ReadString();
             break;
           }
           case 34: {
-            DeliveryDate = input.ReadString();
+            FullName = input.ReadString();
             break;
           }
-          case 40: {
-            Value = input.ReadInt32();
+          case 42: {
+            CellPhone = input.ReadString();
             break;
           }
           case 50: {
-            State = input.ReadString();
-            break;
-          }
-          case 56: {
-            Balance = input.ReadInt32();
-            break;
-          }
-          case 65: {
-            Weight = input.ReadDouble();
-            break;
-          }
-          case 74: {
-            Description = input.ReadString();
+            Email = input.ReadString();
             break;
           }
         }
@@ -681,35 +584,23 @@ namespace Pomona.Protos {
             break;
           }
           case 16: {
-            Number = input.ReadInt32();
+            IdentificationTypeId = input.ReadInt32();
             break;
           }
           case 26: {
-            Date = input.ReadString();
+            IdentificationNumber = input.ReadString();
             break;
           }
           case 34: {
-            DeliveryDate = input.ReadString();
+            FullName = input.ReadString();
             break;
           }
-          case 40: {
-            Value = input.ReadInt32();
+          case 42: {
+            CellPhone = input.ReadString();
             break;
           }
           case 50: {
-            State = input.ReadString();
-            break;
-          }
-          case 56: {
-            Balance = input.ReadInt32();
-            break;
-          }
-          case 65: {
-            Weight = input.ReadDouble();
-            break;
-          }
-          case 74: {
-            Description = input.ReadString();
+            Email = input.ReadString();
             break;
           }
         }

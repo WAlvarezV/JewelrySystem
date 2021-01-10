@@ -1,4 +1,5 @@
 
+using AutoMapper;
 using Grpc.Net.Client;
 using Grpc.Net.Client.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
@@ -26,7 +27,7 @@ namespace Pomona.Pwa.Client
 
             builder.Services.AddApiAuthorization();
 
-            _ = builder.Services.AddScoped(services =>
+            builder.Services.AddScoped(services =>
               {
                   var baseAddressMessageHandler = services.GetRequiredService<BaseAddressAuthorizationMessageHandler>();
                   baseAddressMessageHandler.InnerHandler = new HttpClientHandler();
@@ -54,7 +55,7 @@ namespace Pomona.Pwa.Client
 
             //services.AddFileReaderService(options => options.InitializeOnFirstCall = true);
             //services.AddSingleton<IFileImportService, FileImportService>();
-            //services.AddAutoMapper(typeof(Program));
+            services.AddAutoMapper(typeof(Program));
         }
     }
 }

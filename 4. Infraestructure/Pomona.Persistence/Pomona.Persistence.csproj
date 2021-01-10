@@ -18,4 +18,13 @@
     <ProjectReference Include="..\..\5. Shared\Pomona.Utilities\Pomona.Utilities.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Context\Seeds\IdentificationTypeSeedData.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Context\Seeds\ItemTypeSeedData.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -4,4 +4,5 @@
   <ContentRoot BasePath="/" Path="F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Client\wwwroot\" />
   <ContentRoot BasePath="/Identity" Path="C:\Users\WAlvarezV\.nuget\packages\microsoft.aspnetcore.identity.ui\5.0.1\staticwebassets\V4\" />
   <ContentRoot BasePath="_content/Microsoft.AspNetCore.Components.WebAssembly.Authentication" Path="C:\Users\WAlvarezV\.nuget\packages\microsoft.aspnetcore.components.webassembly.authentication\5.0.1\build\..\staticwebassets\" />
+  <ContentRoot BasePath="_content/Tewr.Blazor.FileReader" Path="C:\Users\WAlvarezV\.nuget\packages\tewr.blazor.filereader\2.1.0.20274\build\..\staticwebassets\" />
 </StaticWebAssets>

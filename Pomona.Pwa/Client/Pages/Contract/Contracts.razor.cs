@@ -1,5 +1,6 @@
 ﻿using Pomona.Protos;
 using Pomona.Pwa.Client.Custom;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,13 +13,23 @@ namespace Pomona.Pwa.Client.Pages.Contract
 
         protected override async Task OnInitializedAsync()
         {
-            //await SetToken();
             base.OnInitialized();
-            await GetRoles().ConfigureAwait(false);
+            await GetContracts().ConfigureAwait(false);
         }
 
-        protected async Task GetRoles() =>
-            Contracts = (await Clients.Contract().GetContractsAsync(Empty)).ItemsList;
+        protected async Task GetContracts()
+        {
+            try
+            {
+                Contracts = (await Clients.Contract().GetContractsAsync(Empty)).ItemsList;
+            }
+            catch (Exception ex)
+            {
+                var error = $"GetContractsAsync ExceptionError => {ex.Message} {(ex.InnerException != null ? $"InnerExceptionError => {ex.InnerException.Message}" : "")}";
+                Console.WriteLine(error);
+            }
+        }
+
 
     }
 }

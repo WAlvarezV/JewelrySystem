@@ -1,12 +1,28 @@
 ﻿self.assetsManifest = {
   "assets": [
     {
+      "hash": "sha256-M9IaajWSJ80VmbzqkAOB7oo5pXvfoHDpNlCoG2GPFfc=",
+      "url": "_content\/Tewr.Blazor.FileReader\/FileReaderComponent.js"
+    },
+    {
+      "hash": "sha256-9lXnP+ZTeQbd9bJQWQo+OJBKHmODNqfwawcURC6Wq8Y=",
+      "url": "_content\/Tewr.Blazor.FileReader\/FileReaderComponent.js.map"
+    },
+    {
       "hash": "sha256-pJQvSpzzXNlfQUjYVNgyMVCSbkbhkhhb5UM9Isl25h4=",
       "url": "_content\/Microsoft.AspNetCore.Components.WebAssembly.Authentication\/AuthenticationService.js"
     },
     {
-      "hash": "sha256-5MGfPFnstr6rmU64XGtpEHT7Y13xoKY8SEHrcohYth8=",
+      "hash": "sha256-ZgpAt4dtneNsipXlDjbnLGQPnJkXiq1XuL4FbybQQQc=",
       "url": "_framework\/blazor.boot.json"
+    },
+    {
+      "hash": "sha256-5YZMgnS9flpYsRkvS42Avy\/zKTyfHrpVyRz2t3MJwWY=",
+      "url": "_framework\/AutoMapper.dll"
+    },
+    {
+      "hash": "sha256-w3G5KU+mvJECrhuoTbCD8ku0xNitG110NmB07EEVL7U=",
+      "url": "_framework\/AutoMapper.Extensions.Microsoft.DependencyInjection.dll"
     },
     {
       "hash": "sha256-zvZTJX9Bf0ALiFfprhBSjfGce9QyqANXIkUvibJJNtc=",
@@ -59,6 +75,10 @@
     {
       "hash": "sha256-07Nes4qtyvtCCTr1qv4J5MweJd0ZsW+AeK3V7tfsv0k=",
       "url": "_framework\/Microsoft.AspNetCore.Metadata.dll"
+    },
+    {
+      "hash": "sha256-OBWh2or+2mU6elwqPfmL72FBZVKl2WzTJ4L\/IrKeXM4=",
+      "url": "_framework\/Microsoft.Bcl.AsyncInterfaces.dll"
     },
     {
       "hash": "sha256-x9zYR1t1is\/fStNpBiQnXyPdMpLLcQcra3w4RXGSg4o=",
@@ -131,6 +151,10 @@
     {
       "hash": "sha256-3ET+mpR7F058YRj9YaLHOVXBqOW6iUxtIpeiKPYw4PA=",
       "url": "_framework\/System.IO.Pipelines.dll"
+    },
+    {
+      "hash": "sha256-Zyzqe\/EA0OHa2D757deFsdytV\/SRN7xEwHwtMhgb7VM=",
+      "url": "_framework\/Tewr.Blazor.FileReader.dll"
     },
     {
       "hash": "sha256-JWW\/4VOX8B0ELTP\/v4O7wlgWY8ZyVIv0BTIRIv2TJBw=",
@@ -821,11 +845,11 @@
       "url": "_framework\/dotnet.5.0.1.js"
     },
     {
-      "hash": "sha256-h0I6M5YHbeucLtyra2gLdmBcNOpQ9Vu+FwoRgKJFfgk=",
+      "hash": "sha256-eyVXQwG\/ywe8hwfSGlMBWqg\/v99bHJ2H1mlDy8\/eq0o=",
       "url": "_framework\/Pomona.Models.dll"
     },
     {
-      "hash": "sha256-KLe+nd0uUGg8Tr5\/fOTjU9iTQXri\/jMEinWjdrsn00M=",
+      "hash": "sha256-yeU9Lvm840y9xVdpsb\/fes7ZPNnUZhN7r39TzQMNaBk=",
       "url": "_framework\/Pomona.Protos.dll"
     },
     {
@@ -833,11 +857,11 @@
       "url": "_framework\/Pomona.Pwa.Shared.dll"
     },
     {
-      "hash": "sha256-iJ3hViV+TU\/MDkn4VgvP92894htz2DLXPoUFw3jMvPs=",
+      "hash": "sha256-oUpyHxhX+2UwT2Ahk5evCK+yFqc21ezSyuo5ao6ZACw=",
       "url": "_framework\/Pomona.Models.pdb"
     },
     {
-      "hash": "sha256-jzUSrcgSO+Ui5tW\/wDI31aS8sWj1dCAkM6zW6YbQo40=",
+      "hash": "sha256-oh6e4ps+aQ4EG6uLUQlew2\/SW+OqE\/B2Yv30ETwJWlY=",
       "url": "_framework\/Pomona.Protos.pdb"
     },
     {
@@ -845,16 +869,24 @@
       "url": "_framework\/Pomona.Pwa.Shared.pdb"
     },
     {
-      "hash": "sha256-LpU+\/pmAou1qCCo6MIYnLgzWPT9fKy3hicvalAMOkI4=",
+      "hash": "sha256-Vz7Vm7UEFfQUgHLDXob2ry7QrfQ6axO1a0Spyg5ooQs=",
       "url": "_framework\/Pomona.Pwa.Client.dll"
     },
     {
-      "hash": "sha256-FggpQMlfZ2qEQsqdv7+ItEVNGQsofAyLki0lMQPq1Z4=",
+      "hash": "sha256-rAD3TKb+agYRRUWzo6I7fIshQPef8vwX7u2YXgBm1EE=",
       "url": "_framework\/Pomona.Pwa.Client.pdb"
     },
     {
       "hash": "sha256-sYA0L2visb01XnqGT7epPVSXTZJFhpQ4PMDzhF\/rngo=",
       "url": "_framework\/blazor.webassembly.js"
+    },
+    {
+      "hash": "sha256-0W8XJfwXiiuZNRp3Dcl0HBv4CWg\/LV4KZg6B2HCwFm4=",
+      "url": "_framework\/AutoMapper.dll.gz"
+    },
+    {
+      "hash": "sha256-e7vGuFrvql+5MchroCqGUUBqlsdXVkm7qEFDSOcM\/SU=",
+      "url": "_framework\/AutoMapper.Extensions.Microsoft.DependencyInjection.dll.gz"
     },
     {
       "hash": "sha256-t2etddm3SVF0dW6J\/76xCAIRQLcn9OBHFc+tUTirlEo=",
@@ -907,6 +939,10 @@
     {
       "hash": "sha256-vCxnUWSk2mP9vgiXGfHcLgiv6RPpBCmaHRJbdjjXOYc=",
       "url": "_framework\/Microsoft.AspNetCore.Metadata.dll.gz"
+    },
+    {
+      "hash": "sha256-VGG8lFGHHUKmZifWUEWk9olCm4OZdGIrZblbWZt4jG0=",
+      "url": "_framework\/Microsoft.Bcl.AsyncInterfaces.dll.gz"
     },
     {
       "hash": "sha256-vwJvf0CyeB3VLdzF9SPGQ2aslb5\/BZWEqYUiyzRD\/zc=",
@@ -979,6 +1015,10 @@
     {
       "hash": "sha256-bKUyqPBN97RAML0EFDOqEqLzHp6KbO5DKcF0CX\/cmSU=",
       "url": "_framework\/System.IO.Pipelines.dll.gz"
+    },
+    {
+      "hash": "sha256-bztHcb7+xL2DrZusQZos05OB8CFWAxIo0wz788eCtmQ=",
+      "url": "_framework\/Tewr.Blazor.FileReader.dll.gz"
     },
     {
       "hash": "sha256-3uvAz7RWk7L5slN5U9bOseBg000S7tVGAOQ\/Ayzl\/P8=",
@@ -1669,11 +1709,11 @@
       "url": "_framework\/dotnet.5.0.1.js.gz"
     },
     {
-      "hash": "sha256-qV2+BZ0R+OCRS6P+Skkpw1uuyoI7yokXncEle6Sjf\/M=",
+      "hash": "sha256-ncGHFJ+bBpXMpY8XpCsnLULzU2e1MaZOXIzUZMgKR8Y=",
       "url": "_framework\/Pomona.Models.dll.gz"
     },
     {
-      "hash": "sha256-xJStERZdeU2vk1kuqdPSevQAufBZ6HAAfFodGmeTRnA=",
+      "hash": "sha256-mqb3Mf6JoM7L7vu5cPyNlPtHDg3A4AAQI8glIOpanIU=",
       "url": "_framework\/Pomona.Protos.dll.gz"
     },
     {
@@ -1691,6 +1731,10 @@
     {
       "hash": "sha256-xMZ0SaSBYZSHVjFdZTAT\/IjRExRIxSriWcJLcA9nkj0=",
       "url": "css\/bootstrap\/bootstrap.min.css.map"
+    },
+    {
+      "hash": "sha256-S5UlepfnejLIV0x03CNSm8RY9oMqTin9a+fpvzN5OQA=",
+      "url": "css\/custom.css"
     },
     {
       "hash": "sha256-jA4J4h\/k76zVxbFKEaWwFKJccmO0voOQ1DbUW+5YNlI=",
@@ -1737,8 +1781,16 @@
       "url": "icon-512.png"
     },
     {
-      "hash": "sha256-tJNJ3V52SA4PeS6fs\/KzWMrpZhtr\/0J\/cb\/kLXnDyWg=",
+      "hash": "sha256-+m+9cbBXjTFarBcnaleBq\/PAkkMerxjGTB\/ISMgH67Q=",
       "url": "index.html"
+    },
+    {
+      "hash": "sha256-McOGvUXZkQ2BvstQ\/eqR\/kMTFHNlYixF+IyxvnE2rdU=",
+      "url": "js\/customMessages.js"
+    },
+    {
+      "hash": "sha256-1AfEPkK5Ho2BtuhAItWPDOpzm\/\/CQwPzehm7SM+b1GE=",
+      "url": "js\/utilities.js"
     },
     {
       "hash": "sha256-r\/KhAj3kKUQ11GDvPRpMq16agUB6L8hReAd5DzizppM=",
@@ -1753,5 +1805,5 @@
       "url": "Pomona.Pwa.Client.bundle.scp.css"
     }
   ],
-  "version": "xPacm739"
+  "version": "q7moxklW"
 };

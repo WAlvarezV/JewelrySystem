@@ -6,26 +6,73 @@
 </div>
 
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <ul class="nav flex-column">
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-            </NavLink>
-        </li>
-    </ul>
+    <AuthorizeView>
+        <ul class="nav flex-column">
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="contratos">
+                    <span class="oi oi-document" aria-hidden="true"></span> Contratos
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="counter">
+                    <span class="oi oi-dollar" aria-hidden="true"></span> Caja
+                </NavLink>
+            </li>
+            <!--#region Inventory Menu -->
+
+            <li class="nav-item px-3 py-0">
+                <NavLink class="nav-link dropdown-toggle" @onclick="()=>exSubInventory = !exSubInventory">
+                    <span class="oi oi-loop-square" aria-hidden="true"></span> Inventario
+                </NavLink>
+                @if (exSubInventory)
+                {
+                    <ul class="nav flex-column">
+                        <li class="nav-item px-3 py-0">
+                            <NavLink class="nav-link" href="informacion-externa">
+                                <span class="oi oi-dial" aria-hidden="true"></span> Anillos
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3 py-0">
+                            <NavLink class="nav-link" href="precalificacion">
+                                <span class="oi oi-double-quote-serif-right" aria-hidden="true"></span> Aretes
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3 py-0">
+                            <NavLink class="nav-link" href="duplicidad">
+                                <span class="oi oi-link-intact" aria-hidden="true"></span> Cadenas
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3 py-0">
+                            <NavLink class="nav-link" href="prescripcion">
+                                <span class="oi oi-link-intact" aria-hidden="true"></span> Pulseras
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3 py-0">
+                            <NavLink class="nav-link" href="liberar-acreencias">
+                                <span class="oi oi-clock" aria-hidden="true"></span> Relojes
+                            </NavLink>
+                        </li>
+                    </ul>
+                }
+            </li>
+
+            <!--#endregion -->
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="fetchdata">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Proveedores
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="contratos">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Utilidades
+                </NavLink>
+            </li>
+        </ul>
+    </AuthorizeView>
 </div>
 
 @code {
+    private bool exSubInventory;
     private bool collapseNavMenu = true;
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;

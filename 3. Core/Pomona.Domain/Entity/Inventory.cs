@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text.Json;
 
 namespace Pomona.Domain.Entity
 {
@@ -12,7 +11,8 @@ namespace Pomona.Domain.Entity
         public int SaleValue { get; set; }
         public int ItemTypeId { get; set; }
         public ItemType ItemType { get; set; }
-        public JsonDocument Item { get; set; }
+        //public JsonDocument Item { get; set; }
+        public string Item { get; set; }
         public bool Active { get; set; } = true;
 
         public string Description { get; set; }
