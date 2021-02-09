@@ -1,10 +1,11 @@
 ﻿using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Pomona.Application.Interfaces;
-using Pomona.Protos;
+using Pomona.Protos.Common;
+using Pomona.Protos.Contract;
 using System.Threading;
 using System.Threading.Tasks;
-using static Pomona.Protos.ContractSrv;
+using static Pomona.Protos.Contract.ContractSrv;
 
 namespace Pomona.Pwa.Server.GrpcServices
 {

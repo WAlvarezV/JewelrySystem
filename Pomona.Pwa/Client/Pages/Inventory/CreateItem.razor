@@ -1,0 +1,10 @@
+﻿@page "/new/item/{ItemTypeId:int}"
+
+<h3>CreateItem</h3>
+<div class="card">
+    <Item ItemTypeId="ItemTypeId" />
+</div>
+
+@code {
+    [Parameter] public int ItemTypeId { get; set; }
+}

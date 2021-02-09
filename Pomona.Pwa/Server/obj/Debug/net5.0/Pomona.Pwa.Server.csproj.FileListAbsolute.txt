@@ -138,6 +138,6 @@ F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\bin\Debug\net5.0\Pomona.Proto
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\bin\Debug\net5.0\Pomona.Utilities.pdb
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\bin\Debug\net5.0\Microsoft.Bcl.AsyncInterfaces.dll
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\bin\Debug\net5.0\Tewr.Blazor.FileReader.dll
-F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\obj\Debug\net5.0\Pomona.Pwa.Server.MvcApplicationPartsAssemblyInfo.cs
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\bin\Debug\net5.0\Context\Seeds\IdentificationTypeSeedData.json
 F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\bin\Debug\net5.0\Context\Seeds\ItemTypeSeedData.json
+F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Server\bin\Debug\net5.0\Context\Seeds\BrandSeedData.json

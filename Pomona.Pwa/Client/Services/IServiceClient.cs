@@ -1,5 +1,6 @@
-﻿using static Pomona.Protos.ContractSrv;
-using static Pomona.Protos.InventorySrv;
+﻿using static Pomona.Protos.Contract.ContractSrv;
+using static Pomona.Protos.Inventory.InventorySrv;
+using static Pomona.Protos.Parametric.ParametricSrv;
 
 namespace Pomona.Pwa.Client.Services
 {
@@ -7,5 +8,6 @@ namespace Pomona.Pwa.Client.Services
     {
         InventorySrvClient Inventory();
         ContractSrvClient Contract();
+        ParametricSrvClient Parametric();
     }
 }

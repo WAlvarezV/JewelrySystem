@@ -23,3 +23,4 @@ F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Application\obj\Debug\net5.0\ref
 F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Application\obj\Debug\net5.0\Pomona.Application.pdb
 F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Application\bin\Debug\net5.0\Context\Seeds\IdentificationTypeSeedData.json
 F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Application\bin\Debug\net5.0\Context\Seeds\ItemTypeSeedData.json
+F:\Proyectos\Joyeria\repo\Pomona\3. Core\Pomona.Application\bin\Debug\net5.0\Context\Seeds\BrandSeedData.json

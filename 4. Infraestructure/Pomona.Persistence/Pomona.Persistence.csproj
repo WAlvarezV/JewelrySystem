@@ -15,11 +15,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\3. Core\Pomona.Domain\Pomona.Domain.csproj" />
+    <ProjectReference Include="..\..\3. Core\Pomona.Protos\Pomona.Protos.csproj" />
     <ProjectReference Include="..\..\5. Shared\Pomona.Utilities\Pomona.Utilities.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update="Context\Seeds\IdentificationTypeSeedData.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Context\Seeds\BrandSeedData.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Context\Seeds\ItemTypeSeedData.json">

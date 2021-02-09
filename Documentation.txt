@@ -1,7 +1,7 @@
 
 2. Server
 
-Add-Migration UpdateModel -context ApplicationDbContext
+Add-Migration UpdateModel2 -context ApplicationDbContext
 
 update-database -context ApplicationDbContext
 

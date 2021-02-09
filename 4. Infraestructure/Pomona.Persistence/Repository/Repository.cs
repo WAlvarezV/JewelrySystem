@@ -1,5 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Pomona.Domain.Shared;
 using Pomona.Persistence.Context;
+using Pomona.Persistence.Extensions;
+using Pomona.Protos.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,5 +61,45 @@ namespace Pomona.Persistence.Repository
             _dbSet.Add(entity);
             return entity;
         }
+
+        public async Task<PaginationResponse<T>> Paginate(Pagination paginationProto,
+            string includeProperties = "")
+        {
+            var queryable = _dbSet.AsQueryable();
+            foreach (var includeProperty in includeProperties.Split
+                    (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                queryable = queryable.Include(includeProperty);
+            }
+            double count = await queryable.CountAsync();
+            var totalPages = (int)Math.Ceiling(count / paginationProto.Records);
+            var response = await queryable.Paginate(paginationProto).ToListAsync();
+            return new PaginationResponse<T>
+            {
+                Items = response,
+                Pages = totalPages
+            };
+        }
+
+        public async Task<PaginationResponse<T>> FindAndPaginate(Expression<Func<T, bool>> filter, Pagination paginationProto,
+            string includeProperties = "")
+        {
+            var queryable = _dbSet.AsQueryable();
+            foreach (var includeProperty in includeProperties.Split
+                    (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                queryable = queryable.Include(includeProperty);
+            }
+            queryable = queryable.Where(filter);
+            double count = await queryable.CountAsync();
+            var totalPages = (int)Math.Ceiling(count / paginationProto.Records);
+            var response = await queryable.Paginate(paginationProto).ToListAsync();
+            return new PaginationResponse<T>
+            {
+                Items = response,
+                Pages = totalPages
+            };
+        }
+
     }
 }

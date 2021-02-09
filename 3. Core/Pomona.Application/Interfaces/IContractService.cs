@@ -1,6 +1,7 @@
 ﻿
 using Google.Protobuf.WellKnownTypes;
-using Pomona.Protos;
+using Pomona.Protos.Common;
+using Pomona.Protos.Contract;
 using System.Threading;
 using System.Threading.Tasks;
 

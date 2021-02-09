@@ -1,4 +1,5 @@
-﻿using Pomona.Protos;
+﻿using Pomona.Protos.Common;
+using Pomona.Protos.Contract;
 using Pomona.Pwa.Client.Custom;
 using System;
 using System.Collections.Generic;
@@ -30,6 +31,23 @@ namespace Pomona.Pwa.Client.Pages.Contract
             }
         }
 
+        protected async Task FilteredSearch()
+        {
+            Pagination.Page = 1;
+            Pagination.Records = 10;
+            await GetContracts().ConfigureAwait(true);
+        }
 
+        protected async Task SelectedPage(Pagination pagination)
+        {
+            Pagination = pagination;
+            await GetContracts().ConfigureAwait(true);
+        }
+
+        protected async Task ClearFilter()
+        {
+            ClearPaginationFilter();
+            await GetContracts().ConfigureAwait(false);
+        }
     }
 }

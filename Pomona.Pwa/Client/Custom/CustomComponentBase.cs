@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.JSInterop;
+using Pomona.Protos.Common;
 using Pomona.Pwa.Client.Extensions;
 using Pomona.Pwa.Client.Services;
 using System.Globalization;
@@ -24,12 +25,13 @@ namespace Pomona.Pwa.Client.Custom
         protected Metadata Header { get; set; } = new Metadata();
         protected CultureInfo CultureInfo { get; set; } = new CultureInfo("es-US", false);
         protected NumberFormatInfo NumberFormatInfo { get; set; } = new CultureInfo("es-US", false).NumberFormat;
-        //protected PaginationProto PaginationProto { get; set; } = new PaginationProto
-        //{
-        //    Page = 1,
-        //    Records = 10,
-        //    Filter = new FilterProto { State = "0", Type = "0" }
-        //};
+        protected Pagination Pagination { get; set; } = new Pagination
+        {
+            Page = 1,
+            Records = 10,
+            Filter = new Filter { State = "0", Type = "0" }
+        };
+        protected int Pages;
         protected string UserId { get; set; } = string.Empty;
         protected string UserRole { get; set; } = string.Empty;
         //protected string AuthorizedRoles { get; set; } = Constant.AdministratorRole;
@@ -119,11 +121,11 @@ namespace Pomona.Pwa.Client.Custom
         //    }
         //}
 
-        //protected void ClearPaginationFilter()
-        //{
-        //    PaginationProto.Page = 1;
-        //    PaginationProto.Filter = new FilterProto { Key = string.Empty, State = "0", Type = "0", Other = string.Empty };
-        //}
+        protected void ClearPaginationFilter()
+        {
+            Pagination.Page = 1;
+            Pagination.Filter = new Filter { Key = string.Empty, State = "0", Type = "0", Other = string.Empty };
+        }
     }
 }
 

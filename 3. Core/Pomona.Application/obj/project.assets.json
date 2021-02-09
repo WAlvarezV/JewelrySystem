@@ -347,6 +347,7 @@
           "Microsoft.AspNetCore.Http.Abstractions": "2.2.0",
           "Microsoft.EntityFrameworkCore": "5.0.1",
           "Pomona.Domain": "1.0.0",
+          "Pomona.Protos": "1.0.0",
           "Pomona.Utilities": "1.0.0"
         },
         "compile": {
@@ -1141,7 +1142,8 @@
       "NLog >= 4.7.6",
       "Pomona.Domain >= 1.0.0",
       "Pomona.Infrastructure >= 1.0.0",
-      "Pomona.Protos >= 1.0.0"
+      "Pomona.Protos >= 1.0.0",
+      "Pomona.Utilities >= 1.0.0"
     ]
   },
   "packageFolders": {
@@ -1184,6 +1186,9 @@
             },
             "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Infrastructure\\Pomona.Infrastructure.csproj": {
               "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Infrastructure\\Pomona.Infrastructure.csproj"
+            },
+            "F:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj": {
+              "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj"
             }
           }
         }
@@ -1222,7 +1227,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.101\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.102\\RuntimeIdentifierGraph.json"
       }
     }
   }

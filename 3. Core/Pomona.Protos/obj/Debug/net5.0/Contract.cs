@@ -9,7 +9,7 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace Pomona.Protos {
+namespace Pomona.Protos.Contract {
 
   /// <summary>Holder for reflection information generated from Contract.proto</summary>
   public static partial class ContractReflection {
@@ -26,36 +26,36 @@ namespace Pomona.Protos {
           string.Concat(
             "Cg5Db250cmFjdC5wcm90bxIGUG9tb25hGh9nb29nbGUvcHJvdG9idWYvdGlt",
             "ZXN0YW1wLnByb3RvGhtnb29nbGUvcHJvdG9idWYvZW1wdHkucHJvdG8aDFBl",
-            "cnNvbi5wcm90bxoQUGFyYW1ldHJpYy5wcm90byLcAgoNQ29udHJhY3RQcm90",
-            "bxIKCgJJZBgBIAEoBRIOCgZOdW1iZXIYAiABKAUSKAoERGF0ZRgDIAEoCzIa",
-            "Lmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASMAoMRGVsaXZlcnlEYXRlGAQg",
-            "ASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBINCgVWYWx1ZRgFIAEo",
-            "BRINCgVTdGF0ZRgGIAEoCRIPCgdQYXltZW50GA8gASgFEg8KB0JhbGFuY2UY",
-            "ByABKAUSDgoGV2VpZ2h0GAggASgBEhMKC0Rlc2NyaXB0aW9uGAkgASgJEhwK",
-            "FElkZW50aWZpY2F0aW9uVHlwZUlkGAogASgFEhwKFElkZW50aWZpY2F0aW9u",
-            "TnVtYmVyGAsgASgJEhAKCEZ1bGxOYW1lGAwgASgJEhEKCUNlbGxQaG9uZRgN",
-            "IAEoCRINCgVFbWFpbBgOIAEoCSJ1ChBDb250cmFjdFJlc3BvbnNlEhAKCFJl",
-            "c3BvbnNlGAEgASgJEicKCENvbnRyYWN0GAIgASgLMhUuUG9tb25hLkNvbnRy",
-            "YWN0UHJvdG8SJgoIUGF5bWVudHMYAyADKAsyFC5Qb21vbmEuUGF5bWVudFBy",
-            "b3RvIj0KEUNvbnRyYWN0c1Jlc3BvbnNlEigKCUl0ZW1zTGlzdBgBIAMoCzIV",
-            "LlBvbW9uYS5Db250cmFjdFByb3RvIooBCgxQYXltZW50UHJvdG8SCgoCSWQY",
-            "ASABKAUSDgoGTnVtYmVyGAIgASgFEigKBERhdGUYAyABKAsyGi5nb29nbGUu",
-            "cHJvdG9idWYuVGltZXN0YW1wEg0KBVZhbHVlGAQgASgFEhAKCEVudGl0eUlk",
-            "GAYgASgFEhMKC1BheW1lbnRUeXBlGAcgASgJMpYCCgtDb250cmFjdFNydhJD",
-            "ChBSZWdpc3RlckNvbnRyYWN0EhUuUG9tb25hLkNvbnRyYWN0UHJvdG8aGC5Q",
-            "b21vbmEuQ29udHJhY3RSZXNwb25zZRJBCg9SZWdpc3RlclBheW1lbnQSFC5Q",
-            "b21vbmEuUGF5bWVudFByb3RvGhguUG9tb25hLkNvbnRyYWN0UmVzcG9uc2US",
-            "PAoPR2V0Q29udHJhY3RCeUlkEg8uUG9tb25hLklkUHJvdG8aGC5Qb21vbmEu",
-            "Q29udHJhY3RSZXNwb25zZRJBCgxHZXRDb250cmFjdHMSFi5nb29nbGUucHJv",
-            "dG9idWYuRW1wdHkaGS5Qb21vbmEuQ29udHJhY3RzUmVzcG9uc2VCEKoCDVBv",
-            "bW9uYS5Qcm90b3NiBnByb3RvMw=="));
+            "cnNvbi5wcm90bxoMQ29tbW9uLnByb3RvItwCCg1Db250cmFjdFByb3RvEgoK",
+            "AklkGAEgASgFEg4KBk51bWJlchgCIAEoBRIoCgREYXRlGAMgASgLMhouZ29v",
+            "Z2xlLnByb3RvYnVmLlRpbWVzdGFtcBIwCgxEZWxpdmVyeURhdGUYBCABKAsy",
+            "Gi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEg0KBVZhbHVlGAUgASgFEg0K",
+            "BVN0YXRlGAYgASgJEg8KB1BheW1lbnQYDyABKAUSDwoHQmFsYW5jZRgHIAEo",
+            "BRIOCgZXZWlnaHQYCCABKAESEwoLRGVzY3JpcHRpb24YCSABKAkSHAoUSWRl",
+            "bnRpZmljYXRpb25UeXBlSWQYCiABKAUSHAoUSWRlbnRpZmljYXRpb25OdW1i",
+            "ZXIYCyABKAkSEAoIRnVsbE5hbWUYDCABKAkSEQoJQ2VsbFBob25lGA0gASgJ",
+            "Eg0KBUVtYWlsGA4gASgJInUKEENvbnRyYWN0UmVzcG9uc2USEAoIUmVzcG9u",
+            "c2UYASABKAkSJwoIQ29udHJhY3QYAiABKAsyFS5Qb21vbmEuQ29udHJhY3RQ",
+            "cm90bxImCghQYXltZW50cxgDIAMoCzIULlBvbW9uYS5QYXltZW50UHJvdG8i",
+            "PQoRQ29udHJhY3RzUmVzcG9uc2USKAoJSXRlbXNMaXN0GAEgAygLMhUuUG9t",
+            "b25hLkNvbnRyYWN0UHJvdG8iigEKDFBheW1lbnRQcm90bxIKCgJJZBgBIAEo",
+            "BRIOCgZOdW1iZXIYAiABKAUSKAoERGF0ZRgDIAEoCzIaLmdvb2dsZS5wcm90",
+            "b2J1Zi5UaW1lc3RhbXASDQoFVmFsdWUYBCABKAUSEAoIRW50aXR5SWQYBiAB",
+            "KAUSEwoLUGF5bWVudFR5cGUYByABKAkylgIKC0NvbnRyYWN0U3J2EkMKEFJl",
+            "Z2lzdGVyQ29udHJhY3QSFS5Qb21vbmEuQ29udHJhY3RQcm90bxoYLlBvbW9u",
+            "YS5Db250cmFjdFJlc3BvbnNlEkEKD1JlZ2lzdGVyUGF5bWVudBIULlBvbW9u",
+            "YS5QYXltZW50UHJvdG8aGC5Qb21vbmEuQ29udHJhY3RSZXNwb25zZRI8Cg9H",
+            "ZXRDb250cmFjdEJ5SWQSDy5Qb21vbmEuSWRQcm90bxoYLlBvbW9uYS5Db250",
+            "cmFjdFJlc3BvbnNlEkEKDEdldENvbnRyYWN0cxIWLmdvb2dsZS5wcm90b2J1",
+            "Zi5FbXB0eRoZLlBvbW9uYS5Db250cmFjdHNSZXNwb25zZUIZqgIWUG9tb25h",
+            "LlByb3Rvcy5Db250cmFjdGIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Google.Protobuf.WellKnownTypes.TimestampReflection.Descriptor, global::Google.Protobuf.WellKnownTypes.EmptyReflection.Descriptor, global::Pomona.Protos.PersonReflection.Descriptor, global::Pomona.Protos.ParametricReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Google.Protobuf.WellKnownTypes.TimestampReflection.Descriptor, global::Google.Protobuf.WellKnownTypes.EmptyReflection.Descriptor, global::Pomona.Protos.PersonReflection.Descriptor, global::Pomona.Protos.Common.CommonReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Pomona.Protos.ContractProto), global::Pomona.Protos.ContractProto.Parser, new[]{ "Id", "Number", "Date", "DeliveryDate", "Value", "State", "Payment", "Balance", "Weight", "Description", "IdentificationTypeId", "IdentificationNumber", "FullName", "CellPhone", "Email" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Pomona.Protos.ContractResponse), global::Pomona.Protos.ContractResponse.Parser, new[]{ "Response", "Contract", "Payments" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Pomona.Protos.ContractsResponse), global::Pomona.Protos.ContractsResponse.Parser, new[]{ "ItemsList" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Pomona.Protos.PaymentProto), global::Pomona.Protos.PaymentProto.Parser, new[]{ "Id", "Number", "Date", "Value", "EntityId", "PaymentType" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Pomona.Protos.Contract.ContractProto), global::Pomona.Protos.Contract.ContractProto.Parser, new[]{ "Id", "Number", "Date", "DeliveryDate", "Value", "State", "Payment", "Balance", "Weight", "Description", "IdentificationTypeId", "IdentificationNumber", "FullName", "CellPhone", "Email" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Pomona.Protos.Contract.ContractResponse), global::Pomona.Protos.Contract.ContractResponse.Parser, new[]{ "Response", "Contract", "Payments" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Pomona.Protos.Contract.ContractsResponse), global::Pomona.Protos.Contract.ContractsResponse.Parser, new[]{ "ItemsList" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Pomona.Protos.Contract.PaymentProto), global::Pomona.Protos.Contract.PaymentProto.Parser, new[]{ "Id", "Number", "Date", "Value", "EntityId", "PaymentType" }, null, null, null, null)
           }));
     }
     #endregion
@@ -74,7 +74,7 @@ namespace Pomona.Protos {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Pomona.Protos.ContractReflection.Descriptor.MessageTypes[0]; }
+      get { return global::Pomona.Protos.Contract.ContractReflection.Descriptor.MessageTypes[0]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -768,7 +768,7 @@ namespace Pomona.Protos {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Pomona.Protos.ContractReflection.Descriptor.MessageTypes[1]; }
+      get { return global::Pomona.Protos.Contract.ContractReflection.Descriptor.MessageTypes[1]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -809,9 +809,9 @@ namespace Pomona.Protos {
 
     /// <summary>Field number for the "Contract" field.</summary>
     public const int ContractFieldNumber = 2;
-    private global::Pomona.Protos.ContractProto contract_;
+    private global::Pomona.Protos.Contract.ContractProto contract_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Pomona.Protos.ContractProto Contract {
+    public global::Pomona.Protos.Contract.ContractProto Contract {
       get { return contract_; }
       set {
         contract_ = value;
@@ -820,11 +820,11 @@ namespace Pomona.Protos {
 
     /// <summary>Field number for the "Payments" field.</summary>
     public const int PaymentsFieldNumber = 3;
-    private static readonly pb::FieldCodec<global::Pomona.Protos.PaymentProto> _repeated_payments_codec
-        = pb::FieldCodec.ForMessage(26, global::Pomona.Protos.PaymentProto.Parser);
-    private readonly pbc::RepeatedField<global::Pomona.Protos.PaymentProto> payments_ = new pbc::RepeatedField<global::Pomona.Protos.PaymentProto>();
+    private static readonly pb::FieldCodec<global::Pomona.Protos.Contract.PaymentProto> _repeated_payments_codec
+        = pb::FieldCodec.ForMessage(26, global::Pomona.Protos.Contract.PaymentProto.Parser);
+    private readonly pbc::RepeatedField<global::Pomona.Protos.Contract.PaymentProto> payments_ = new pbc::RepeatedField<global::Pomona.Protos.Contract.PaymentProto>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<global::Pomona.Protos.PaymentProto> Payments {
+    public pbc::RepeatedField<global::Pomona.Protos.Contract.PaymentProto> Payments {
       get { return payments_; }
     }
 
@@ -928,7 +928,7 @@ namespace Pomona.Protos {
       }
       if (other.contract_ != null) {
         if (contract_ == null) {
-          Contract = new global::Pomona.Protos.ContractProto();
+          Contract = new global::Pomona.Protos.Contract.ContractProto();
         }
         Contract.MergeFrom(other.Contract);
       }
@@ -953,7 +953,7 @@ namespace Pomona.Protos {
           }
           case 18: {
             if (contract_ == null) {
-              Contract = new global::Pomona.Protos.ContractProto();
+              Contract = new global::Pomona.Protos.Contract.ContractProto();
             }
             input.ReadMessage(Contract);
             break;
@@ -982,7 +982,7 @@ namespace Pomona.Protos {
           }
           case 18: {
             if (contract_ == null) {
-              Contract = new global::Pomona.Protos.ContractProto();
+              Contract = new global::Pomona.Protos.Contract.ContractProto();
             }
             input.ReadMessage(Contract);
             break;
@@ -1010,7 +1010,7 @@ namespace Pomona.Protos {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Pomona.Protos.ContractReflection.Descriptor.MessageTypes[2]; }
+      get { return global::Pomona.Protos.Contract.ContractReflection.Descriptor.MessageTypes[2]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1038,11 +1038,11 @@ namespace Pomona.Protos {
 
     /// <summary>Field number for the "ItemsList" field.</summary>
     public const int ItemsListFieldNumber = 1;
-    private static readonly pb::FieldCodec<global::Pomona.Protos.ContractProto> _repeated_itemsList_codec
-        = pb::FieldCodec.ForMessage(10, global::Pomona.Protos.ContractProto.Parser);
-    private readonly pbc::RepeatedField<global::Pomona.Protos.ContractProto> itemsList_ = new pbc::RepeatedField<global::Pomona.Protos.ContractProto>();
+    private static readonly pb::FieldCodec<global::Pomona.Protos.Contract.ContractProto> _repeated_itemsList_codec
+        = pb::FieldCodec.ForMessage(10, global::Pomona.Protos.Contract.ContractProto.Parser);
+    private readonly pbc::RepeatedField<global::Pomona.Protos.Contract.ContractProto> itemsList_ = new pbc::RepeatedField<global::Pomona.Protos.Contract.ContractProto>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<global::Pomona.Protos.ContractProto> ItemsList {
+    public pbc::RepeatedField<global::Pomona.Protos.Contract.ContractProto> ItemsList {
       get { return itemsList_; }
     }
 
@@ -1171,7 +1171,7 @@ namespace Pomona.Protos {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Pomona.Protos.ContractReflection.Descriptor.MessageTypes[3]; }
+      get { return global::Pomona.Protos.Contract.ContractReflection.Descriptor.MessageTypes[3]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

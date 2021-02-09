@@ -9,3 +9,4 @@ F:\Proyectos\Joyeria\repo\Pomona\5. Shared\Pomona.Utilities\obj\Debug\net5.0\Pom
 F:\Proyectos\Joyeria\repo\Pomona\5. Shared\Pomona.Utilities\obj\Debug\net5.0\Pomona.Utilities.dll
 F:\Proyectos\Joyeria\repo\Pomona\5. Shared\Pomona.Utilities\obj\Debug\net5.0\ref\Pomona.Utilities.dll
 F:\Proyectos\Joyeria\repo\Pomona\5. Shared\Pomona.Utilities\obj\Debug\net5.0\Pomona.Utilities.pdb
+F:\Proyectos\Joyeria\repo\Pomona\5. Shared\Pomona.Utilities\obj\Debug\net5.0\Pomona.Utilities.csprojAssemblyReference.cache

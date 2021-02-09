@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "Fo/cAfGQY50Wo0XBaPTKbFYDkZzvaGU2sAGeX/ipi4JrwYHQy+Fz4uHyAEtbDL9bs4uOooqw8Awf4vTNhW0Hkw==",
+  "dgSpecHash": "oqY8CCo+VGfAmGGprQkQpTLV8aESlKr1DaA+z2HOXcxvs8zesRUFxvZhFZK7H+DFmicRATq3nOhfZD0r2/K1Aw==",
   "success": true,
   "projectFilePath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Client\\Pomona.Pwa.Client.csproj",
   "expectedPackageFiles": [
@@ -47,7 +47,7 @@
     "C:\\Users\\WAlvarezV\\.nuget\\packages\\system.reflection.emit\\4.7.0\\system.reflection.emit.4.7.0.nupkg.sha512",
     "C:\\Users\\WAlvarezV\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\4.5.2\\system.runtime.compilerservices.unsafe.4.5.2.nupkg.sha512",
     "C:\\Users\\WAlvarezV\\.nuget\\packages\\tewr.blazor.filereader\\2.1.0.20274\\tewr.blazor.filereader.2.1.0.20274.nupkg.sha512",
-    "C:\\Users\\WAlvarezV\\.nuget\\packages\\microsoft.netcore.app.runtime.browser-wasm\\5.0.1\\microsoft.netcore.app.runtime.browser-wasm.5.0.1.nupkg.sha512"
+    "C:\\Users\\WAlvarezV\\.nuget\\packages\\microsoft.netcore.app.runtime.browser-wasm\\5.0.2\\microsoft.netcore.app.runtime.browser-wasm.5.0.2.nupkg.sha512"
   ],
   "logs": []
 }

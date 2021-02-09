@@ -1,0 +1,29 @@
+syntax = "proto3";
+option csharp_namespace = "Pomona.Protos.Common";
+package Pomona;
+
+message Response { 
+    string Message = 1;
+}
+
+message IdProto { 
+	int32 Id = 1;
+}
+
+message TypeProto { 
+	string Id = 1;
+	string Name = 2;
+}
+
+message Pagination{ 
+    int32 Page = 1;
+    int32 Records = 2;
+    Filter Filter = 3;
+}
+
+message Filter { 
+    string Key = 1;
+    string State = 2;
+    string Type = 3;
+    string Other = 4;
+}

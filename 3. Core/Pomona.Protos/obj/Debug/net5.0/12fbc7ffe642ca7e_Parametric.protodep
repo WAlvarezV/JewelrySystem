@@ -1,3 +1,4 @@
 obj\Debug\net5.0/Parametric.cs \
-obj\Debug\net5.0/ParametricGrpc.cs: C:/Users/WAlvarezV/.nuget/packages/grpc.tools/2.33.1/build/native/include/google/protobuf/empty.proto\
+obj\Debug\net5.0/ParametricGrpc.cs: Protos/Common.proto\
+ C:/Users/WAlvarezV/.nuget/packages/grpc.tools/2.33.1/build/native/include/google/protobuf/empty.proto\
  Protos/Parametric.proto

@@ -22,15 +22,18 @@ namespace Pomona.Pwa.Server.Data
             base.OnModelCreating(modelBuilder);
         }
 
-        #region DbSet
+        #region DbSet        
+        public virtual DbSet<Brand> Brands { get; set; }
         public virtual DbSet<Contract> Contracts { get; set; }
         public virtual DbSet<DailyRecord> DailyRecords { get; set; }
         public virtual DbSet<IdentificationType> IdentificationTypes { get; set; }
-        public virtual DbSet<Inventory> Inventories { get; set; }
         public virtual DbSet<Invoice> Invoices { get; set; }
+        public virtual DbSet<Item> Items { get; set; }
         public virtual DbSet<ItemType> ItemTypes { get; set; }
+        public virtual DbSet<Jewel> Jewelry { get; set; }
         public virtual DbSet<Payment> Payments { get; set; }
         public virtual DbSet<Person> Persons { get; set; }
+        public virtual DbSet<Watch> Watches { get; set; }
         #endregion
     }
 }

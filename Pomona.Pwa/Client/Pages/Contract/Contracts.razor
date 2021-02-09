@@ -11,6 +11,8 @@
 
     @if (Contracts.Any())
     {
+        <GenericFilter Pagination="Pagination" KeyText="Número" StateText="Estado" Search="FilteredSearch" Clear="ClearFilter" />
+        @*<GenericFilter Pagination="PaginationProto" States="Parametric.DebtStates" KeyText="Número" StateText="Estado" Search="FilteredSearch" Clear="ClearFilter" />*@
         <div class="table-responsive">
             <table class="table table-sm table-bordered table-striped">
                 <thead>
@@ -56,7 +58,9 @@
                     }
                 </tbody>
             </table>
+
         </div>
+        <GenericPagination CurrentPage="@Pagination.Page" TotalAmountPages="Pages" Filter="Pagination.Filter" SelectedPage="SelectedPage" />
     }
     else
     {

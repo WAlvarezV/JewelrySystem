@@ -5,11 +5,17 @@ namespace Pomona.Infrastructure.Implementation
 {
     internal interface IUnitOfWork
     {
-        Repository<DailyRecord> DailyRecords { get; }
+        Repository<Brand> Brands { get; }
         Repository<Contract> Contracts { get; }
+        Repository<DailyRecord> DailyRecords { get; }
+        Repository<IdentificationType> IdentificationTypes { get; }
+        Repository<Invoice> Invoices { get; }
+        Repository<Item> Items { get; }
+        Repository<ItemType> ItemTypes { get; }
+        Repository<Jewel> Jewelry { get; }
         Repository<Payment> Payments { get; }
         Repository<Person> Persons { get; }
-        Repository<ItemType> ItemTypes { get; }
+        Repository<Watch> Watches { get; }
 
         int Save();
     }

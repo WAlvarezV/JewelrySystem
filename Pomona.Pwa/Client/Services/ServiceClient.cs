@@ -1,6 +1,7 @@
 ﻿using Grpc.Net.Client;
-using static Pomona.Protos.ContractSrv;
-using static Pomona.Protos.InventorySrv;
+using static Pomona.Protos.Contract.ContractSrv;
+using static Pomona.Protos.Inventory.InventorySrv;
+using static Pomona.Protos.Parametric.ParametricSrv;
 
 namespace Pomona.Pwa.Client.Services
 {
@@ -8,16 +9,18 @@ namespace Pomona.Pwa.Client.Services
     {
         private InventorySrvClient InventoryClient { get; set; }
         private ContractSrvClient ContractClient { get; set; }
+        private ParametricSrvClient ParametricClient { get; set; }
 
 
         public ServiceClient(GrpcChannel Channel)
         {
             InventoryClient = new InventorySrvClient(Channel);
             ContractClient = new ContractSrvClient(Channel);
+            ParametricClient = new ParametricSrvClient(Channel);
         }
-
 
         public InventorySrvClient Inventory() => InventoryClient;
         public ContractSrvClient Contract() => ContractClient;
+        public ParametricSrvClient Parametric() => ParametricClient;
     }
 }

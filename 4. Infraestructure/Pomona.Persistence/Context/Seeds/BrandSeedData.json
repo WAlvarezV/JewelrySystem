@@ -1,0 +1,46 @@
+[
+  {
+    "Id": 1,
+    "Name": "ANDRÉ"
+  },
+  {
+    "Id": 2,
+    "Name": "CASIO"
+  },
+  {
+    "Id": 3,
+    "Name": "D'MARIO"
+  },
+  {
+    "Id": 4,
+    "Name": "GIOVANNI VALENTINO"
+  },
+  {
+    "Id": 5,
+    "Name": "INVICTA"
+  },
+  {
+    "Id": 6,
+    "Name": "ORIENT"
+  },
+  {
+    "Id": 7,
+    "Name": "PHILLIPE AMIEL"
+  },
+  {
+    "Id": 8,
+    "Name": "Q&Q"
+  },
+  {
+    "Id": 9,
+    "Name": "SANDOZ"
+  },
+  {
+    "Id": 10,
+    "Name": "SWATCH"
+  },
+  {
+    "Id": 11,
+    "Name": "OTRAS MARCAS"
+  }
+]

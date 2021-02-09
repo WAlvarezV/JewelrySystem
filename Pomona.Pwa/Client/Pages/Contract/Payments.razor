@@ -1,6 +1,11 @@
-﻿<h4>Abonos</h4>
-<EditForm Model="@NewPaymenValue" OnValidSubmit="RegisterPayment">
-    <div class="table-responsive">
+﻿
+
+<EditForm Model="@NewPayment" OnSubmit="RegisterPayment">
+    <br />
+    <div class="card-header">
+        <h4>Abonos</h4>
+    </div>
+    <div class="card-body">
         <table class="table table-sm table-bordered table-striped">
             <thead>
                 <tr>
@@ -12,35 +17,33 @@
                 @foreach (var item in PaymentsList)
                 {
                     <tr>
-                        <td>@item.Date.ToDateTime().ToString("dd-MMMM-yyyy")</td>
+                        <td>@item.Date.ToDateTime().ToString("dd - MMMM - yyyy")</td>
                         <td>@item.Value.ToString("C0", CultureInfo)</td>
                     </tr>
                 }
+                <tr>
+                    <td><b>Total Abonos</b></td>
+                    <td><b>@PaymentsList.Sum(x => x.Value).ToString("C0", CultureInfo)</b></td>
+                </tr>
             </tbody>
         </table>
+        <div class="row">
+            <div class="col-md-4">
+                <label class="form-label" for="number">Nuevo Abono</label>
+                <input type="number" class="form-control" min="1" @bind-value="NewPayment.Value" />
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary btn-block">Abonar</button>
+            </div>
+        </div>
     </div>
     <br />
-    <div class="form-row">
-        <div class="form-group col-md-4">
-            <label for="number">Nuevo Abono</label>
-            <input type="number" class="form-control" min="1" @bind-value="NewPaymenValue" />
-        </div>
-        <div class="form-group col-md-2">
-            <label class="label-white" for="search">Btn</label>
-            <button type="submit" class="btn btn-primary btn-block">Abonar</button>
-        </div>
-    </div>
 </EditForm>
 @code {
     [Parameter] public IEnumerable<PaymentProto> PaymentsList { get; set; } = Enumerable.Empty<PaymentProto>();
-    [Parameter] public EventCallback<int> OnValidSubmit { get; set; }
-    [Parameter] public int NewPaymenValue { get; set; }
+    [Parameter] public EventCallback RegisterPayment { get; set; }
+    [Parameter] public PaymentProto NewPayment { get; set; }
     [Parameter] public CultureInfo CultureInfo { get; set; }
-
-    public async Task RegisterPayment()
-    {
-        await OnValidSubmit.InvokeAsync(NewPaymenValue);
-    }
 }
 
 

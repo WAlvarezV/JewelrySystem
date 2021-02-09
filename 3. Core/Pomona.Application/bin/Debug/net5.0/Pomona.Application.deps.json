@@ -12,7 +12,8 @@
           "NLog": "4.7.6",
           "Pomona.Domain": "1.0.0",
           "Pomona.Infrastructure": "1.0.0",
-          "Pomona.Protos": "1.0.0"
+          "Pomona.Protos": "1.0.0",
+          "Pomona.Utilities": "1.0.0"
         },
         "runtime": {
           "Pomona.Application.dll": {}
@@ -260,6 +261,7 @@
           "Microsoft.AspNetCore.Http.Abstractions": "2.2.0",
           "Microsoft.EntityFrameworkCore": "5.0.1",
           "Pomona.Domain": "1.0.0",
+          "Pomona.Protos": "1.0.0",
           "Pomona.Utilities": "1.0.0"
         },
         "runtime": {

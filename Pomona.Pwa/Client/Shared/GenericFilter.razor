@@ -1,0 +1,86 @@
+﻿<div class="card-body">
+    <div class="row">
+        @if (!string.IsNullOrWhiteSpace(KeyText))
+        {
+            <div class="form-group col-md-@KeyTextSize">
+                <label for="key">@KeyText</label>
+                <input type="text" class="form-control" @bind="Pagination.Filter.Key" />
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(StateText))
+        {
+            <div class="form-group col-md-3">
+                <label for="rolename">@StateText</label>
+                <select class="form-control mb-2 mr-sm-2" @bind="Pagination.Filter.State">
+                    <option value="0">-- Seleccione una opción --</option>
+                    @foreach (var item in States)
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                </select>
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(TypeText))
+        {
+            <div class="form-group col-md-4">
+                <label for="rolename">@TypeText</label>
+                <select class="form-control mb-2 mr-sm-2" @bind="Pagination.Filter.Type">
+                    <option value="0">-- Seleccione una opción --</option>
+                    @foreach (var item in Types)
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                </select>
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(OtherText))
+        {
+            <div class="form-group col-md-2">
+                <label for="key">@OtherText</label>
+                <input type="text" class="form-control" @bind="Pagination.Filter.Other" />
+            </div>
+        }
+
+        <div class="form-group col-md-1">
+            <label class="label-white" for="search">Btn</label>
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <button type="button" class="btn btn-outline-primary" @onclick="Search"><i class="bi bi-search"></i></button>
+                <button type="button" class="btn btn-outline-primary" @onclick="Clear"><i class="bi bi-x"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Pagination Pagination { get; set; }
+    [Parameter] public string KeyText { get; set; } = string.Empty;
+    [Parameter] public string StateText { get; set; } = string.Empty;
+    [Parameter] public string TypeText { get; set; } = string.Empty;
+    [Parameter] public string OtherText { get; set; } = string.Empty;
+    [Parameter] public IEnumerable<TypeProto> States { get; set; } = Enumerable.Empty<TypeProto>();
+    [Parameter] public IEnumerable<TypeProto> Types { get; set; } = Enumerable.Empty<TypeProto>();
+    [Parameter] public EventCallback Search { get; set; }
+    [Parameter] public EventCallback Clear { get; set; }
+    public int KeyTextSize { get; set; } = 2;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        var length = KeyText.Length;
+        if (length < 30)
+        {
+            KeyTextSize = 2;
+        }
+        else if (length > 30 && length < 40)
+        {
+            KeyTextSize = 3;
+        }
+        else
+        {
+            KeyTextSize = 4;
+        }
+    }
+}

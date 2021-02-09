@@ -11,9 +11,9 @@
     font-size: 1.1rem;
 }
 
-.oi[b-fxaw73vlgm] {
+.bi[b-fxaw73vlgm] {
     width: 2rem;
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     vertical-align: text-top;
     top: -2px;
 }
@@ -40,15 +40,15 @@
         line-height: 3rem;
     }
 
-.nav-item[b-fxaw73vlgm]  a.active {
-    background-color: rgba(255,255,255,0.25);
-    color: white;
-}
+        .nav-item[b-fxaw73vlgm]  a.active {
+            background-color: rgba(255,255,255,0.25);
+            color: white;
+        }
 
-.nav-item[b-fxaw73vlgm]  a:hover {
-    background-color: rgba(255,255,255,0.1);
-    color: white;
-}
+        .nav-item[b-fxaw73vlgm]  a:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+        }
 
 @media (min-width: 641px) {
     .navbar-toggler[b-fxaw73vlgm] {

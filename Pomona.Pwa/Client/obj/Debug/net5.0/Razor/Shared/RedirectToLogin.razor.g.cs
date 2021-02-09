@@ -109,13 +109,34 @@ using Pomona.Protos;
 #nullable disable
 #nullable restore
 #line 16 "F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Client\_Imports.razor"
-using Pomona.Pwa.Client.Custom;
+using Pomona.Protos.Common;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
 #line 17 "F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Client\_Imports.razor"
+using Pomona.Protos.Contract;
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 18 "F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Client\_Imports.razor"
+using Pomona.Protos.Inventory;
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 19 "F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Client\_Imports.razor"
+using Pomona.Pwa.Client.Custom;
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 20 "F:\Proyectos\Joyeria\repo\Pomona\Pomona.Pwa\Client\_Imports.razor"
 using System.Globalization;
 
 #line default

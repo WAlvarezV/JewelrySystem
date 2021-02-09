@@ -1,12 +1,14 @@
 syntax = "proto3";
-option csharp_namespace = "Pomona.Protos";
+option csharp_namespace = "Pomona.Protos.Contract";
 package Pomona;
 
 // import "google/protobuf/wrappers.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 import "Person.proto";
-import "Parametric.proto";
+import "Common.proto";
+
+
 service ContractSrv {
     rpc RegisterContract (ContractProto) returns (ContractResponse);
     rpc RegisterPayment (PaymentProto) returns (ContractResponse);

@@ -1,0 +1,101 @@
+﻿@inherits WatchBase
+
+<EditForm Model="@Watch" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="card-header">
+        <h3>Reloj</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <label class="form-label" for="provider">Proveedor</label>
+                <select disabled="@IsDisabled" class="form-control mb-2 mr-sm-2" @bind="Watch.ProviderId">
+                    <option value="0">-- Seleccione una opción --</option>
+                    @foreach (var item in Providers)
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                </select>
+                <ValidationMessage For="@(() => Watch.ProviderId)" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label" for="brand">Marca</label>
+                <select disabled="@IsDisabled" class="form-control mb-2 mr-sm-2" @bind="Watch.BrandId">
+                    <option value="0">-- Seleccione una opción --</option>
+                    @foreach (var item in Brands)
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                </select>
+                <ValidationMessage For="@(() => Watch.BrandId)" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label" for="brand">Género</label>
+                <select disabled="@IsDisabled" class="form-control mb-2 mr-sm-2" @bind="Watch.GenderType">
+                    <option value="0">-- Seleccione una opción --</option>
+                    @foreach (var item in Genders)
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                </select>
+                <ValidationMessage For="@(() => Watch.GenderType)" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <label class="form-label" for="refernce">Referencia</label>
+                <input type="number" @ref="ReferenceInput" disabled="@EditMode" class="form-control" @bind="Watch.Reference"></input>
+                <ValidationMessage For="@(() => Watch.Reference)" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label" for="sale">Valor Venta</label>
+                <InputNumber class="form-control" @bind-Value="Watch.SaleValue" />
+                <ValidationMessage For="@(() => Watch.SaleValue)" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label" for="sale">Valor Costo</label>
+                <InputNumber style="color:red" class="form-control" @bind-Value="Watch.CostValue" />
+                <ValidationMessage For="@(() => Watch.CostValue)" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label" for="case">Nro. Caja</label>
+                <InputText class="form-control" @bind-Value="Watch.CaseNumber"></InputText>
+                <ValidationMessage For="@(() => Watch.CaseNumber)" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <label class="form-label" for="number">Descripción del Artículo</label>
+                <InputTextArea class="form-control" @bind-Value="Watch.Description" />
+                <ValidationMessage For="@(() => Watch.Description)" />
+            </div>
+        </div>
+
+
+        <div class="card-footer bg-transparent">
+            <div class="d-flex justify-content-end">
+                <div class="col-md-2">
+                    <a class="btn btn-outline-secondary btn-block" href="/watches">Atrás</a>
+                </div>
+                @if (!EditMode)
+                {
+                    <div class="col-md-2">
+                        <button class="btn btn-outline-primary btn-block" @onclick="ClearForm">Limpiar</button>
+                    </div>
+                }
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary btn-block">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+

@@ -1,7 +1,7 @@
 [
   {
     "Id": 1,
-    "Name": "Cedula de Ciudadanía"
+    "Name": "Cedula de CiudadanÃ­a"
   },
   {
     "Id": 2,
@@ -9,6 +9,6 @@
   },
   {
     "Id": 3,
-    "Name": "Cedula de Extranjería"
+    "Name": "Cedula de ExtranjerÃ­a"
   }
 ]

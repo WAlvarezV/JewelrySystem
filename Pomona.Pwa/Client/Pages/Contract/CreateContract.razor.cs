@@ -1,5 +1,6 @@
-﻿using Pomona.Models.Models;
-using Pomona.Protos;
+﻿using Microsoft.AspNetCore.Components;
+using Pomona.Models.Models;
+using Pomona.Protos.Contract;
 using Pomona.Pwa.Client.Custom;
 using System;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ namespace Pomona.Pwa.Client.Pages.Contract
     public partial class CreateContractBase : CustomComponentBase
     {
         public ContractModel Contract { get; set; } = new ContractModel();
+        public ElementReference ReferenceInput { get; set; }
 
         protected async Task Create()
         {

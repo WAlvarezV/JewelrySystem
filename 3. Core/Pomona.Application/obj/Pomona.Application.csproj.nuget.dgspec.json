@@ -40,6 +40,9 @@
               },
               "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Infrastructure\\Pomona.Infrastructure.csproj": {
                 "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Infrastructure\\Pomona.Infrastructure.csproj"
+              },
+              "F:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj": {
+                "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj"
               }
             }
           }
@@ -78,7 +81,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.101\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.102\\RuntimeIdentifierGraph.json"
         }
       }
     },
@@ -142,7 +145,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.101\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.102\\RuntimeIdentifierGraph.json"
         }
       }
     },
@@ -216,7 +219,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.101\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.102\\RuntimeIdentifierGraph.json"
         }
       }
     },
@@ -281,7 +284,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.101\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.102\\RuntimeIdentifierGraph.json"
         }
       }
     },
@@ -315,6 +318,9 @@
             "projectReferences": {
               "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj": {
                 "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj"
+              },
+              "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj": {
+                "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj"
               },
               "F:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj": {
                 "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj"
@@ -356,7 +362,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.101\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.102\\RuntimeIdentifierGraph.json"
         }
       }
     },
@@ -414,7 +420,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.101\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.102\\RuntimeIdentifierGraph.json"
         }
       }
     }

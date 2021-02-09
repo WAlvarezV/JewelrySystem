@@ -1,32 +1,72 @@
 syntax = "proto3";
-option csharp_namespace = "Pomona.Protos";
+option csharp_namespace = "Pomona.Protos.Inventory";
 package Pomona;
 
-// import "google/protobuf/wrappers.proto";
-// import "google/protobuf/timestamp.proto";
+import "Common.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
 
 service InventorySrv {
     rpc RegisterItem (ItemProto) returns (ItemResponse);
+    rpc GetWatches (Pagination) returns (WatchesResponse);
     
 }
 
-message ItemProto{ 
-    int32 AssignedItems = 1;
-	int32 QualifiedItems = 2;
-	int32 ItemsQualifying = 3;
-	int32 PendingItems = 4;
-	int32 DebtItems = 5;
-    int32 DebtState = 6;
-	string ClaimedValue = 7;
-	string AcceptedValue = 8;
-	string AuditValue = 9;
-    repeated int32 QulificationIds = 10;
-    bool IsQualified = 11;
+message ItemRequest {
+	ItemProto ItemProto = 1;
 }
 
-message ItemResponse { 
+message ItemResponse {
+	ItemProto ItemProto = 1;
+}
+
+message ItemProto {
+	int32 Id = 1;
+	int32 Reference = 2;
+	int32 CostValue = 3;
+	google.protobuf.Timestamp DateOfEntry = 4;
+	google.protobuf.Timestamp DateOfSale = 5;
+	int32 SaleValue = 6;
+	string Description = 7;
+	bool Active = 8;
+	int32 ItemTypeId = 9;
+	google.protobuf.Int32Value ProviderId = 10;
+
+	string GenderType = 11;
+	string CaseNumber = 12;
+	string BrandId = 13;
+
+	double Weight = 14;
+	int32 GramValue = 15;
+	int32 Length = 16;
+}
+
+message ItemsResponse { 
     repeated string ItemsList = 1;
     int32 Pages = 2;
     string UserId = 3;
     int32 QualificationTypeId = 4;
+}
+
+message JewelProto {
+	int32 Id = 1;
+	int32 ItemId = 2;
+	double Weight = 3;
+	int32 GramValue = 4;
+	google.protobuf.Int32Value Length = 5;
+}
+
+message WatchProto {
+	int32 Id = 1;
+	ItemProto Item = 2;
+	string CaseNumber = 3;
+	string Gender = 4;
+	TypeProto Brand = 5;
+}
+
+message WatchesResponse { 
+    repeated WatchProto Watches = 1;
+    int32 Pages = 2;
+	Response Response = 3;
 }

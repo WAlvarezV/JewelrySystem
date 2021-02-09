@@ -7,7 +7,7 @@
 
 using grpc = global::Grpc.Core;
 
-namespace Pomona.Protos {
+namespace Pomona.Protos.Parametric {
   public static partial class ParametricSrv
   {
     static readonly string __ServiceName = "Pomona.ParametricSrv";
@@ -43,92 +43,62 @@ namespace Pomona.Protos {
     }
 
     static readonly grpc::Marshaller<global::Google.Protobuf.WellKnownTypes.Empty> __Marshaller_google_protobuf_Empty = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Google.Protobuf.WellKnownTypes.Empty.Parser));
-    static readonly grpc::Marshaller<global::Pomona.Protos.TypesResponse> __Marshaller_Pomona_TypesResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Pomona.Protos.TypesResponse.Parser));
-    static readonly grpc::Marshaller<global::Pomona.Protos.ParametricResponse> __Marshaller_Pomona_ParametricResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Pomona.Protos.ParametricResponse.Parser));
-    static readonly grpc::Marshaller<global::Pomona.Protos.DebtTypesResponse> __Marshaller_Pomona_DebtTypesResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Pomona.Protos.DebtTypesResponse.Parser));
-    static readonly grpc::Marshaller<global::Pomona.Protos.ControlsResponse> __Marshaller_Pomona_ControlsResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Pomona.Protos.ControlsResponse.Parser));
-    static readonly grpc::Marshaller<global::Pomona.Protos.HeaderFormatRequest> __Marshaller_Pomona_HeaderFormatRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Pomona.Protos.HeaderFormatRequest.Parser));
-    static readonly grpc::Marshaller<global::Pomona.Protos.HeaderFormatResponse> __Marshaller_Pomona_HeaderFormatResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Pomona.Protos.HeaderFormatResponse.Parser));
-    static readonly grpc::Marshaller<global::Pomona.Protos.AuthorizationTypesResponse> __Marshaller_Pomona_AuthorizationTypesResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Pomona.Protos.AuthorizationTypesResponse.Parser));
+    static readonly grpc::Marshaller<global::Pomona.Protos.Parametric.TypesResponse> __Marshaller_Pomona_TypesResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Pomona.Protos.Parametric.TypesResponse.Parser));
 
-    static readonly grpc::Method<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.TypesResponse> __Method_GetDocumentTypes = new grpc::Method<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.TypesResponse>(
+    static readonly grpc::Method<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.Parametric.TypesResponse> __Method_GetBrands = new grpc::Method<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.Parametric.TypesResponse>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "GetBrands",
+        __Marshaller_google_protobuf_Empty,
+        __Marshaller_Pomona_TypesResponse);
+
+    static readonly grpc::Method<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.Parametric.TypesResponse> __Method_GetDocumentTypes = new grpc::Method<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.Parametric.TypesResponse>(
         grpc::MethodType.Unary,
         __ServiceName,
         "GetDocumentTypes",
         __Marshaller_google_protobuf_Empty,
         __Marshaller_Pomona_TypesResponse);
 
-    static readonly grpc::Method<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.ParametricResponse> __Method_GetParametricData = new grpc::Method<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.ParametricResponse>(
+    static readonly grpc::Method<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.Parametric.TypesResponse> __Method_GetGenders = new grpc::Method<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.Parametric.TypesResponse>(
         grpc::MethodType.Unary,
         __ServiceName,
-        "GetParametricData",
+        "GetGenders",
         __Marshaller_google_protobuf_Empty,
-        __Marshaller_Pomona_ParametricResponse);
+        __Marshaller_Pomona_TypesResponse);
 
-    static readonly grpc::Method<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.DebtTypesResponse> __Method_GetDebtTypes = new grpc::Method<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.DebtTypesResponse>(
+    static readonly grpc::Method<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.Parametric.TypesResponse> __Method_GetProviders = new grpc::Method<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.Parametric.TypesResponse>(
         grpc::MethodType.Unary,
         __ServiceName,
-        "GetDebtTypes",
+        "GetProviders",
         __Marshaller_google_protobuf_Empty,
-        __Marshaller_Pomona_DebtTypesResponse);
-
-    static readonly grpc::Method<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.ControlsResponse> __Method_GetControls = new grpc::Method<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.ControlsResponse>(
-        grpc::MethodType.Unary,
-        __ServiceName,
-        "GetControls",
-        __Marshaller_google_protobuf_Empty,
-        __Marshaller_Pomona_ControlsResponse);
-
-    static readonly grpc::Method<global::Pomona.Protos.HeaderFormatRequest, global::Pomona.Protos.HeaderFormatResponse> __Method_GetHeaderFormat = new grpc::Method<global::Pomona.Protos.HeaderFormatRequest, global::Pomona.Protos.HeaderFormatResponse>(
-        grpc::MethodType.Unary,
-        __ServiceName,
-        "GetHeaderFormat",
-        __Marshaller_Pomona_HeaderFormatRequest,
-        __Marshaller_Pomona_HeaderFormatResponse);
-
-    static readonly grpc::Method<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.AuthorizationTypesResponse> __Method_GetAuthorizationTypes = new grpc::Method<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.AuthorizationTypesResponse>(
-        grpc::MethodType.Unary,
-        __ServiceName,
-        "GetAuthorizationTypes",
-        __Marshaller_google_protobuf_Empty,
-        __Marshaller_Pomona_AuthorizationTypesResponse);
+        __Marshaller_Pomona_TypesResponse);
 
     /// <summary>Service descriptor</summary>
     public static global::Google.Protobuf.Reflection.ServiceDescriptor Descriptor
     {
-      get { return global::Pomona.Protos.ParametricReflection.Descriptor.Services[0]; }
+      get { return global::Pomona.Protos.Parametric.ParametricReflection.Descriptor.Services[0]; }
     }
 
     /// <summary>Base class for server-side implementations of ParametricSrv</summary>
     [grpc::BindServiceMethod(typeof(ParametricSrv), "BindService")]
     public abstract partial class ParametricSrvBase
     {
-      public virtual global::System.Threading.Tasks.Task<global::Pomona.Protos.TypesResponse> GetDocumentTypes(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::ServerCallContext context)
+      public virtual global::System.Threading.Tasks.Task<global::Pomona.Protos.Parametric.TypesResponse> GetBrands(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::ServerCallContext context)
       {
         throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
       }
 
-      public virtual global::System.Threading.Tasks.Task<global::Pomona.Protos.ParametricResponse> GetParametricData(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::ServerCallContext context)
+      public virtual global::System.Threading.Tasks.Task<global::Pomona.Protos.Parametric.TypesResponse> GetDocumentTypes(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::ServerCallContext context)
       {
         throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
       }
 
-      public virtual global::System.Threading.Tasks.Task<global::Pomona.Protos.DebtTypesResponse> GetDebtTypes(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::ServerCallContext context)
+      public virtual global::System.Threading.Tasks.Task<global::Pomona.Protos.Parametric.TypesResponse> GetGenders(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::ServerCallContext context)
       {
         throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
       }
 
-      public virtual global::System.Threading.Tasks.Task<global::Pomona.Protos.ControlsResponse> GetControls(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::ServerCallContext context)
-      {
-        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
-      }
-
-      public virtual global::System.Threading.Tasks.Task<global::Pomona.Protos.HeaderFormatResponse> GetHeaderFormat(global::Pomona.Protos.HeaderFormatRequest request, grpc::ServerCallContext context)
-      {
-        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
-      }
-
-      public virtual global::System.Threading.Tasks.Task<global::Pomona.Protos.AuthorizationTypesResponse> GetAuthorizationTypes(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::ServerCallContext context)
+      public virtual global::System.Threading.Tasks.Task<global::Pomona.Protos.Parametric.TypesResponse> GetProviders(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::ServerCallContext context)
       {
         throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
       }
@@ -158,101 +128,69 @@ namespace Pomona.Protos {
       {
       }
 
-      public virtual global::Pomona.Protos.TypesResponse GetDocumentTypes(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      public virtual global::Pomona.Protos.Parametric.TypesResponse GetBrands(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return GetBrands(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual global::Pomona.Protos.Parametric.TypesResponse GetBrands(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_GetBrands, null, options, request);
+      }
+      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.Parametric.TypesResponse> GetBrandsAsync(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return GetBrandsAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.Parametric.TypesResponse> GetBrandsAsync(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_GetBrands, null, options, request);
+      }
+      public virtual global::Pomona.Protos.Parametric.TypesResponse GetDocumentTypes(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
       {
         return GetDocumentTypes(request, new grpc::CallOptions(headers, deadline, cancellationToken));
       }
-      public virtual global::Pomona.Protos.TypesResponse GetDocumentTypes(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::CallOptions options)
+      public virtual global::Pomona.Protos.Parametric.TypesResponse GetDocumentTypes(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::CallOptions options)
       {
         return CallInvoker.BlockingUnaryCall(__Method_GetDocumentTypes, null, options, request);
       }
-      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.TypesResponse> GetDocumentTypesAsync(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.Parametric.TypesResponse> GetDocumentTypesAsync(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
       {
         return GetDocumentTypesAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
       }
-      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.TypesResponse> GetDocumentTypesAsync(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::CallOptions options)
+      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.Parametric.TypesResponse> GetDocumentTypesAsync(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::CallOptions options)
       {
         return CallInvoker.AsyncUnaryCall(__Method_GetDocumentTypes, null, options, request);
       }
-      public virtual global::Pomona.Protos.ParametricResponse GetParametricData(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      public virtual global::Pomona.Protos.Parametric.TypesResponse GetGenders(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
       {
-        return GetParametricData(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+        return GetGenders(request, new grpc::CallOptions(headers, deadline, cancellationToken));
       }
-      public virtual global::Pomona.Protos.ParametricResponse GetParametricData(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::CallOptions options)
+      public virtual global::Pomona.Protos.Parametric.TypesResponse GetGenders(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::CallOptions options)
       {
-        return CallInvoker.BlockingUnaryCall(__Method_GetParametricData, null, options, request);
+        return CallInvoker.BlockingUnaryCall(__Method_GetGenders, null, options, request);
       }
-      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.ParametricResponse> GetParametricDataAsync(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.Parametric.TypesResponse> GetGendersAsync(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
       {
-        return GetParametricDataAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+        return GetGendersAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
       }
-      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.ParametricResponse> GetParametricDataAsync(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::CallOptions options)
+      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.Parametric.TypesResponse> GetGendersAsync(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::CallOptions options)
       {
-        return CallInvoker.AsyncUnaryCall(__Method_GetParametricData, null, options, request);
+        return CallInvoker.AsyncUnaryCall(__Method_GetGenders, null, options, request);
       }
-      public virtual global::Pomona.Protos.DebtTypesResponse GetDebtTypes(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      public virtual global::Pomona.Protos.Parametric.TypesResponse GetProviders(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
       {
-        return GetDebtTypes(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+        return GetProviders(request, new grpc::CallOptions(headers, deadline, cancellationToken));
       }
-      public virtual global::Pomona.Protos.DebtTypesResponse GetDebtTypes(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::CallOptions options)
+      public virtual global::Pomona.Protos.Parametric.TypesResponse GetProviders(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::CallOptions options)
       {
-        return CallInvoker.BlockingUnaryCall(__Method_GetDebtTypes, null, options, request);
+        return CallInvoker.BlockingUnaryCall(__Method_GetProviders, null, options, request);
       }
-      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.DebtTypesResponse> GetDebtTypesAsync(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.Parametric.TypesResponse> GetProvidersAsync(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
       {
-        return GetDebtTypesAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+        return GetProvidersAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
       }
-      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.DebtTypesResponse> GetDebtTypesAsync(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::CallOptions options)
+      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.Parametric.TypesResponse> GetProvidersAsync(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::CallOptions options)
       {
-        return CallInvoker.AsyncUnaryCall(__Method_GetDebtTypes, null, options, request);
-      }
-      public virtual global::Pomona.Protos.ControlsResponse GetControls(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-      {
-        return GetControls(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-      }
-      public virtual global::Pomona.Protos.ControlsResponse GetControls(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::CallOptions options)
-      {
-        return CallInvoker.BlockingUnaryCall(__Method_GetControls, null, options, request);
-      }
-      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.ControlsResponse> GetControlsAsync(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-      {
-        return GetControlsAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-      }
-      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.ControlsResponse> GetControlsAsync(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::CallOptions options)
-      {
-        return CallInvoker.AsyncUnaryCall(__Method_GetControls, null, options, request);
-      }
-      public virtual global::Pomona.Protos.HeaderFormatResponse GetHeaderFormat(global::Pomona.Protos.HeaderFormatRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-      {
-        return GetHeaderFormat(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-      }
-      public virtual global::Pomona.Protos.HeaderFormatResponse GetHeaderFormat(global::Pomona.Protos.HeaderFormatRequest request, grpc::CallOptions options)
-      {
-        return CallInvoker.BlockingUnaryCall(__Method_GetHeaderFormat, null, options, request);
-      }
-      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.HeaderFormatResponse> GetHeaderFormatAsync(global::Pomona.Protos.HeaderFormatRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-      {
-        return GetHeaderFormatAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-      }
-      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.HeaderFormatResponse> GetHeaderFormatAsync(global::Pomona.Protos.HeaderFormatRequest request, grpc::CallOptions options)
-      {
-        return CallInvoker.AsyncUnaryCall(__Method_GetHeaderFormat, null, options, request);
-      }
-      public virtual global::Pomona.Protos.AuthorizationTypesResponse GetAuthorizationTypes(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-      {
-        return GetAuthorizationTypes(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-      }
-      public virtual global::Pomona.Protos.AuthorizationTypesResponse GetAuthorizationTypes(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::CallOptions options)
-      {
-        return CallInvoker.BlockingUnaryCall(__Method_GetAuthorizationTypes, null, options, request);
-      }
-      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.AuthorizationTypesResponse> GetAuthorizationTypesAsync(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-      {
-        return GetAuthorizationTypesAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-      }
-      public virtual grpc::AsyncUnaryCall<global::Pomona.Protos.AuthorizationTypesResponse> GetAuthorizationTypesAsync(global::Google.Protobuf.WellKnownTypes.Empty request, grpc::CallOptions options)
-      {
-        return CallInvoker.AsyncUnaryCall(__Method_GetAuthorizationTypes, null, options, request);
+        return CallInvoker.AsyncUnaryCall(__Method_GetProviders, null, options, request);
       }
       /// <summary>Creates a new instance of client from given <c>ClientBaseConfiguration</c>.</summary>
       protected override ParametricSrvClient NewInstance(ClientBaseConfiguration configuration)
@@ -266,12 +204,10 @@ namespace Pomona.Protos {
     public static grpc::ServerServiceDefinition BindService(ParametricSrvBase serviceImpl)
     {
       return grpc::ServerServiceDefinition.CreateBuilder()
+          .AddMethod(__Method_GetBrands, serviceImpl.GetBrands)
           .AddMethod(__Method_GetDocumentTypes, serviceImpl.GetDocumentTypes)
-          .AddMethod(__Method_GetParametricData, serviceImpl.GetParametricData)
-          .AddMethod(__Method_GetDebtTypes, serviceImpl.GetDebtTypes)
-          .AddMethod(__Method_GetControls, serviceImpl.GetControls)
-          .AddMethod(__Method_GetHeaderFormat, serviceImpl.GetHeaderFormat)
-          .AddMethod(__Method_GetAuthorizationTypes, serviceImpl.GetAuthorizationTypes).Build();
+          .AddMethod(__Method_GetGenders, serviceImpl.GetGenders)
+          .AddMethod(__Method_GetProviders, serviceImpl.GetProviders).Build();
     }
 
     /// <summary>Register service method with a service binder with or without implementation. Useful when customizing the  service binding logic.
@@ -280,12 +216,10 @@ namespace Pomona.Protos {
     /// <param name="serviceImpl">An object implementing the server-side handling logic.</param>
     public static void BindService(grpc::ServiceBinderBase serviceBinder, ParametricSrvBase serviceImpl)
     {
-      serviceBinder.AddMethod(__Method_GetDocumentTypes, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.TypesResponse>(serviceImpl.GetDocumentTypes));
-      serviceBinder.AddMethod(__Method_GetParametricData, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.ParametricResponse>(serviceImpl.GetParametricData));
-      serviceBinder.AddMethod(__Method_GetDebtTypes, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.DebtTypesResponse>(serviceImpl.GetDebtTypes));
-      serviceBinder.AddMethod(__Method_GetControls, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.ControlsResponse>(serviceImpl.GetControls));
-      serviceBinder.AddMethod(__Method_GetHeaderFormat, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Pomona.Protos.HeaderFormatRequest, global::Pomona.Protos.HeaderFormatResponse>(serviceImpl.GetHeaderFormat));
-      serviceBinder.AddMethod(__Method_GetAuthorizationTypes, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.AuthorizationTypesResponse>(serviceImpl.GetAuthorizationTypes));
+      serviceBinder.AddMethod(__Method_GetBrands, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.Parametric.TypesResponse>(serviceImpl.GetBrands));
+      serviceBinder.AddMethod(__Method_GetDocumentTypes, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.Parametric.TypesResponse>(serviceImpl.GetDocumentTypes));
+      serviceBinder.AddMethod(__Method_GetGenders, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.Parametric.TypesResponse>(serviceImpl.GetGenders));
+      serviceBinder.AddMethod(__Method_GetProviders, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Google.Protobuf.WellKnownTypes.Empty, global::Pomona.Protos.Parametric.TypesResponse>(serviceImpl.GetProviders));
     }
 
   }

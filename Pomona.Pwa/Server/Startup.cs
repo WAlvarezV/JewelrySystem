@@ -61,6 +61,7 @@ namespace Pomona.Pwa.Server
             services.TryAddTransient<IUnitOfWork, UnitOfWork>();
             services.TryAddTransient<IInventoryService, InventoryService>();
             services.TryAddTransient<IContractService, ContractService>();
+            services.TryAddTransient<IParametricService, ParametricService>();
             #endregion
 
 
@@ -98,6 +99,7 @@ namespace Pomona.Pwa.Server
             {
                 endpoints.MapGrpcService<InventoryGrpcService>().RequireAuthorization().EnableGrpcWeb();
                 endpoints.MapGrpcService<ContractGrpcService>().RequireAuthorization().EnableGrpcWeb();
+                endpoints.MapGrpcService<ParametricGrpcService>().RequireAuthorization().EnableGrpcWeb();
 
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();

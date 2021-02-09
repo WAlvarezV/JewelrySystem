@@ -1,0 +1,10 @@
+﻿@page "/new/watch"
+@inherits CreateWatchBase
+
+<div class="card">
+    <Watch ItemTypeId="ItemTypeId" />
+</div>
+
+@code {
+    [Parameter] public int ItemTypeId { get; set; }
+}

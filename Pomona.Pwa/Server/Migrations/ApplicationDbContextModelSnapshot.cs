@@ -257,6 +257,79 @@ namespace Pomona.Pwa.Server.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("Pomona.Domain.Entity.Brand", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Brands");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "ANDRÉ"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "CASIO"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "D'MARIO"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "GIOVANNI VALENTINO"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "INVICTA"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "ORIENT"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "PHILLIPE AMIEL"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "Q&Q"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Name = "SANDOZ"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Name = "SWATCH"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Name = "OTRAS MARCAS"
+                        });
+                });
+
             modelBuilder.Entity("Pomona.Domain.Entity.Contract", b =>
                 {
                     b.Property<int>("Id")
@@ -343,7 +416,7 @@ namespace Pomona.Pwa.Server.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "Cedula de Ciudadan�a"
+                            Name = "Cedula de Ciudadanía"
                         },
                         new
                         {
@@ -353,50 +426,8 @@ namespace Pomona.Pwa.Server.Migrations
                         new
                         {
                             Id = 3,
-                            Name = "Cedula de Extranjer�a"
+                            Name = "Cedula de Extranjería"
                         });
-                });
-
-            modelBuilder.Entity("Pomona.Domain.Entity.Inventory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .UseIdentityColumn();
-
-                    b.Property<bool>("Active")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("CostValue")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("DateOfEntry")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DateOfSale")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<string>("Item")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ItemTypeId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Reference")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SaleValue")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ItemTypeId");
-
-                    b.ToTable("Inventories");
                 });
 
             modelBuilder.Entity("Pomona.Domain.Entity.Invoice", b =>
@@ -418,6 +449,50 @@ namespace Pomona.Pwa.Server.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Invoices");
+                });
+
+            modelBuilder.Entity("Pomona.Domain.Entity.Item", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("CostValue")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateOfEntry")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateOfSale")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("ItemTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProviderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Reference")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SaleValue")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemTypeId");
+
+                    b.HasIndex("ProviderId");
+
+                    b.ToTable("Items");
                 });
 
             modelBuilder.Entity("Pomona.Domain.Entity.ItemType", b =>
@@ -472,6 +547,32 @@ namespace Pomona.Pwa.Server.Migrations
                             Id = 7,
                             Name = "Topo Perforada"
                         });
+                });
+
+            modelBuilder.Entity("Pomona.Domain.Entity.Jewel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<int>("GramValue")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Length")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Weight")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemId");
+
+                    b.ToTable("Jewelry");
                 });
 
             modelBuilder.Entity("Pomona.Domain.Entity.Payment", b =>
@@ -543,6 +644,34 @@ namespace Pomona.Pwa.Server.Migrations
                     b.HasIndex("IdentificationTypeId");
 
                     b.ToTable("Persons");
+                });
+
+            modelBuilder.Entity("Pomona.Domain.Entity.Watch", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<int>("BrandId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CaseNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("GenderType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BrandId");
+
+                    b.HasIndex("ItemId");
+
+                    b.ToTable("Watches");
                 });
 
             modelBuilder.Entity("Pomona.Pwa.Server.Models.ApplicationUser", b =>
@@ -672,7 +801,7 @@ namespace Pomona.Pwa.Server.Migrations
                     b.Navigation("Person");
                 });
 
-            modelBuilder.Entity("Pomona.Domain.Entity.Inventory", b =>
+            modelBuilder.Entity("Pomona.Domain.Entity.Item", b =>
                 {
                     b.HasOne("Pomona.Domain.Entity.ItemType", "ItemType")
                         .WithMany()
@@ -680,7 +809,24 @@ namespace Pomona.Pwa.Server.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Pomona.Domain.Entity.Person", "Provider")
+                        .WithMany()
+                        .HasForeignKey("ProviderId");
+
                     b.Navigation("ItemType");
+
+                    b.Navigation("Provider");
+                });
+
+            modelBuilder.Entity("Pomona.Domain.Entity.Jewel", b =>
+                {
+                    b.HasOne("Pomona.Domain.Entity.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
                 });
 
             modelBuilder.Entity("Pomona.Domain.Entity.Person", b =>
@@ -692,6 +838,25 @@ namespace Pomona.Pwa.Server.Migrations
                         .IsRequired();
 
                     b.Navigation("IdentificationType");
+                });
+
+            modelBuilder.Entity("Pomona.Domain.Entity.Watch", b =>
+                {
+                    b.HasOne("Pomona.Domain.Entity.Brand", "Brand")
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Pomona.Domain.Entity.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
+
+                    b.Navigation("Item");
                 });
 #pragma warning restore 612, 618
         }

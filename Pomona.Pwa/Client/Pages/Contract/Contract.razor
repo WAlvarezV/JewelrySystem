@@ -5,9 +5,9 @@
         <h3>Contrato Número: <b style="color:red">@Contract.Number</b></h3>
     </div>
     <div class="card-body">
-        <div class="form-row">
-            <div class="form-group col-md-3">
-                <label for="rolename">Tipo Identificación</label>
+        <div class="row">
+            <div class="col-md-3">
+                <label class="form-label" for="rolename">Tipo Identificación</label>
                 <select disabled="@IsDisabled" class="form-control mb-2 mr-sm-2" @bind="Contract.IdentificationTypeId">
                     <option value="0">-- Seleccione una opción --</option>
                     @foreach (var item in IdentificationTypes)
@@ -17,80 +17,80 @@
                 </select>
                 <ValidationMessage For="@(() => Contract.IdentificationTypeId)" />
             </div>
-            <div class="form-group col-md-2">
-                <label for="identification">Número Identificación</label>
+            <div class="col-md-2">
+                <label class="form-label" for="identification">Nro. Identificación</label>
                 <input disabled="@IsDisabled" type="text" class="form-control" id="identification"
                        @bind-value="Contract.IdentificationNumber" @onblur="OnBlur" />
                 <ValidationMessage For="@(() => Contract.IdentificationNumber)" />
             </div>
-            <div class="form-group col-md-5">
-                <label for="fullname">Nombre Completo</label>
+            <div class="col-md-5">
+                <label class="form-label" for="fullname">Nombre Completo</label>
                 <InputText disabled="@EditMode" class="form-control" @bind-Value="Contract.FullName">Nombre Completo</InputText>
                 <ValidationMessage For="@(() => Contract.FullName)" />
             </div>
-            <div class="form-group col-md-2">
-                <label for="cellphone">Celular</label>
+            <div class="col-md-2">
+                <label class="form-label" for="cellphone">Celular</label>
                 <InputText class="form-control" @bind-Value="Contract.CellPhone">Celular</InputText>
                 <ValidationMessage For="@(() => Contract.CellPhone)" />
             </div>
         </div>
 
-        <div class="form-row">
-            <div class="form-group col-md-4">
-                <label for="number">Fecha de Contrato</label>
+        <div class="row">
+            <div class="col-md-4">
+                <label class="form-label" for="number">Fecha de Contrato</label>
                 <InputDate disabled class="form-control" @bind-Value="Contract.Date" />
             </div>
-            <div class="form-group col-md-4">
-                <label for="number">Número de Contrato</label>
+            <div class="col-md-4">
+                <label class="form-label" for="number">Número de Contrato</label>
                 <InputNumber style="color:red" class="form-control" @bind-Value="Contract.Number" />
                 <ValidationMessage For="@(() => Contract.Number)" />
             </div>
-            <div class="form-group col-md-4">
-                <label for="number">Fecha de Entrega</label>
+            <div class="col-md-4">
+                <label class="form-label" for="number">Fecha de Entrega</label>
                 <InputDate class="form-control" @bind-Value="Contract.DeliveryDate" />
             </div>
         </div>
         @if (EditMode)
         {
-            <div class="form-row">
-                <div class="form-group col-md-4">
-                    <label for="number">Valor de Contrato</label>
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="form-label" for="number">Valor de Contrato</label>
                     <input disabled class="form-control" @bind="ContractValue" />
                 </div>
 
-                <div class="form-group col-md-4">
-                    <label for="number">Total de Abonos</label>
+                <div class="col-md-4">
+                    <label class="form-label" for="number">Total de Abonos</label>
                     <input disabled class="form-control" @bind="PaymentsValue" />
                 </div>
-                <div class="form-group col-md-4">
-                    <label for="number">Saldo</label>
+                <div class="col-md-4">
+                    <label class="form-label" for="number">Saldo</label>
                     <input disabled class="form-control" @bind="BalanceValue" />
                 </div>
             </div>
         }
         else
         {
-            <div class="form-row">
-                <div class="form-group col-md-4">
-                    <label for="number">Valor de Contrato</label>
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="form-label" for="number">Valor de Contrato</label>
                     <InputNumber class="form-control" @bind-Value="Contract.Value" />
                     <ValidationMessage For="@(() => Contract.Value)" />
                 </div>
 
 
-                <div class="form-group col-md-4">
-                    <label for="number">Abono</label>
+                <div class="col-md-4">
+                    <label class="form-label" for="number">Abono</label>
                     <input type="number" class="form-control" min="0" @bind-value="Contract.Payment" @onblur="OnPaymentBlur" />
                 </div>
-                <div class="form-group col-md-4">
-                    <label for="number">Saldo</label>
+                <div class="col-md-4">
+                    <label class="form-label" for="number">Saldo</label>
                     <InputNumber disabled class="form-control" @bind-Value="Contract.Balance" />
                 </div>
             </div>
         }
-        <div class="form-row">
-            <div class="form-group col-md-12">
-                <label for="number">Descripción del Contrato</label>
+        <div class="row">
+            <div class="col-md-12">
+                <label class="form-label" for="number">Descripción del Contrato</label>
                 <InputTextArea class="form-control" @bind-Value="Contract.Description" />
                 <ValidationMessage For="@(() => Contract.Description)" />
             </div>
@@ -100,23 +100,23 @@
         {
             @if (Payments.Any())
             {
-                <Payments PaymentsList="Payments" NewPaymenValue="NewPaymenValue" CultureInfo="CultureInfo" OnValidSubmit="RegisterNewPayment" />
+                <Payments PaymentsList="Payments" NewPayment="NewPayment" CultureInfo="CultureInfo" RegisterPayment="RegisterNewPayment" />
             }
         }
 
 
         <div class="card-footer bg-transparent">
             <div class="d-flex justify-content-end">
-                <div class="form-group col-md-2">
+                <div class="col-md-2">
                     <a class="btn btn-outline-secondary btn-block" href="/contratos">Atrás</a>
                 </div>
                 @if (!EditMode)
                 {
-                    <div class="form-group col-md-2">
+                    <div class="col-md-2">
                         <button class="btn btn-outline-primary btn-block" @onclick="ClearForm">Limpiar</button>
                     </div>
                 }
-                <div class="form-group col-md-2">
+                <div class="col-md-2">
                     <button type="submit" class="btn btn-primary btn-block">Guardar</button>
                 </div>
             </div>

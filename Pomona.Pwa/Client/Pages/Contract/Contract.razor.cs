@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Components.Web;
 using Pomona.Models.Models;
 using Pomona.Protos;
+using Pomona.Protos.Common;
+using Pomona.Protos.Contract;
 using Pomona.Pwa.Client.Custom;
 using System;
 using System.Collections.Generic;
@@ -24,7 +26,7 @@ namespace Pomona.Pwa.Client.Pages.Contract
         public string ContractValue { get; set; } = "$0";
         public string PaymentsValue { get; set; } = "$0";
         public string BalanceValue { get; set; } = "$0";
-        public int NewPaymenValue { get; set; }
+        public PaymentProto NewPayment { get; set; } = new PaymentProto();
 
         public ContractResponse Response { get; set; } = new ContractResponse();
 
@@ -69,14 +71,15 @@ namespace Pomona.Pwa.Client.Pages.Contract
             }
         }
 
-        protected async Task RegisterNewPayment(int value)
+        protected async Task RegisterNewPayment()
         {
             try
             {
                 await WaitMessage("Registrando Abono.");
-                var payment = new PaymentProto { EntityId = ContractId, Value = value };
-                var res = await Clients.Contract().RegisterPaymentAsync(payment);
+                NewPayment.EntityId = ContractId;
+                var res = await Clients.Contract().RegisterPaymentAsync(NewPayment);
                 await GetContract().ConfigureAwait(false);
+                NewPayment.Value = 0;
                 await SuccessMessage(res.Response);
                 StateHasChanged();
             }

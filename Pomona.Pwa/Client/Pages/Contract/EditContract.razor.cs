@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Pomona.Models.Models;
 using Pomona.Protos;
+using Pomona.Protos.Contract;
 using Pomona.Pwa.Client.Custom;
 using System;
 using System.Threading.Tasks;
