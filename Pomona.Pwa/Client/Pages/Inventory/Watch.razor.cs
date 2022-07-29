@@ -33,7 +33,8 @@ namespace Pomona.Pwa.Client.Pages.Inventory
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-            await ReferenceInput.FocusAsync();
+            if (firstRender)
+                await ReferenceInput.FocusAsync();
         }
 
         protected async Task GetContract()

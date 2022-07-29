@@ -1,5 +1,51 @@
-﻿<h3>Jewelry</h3>
+﻿@page "/jewelry/{ItemTypeId:int}"
+@inherits JewelryBase
 
-@code {
+<div class="card">
+    <div class="card-header">
+        <h3>@Tittle</h3>
+    </div>
+    <div class="form-group card-body">
+        <a class="btn btn-primary" href="new/jewel/@ItemTypeId">Nuevo Registro</a>
+    </div>
 
-}
+    @if (Jewels.Any())
+    {
+        <GenericFilter Pagination="Pagination" KeyText="Referencia" OtherText="Descripción" Search="FilteredSearch" Clear="ClearFilter" />
+        @*<GenericFilter Pagination="PaginationProto" States="Parametric.DebtStates" KeyText="Número" StateText="Estado" Search="FilteredSearch" Clear="ClearFilter" />*@
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Referencia</th>
+                        <th>Descripcion</th>
+                        <th>Peso gr</th>
+                        <th>Valor Venta</th>
+                        <th>Valor Costo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var jewel in Jewels)
+                    {
+                        <tr>
+                            <td>
+                                <a class="btn btn-link" href="/jewel/@jewel.Id">@jewel.Item.Reference</a>
+                            </td>
+                            <td>@jewel.Item.Description</td>
+                            <td>@jewel.Weight</td>
+                            <td>@jewel.Item.SaleValue.ToString("C0", CultureInfo)</td>
+                            <td style="color:red">@jewel.Item.CostValue.ToString("C0", CultureInfo)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        </div>
+        <GenericPagination CurrentPage="@Pagination.Page" TotalAmountPages="Pages" Filter="Pagination.Filter" SelectedPage="SelectedPage" />
+    }
+    else
+    {
+        <text>No hay registros para mostrar.</text>
+    }
+</div>
+

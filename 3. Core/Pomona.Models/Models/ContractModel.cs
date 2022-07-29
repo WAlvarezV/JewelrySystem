@@ -22,7 +22,7 @@ namespace Pomona.Models.Models
 
         public double? Weight { get; set; }
         [Required(ErrorMessage = Constant.Required)]
-        [RegularExpression(Constant.RegExUpperCase, ErrorMessage = Constant.UpperCaseMssg)]
+        //[RegularExpression(Constant.RegExUpperCase, ErrorMessage = Constant.UpperCaseMssg)]
         [StringLengthRange(Min = 15, Max = 1000, Required = true)]
         public string Description { get; set; }
         // Client Information

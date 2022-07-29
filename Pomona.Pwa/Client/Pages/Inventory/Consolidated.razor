@@ -1,0 +1,84 @@
+﻿@page "/consolidated"
+@inherits ConsolidatedBase
+
+<div class="card">
+    <div class="card-header">
+        <h3>Consolidado</h3>
+    </div>
+    <div class="form-group card-body">
+
+        @if (Consolidated.Jewerly.Any())
+        {
+            <h4>Joyería</h4>
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Joya</th>
+                            <th>Cantidad</th>
+                            <th>Peso Total</th>
+                            <th>Valor Venta</th>
+                            <th>Valor Costo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var jewel in Consolidated.Jewerly)
+                        {
+                            <tr>
+                                <td>@jewel.Type</td>
+                                <td>@jewel.Quantity</td>
+                                <td>@jewel.Weight</td>
+                                <td>@jewel.SaleValue.ToString("C0", CultureInfo)</td>
+                                <td style="color:red">@jewel.CostValue.ToString("C0", CultureInfo)</td>
+                            </tr>
+                        }
+                        <tr>
+                            <th>Total</th>
+                            <th>@Consolidated.Jewerly.Sum(x => x.Quantity)</th>
+                            <th>@Consolidated.Jewerly.Sum(x => x.Weight)</th>
+                            <th>@Consolidated.Jewerly.Sum(x => x.SaleValue).ToString("C0", CultureInfo)</th>
+                            <th style="color:green">@Consolidated.Jewerly.Sum(x => x.CostValue).ToString("C0", CultureInfo)</th>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        }
+        <br />
+        @if (Consolidated.Watches.Any())
+        {
+            <h4>Relojería</h4>
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Reloj</th>
+                            <th>Género</th>
+                            <th>Cantidad</th>
+                            <th>Valor Venta</th>
+                            <th>Valor Costo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var watch in Consolidated.Watches)
+                        {
+                            <tr>
+                                <td>@watch.Type</td>
+                                <td>@watch.Other</td>
+                                <td>@watch.Quantity</td>
+                                <td>@watch.SaleValue.ToString("C0", CultureInfo)</td>
+                                <td style="color:red">@watch.CostValue.ToString("C0", CultureInfo)</td>
+                            </tr>
+                        }
+                        <tr>
+                            <th colspan="2">Total</th>
+                            <th>@Consolidated.Watches.Sum(x => x.Quantity)</th>
+                            <th>@Consolidated.Watches.Sum(x => x.SaleValue).ToString("C0", CultureInfo)</th>
+                            <th style="color:green">@Consolidated.Watches.Sum(x => x.CostValue).ToString("C0", CultureInfo)</th>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

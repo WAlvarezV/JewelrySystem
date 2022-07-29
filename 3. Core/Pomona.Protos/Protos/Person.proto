@@ -1,5 +1,5 @@
 syntax = "proto3";
-option csharp_namespace = "Pomona.Protos";
+option csharp_namespace = "Pomona.Protos.Person";
 package Pomona;
 
 // import "google/protobuf/wrappers.proto";

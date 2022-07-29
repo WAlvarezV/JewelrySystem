@@ -14,9 +14,27 @@
                 </NavLink>
             </li>
             <li class="nav-item px-3">
-                <NavLink class="nav-link" href="counter">
+                <NavLink class="nav-link dropdown-toggle" @onclick="()=>exSubCash = !exSubCash">
                     <span class="bi bi-cash" aria-hidden="true"></span> Caja
                 </NavLink>
+                @if (exSubCash)
+                {
+                    <ul class="nav flex-column">
+                        <li class="nav-item px-3 py-0">
+                            <NavLink class="nav-link" href="daily">
+                                <span class="bi bi-calendar-plus" aria-hidden="true"></span> Diario
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3 py-0">
+                            <NavLink class="nav-link" href="daily">
+                                <span class="bi bi-calendar-week" aria-hidden="true"></span> Consolidado
+                            </NavLink>
+                        </li>
+
+
+
+                    </ul>
+                }
             </li>
             <!--#region Inventory Menu -->
 
@@ -28,28 +46,43 @@
                 {
                     <ul class="nav flex-column">
                         <li class="nav-item px-3 py-0">
-                            <NavLink class="nav-link" href="informacion-externa">
+                            <NavLink class="nav-link" href="jewelry/1">
                                 <span class="bi bi-gem" aria-hidden="true"></span> Anillos
                             </NavLink>
                         </li>
                         <li class="nav-item px-3 py-0">
-                            <NavLink class="nav-link" href="precalificacion">
+                            <NavLink class="nav-link" href="jewelry/2">
                                 <span class="bi bi-earbuds" aria-hidden="true"></span> Aretes
                             </NavLink>
                         </li>
                         <li class="nav-item px-3 py-0">
-                            <NavLink class="nav-link" href="duplicidad">
+                            <NavLink class="nav-link" href="jewelry/3">
                                 <span class="bi bi-link-45deg" aria-hidden="true"></span> Cadenas
                             </NavLink>
                         </li>
                         <li class="nav-item px-3 py-0">
-                            <NavLink class="nav-link" href="prescripcion">
+                            <NavLink class="nav-link" href="jewelry/4">
                                 <span class="bi bi-link-45deg" aria-hidden="true"></span> Pulseras
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3 py-0">
+                            <NavLink class="nav-link" href="jewelry/6">
+                                <span class="bi bi-flower3" aria-hidden="true"></span> Dijes
                             </NavLink>
                         </li>
                         <li class="nav-item px-3 py-0">
                             <NavLink class="nav-link" href="watches">
                                 <span class="bi bi-watch" aria-hidden="true"></span> Relojes
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3 py-0">
+                            <NavLink class="nav-link" href="consolidated">
+                                <span class="bi bi-graph-up" aria-hidden="true"></span> Consolidado
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3 py-0">
+                            <NavLink class="nav-link" href="discharge">
+                                <span class="bi bi-archive" aria-hidden="true"></span> Descargar
                             </NavLink>
                         </li>
                     </ul>
@@ -73,6 +106,7 @@
 
 @code {
     private bool exSubInventory;
+    private bool exSubCash;
     private bool collapseNavMenu = true;
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;

@@ -1,3 +1,0 @@
-obj\Debug\net5.0/Person.cs \
-obj\Debug\net5.0/PersonGrpc.cs: C:/Users/WAlvarezV/.nuget/packages/grpc.tools/2.33.1/build/native/include/google/protobuf/empty.proto\
- Protos/Person.proto

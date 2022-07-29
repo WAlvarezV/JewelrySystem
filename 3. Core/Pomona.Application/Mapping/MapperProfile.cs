@@ -4,6 +4,7 @@ using Pomona.Domain.Entity;
 using Pomona.Protos.Common;
 using Pomona.Protos.Contract;
 using Pomona.Protos.Inventory;
+using Pomona.Protos.Person;
 using System;
 
 namespace Pomona.Application.Mapping
@@ -47,26 +48,75 @@ namespace Pomona.Application.Mapping
             CreateMap<Brand, TypeProto>()
                 .ForMember(dest => dest.Id, o => o.MapFrom(src => src.Id.ToString()));
 
+            CreateMap<ItemType, TypeProto>()
+                .ForMember(dest => dest.Id, o => o.MapFrom(src => src.Id.ToString()));
+
             CreateMap<IdentificationType, TypeProto>()
                 .ForMember(dest => dest.Id, o => o.MapFrom(src => src.Id.ToString()));
 
             CreateMap<Person, TypeProto>()
                 .ForMember(dest => dest.Id, o => o.MapFrom(src => src.Id.ToString()))
                 .ForMember(dest => dest.Name, o => o.MapFrom(src => src.FullName));
+
+            CreateMap<Person, PersonProto>()
+                .ForMember(dest => dest.Id, o => o.MapFrom(src => src.Id.ToString()));
             #endregion
 
             #region Inventory
 
 
             CreateMap<Item, ItemProto>()
+                .ForMember(dest => dest.ItemType, o => o.MapFrom(src => src.ItemType))
+                .ForMember(dest => dest.Provider, o => o.MapFrom(src => src.Provider))
                 .ForMember(dest => dest.DateOfEntry, o => o.MapFrom(src => Timestamp.FromDateTime((src.DateOfEntry).ToUniversalTime())))
                 .ForMember(dest => dest.DateOfSale, o => o.MapFrom(src => src.DateOfSale != null ? Timestamp.FromDateTime(((DateTime)src.DateOfSale).ToUniversalTime()) : null))
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
+            CreateMap<Watch, ItemProto>()
+                .ForMember(dest => dest.Id, o => o.MapFrom(src => src.Item.Id))
+                .ForMember(dest => dest.Reference, o => o.MapFrom(src => src.Item.Reference))
+                .ForMember(dest => dest.CostValue, o => o.MapFrom(src => src.Item.CostValue))
+                .ForMember(dest => dest.DateOfEntry, o => o.MapFrom(src => Timestamp.FromDateTime((src.Item.DateOfEntry).ToUniversalTime())))
+                .ForMember(dest => dest.DateOfSale, o => o.MapFrom(src => src.Item.DateOfSale != null ? Timestamp.FromDateTime(((DateTime)src.Item.DateOfSale).ToUniversalTime()) : null))
+                .ForMember(dest => dest.SaleValue, o => o.MapFrom(src => src.Item.SaleValue))
+                .ForMember(dest => dest.Description, o => o.MapFrom(src => src.Item.Description))
+                .ForMember(dest => dest.Active, o => o.MapFrom(src => src.Item.Active))
+                .ForMember(dest => dest.ItemType, o => o.MapFrom(src => src.Item.ItemType))
+                .ForMember(dest => dest.Provider, o => o.MapFrom(src => src.Item.Provider))
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<Jewel, ItemProto>()
+                .ForMember(dest => dest.Id, o => o.MapFrom(src => src.Item.Id))
+                .ForMember(dest => dest.Reference, o => o.MapFrom(src => src.Item.Reference))
+                .ForMember(dest => dest.CostValue, o => o.MapFrom(src => src.Item.CostValue))
+                .ForMember(dest => dest.DateOfEntry, o => o.MapFrom(src => Timestamp.FromDateTime((src.Item.DateOfEntry).ToUniversalTime())))
+                .ForMember(dest => dest.DateOfSale, o => o.MapFrom(src => src.Item.DateOfSale != null ? Timestamp.FromDateTime(((DateTime)src.Item.DateOfSale).ToUniversalTime()) : null))
+                .ForMember(dest => dest.SaleValue, o => o.MapFrom(src => src.Item.SaleValue))
+                .ForMember(dest => dest.Description, o => o.MapFrom(src => src.Item.Description))
+                .ForMember(dest => dest.Active, o => o.MapFrom(src => src.Item.Active))
+                .ForMember(dest => dest.ItemType, o => o.MapFrom(src => src.Item.ItemType))
+                .ForMember(dest => dest.Provider, o => o.MapFrom(src => src.Item.Provider))
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+
+            CreateMap<ItemProto, Item>()
+                .ForMember(dest => dest.DateOfEntry, o => o.MapFrom(src => src.DateOfEntry.ToDateTime()))
+                .ForMember(dest => dest.DateOfSale, o => o.MapFrom(src => src.DateOfSale != null ? src.DateOfSale.ToDateTime() : DateTime.MinValue))
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<ItemProto, Watch>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<ItemProto, Jewel>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
             CreateMap<Watch, WatchProto>()
-                //.ForMember(dest => dest.Item, o => o.MapFrom(src => new ItemProto { Id = src.Item.Id }))
                 .ForMember(dest => dest.Item, o => o.MapFrom(src => src.Item))
                 .ForMember(dest => dest.Brand, o => o.MapFrom(src => src.Brand))
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<Jewel, JewelProto>()
+                .ForMember(dest => dest.Item, o => o.MapFrom(src => src.Item))
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
             #endregion
         }

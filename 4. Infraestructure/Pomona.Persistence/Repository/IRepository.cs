@@ -17,6 +17,7 @@ namespace Pomona.Persistence.Repository
         T GetById(int id);
 
         T Insert(T entity);
+        bool Update(T entity);
 
         Task<PaginationResponse<T>> Paginate(Pagination pagination, string includeProperties = "");
         Task<PaginationResponse<T>> FindAndPaginate(Expression<Func<T, bool>> filter, Pagination pagination, string includeProperties = "");

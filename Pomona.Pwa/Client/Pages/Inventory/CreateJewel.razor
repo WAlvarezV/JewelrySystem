@@ -1,0 +1,6 @@
+﻿@page "/new/jewel/{ItemTypeId:int}"
+@inherits CreateJewelBase
+
+<div class="card">
+    <Jewel Jewel="@Jewel" ItemTypeId="ItemTypeId" FirstInput="ReferenceInput" OnValidSubmit="Create" />
+</div>

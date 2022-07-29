@@ -21,10 +21,18 @@ namespace Pomona.Pwa.Client
                 .ForMember(dest => dest.DeliveryDate, opt => opt.MapFrom(src => src.DeliveryDate.ToDateTime()))
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-            CreateMap<ItemModel, ItemProto>()
-                .ForMember(dest => dest.DateOfEntry, opt => opt.MapFrom(src => Timestamp.FromDateTime(src.DateOfEntry.ToUniversalTime())))
+            CreateMap<WatchModel, ItemProto>()
+                .ForMember(dest => dest.DateOfEntry, opt => opt.MapFrom(src => Timestamp.FromDateTime(DateTime.SpecifyKind(src.DateOfEntry, DateTimeKind.Utc))))
+                .ForMember(dest => dest.DateOfSale, opt => opt.MapFrom(src => src.DateOfSale != null ? Timestamp.FromDateTime(((DateTime)src.DateOfSale).ToUniversalTime()) : null))
+                .ForMember(dest => dest.ItemTypeId, opt => opt.MapFrom(src => 5))
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<JewelModel, ItemProto>()
+                .ForMember(dest => dest.DateOfEntry, opt => opt.MapFrom(src => Timestamp.FromDateTime(DateTime.SpecifyKind(src.DateOfEntry, DateTimeKind.Utc))))
                 .ForMember(dest => dest.DateOfSale, opt => opt.MapFrom(src => src.DateOfSale != null ? Timestamp.FromDateTime(((DateTime)src.DateOfSale).ToUniversalTime()) : null))
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+
 
             CreateMap<ItemProto, ItemModel>()
                 .ForMember(dest => dest.DateOfEntry, opt => opt.MapFrom(src => src.DateOfEntry.ToDateTime()))

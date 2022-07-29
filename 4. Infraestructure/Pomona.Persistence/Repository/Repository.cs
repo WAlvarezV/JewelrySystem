@@ -40,6 +40,7 @@ namespace Pomona.Persistence.Repository
                 foreach (var includeProperty in includeProperties.Split
                     (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
+
                     query = query.Include(includeProperty);
                 }
 
@@ -60,6 +61,13 @@ namespace Pomona.Persistence.Repository
         {
             _dbSet.Add(entity);
             return entity;
+        }
+
+        public virtual bool Update(T entityToUpdate)
+        {
+            _dbSet.Attach(entityToUpdate);
+            _context.Entry(entityToUpdate).State = EntityState.Modified;
+            return true;
         }
 
         public async Task<PaginationResponse<T>> Paginate(Pagination paginationProto,
@@ -100,6 +108,5 @@ namespace Pomona.Persistence.Repository
                 Pages = totalPages
             };
         }
-
     }
 }

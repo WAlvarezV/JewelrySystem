@@ -1,43 +1,38 @@
 {
   "version": 3,
   "targets": {
-    "net5.0": {}
+    "net6.0": {}
   },
   "libraries": {},
   "projectFileDependencyGroups": {
-    "net5.0": []
+    "net6.0": []
   },
   "packageFolders": {
-    "C:\\Users\\WAlvarezV\\.nuget\\packages\\": {},
-    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
+    "C:\\Users\\willi\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\Pomona.Models.csproj",
+      "projectUniqueName": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\Pomona.Models.csproj",
       "projectName": "Pomona.Models",
-      "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\Pomona.Models.csproj",
-      "packagesPath": "C:\\Users\\WAlvarezV\\.nuget\\packages\\",
-      "outputPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\obj\\",
+      "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\Pomona.Models.csproj",
+      "packagesPath": "C:\\Users\\willi\\.nuget\\packages\\",
+      "outputPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
-      ],
       "configFilePaths": [
-        "C:\\Users\\WAlvarezV\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\willi\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
-        "net5.0"
+        "net6.0"
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "https://api.nuget.org/v3/index.json": {},
-        "https://nuget.devexpress.com/V9Tlzvj8EwgLuFAiA19nMbykdDvkEIukAM4HKuhz2B6jtnprdA/api": {}
+        "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
-        "net5.0": {
-          "targetAlias": "net5.0",
+        "net6.0": {
+          "targetAlias": "net6.0",
           "projectReferences": {}
         }
       },
@@ -48,8 +43,8 @@
       }
     },
     "frameworks": {
-      "net5.0": {
-        "targetAlias": "net5.0",
+      "net6.0": {
+        "targetAlias": "net6.0",
         "imports": [
           "net461",
           "net462",
@@ -65,7 +60,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.102\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.302\\RuntimeIdentifierGraph.json"
       }
     }
   }

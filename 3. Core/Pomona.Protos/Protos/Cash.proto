@@ -1,0 +1,19 @@
+syntax = "proto3";
+option csharp_namespace = "Pomona.Protos.Cash";
+package Pomona;
+
+import "Common.proto";
+import "google/protobuf/empty.proto";
+
+service CashSrv {
+	rpc DailyRecord (Record) returns (DailyRecords);	
+	rpc GetDailyRecords (google.protobuf.Empty) returns (DailyRecords);
+}
+
+message Record {
+	int32 Id = 1;
+}
+
+message DailyRecords {
+	repeated Record Items = 1;
+}

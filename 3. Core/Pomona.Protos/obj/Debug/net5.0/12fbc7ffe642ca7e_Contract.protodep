@@ -1,6 +1,0 @@
-obj\Debug\net5.0/Contract.cs \
-obj\Debug\net5.0/ContractGrpc.cs: C:/Users/WAlvarezV/.nuget/packages/grpc.tools/2.33.1/build/native/include/google/protobuf/timestamp.proto\
- C:/Users/WAlvarezV/.nuget/packages/grpc.tools/2.33.1/build/native/include/google/protobuf/empty.proto\
- Protos/Person.proto\
- Protos/Common.proto\
- Protos/Contract.proto

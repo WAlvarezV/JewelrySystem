@@ -1,48 +1,44 @@
 {
   "format": 1,
   "restore": {
-    "F:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Server\\Pomona.Pwa.Server.csproj": {}
+    "E:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Server\\Pomona.Pwa.Server.csproj": {}
   },
   "projects": {
-    "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Application\\Pomona.Application.csproj": {
+    "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Application\\Pomona.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Application\\Pomona.Application.csproj",
+        "projectUniqueName": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Application\\Pomona.Application.csproj",
         "projectName": "Pomona.Application",
-        "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Application\\Pomona.Application.csproj",
-        "packagesPath": "C:\\Users\\WAlvarezV\\.nuget\\packages\\",
-        "outputPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Application\\obj\\",
+        "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Application\\Pomona.Application.csproj",
+        "packagesPath": "C:\\Users\\willi\\.nuget\\packages\\",
+        "outputPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Application\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
-        ],
         "configFilePaths": [
-          "C:\\Users\\WAlvarezV\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\willi\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net5.0"
+          "net6.0"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {},
-          "https://nuget.devexpress.com/V9Tlzvj8EwgLuFAiA19nMbykdDvkEIukAM4HKuhz2B6jtnprdA/api": {}
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net5.0": {
-            "targetAlias": "net5.0",
+          "net6.0": {
+            "targetAlias": "net6.0",
             "projectReferences": {
-              "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj": {
-                "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj"
+              "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj": {
+                "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj"
               },
-              "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj": {
-                "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj"
+              "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj": {
+                "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj"
               },
-              "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Infrastructure\\Pomona.Infrastructure.csproj": {
-                "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Infrastructure\\Pomona.Infrastructure.csproj"
+              "E:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Infrastructure\\Pomona.Infrastructure.csproj": {
+                "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Infrastructure\\Pomona.Infrastructure.csproj"
               },
-              "F:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj": {
-                "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj"
+              "E:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj": {
+                "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj"
               }
             }
           }
@@ -54,8 +50,8 @@
         }
       },
       "frameworks": {
-        "net5.0": {
-          "targetAlias": "net5.0",
+        "net6.0": {
+          "targetAlias": "net6.0",
           "dependencies": {
             "AutoMapper": {
               "target": "Package",
@@ -63,7 +59,7 @@
             },
             "NLog": {
               "target": "Package",
-              "version": "[4.7.6, )"
+              "version": "[5.0.1, )"
             }
           },
           "imports": [
@@ -81,37 +77,33 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.302\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj": {
+    "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj",
+        "projectUniqueName": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj",
         "projectName": "Pomona.Domain",
-        "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj",
-        "packagesPath": "C:\\Users\\WAlvarezV\\.nuget\\packages\\",
-        "outputPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\obj\\",
+        "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj",
+        "packagesPath": "C:\\Users\\willi\\.nuget\\packages\\",
+        "outputPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
-        ],
         "configFilePaths": [
-          "C:\\Users\\WAlvarezV\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\willi\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net5.0"
+          "net6.0"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {},
-          "https://nuget.devexpress.com/V9Tlzvj8EwgLuFAiA19nMbykdDvkEIukAM4HKuhz2B6jtnprdA/api": {}
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net5.0": {
-            "targetAlias": "net5.0",
+          "net6.0": {
+            "targetAlias": "net6.0",
             "projectReferences": {}
           }
         },
@@ -122,12 +114,12 @@
         }
       },
       "frameworks": {
-        "net5.0": {
-          "targetAlias": "net5.0",
+        "net6.0": {
+          "targetAlias": "net6.0",
           "dependencies": {
             "Newtonsoft.Json": {
               "target": "Package",
-              "version": "[12.0.3, )"
+              "version": "[13.0.1, )"
             }
           },
           "imports": [
@@ -145,37 +137,33 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.302\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\Pomona.Models.csproj": {
+    "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\Pomona.Models.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\Pomona.Models.csproj",
+        "projectUniqueName": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\Pomona.Models.csproj",
         "projectName": "Pomona.Models",
-        "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\Pomona.Models.csproj",
-        "packagesPath": "C:\\Users\\WAlvarezV\\.nuget\\packages\\",
-        "outputPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\obj\\",
+        "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\Pomona.Models.csproj",
+        "packagesPath": "C:\\Users\\willi\\.nuget\\packages\\",
+        "outputPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
-        ],
         "configFilePaths": [
-          "C:\\Users\\WAlvarezV\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\willi\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net5.0"
+          "net6.0"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {},
-          "https://nuget.devexpress.com/V9Tlzvj8EwgLuFAiA19nMbykdDvkEIukAM4HKuhz2B6jtnprdA/api": {}
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net5.0": {
-            "targetAlias": "net5.0",
+          "net6.0": {
+            "targetAlias": "net6.0",
             "projectReferences": {}
           }
         },
@@ -186,8 +174,8 @@
         }
       },
       "frameworks": {
-        "net5.0": {
-          "targetAlias": "net5.0",
+        "net6.0": {
+          "targetAlias": "net6.0",
           "imports": [
             "net461",
             "net462",
@@ -203,37 +191,33 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.302\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj": {
+    "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj",
+        "projectUniqueName": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj",
         "projectName": "Pomona.Protos",
-        "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj",
-        "packagesPath": "C:\\Users\\WAlvarezV\\.nuget\\packages\\",
-        "outputPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\obj\\",
+        "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj",
+        "packagesPath": "C:\\Users\\willi\\.nuget\\packages\\",
+        "outputPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
-        ],
         "configFilePaths": [
-          "C:\\Users\\WAlvarezV\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\willi\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net5.0"
+          "net6.0"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {},
-          "https://nuget.devexpress.com/V9Tlzvj8EwgLuFAiA19nMbykdDvkEIukAM4HKuhz2B6jtnprdA/api": {}
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net5.0": {
-            "targetAlias": "net5.0",
+          "net6.0": {
+            "targetAlias": "net6.0",
             "projectReferences": {}
           }
         },
@@ -244,22 +228,22 @@
         }
       },
       "frameworks": {
-        "net5.0": {
-          "targetAlias": "net5.0",
+        "net6.0": {
+          "targetAlias": "net6.0",
           "dependencies": {
             "Google.Protobuf": {
               "target": "Package",
-              "version": "[3.14.0, )"
+              "version": "[3.21.4, )"
             },
             "Grpc.Net.Client": {
               "target": "Package",
-              "version": "[2.33.1, )"
+              "version": "[2.47.0, )"
             },
             "Grpc.Tools": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
               "target": "Package",
-              "version": "[2.33.1, )"
+              "version": "[2.47.0, )"
             }
           },
           "imports": [
@@ -277,43 +261,39 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.302\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Infrastructure\\Pomona.Infrastructure.csproj": {
+    "E:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Infrastructure\\Pomona.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Infrastructure\\Pomona.Infrastructure.csproj",
+        "projectUniqueName": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Infrastructure\\Pomona.Infrastructure.csproj",
         "projectName": "Pomona.Infrastructure",
-        "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Infrastructure\\Pomona.Infrastructure.csproj",
-        "packagesPath": "C:\\Users\\WAlvarezV\\.nuget\\packages\\",
-        "outputPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Infrastructure\\obj\\",
+        "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Infrastructure\\Pomona.Infrastructure.csproj",
+        "packagesPath": "C:\\Users\\willi\\.nuget\\packages\\",
+        "outputPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
-        ],
         "configFilePaths": [
-          "C:\\Users\\WAlvarezV\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\willi\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net5.0"
+          "net6.0"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {},
-          "https://nuget.devexpress.com/V9Tlzvj8EwgLuFAiA19nMbykdDvkEIukAM4HKuhz2B6jtnprdA/api": {}
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net5.0": {
-            "targetAlias": "net5.0",
+          "net6.0": {
+            "targetAlias": "net6.0",
             "projectReferences": {
-              "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj": {
-                "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj"
+              "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj": {
+                "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj"
               },
-              "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\Pomona.Persistence.csproj": {
-                "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\Pomona.Persistence.csproj"
+              "E:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\Pomona.Persistence.csproj": {
+                "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\Pomona.Persistence.csproj"
               }
             }
           }
@@ -325,8 +305,8 @@
         }
       },
       "frameworks": {
-        "net5.0": {
-          "targetAlias": "net5.0",
+        "net6.0": {
+          "targetAlias": "net6.0",
           "imports": [
             "net461",
             "net462",
@@ -342,46 +322,42 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.302\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\Pomona.Persistence.csproj": {
+    "E:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\Pomona.Persistence.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\Pomona.Persistence.csproj",
+        "projectUniqueName": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\Pomona.Persistence.csproj",
         "projectName": "Pomona.Persistence",
-        "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\Pomona.Persistence.csproj",
-        "packagesPath": "C:\\Users\\WAlvarezV\\.nuget\\packages\\",
-        "outputPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\obj\\",
+        "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\Pomona.Persistence.csproj",
+        "packagesPath": "C:\\Users\\willi\\.nuget\\packages\\",
+        "outputPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
-        ],
         "configFilePaths": [
-          "C:\\Users\\WAlvarezV\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\willi\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net5.0"
+          "net6.0"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {},
-          "https://nuget.devexpress.com/V9Tlzvj8EwgLuFAiA19nMbykdDvkEIukAM4HKuhz2B6jtnprdA/api": {}
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net5.0": {
-            "targetAlias": "net5.0",
+          "net6.0": {
+            "targetAlias": "net6.0",
             "projectReferences": {
-              "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj": {
-                "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj"
+              "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj": {
+                "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj"
               },
-              "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj": {
-                "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj"
+              "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj": {
+                "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj"
               },
-              "F:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj": {
-                "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj"
+              "E:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj": {
+                "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj"
               }
             }
           }
@@ -393,8 +369,8 @@
         }
       },
       "frameworks": {
-        "net5.0": {
-          "targetAlias": "net5.0",
+        "net6.0": {
+          "targetAlias": "net6.0",
           "dependencies": {
             "Microsoft.AspNetCore.Http.Abstractions": {
               "target": "Package",
@@ -402,7 +378,7 @@
             },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[5.0.1, )"
+              "version": "[6.0.7, )"
             }
           },
           "imports": [
@@ -420,37 +396,33 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.302\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "F:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj": {
+    "E:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj",
+        "projectUniqueName": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj",
         "projectName": "Pomona.Utilities",
-        "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj",
-        "packagesPath": "C:\\Users\\WAlvarezV\\.nuget\\packages\\",
-        "outputPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\obj\\",
+        "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\Pomona.Utilities.csproj",
+        "packagesPath": "C:\\Users\\willi\\.nuget\\packages\\",
+        "outputPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\5. Shared\\Pomona.Utilities\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
-        ],
         "configFilePaths": [
-          "C:\\Users\\WAlvarezV\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\willi\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net5.0"
+          "net6.0"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {},
-          "https://nuget.devexpress.com/V9Tlzvj8EwgLuFAiA19nMbykdDvkEIukAM4HKuhz2B6jtnprdA/api": {}
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net5.0": {
-            "targetAlias": "net5.0",
+          "net6.0": {
+            "targetAlias": "net6.0",
             "projectReferences": {}
           }
         },
@@ -461,8 +433,8 @@
         }
       },
       "frameworks": {
-        "net5.0": {
-          "targetAlias": "net5.0",
+        "net6.0": {
+          "targetAlias": "net6.0",
           "imports": [
             "net461",
             "net462",
@@ -478,46 +450,42 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.302\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "F:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Client\\Pomona.Pwa.Client.csproj": {
+    "E:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Client\\Pomona.Pwa.Client.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Client\\Pomona.Pwa.Client.csproj",
+        "projectUniqueName": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Client\\Pomona.Pwa.Client.csproj",
         "projectName": "Pomona.Pwa.Client",
-        "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Client\\Pomona.Pwa.Client.csproj",
-        "packagesPath": "C:\\Users\\WAlvarezV\\.nuget\\packages\\",
-        "outputPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Client\\obj\\",
+        "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Client\\Pomona.Pwa.Client.csproj",
+        "packagesPath": "C:\\Users\\willi\\.nuget\\packages\\",
+        "outputPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Client\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
-        ],
         "configFilePaths": [
-          "C:\\Users\\WAlvarezV\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\willi\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net5.0"
+          "net6.0"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {},
-          "https://nuget.devexpress.com/V9Tlzvj8EwgLuFAiA19nMbykdDvkEIukAM4HKuhz2B6jtnprdA/api": {}
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net5.0": {
-            "targetAlias": "net5.0",
+          "net6.0": {
+            "targetAlias": "net6.0",
             "projectReferences": {
-              "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\Pomona.Models.csproj": {
-                "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\Pomona.Models.csproj"
+              "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\Pomona.Models.csproj": {
+                "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\Pomona.Models.csproj"
               },
-              "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj": {
-                "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj"
+              "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj": {
+                "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj"
               },
-              "F:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Shared\\Pomona.Pwa.Shared.csproj": {
-                "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Shared\\Pomona.Pwa.Shared.csproj"
+              "E:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Shared\\Pomona.Pwa.Shared.csproj": {
+                "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Shared\\Pomona.Pwa.Shared.csproj"
               }
             }
           }
@@ -529,41 +497,41 @@
         }
       },
       "frameworks": {
-        "net5.0": {
-          "targetAlias": "net5.0",
+        "net6.0": {
+          "targetAlias": "net6.0",
           "dependencies": {
             "AutoMapper.Extensions.Microsoft.DependencyInjection": {
               "target": "Package",
-              "version": "[8.1.0, )"
+              "version": "[8.1.1, )"
             },
             "Grpc.Net.Client.Web": {
               "target": "Package",
-              "version": "[2.34.0, )"
+              "version": "[2.47.0, )"
             },
             "Microsoft.AspNetCore.Components.WebAssembly": {
               "target": "Package",
-              "version": "[5.0.1, )"
+              "version": "[6.0.7, )"
             },
             "Microsoft.AspNetCore.Components.WebAssembly.Authentication": {
               "target": "Package",
-              "version": "[5.0.1, )"
+              "version": "[6.0.7, )"
             },
             "Microsoft.AspNetCore.Components.WebAssembly.DevServer": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[5.0.1, )"
+              "version": "[6.0.7, )"
             },
             "Microsoft.Extensions.Http": {
               "target": "Package",
-              "version": "[5.0.0, )"
+              "version": "[6.0.0, )"
             },
             "System.Net.Http.Json": {
               "target": "Package",
-              "version": "[5.0.0, )"
+              "version": "[6.0.0, )"
             },
             "Tewr.Blazor.FileReader": {
               "target": "Package",
-              "version": "[2.1.0.20274, )"
+              "version": "[3.3.1.21360, )"
             }
           },
           "imports": [
@@ -578,8 +546,8 @@
           "warn": true,
           "downloadDependencies": [
             {
-              "name": "Microsoft.NETCore.App.Runtime.browser-wasm",
-              "version": "[5.0.2, 5.0.2]"
+              "name": "Microsoft.NETCore.App.Runtime.Mono.browser-wasm",
+              "version": "[6.0.7, 6.0.7]"
             }
           ],
           "frameworkReferences": {
@@ -587,7 +555,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.302\\RuntimeIdentifierGraph.json"
         }
       },
       "runtimes": {
@@ -596,51 +564,47 @@
         }
       }
     },
-    "F:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Server\\Pomona.Pwa.Server.csproj": {
+    "E:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Server\\Pomona.Pwa.Server.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Server\\Pomona.Pwa.Server.csproj",
+        "projectUniqueName": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Server\\Pomona.Pwa.Server.csproj",
         "projectName": "Pomona.Pwa.Server",
-        "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Server\\Pomona.Pwa.Server.csproj",
-        "packagesPath": "C:\\Users\\WAlvarezV\\.nuget\\packages\\",
-        "outputPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Server\\obj\\",
+        "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Server\\Pomona.Pwa.Server.csproj",
+        "packagesPath": "C:\\Users\\willi\\.nuget\\packages\\",
+        "outputPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Server\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
-        ],
         "configFilePaths": [
-          "C:\\Users\\WAlvarezV\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\willi\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net5.0"
+          "net6.0"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {},
-          "https://nuget.devexpress.com/V9Tlzvj8EwgLuFAiA19nMbykdDvkEIukAM4HKuhz2B6jtnprdA/api": {}
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net5.0": {
-            "targetAlias": "net5.0",
+          "net6.0": {
+            "targetAlias": "net6.0",
             "projectReferences": {
-              "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Application\\Pomona.Application.csproj": {
-                "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Application\\Pomona.Application.csproj"
+              "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Application\\Pomona.Application.csproj": {
+                "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Application\\Pomona.Application.csproj"
               },
-              "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj": {
-                "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj"
+              "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj": {
+                "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj"
               },
-              "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Infrastructure\\Pomona.Infrastructure.csproj": {
-                "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Infrastructure\\Pomona.Infrastructure.csproj"
+              "E:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Infrastructure\\Pomona.Infrastructure.csproj": {
+                "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Infrastructure\\Pomona.Infrastructure.csproj"
               },
-              "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\Pomona.Persistence.csproj": {
-                "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\Pomona.Persistence.csproj"
+              "E:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\Pomona.Persistence.csproj": {
+                "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\Pomona.Persistence.csproj"
               },
-              "F:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Client\\Pomona.Pwa.Client.csproj": {
-                "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Client\\Pomona.Pwa.Client.csproj"
+              "E:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Client\\Pomona.Pwa.Client.csproj": {
+                "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Client\\Pomona.Pwa.Client.csproj"
               },
-              "F:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Shared\\Pomona.Pwa.Shared.csproj": {
-                "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Shared\\Pomona.Pwa.Shared.csproj"
+              "E:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Shared\\Pomona.Pwa.Shared.csproj": {
+                "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Shared\\Pomona.Pwa.Shared.csproj"
               }
             }
           }
@@ -652,48 +616,48 @@
         }
       },
       "frameworks": {
-        "net5.0": {
-          "targetAlias": "net5.0",
+        "net6.0": {
+          "targetAlias": "net6.0",
           "dependencies": {
             "AutoMapper.Extensions.Microsoft.DependencyInjection": {
               "target": "Package",
-              "version": "[8.1.0, )"
+              "version": "[8.1.1, )"
             },
             "Grpc.AspNetCore": {
               "target": "Package",
-              "version": "[2.34.0, )"
+              "version": "[2.47.0, )"
             },
             "Grpc.AspNetCore.Web": {
               "target": "Package",
-              "version": "[2.34.0, )"
+              "version": "[2.47.0, )"
             },
             "Microsoft.AspNetCore.ApiAuthorization.IdentityServer": {
               "target": "Package",
-              "version": "[5.0.1, )"
+              "version": "[5.0.16, )"
             },
             "Microsoft.AspNetCore.Components.WebAssembly.Server": {
               "target": "Package",
-              "version": "[5.0.1, )"
+              "version": "[6.0.7, )"
             },
             "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[5.0.1, )"
+              "version": "[6.0.7, )"
             },
             "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[5.0.1, )"
+              "version": "[6.0.7, )"
             },
             "Microsoft.AspNetCore.Identity.UI": {
               "target": "Package",
-              "version": "[5.0.1, )"
+              "version": "[6.0.7, )"
             },
             "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
-              "version": "[5.0.1, )"
+              "version": "[6.0.7, )"
             },
             "Microsoft.EntityFrameworkCore.Tools": {
               "target": "Package",
-              "version": "[5.0.1, )"
+              "version": "[6.0.7, )"
             }
           },
           "imports": [
@@ -714,37 +678,33 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.302\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "F:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Shared\\Pomona.Pwa.Shared.csproj": {
+    "E:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Shared\\Pomona.Pwa.Shared.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Shared\\Pomona.Pwa.Shared.csproj",
+        "projectUniqueName": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Shared\\Pomona.Pwa.Shared.csproj",
         "projectName": "Pomona.Pwa.Shared",
-        "projectPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Shared\\Pomona.Pwa.Shared.csproj",
-        "packagesPath": "C:\\Users\\WAlvarezV\\.nuget\\packages\\",
-        "outputPath": "F:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Shared\\obj\\",
+        "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Shared\\Pomona.Pwa.Shared.csproj",
+        "packagesPath": "C:\\Users\\willi\\.nuget\\packages\\",
+        "outputPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Shared\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
-        ],
         "configFilePaths": [
-          "C:\\Users\\WAlvarezV\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\willi\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net5.0"
+          "net6.0"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {},
-          "https://nuget.devexpress.com/V9Tlzvj8EwgLuFAiA19nMbykdDvkEIukAM4HKuhz2B6jtnprdA/api": {}
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net5.0": {
-            "targetAlias": "net5.0",
+          "net6.0": {
+            "targetAlias": "net6.0",
             "projectReferences": {}
           }
         },
@@ -755,8 +715,8 @@
         }
       },
       "frameworks": {
-        "net5.0": {
-          "targetAlias": "net5.0",
+        "net6.0": {
+          "targetAlias": "net6.0",
           "imports": [
             "net461",
             "net462",
@@ -772,7 +732,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.302\\RuntimeIdentifierGraph.json"
         }
       }
     }

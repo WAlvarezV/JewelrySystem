@@ -1,6 +1,0 @@
-obj\Debug\net5.0/Inventory.cs \
-obj\Debug\net5.0/InventoryGrpc.cs: Protos/Common.proto\
- C:/Users/WAlvarezV/.nuget/packages/grpc.tools/2.33.1/build/native/include/google/protobuf/empty.proto\
- C:/Users/WAlvarezV/.nuget/packages/grpc.tools/2.33.1/build/native/include/google/protobuf/wrappers.proto\
- C:/Users/WAlvarezV/.nuget/packages/grpc.tools/2.33.1/build/native/include/google/protobuf/timestamp.proto\
- Protos/Inventory.proto

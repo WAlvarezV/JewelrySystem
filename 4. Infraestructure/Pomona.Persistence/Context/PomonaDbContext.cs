@@ -10,7 +10,7 @@ namespace Pomona.Persistence.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ContractConfig).Assembly);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(DailyRecordConfig).Assembly);
             base.OnModelCreating(modelBuilder);
         }
 

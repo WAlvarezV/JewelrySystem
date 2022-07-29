@@ -2,9 +2,5 @@
 @inherits CreateWatchBase
 
 <div class="card">
-    <Watch ItemTypeId="ItemTypeId" />
+    <Watch Watch="@Watch" ReferenceInput="ReferenceInput" OnValidSubmit="Create" />
 </div>
-
-@code {
-    [Parameter] public int ItemTypeId { get; set; }
-}

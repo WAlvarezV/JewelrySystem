@@ -1,6 +1,6 @@
 ﻿@inherits WatchBase
 
-<EditForm Model="@Watch" OnValidSubmit="OnValidSubmit">
+<EditForm Model="@Watch" OnSubmit="OnValidSubmit">
     <DataAnnotationsValidator />
     <div class="card-header">
         <h3>Reloj</h3>
@@ -52,9 +52,9 @@
             </div>
 
             <div class="col-md-3">
-                <label class="form-label" for="sale">Valor Venta</label>
-                <InputNumber class="form-control" @bind-Value="Watch.SaleValue" />
-                <ValidationMessage For="@(() => Watch.SaleValue)" />
+                <label class="form-label" for="case">Nro. Caja</label>
+                <InputText class="form-control" @bind-Value="Watch.CaseNumber"></InputText>
+                <ValidationMessage For="@(() => Watch.CaseNumber)" />
             </div>
 
             <div class="col-md-3">
@@ -62,12 +62,12 @@
                 <InputNumber style="color:red" class="form-control" @bind-Value="Watch.CostValue" />
                 <ValidationMessage For="@(() => Watch.CostValue)" />
             </div>
-
             <div class="col-md-3">
-                <label class="form-label" for="case">Nro. Caja</label>
-                <InputText class="form-control" @bind-Value="Watch.CaseNumber"></InputText>
-                <ValidationMessage For="@(() => Watch.CaseNumber)" />
+                <label class="form-label" for="sale">Valor Venta</label>
+                <InputNumber class="form-control" @bind-Value="Watch.SaleValue" />
+                <ValidationMessage For="@(() => Watch.SaleValue)" />
             </div>
+
         </div>
 
         <div class="row">
@@ -82,16 +82,16 @@
         <div class="card-footer bg-transparent">
             <div class="d-flex justify-content-end">
                 <div class="col-md-2">
-                    <a class="btn btn-outline-secondary btn-block" href="/watches">Atrás</a>
+                    <a class="btn btn-outline-secondary btn-block" href="/watches"><i class="bi bi-arrow-left"></i> Atrás</a>
                 </div>
                 @if (!EditMode)
                 {
                     <div class="col-md-2">
-                        <button class="btn btn-outline-primary btn-block" @onclick="ClearForm">Limpiar</button>
+                        <button class="btn btn-outline-primary btn-block" @onclick="ClearForm"><i class="bi bi-x"></i> Limpiar</button>
                     </div>
                 }
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary btn-block">Guardar</button>
+                    <button type="submit" class="btn btn-primary btn-block"><i class="bi bi-check2"></i> Guardar</button>
                 </div>
             </div>
         </div>

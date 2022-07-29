@@ -12,12 +12,12 @@ namespace Pomona.Models.Models
 
         [Required(ErrorMessage = Constant.Required + ": Valor de Costo")]
         public int CostValue { get; set; }
-        public DateTime DateOfEntry { get; set; }
+        public DateTime DateOfEntry { get; set; } = DateTime.Now;
         public DateTime? DateOfSale { get; set; }
         public int SaleValue { get; set; }
 
-        [Required(ErrorMessage = Constant.Required + ": Observación")]
-        [RegularExpression(Constant.RegExUpperCase, ErrorMessage = Constant.UpperCaseMssg)]
+        // [Required(ErrorMessage = Constant.Required + ": Observación")]
+        // [RegularExpression(Constant.RegExUpperCase, ErrorMessage = Constant.UpperCaseMssg)]
         [StringLengthRange(Min = 15, Max = 1000, Required = true)]
         public string Description { get; set; }
 

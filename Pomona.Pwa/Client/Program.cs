@@ -32,6 +32,9 @@ namespace Pomona.Pwa.Client
                   var baseAddressMessageHandler = services.GetRequiredService<BaseAddressAuthorizationMessageHandler>();
                   baseAddressMessageHandler.InnerHandler = new HttpClientHandler();
                   var grpcWebHandler = new GrpcWebHandler(GrpcWebMode.GrpcWeb, baseAddressMessageHandler);
+                  var httpHandler = new HttpClientHandler();
+                  // Return `true` to allow certificates that are untrusted/invalid
+                  // httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
                   var channel = GrpcChannel.ForAddress(builder.HostEnvironment.BaseAddress, new GrpcChannelOptions { HttpHandler = grpcWebHandler });
 
                   return channel;
