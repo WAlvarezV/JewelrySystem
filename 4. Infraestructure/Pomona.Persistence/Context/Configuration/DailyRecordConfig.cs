@@ -10,6 +10,8 @@ namespace Pomona.Persistence.Context.Configuration
     {
         public void Configure(EntityTypeBuilder<DailyRecord> builder)
         {
+            builder.Property(p => p.Number).HasMaxLength(10);
+
             builder.Property(p => p.Description).HasMaxLength(2000);
 
             var recordTypeConverter = new EnumToStringConverter<RecordType>();

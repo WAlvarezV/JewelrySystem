@@ -9,12 +9,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="EFCore.BulkExtensions" Version="6.4.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\3. Core\Pomona.Domain\Pomona.Domain.csproj" />
+    <ProjectReference Include="..\..\3. Core\Pomona.Models\Pomona.Models.csproj" />
     <ProjectReference Include="..\..\3. Core\Pomona.Protos\Pomona.Protos.csproj" />
     <ProjectReference Include="..\..\5. Shared\Pomona.Utilities\Pomona.Utilities.csproj" />
   </ItemGroup>

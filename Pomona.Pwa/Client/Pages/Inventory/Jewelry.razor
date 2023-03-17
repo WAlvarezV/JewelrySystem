@@ -22,6 +22,7 @@
                         <th>Peso gr</th>
                         <th>Valor Venta</th>
                         <th>Valor Costo</th>
+                        <th>Estado</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -29,12 +30,13 @@
                     {
                         <tr>
                             <td>
-                                <a class="btn btn-link" href="/jewel/@jewel.Id">@jewel.Item.Reference</a>
+                                <a class="btn btn-link" href="/item/@jewel.Item.Reference">@jewel.Item.Reference</a>
                             </td>
                             <td>@jewel.Item.Description</td>
                             <td>@jewel.Weight</td>
                             <td>@jewel.Item.SaleValue.ToString("C0", CultureInfo)</td>
                             <td style="color:red">@jewel.Item.CostValue.ToString("C0", CultureInfo)</td>
+                            <td>@(jewel.Item.Active ? "En Stock" : "Vendido")</td>
                         </tr>
                     }
                 </tbody>

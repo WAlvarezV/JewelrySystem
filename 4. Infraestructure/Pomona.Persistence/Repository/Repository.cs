@@ -108,5 +108,7 @@ namespace Pomona.Persistence.Repository
                 Pages = totalPages
             };
         }
+
+        public IEnumerable<T> FromSqlRaw(string query) => _dbSet.FromSqlRaw(query).ToList();
     }
 }

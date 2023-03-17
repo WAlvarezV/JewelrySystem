@@ -1,4 +1,5 @@
-﻿@inherits WatchBase
+﻿@page "/watch/{Reference:int}"
+@inherits WatchBase
 
 <EditForm Model="@Watch" OnSubmit="OnValidSubmit">
     <DataAnnotationsValidator />

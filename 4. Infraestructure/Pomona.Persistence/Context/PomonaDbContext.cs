@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Pomona.Domain.Entity;
+using Pomona.Models.Transient;
 using Pomona.Persistence.Context.Configuration;
 
 namespace Pomona.Persistence.Context
@@ -26,6 +27,7 @@ namespace Pomona.Persistence.Context
         public virtual DbSet<Payment> Payments { get; set; }
         public virtual DbSet<Person> Persons { get; set; }
         public virtual DbSet<Watch> Watches { get; set; }
+        public virtual DbSet<ConsolidatedRecord> ConsolidatedRecords { get; set; }
         #endregion
     }
 }

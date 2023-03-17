@@ -20,6 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\4. Infraestructure\Pomona.Infrastructure\Pomona.Infrastructure.csproj" />
     <ProjectReference Include="..\..\5. Shared\Pomona.Utilities\Pomona.Utilities.csproj" />
+    <ProjectReference Include="..\..\Pomona.Pwa\Shared\Pomona.Pwa.Shared.csproj" />
     <ProjectReference Include="..\Pomona.Domain\Pomona.Domain.csproj" />
     <ProjectReference Include="..\Pomona.Protos\Pomona.Protos.csproj" />
   </ItemGroup>

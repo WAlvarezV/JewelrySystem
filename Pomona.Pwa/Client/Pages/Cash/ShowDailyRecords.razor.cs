@@ -8,14 +8,11 @@ using System.Threading.Tasks;
 
 namespace Pomona.Pwa.Client.Pages.Cash
 {
-    public partial class DailyBase : CustomComponentBase
+    public class ShowDailyRecordsBase : CustomComponentBase
     {
-        public DailyRecords DailyRecords = new();
-        [Parameter] public int ItemTypeId { get; set; }
-        public DateTime DateTimeToday { get; set; } = DateTime.Today;
-        public bool IsDisabled { get; set; } = true;
-
-        public Record Record { get; set; } = new();
+        [Parameter] public DailyRecords DailyRecords { get; set; }
+        [Parameter] public DateTime DateTimeToday { get; set; }
+        [Parameter] public bool GetDailyRecords { get; set; }
         public string CashIn { get; set; }
         public string CashBalance { get; set; }
         public string OthersIn { get; set; }
@@ -23,19 +20,15 @@ namespace Pomona.Pwa.Client.Pages.Cash
         public string BalanceIn { get; set; }
         public string Balance { get; set; }
 
-        protected override async Task OnInitializedAsync()
+        protected override async Task OnParametersSetAsync()
         {
-            try
+            base.OnParametersSet();
+            if (GetDailyRecords)
             {
                 var date = DateTimeToday.ToString(Constants.DateParse);
                 DailyRecords = await Clients.Cash().GetDailyRecordsAsync(new RecordsRequest { StartDate = date, EndDate = date });
-                SetValues();
             }
-            catch (Exception ex)
-            {
-                var error = $"OnInitializedAsync ExceptionError => {ex.Message} {(ex.InnerException != null ? $"InnerExceptionError => {ex.InnerException.Message}" : "")}";
-                Console.WriteLine(error);
-            }
+            SetValues();
         }
 
         private void SetValues()
@@ -51,22 +44,6 @@ namespace Pomona.Pwa.Client.Pages.Cash
             BalanceIn = balanceIn.ToString("C0", CultureInfo);
             Balance = (balanceIn - balanceOut).ToString("C0", CultureInfo);
             CashBalance = (cashIn - balanceOut).ToString("C0", CultureInfo);
-        }
-
-        protected async Task RegisterDailyRecord()
-        {
-            try
-            {
-                Record.Date = DateTime.Now.ToString(Constants.DateTimeParse);
-                DailyRecords = await Clients.Cash().RegisterDailyRecordAsync(Record);
-                SetValues();
-                Record = new();
-            }
-            catch (Exception ex)
-            {
-                var error = $"RegisterDailyRecord ExceptionError => {ex.Message} {(ex.InnerException != null ? $"InnerExceptionError => {ex.InnerException.Message}" : "")}";
-                Console.WriteLine(error);
-            }
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Google.Protobuf.WellKnownTypes;
-using Grpc.Core;
+﻿using Grpc.Core;
 using Pomona.Application.Interfaces;
 using Pomona.Protos.Cash;
 using System.Threading;
@@ -13,11 +12,14 @@ namespace Pomona.Pwa.Server.GrpcServices
         private readonly ICashService _service;
         public CashGrpcService(ICashService service) => _service = service;
 
-        public override async Task<DailyRecords> DailyRecord(Record record, ServerCallContext context)
-            => await _service.DailyRecordAsync(record, CancellationToken.None);
+        public override async Task<DailyRecords> RegisterDailyRecord(Record record, ServerCallContext context)
+            => await _service.RegisterDailyRecordAsync(record, CancellationToken.None);
 
-        public override async Task<DailyRecords> GetDailyRecords(Empty empty, ServerCallContext context)
-            => await _service.GetDailyRecordsAsync(empty, CancellationToken.None);
+        public override async Task<DailyRecords> GetDailyRecords(RecordsRequest request, ServerCallContext context)
+            => await _service.GetDailyRecordsAsync(request, CancellationToken.None);
+
+        public override async Task<ConsolidatedRecords> GetConsolidatedRecords(RecordsRequest request, ServerCallContext context)
+            => await _service.GetConsolidatedRecordsAsync(request, CancellationToken.None);
 
     }
 }

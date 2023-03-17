@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "JjdR1kume1Gfsn7kMyWWuhjnt+GUjkKV81jGFLnFzOlirPxdrc6pdhzImQ7XmxI3LI41esR0dTLA/mpuBLHCIA==",
+  "dgSpecHash": "RElePxRv3pWiU8wwPbM/QSpvu/w9d/PwcIorxnPk7RdeYlpBPphnh71fWAiuTAl/D5P88UPcDgZdzDhtO/o+Hw==",
   "success": true,
   "projectFilePath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\Pomona.Pwa\\Client\\Pomona.Pwa.Client.csproj",
   "expectedPackageFiles": [
@@ -49,7 +49,7 @@
     "C:\\Users\\willi\\.nuget\\packages\\system.text.encodings.web\\6.0.0\\system.text.encodings.web.6.0.0.nupkg.sha512",
     "C:\\Users\\willi\\.nuget\\packages\\system.text.json\\6.0.0\\system.text.json.6.0.0.nupkg.sha512",
     "C:\\Users\\willi\\.nuget\\packages\\tewr.blazor.filereader\\3.3.1.21360\\tewr.blazor.filereader.3.3.1.21360.nupkg.sha512",
-    "C:\\Users\\willi\\.nuget\\packages\\microsoft.netcore.app.runtime.mono.browser-wasm\\6.0.7\\microsoft.netcore.app.runtime.mono.browser-wasm.6.0.7.nupkg.sha512"
+    "C:\\Users\\willi\\.nuget\\packages\\microsoft.netcore.app.runtime.mono.browser-wasm\\6.0.11\\microsoft.netcore.app.runtime.mono.browser-wasm.6.0.11.nupkg.sha512"
   ],
   "logs": []
 }

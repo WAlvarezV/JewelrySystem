@@ -1,4 +1,5 @@
 ﻿using Pomona.Domain.Entity;
+using Pomona.Models.Transient;
 using Pomona.Persistence.Context;
 using Pomona.Persistence.Repository;
 
@@ -9,17 +10,21 @@ namespace Pomona.Infrastructure.Implementation
         private readonly PomonaDbContext _context;
         public UnitOfWork(PomonaDbContext context) => _context = context;
 
-        public Repository<Brand> Brands => new Repository<Brand>(_context);
-        public Repository<Contract> Contracts => new Repository<Contract>(_context);
-        public Repository<DailyRecord> DailyRecords => new Repository<DailyRecord>(_context);
-        public Repository<IdentificationType> IdentificationTypes => new Repository<IdentificationType>(_context);
-        public Repository<Invoice> Invoices => new Repository<Invoice>(_context);
-        public Repository<Item> Items => new Repository<Item>(_context);
-        public Repository<ItemType> ItemTypes => new Repository<ItemType>(_context);
-        public Repository<Jewel> Jewelry => new Repository<Jewel>(_context);
-        public Repository<Payment> Payments => new Repository<Payment>(_context);
-        public Repository<Person> Persons => new Repository<Person>(_context);
-        public Repository<Watch> Watches => new Repository<Watch>(_context);
+        public Repository<Brand> Brands => new(_context);
+        public Repository<Contract> Contracts => new(_context);
+        public Repository<DailyRecord> DailyRecords => new(_context);
+        public Repository<IdentificationType> IdentificationTypes => new(_context);
+        public Repository<Invoice> Invoices => new(_context);
+        public Repository<Item> Items => new(_context);
+        public Repository<ItemType> ItemTypes => new(_context);
+        public Repository<Jewel> Jewelry => new(_context);
+        public Repository<Payment> Payments => new(_context);
+        public Repository<Person> Persons => new(_context);
+        public Repository<Watch> Watches => new(_context);
+
+        #region SqlRaw
+        public Repository<ConsolidatedRecord> ConsolidatedRecords => new(_context);
+        #endregion
 
         public int Save() => _context.SaveChanges();
 

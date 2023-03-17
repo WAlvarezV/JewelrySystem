@@ -3,17 +3,42 @@ option csharp_namespace = "Pomona.Protos.Cash";
 package Pomona;
 
 import "Common.proto";
-import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 
 service CashSrv {
-	rpc DailyRecord (Record) returns (DailyRecords);	
-	rpc GetDailyRecords (google.protobuf.Empty) returns (DailyRecords);
+	rpc RegisterDailyRecord (Record) returns (DailyRecords);	
+	rpc GetDailyRecords (RecordsRequest) returns (DailyRecords);
+	rpc GetConsolidatedRecords (RecordsRequest) returns (ConsolidatedRecords);
 }
 
 message Record {
-	int32 Id = 1;
+	string Date = 1;
+	string Number = 2;
+	string Description = 3;
+	string Value = 4;
+	string RecordType = 5;
+	string PaymentMethod = 6;
+	int32 ItemId = 7;
+}
+
+message RecordsRequest {
+	string StartDate = 1;
+	string EndDate = 2;
 }
 
 message DailyRecords {
 	repeated Record Items = 1;
+	Response Response = 2;
+}
+
+message ConsolidatedRecordProto {
+	string Date = 2;
+	string Value = 3;
+	string RecordType = 4;
+	string PaymentMethod = 5;
+}
+
+message ConsolidatedRecords {
+	repeated ConsolidatedRecordProto Items = 1;
+	Response Response = 2;
 }

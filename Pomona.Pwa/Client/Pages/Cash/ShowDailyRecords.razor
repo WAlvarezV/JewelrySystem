@@ -1,0 +1,71 @@
+﻿@inherits ShowDailyRecordsBase
+
+<div class="table-responsive">
+    <table class="table table-sm table-bordered table-striped">
+        <thead>
+            <tr>
+                <th style="max-width: 20px;">Contrato</th>
+                <th>Descripcion</th>
+                <th style="max-width: 20px;">Referencia</th>
+                <th>Entrada</th>
+                <th>Salida</th>
+                <th>Saldo</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var record in DailyRecords.Items)
+            {
+                var initValue = int.Parse(record.Value).ToString("C0", CultureInfo);
+                var value = record.PaymentMethod.Equals("EFECTIVO")
+                ? initValue
+                : $"< {initValue} >";
+                <tr>
+                    <td>@record.Number</td>
+                    <td>@record.Description</td>
+                    <td>@record.Number</td>
+                    @if (record.RecordType.Equals("INGRESO"))
+                    {
+                        <td>@value</td>
+                        <td></td>
+                    }
+                    else
+                    {
+                        <td></td>
+                        <td>@value</td>
+                    }
+                    <td></td>
+                </tr>
+            }
+            <tr>
+                <th colspan="6"></th>
+            </tr>
+            <tr>
+                <th colspan="6"></th>
+            </tr>
+            <tr>
+                <th colspan="3">Sub Total Efectivo</th>
+                <th>@CashIn</th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th colspan="3">Sub Total Otros Medios de Pago</th>
+                <th>@OthersIn</th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th colspan="3">Total</th>
+                <th>@BalanceIn</th>
+                <th>@BalanceOut</th>
+                <th>@Balance</th>
+            </tr>
+            <tr>
+                <th colspan="3">Cuadre @DateTimeToday.ToShortDateString()</th>
+                <th>@CashIn</th>
+                <th style="color:orangered">@BalanceOut</th>
+                <th style="color:green">@CashBalance</th>
+            </tr>
+        </tbody>
+    </table>
+</div>

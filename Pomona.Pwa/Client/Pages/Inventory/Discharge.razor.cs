@@ -26,6 +26,13 @@ namespace Pomona.Pwa.Client.Pages.Inventory
                 Description = Pagination.Filter.Other
             };
             Item = await Clients.Inventory().GetItemAsync(request);
+
+            if (!Item.Active)
+            {
+                await InfoMessage($"El artículo ya fué decargado");
+                Item = new();
+                return;
+            }
             IsWatch = Item.ItemType.Id.Equals("5");
             DateOfEntry = Item.DateOfEntry.ToDateTime().ToString();
             CostValue = Item.CostValue.ToString("C0", CultureInfo);
@@ -55,6 +62,8 @@ namespace Pomona.Pwa.Client.Pages.Inventory
             {
                 var request = new DischargeRequest { ItemId = Item.Id, SaleValue = SaleValue };
                 await Clients.Inventory().DischargeItemAsync(request);
+                ClearPaginationFilter();
+                Item = new ItemProto();
                 await SuccessMessage($"Artículo Descargado.");
             }
         }

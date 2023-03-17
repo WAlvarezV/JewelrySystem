@@ -15,11 +15,10 @@ namespace Pomona.Persistence.Repository
             Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
             string includeProperties = "");
         T GetById(int id);
-
         T Insert(T entity);
         bool Update(T entity);
-
         Task<PaginationResponse<T>> Paginate(Pagination pagination, string includeProperties = "");
         Task<PaginationResponse<T>> FindAndPaginate(Expression<Func<T, bool>> filter, Pagination pagination, string includeProperties = "");
+        IEnumerable<T> FromSqlRaw(string query);
     }
 }

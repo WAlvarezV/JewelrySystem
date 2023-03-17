@@ -225,7 +225,6 @@ namespace Pomona.Application.Services
             var respose = new ItemProto();
             try
             {
-
                 Expression<Func<Item, bool>> expression = x => x != null;
                 if (request.Reference > 0)
                 {

@@ -1,4 +1,5 @@
 ﻿using Pomona.Domain.Entity;
+using Pomona.Models.Transient;
 using Pomona.Persistence.Repository;
 
 namespace Pomona.Infrastructure.Implementation
@@ -16,6 +17,7 @@ namespace Pomona.Infrastructure.Implementation
         Repository<Payment> Payments { get; }
         Repository<Person> Persons { get; }
         Repository<Watch> Watches { get; }
+        Repository<ConsolidatedRecord> ConsolidatedRecords { get; }
 
         int Save();
     }

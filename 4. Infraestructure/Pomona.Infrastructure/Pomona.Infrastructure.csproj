@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\3. Core\Pomona.Domain\Pomona.Domain.csproj" />
+    <ProjectReference Include="..\..\3. Core\Pomona.Models\Pomona.Models.csproj" />
     <ProjectReference Include="..\Pomona.Persistence\Pomona.Persistence.csproj" />
   </ItemGroup>
 

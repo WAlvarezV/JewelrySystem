@@ -1,5 +1,4 @@
-﻿using Google.Protobuf.WellKnownTypes;
-using Pomona.Protos.Cash;
+﻿using Pomona.Protos.Cash;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,7 +6,8 @@ namespace Pomona.Application.Interfaces
 {
     internal interface ICashService
     {
-        Task<DailyRecords> DailyRecordAsync(Record record, CancellationToken cancelToken);
-        Task<DailyRecords> GetDailyRecordsAsync(Empty empty, CancellationToken cancelToken);
+        Task<DailyRecords> RegisterDailyRecordAsync(Record record, CancellationToken cancelToken);
+        Task<DailyRecords> GetDailyRecordsAsync(RecordsRequest request, CancellationToken cancelToken);
+        Task<ConsolidatedRecords> GetConsolidatedRecordsAsync(RecordsRequest request, CancellationToken cancelToken);
     }
 }

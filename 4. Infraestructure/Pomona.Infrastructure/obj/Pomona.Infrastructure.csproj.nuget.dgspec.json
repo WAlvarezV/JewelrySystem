@@ -51,7 +51,8 @@
             "net47",
             "net471",
             "net472",
-            "net48"
+            "net48",
+            "net481"
           ],
           "assetTargetFallback": true,
           "warn": true,
@@ -60,7 +61,62 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.302\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.100\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\Pomona.Models.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\Pomona.Models.csproj",
+        "projectName": "Pomona.Models",
+        "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\Pomona.Models.csproj",
+        "packagesPath": "C:\\Users\\willi\\.nuget\\packages\\",
+        "outputPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\willi\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.100\\RuntimeIdentifierGraph.json"
         }
       }
     },
@@ -121,7 +177,8 @@
             "net47",
             "net471",
             "net472",
-            "net48"
+            "net48",
+            "net481"
           ],
           "assetTargetFallback": true,
           "warn": true,
@@ -130,7 +187,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.302\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.100\\RuntimeIdentifierGraph.json"
         }
       }
     },
@@ -161,6 +218,9 @@
               "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj": {
                 "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj"
               },
+              "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\Pomona.Models.csproj": {
+                "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\Pomona.Models.csproj"
+              },
               "E:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\Pomona.Persistence.csproj": {
                 "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\4. Infraestructure\\Pomona.Persistence\\Pomona.Persistence.csproj"
               }
@@ -182,7 +242,8 @@
             "net47",
             "net471",
             "net472",
-            "net48"
+            "net48",
+            "net481"
           ],
           "assetTargetFallback": true,
           "warn": true,
@@ -191,7 +252,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.302\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.100\\RuntimeIdentifierGraph.json"
         }
       }
     },
@@ -222,6 +283,9 @@
               "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj": {
                 "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Domain\\Pomona.Domain.csproj"
               },
+              "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\Pomona.Models.csproj": {
+                "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Models\\Pomona.Models.csproj"
+              },
               "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj": {
                 "projectPath": "E:\\Proyectos\\Joyeria\\repo\\Pomona\\3. Core\\Pomona.Protos\\Pomona.Protos.csproj"
               },
@@ -241,6 +305,10 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
+            "EFCore.BulkExtensions": {
+              "target": "Package",
+              "version": "[6.4.4, )"
+            },
             "Microsoft.AspNetCore.Http.Abstractions": {
               "target": "Package",
               "version": "[2.2.0, )"
@@ -256,7 +324,8 @@
             "net47",
             "net471",
             "net472",
-            "net48"
+            "net48",
+            "net481"
           ],
           "assetTargetFallback": true,
           "warn": true,
@@ -265,7 +334,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.302\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.100\\RuntimeIdentifierGraph.json"
         }
       }
     },
@@ -310,7 +379,8 @@
             "net47",
             "net471",
             "net472",
-            "net48"
+            "net48",
+            "net481"
           ],
           "assetTargetFallback": true,
           "warn": true,
@@ -319,7 +389,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.302\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.100\\RuntimeIdentifierGraph.json"
         }
       }
     }

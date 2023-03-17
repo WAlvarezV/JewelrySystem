@@ -23,6 +23,7 @@
                         <th>Valor Venta</th>
                         <th>Valor Costo</th>
                         <th>Nro. Caja</th>
+                        <th>Estado</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -30,13 +31,14 @@
                     {
                         <tr>
                             <td>
-                                <a class="btn btn-link" href="/reloj/@watch.Id">@watch.Item.Reference</a>
+                                <a class="btn btn-link" href="/item/@watch.Item.Reference">@watch.Item.Reference</a>
                             </td>
                             <td>@watch.Brand.Name</td>
                             <td>@watch.Item.Description</td>
                             <td>@watch.Item.SaleValue.ToString("C0", CultureInfo)</td>
                             <td style="color:red">@watch.Item.CostValue.ToString("C0", CultureInfo)</td>
                             <td>@watch.CaseNumber</td>
+                            <td>@(watch.Item.Active ? "En Stock": "Vendido")</td>
                         </tr>
                     }
                 </tbody>

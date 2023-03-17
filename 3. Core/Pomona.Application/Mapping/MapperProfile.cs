@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using Google.Protobuf.WellKnownTypes;
 using Pomona.Domain.Entity;
+using Pomona.Protos.Cash;
 using Pomona.Protos.Common;
 using Pomona.Protos.Contract;
 using Pomona.Protos.Inventory;
 using Pomona.Protos.Person;
+using Pomona.Pwa.Shared;
 using System;
 
 namespace Pomona.Application.Mapping
@@ -14,7 +16,6 @@ namespace Pomona.Application.Mapping
         public MapperProfile()
         {
             #region Contract
-            #endregion
             CreateMap<ItemType, TypeProto>()
                 .ForMember(dest => dest.Id, o => o.MapFrom(src => src.Id.ToString()))
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
@@ -39,6 +40,7 @@ namespace Pomona.Application.Mapping
             CreateMap<Payment, PaymentProto>()
                 .ForMember(dest => dest.Date, o => o.MapFrom(src => Timestamp.FromDateTime((src.Date).ToUniversalTime())))
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+            #endregion
 
             #region Common
 
@@ -117,6 +119,22 @@ namespace Pomona.Application.Mapping
 
             CreateMap<Jewel, JewelProto>()
                 .ForMember(dest => dest.Item, o => o.MapFrom(src => src.Item))
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+            #endregion
+
+            #region Cash
+            CreateMap<DailyRecord, Record>()
+                .ForMember(dest => dest.Date, o => o.MapFrom(src => src.Date.ToString(Constants.DateParse)))
+                .ForMember(dest => dest.Value, o => o.MapFrom(src => src.Value.ToString()))
+                .ForMember(dest => dest.RecordType, o => o.MapFrom(src => src.RecordType.ToString()))
+                .ForMember(dest => dest.PaymentMethod, o => o.MapFrom(src => src.PaymentMethod.ToString()))
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<Record, DailyRecord>()
+                .ForMember(dest => dest.Date, o => o.MapFrom(src => Convert.ToDateTime(src.Date)))
+                .ForMember(dest => dest.Value, o => o.MapFrom(src => int.Parse(src.Value)))
+                .ForMember(dest => dest.RecordType, o => o.MapFrom(src => src.RecordType.ToString()))
+                .ForMember(dest => dest.PaymentMethod, o => o.MapFrom(src => src.PaymentMethod.ToString()))
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
             #endregion
         }

@@ -11,79 +11,8 @@
         @if (Item.Id > 0)
         {
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-2">
-                        <label class="form-label" for="refernce">Referencia</label>
-                        <input readonly class="form-control" @bind="Item.Reference" />
-                    </div>
-
-                    <div class="col-md-2">
-                        <label class="form-label" for="brand">Tipo</label>
-                        <input readonly class="form-control" @bind="Item.ItemType.Name" />
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label" for="provider">Proveedor</label>
-                        <input readonly class="form-control" @bind="Provider" />
-                    </div>
-
-                    <div class="col-md-2">
-                        <label class="form-label" for="sale">Valor Costo</label>
-                        <input style="color:red" readonly class="form-control" @bind="CostValue" />
-                    </div>
-
-                    <div class="col-md-2">
-                        <label class="form-label" for="provider">Fecha Ingreso</label>
-                        <input readonly class="form-control" @bind="DateOfEntry" />
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-12">
-                        <label class="form-label" for="number">Descripción del Artículo</label>
-                        <textarea readonly class="form-control" @bind="Item.Description" />
-                    </div>
-                </div>
-
-                @if (IsWatch)
-                {
-                    <div class="row">
-                        <div class="col-md-4">
-                            <label class="form-label" for="refernce">Marca</label>
-                            <input readonly class="form-control" @bind="Item.Brand.Name" />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label" for="brand">Género</label>
-                            <input readonly class="form-control" @bind="Item.GenderType" />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label" for="provider">Nro. Caja</label>
-                            <input readonly class="form-control" @bind="Item.CaseNumber" />
-                        </div>
-                    </div>
-                }
-                else
-                {
-                    <div class="row">
-                        <div class="col-md-4">
-                            <label class="form-label" for="refernce">Costo Gramo</label>
-                            <input readonly class="form-control" @bind="Item.GramValue" />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label" for="brand">Peso</label>
-                            <input readonly class="form-control" @bind="Item.Weight" />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label" for="provider">Largo</label>
-                            <input readonly class="form-control" @bind="Item.Length" />
-                        </div>
-                    </div>
-                }
-
+            <Item Item="Item" />
+            <br>
                 <div class="row">
                     <div class="col-md-3">
                         <label class="form-label" for="sale">Valor Venta</label>
@@ -98,8 +27,8 @@
                             <a class="btn btn-outline-secondary btn-block" href="/watches"><i class="bi bi-arrow-left"></i> Atrás</a>
                         </div>
                         @*<div class="col-md-2">
-                                <button class="btn btn-outline-primary btn-block" @onclick="ClearForm"><i class="bi bi-x"></i> Limpiar</button>
-                            </div>*@
+                    <button class="btn btn-outline-primary btn-block" @onclick="ClearForm"><i class="bi bi-x"></i> Limpiar</button>
+                    </div>*@
 
                         <div class="col-md-2">
                             <button type="submit" class="btn btn-primary btn-block"><i class="bi bi-check2"></i> Descargar</button>
