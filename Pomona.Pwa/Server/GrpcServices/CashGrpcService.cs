@@ -18,7 +18,7 @@ namespace Pomona.Pwa.Server.GrpcServices
         public override async Task<DailyRecords> GetDailyRecords(RecordsRequest request, ServerCallContext context)
             => await _service.GetDailyRecordsAsync(request, CancellationToken.None);
 
-        public override async Task<ConsolidatedRecords> GetConsolidatedRecords(RecordsRequest request, ServerCallContext context)
+        public override async Task<ConsolidatedRecordsResponse> GetConsolidatedRecords(RecordsRequest request, ServerCallContext context)
             => await _service.GetConsolidatedRecordsAsync(request, CancellationToken.None);
 
     }

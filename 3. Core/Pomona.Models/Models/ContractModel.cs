@@ -9,15 +9,16 @@ namespace Pomona.Models.Models
     {
         [Required(ErrorMessage = Constant.Required)]
         public int? Number { get; set; }
-
+        public int? Reference { get; set; }
         public DateTime Date { get; set; } = DateTime.Today;
-
         public DateTime DeliveryDate { get; set; } = DateTime.Today;
+
+        [Required(ErrorMessage = Constant.Required)]
+        public string PaymentMethod { get; set; }
 
         [Required(ErrorMessage = Constant.Required)]
         public int? Value { get; set; }
         public int? Payment { get; set; }
-
         public int? Balance { get; set; }
 
         public double? Weight { get; set; }

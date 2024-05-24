@@ -357,11 +357,20 @@ namespace Pomona.Pwa.Server.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
+                    b.Property<int?>("FatherId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Number")
                         .HasMaxLength(5)
                         .HasColumnType("int");
 
                     b.Property<int>("PersonId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProviderId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Reference")
                         .HasColumnType("int");
 
                     b.Property<string>("State")
@@ -377,10 +386,14 @@ namespace Pomona.Pwa.Server.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("FatherId");
+
                     b.HasIndex("Number")
                         .IsUnique();
 
                     b.HasIndex("PersonId");
+
+                    b.HasIndex("ProviderId");
 
                     b.ToTable("Contracts");
                 });
@@ -400,9 +413,6 @@ namespace Pomona.Pwa.Server.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
-                    b.Property<int?>("ItemId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Number")
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
@@ -417,12 +427,13 @@ namespace Pomona.Pwa.Server.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<int?>("Reference")
+                        .HasColumnType("int");
+
                     b.Property<int>("Value")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ItemId");
 
                     b.ToTable("DailyRecords");
                 });
@@ -470,16 +481,30 @@ namespace Pomona.Pwa.Server.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<int>("BalanceValue")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CreditValue")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Number")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("PaymentLimitDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ProviderId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Value")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ProviderId");
 
                     b.ToTable("Invoices");
                 });
@@ -628,6 +653,9 @@ namespace Pomona.Pwa.Server.Migrations
                     b.Property<string>("Number")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("PaymentMethod")
+                        .HasColumnType("int");
+
                     b.Property<string>("PaymentType")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -713,6 +741,26 @@ namespace Pomona.Pwa.Server.Migrations
                     b.HasIndex("ItemId");
 
                     b.ToTable("Watches");
+                });
+
+            modelBuilder.Entity("Pomona.Models.Transient.ConsolidatedRecord", b =>
+                {
+                    b.Property<string>("Date")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("PaymentMethod")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RecordType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Value")
+                        .HasColumnType("int");
+
+                    b.ToTable("ConsolidatedRecord");
                 });
 
             modelBuilder.Entity("Pomona.Pwa.Server.Models.ApplicationUser", b =>
@@ -833,22 +881,36 @@ namespace Pomona.Pwa.Server.Migrations
 
             modelBuilder.Entity("Pomona.Domain.Entity.Contract", b =>
                 {
+                    b.HasOne("Pomona.Domain.Entity.Contract", "Father")
+                        .WithMany()
+                        .HasForeignKey("FatherId");
+
                     b.HasOne("Pomona.Domain.Entity.Person", "Person")
                         .WithMany()
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Pomona.Domain.Entity.Person", "Provider")
+                        .WithMany()
+                        .HasForeignKey("ProviderId");
+
+                    b.Navigation("Father");
+
                     b.Navigation("Person");
+
+                    b.Navigation("Provider");
                 });
 
-            modelBuilder.Entity("Pomona.Domain.Entity.DailyRecord", b =>
+            modelBuilder.Entity("Pomona.Domain.Entity.Invoice", b =>
                 {
-                    b.HasOne("Pomona.Domain.Entity.Item", "Item")
+                    b.HasOne("Pomona.Domain.Entity.Person", "Provider")
                         .WithMany()
-                        .HasForeignKey("ItemId");
+                        .HasForeignKey("ProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Item");
+                    b.Navigation("Provider");
                 });
 
             modelBuilder.Entity("Pomona.Domain.Entity.Item", b =>

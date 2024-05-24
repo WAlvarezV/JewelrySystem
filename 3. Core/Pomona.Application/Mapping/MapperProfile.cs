@@ -30,10 +30,11 @@ namespace Pomona.Application.Mapping
 
             CreateMap<Contract, ContractProto>()
                 .ForMember(dest => dest.Date, o => o.MapFrom(src => Timestamp.FromDateTime((src.Date).ToUniversalTime())))
+                .ForMember(dest => dest.Description, o => o.MapFrom(src => src.Description.ToUpper()))
                 .ForMember(dest => dest.DeliveryDate, o => o.MapFrom(src => Timestamp.FromDateTime((src.DeliveryDate).ToUniversalTime())))
                 .ForMember(dest => dest.IdentificationTypeId, o => o.MapFrom(src => src.Person.IdentificationTypeId))
                 .ForMember(dest => dest.IdentificationNumber, o => o.MapFrom(src => src.Person.IdentificationNumber))
-                .ForMember(dest => dest.FullName, o => o.MapFrom(src => src.Person.FullName))
+                .ForMember(dest => dest.FullName, o => o.MapFrom(src => src.Person.FullName.ToUpper()))
                 .ForMember(dest => dest.CellPhone, o => o.MapFrom(src => src.Person.CellPhone))
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
@@ -126,6 +127,7 @@ namespace Pomona.Application.Mapping
             CreateMap<DailyRecord, Record>()
                 .ForMember(dest => dest.Date, o => o.MapFrom(src => src.Date.ToString(Constants.DateParse)))
                 .ForMember(dest => dest.Value, o => o.MapFrom(src => src.Value.ToString()))
+                .ForMember(dest => dest.Reference, o => o.MapFrom(src => src.Reference > 0 ? src.Reference.ToString() : string.Empty))
                 .ForMember(dest => dest.RecordType, o => o.MapFrom(src => src.RecordType.ToString()))
                 .ForMember(dest => dest.PaymentMethod, o => o.MapFrom(src => src.PaymentMethod.ToString()))
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
@@ -133,7 +135,9 @@ namespace Pomona.Application.Mapping
             CreateMap<Record, DailyRecord>()
                 .ForMember(dest => dest.Date, o => o.MapFrom(src => Convert.ToDateTime(src.Date)))
                 .ForMember(dest => dest.Value, o => o.MapFrom(src => int.Parse(src.Value)))
+                .ForMember(dest => dest.Reference, o => o.MapFrom(src => string.IsNullOrWhiteSpace(src.Reference) ? 0 : int.Parse(src.Reference)))
                 .ForMember(dest => dest.RecordType, o => o.MapFrom(src => src.RecordType.ToString()))
+                .ForMember(dest => dest.Description, o => o.MapFrom(src => src.Description.ToUpper()))
                 .ForMember(dest => dest.PaymentMethod, o => o.MapFrom(src => src.PaymentMethod.ToString()))
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
             #endregion

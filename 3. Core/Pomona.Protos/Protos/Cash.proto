@@ -8,17 +8,17 @@ import "google/protobuf/timestamp.proto";
 service CashSrv {
 	rpc RegisterDailyRecord (Record) returns (DailyRecords);	
 	rpc GetDailyRecords (RecordsRequest) returns (DailyRecords);
-	rpc GetConsolidatedRecords (RecordsRequest) returns (ConsolidatedRecords);
+	rpc GetConsolidatedRecords (RecordsRequest) returns (ConsolidatedRecordsResponse);
 }
 
 message Record {
 	string Date = 1;
 	string Number = 2;
-	string Description = 3;
-	string Value = 4;
-	string RecordType = 5;
-	string PaymentMethod = 6;
-	int32 ItemId = 7;
+	string Reference = 3;
+	string Description = 4;
+	string Value = 5;
+	string RecordType = 6;
+	string PaymentMethod = 7;
 }
 
 message RecordsRequest {
@@ -32,13 +32,13 @@ message DailyRecords {
 }
 
 message ConsolidatedRecordProto {
-	string Date = 2;
-	string Value = 3;
-	string RecordType = 4;
-	string PaymentMethod = 5;
+	google.protobuf.Timestamp Date = 1;
+	int32 CashInValue = 2;
+	int32 OthersInValue = 3;
+	int32 CashOutValue = 4;
 }
 
-message ConsolidatedRecords {
+message ConsolidatedRecordsResponse {
 	repeated ConsolidatedRecordProto Items = 1;
 	Response Response = 2;
 }

@@ -1,0 +1,40 @@
+﻿@page "/gold-calculator"
+@inherits GoldCalculatorBase
+
+<div class="card">
+    <div class="card-header">
+        <h3>Calcular Ley del Oro</h3>
+    </div>
+    <div class="card-body">
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label for="basValue">Valor Base Hoy *</label>
+                <input type="number" class="form-control" @bind="BaseValue">Valor Base Hoy</input>
+            </div>
+        </div>
+        <br />
+        <div class="form-row">
+            <div class="form-group col-md-4" style="color:orangered">
+                <label for="dryWeight">Peso Seco *</label>
+                <input type="number" class="form-control" @bind="DryWeight">Peso Seco</input>
+            </div>
+            <br />
+            <div class="form-group col-md-4" style="color:blue">
+                <label for="wetWeight">Peso Humedo *</label>
+                <input type="number" class="form-control" @bind="WetWeight">Peso Humedo</input>
+            </div>
+        </div>
+        <br />
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <button class="btn btn-outline-success" @onclick="CalculateLaw"><i class="bi bi-file-check"></i> Calcular Ley</button>
+            </div>
+        </div>
+        <br />
+         <div class="form-row">
+            <div class="form-group col-md-6">
+                <p>@((MarkupString)Result)</p>
+            </div>
+        </div>
+    </div>
+</div>

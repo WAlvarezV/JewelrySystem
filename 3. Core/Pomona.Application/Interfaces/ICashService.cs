@@ -8,6 +8,6 @@ namespace Pomona.Application.Interfaces
     {
         Task<DailyRecords> RegisterDailyRecordAsync(Record record, CancellationToken cancelToken);
         Task<DailyRecords> GetDailyRecordsAsync(RecordsRequest request, CancellationToken cancelToken);
-        Task<ConsolidatedRecords> GetConsolidatedRecordsAsync(RecordsRequest request, CancellationToken cancelToken);
+        Task<ConsolidatedRecordsResponse> GetConsolidatedRecordsAsync(RecordsRequest request, CancellationToken cancelToken);
     }
 }

@@ -5,7 +5,6 @@ package Pomona;
 // import "google/protobuf/wrappers.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
-import "Person.proto";
 import "Common.proto";
 
 
@@ -24,15 +23,17 @@ message ContractProto{
 	google.protobuf.Timestamp DeliveryDate = 4;
 	int32 Value = 5;
     string State = 6;
-	int32 Payment = 15;
-	int32 Balance = 7;
-	double Weight = 8;
-	string Description = 9;
-	int32 IdentificationTypeId = 10;
-	string IdentificationNumber = 11;
-	string FullName = 12;
-	string CellPhone = 13;
-    string Email = 14;
+	int32 Payment = 7;
+	int32 Balance = 8;
+	double Weight = 9;
+	string Description = 10;
+	int32 IdentificationTypeId = 11;
+	string IdentificationNumber = 12;
+	string FullName = 13;
+	string CellPhone = 14;
+    string Email = 15;
+	int32 Reference = 16;
+	string PaymentMethod = 17;
 }
 
 message ContractResponse { 
@@ -51,5 +52,6 @@ message PaymentProto{
 	google.protobuf.Timestamp Date = 3;
 	int32 Value = 4;
     int32 EntityId = 6;
-	string PaymentType = 7;	
+	string PaymentType = 7;
+	string PaymentMethod = 8;
 }

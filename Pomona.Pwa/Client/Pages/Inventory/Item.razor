@@ -1,4 +1,4 @@
-﻿@page "/item/{Reference:int}"
+﻿@page "/item/{ItemTypeId:int}/{Reference:int}"
 @inherits ItemBase
 @if (Item.Id > 0)
 {
@@ -89,6 +89,14 @@
             </div>
         </div>
     }
+
+    if (Item.Base64String is not null)
+    {
+        <br />
+        var imageDataURL = $"data:image/jpeg;base64,{Item.Base64String}";
+        <img src="@imageDataURL" alt="@Item.ImageName" width="200" height="200" />
+    }
+
 
     <div class="card-footer bg-transparent">
         <div class="d-flex justify-content-end">

@@ -4,9 +4,9 @@
     <table class="table table-sm table-bordered table-striped">
         <thead>
             <tr>
-                <th style="max-width: 20px;">Contrato</th>
+                <th style="max-width: 18px;">Contrato</th>
                 <th>Descripcion</th>
-                <th style="max-width: 20px;">Referencia</th>
+                <th style="max-width: 30px;">Referencia</th>
                 <th>Entrada</th>
                 <th>Salida</th>
                 <th>Saldo</th>
@@ -22,7 +22,7 @@
                 <tr>
                     <td>@record.Number</td>
                     <td>@record.Description</td>
-                    <td>@record.Number</td>
+                    <td>@record.Reference</td>
                     @if (record.RecordType.Equals("INGRESO"))
                     {
                         <td>@value</td>
@@ -61,7 +61,7 @@
                 <th>@Balance</th>
             </tr>
             <tr>
-                <th colspan="3">Cuadre @DateTimeToday.ToShortDateString()</th>
+                <th colspan="3">Cuadre @DateTimeSelected.ToShortDateString()</th>
                 <th>@CashIn</th>
                 <th style="color:orangered">@BalanceOut</th>
                 <th style="color:green">@CashBalance</th>

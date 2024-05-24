@@ -9,6 +9,7 @@ using Pomona.Protos.Inventory;
 using Pomona.Utilities.Expressions;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
@@ -46,7 +47,6 @@ namespace Pomona.Application.Services
                     newJewel.Item = newItem;
                     newJewel = _uow.Jewelry.Insert(newJewel);
                 }
-
                 _uow.Save();
 
             }
@@ -225,10 +225,11 @@ namespace Pomona.Application.Services
             var respose = new ItemProto();
             try
             {
-                Expression<Func<Item, bool>> expression = x => x != null;
+                Expression<Func<Item, bool>> expression = x => x.ItemTypeId.Equals(request.ItemTypeId);
                 if (request.Reference > 0)
                 {
-                    expression = x => x.Reference.Equals(request.Reference);
+                    Expression<Func<Item, bool>> expressionReference = x => x.Reference.Equals(request.Reference);
+                    expression = ExpressionFunctions.AndAlso(expression, expressionReference);
                 }
 
                 if (!string.IsNullOrWhiteSpace(request.Description))
@@ -238,7 +239,6 @@ namespace Pomona.Application.Services
                 }
 
                 var item = (await _uow.Items.FindAll(expression, null, "ItemType,Provider")).First();
-
 
                 if (item.ItemTypeId.Equals(5))
                 {
@@ -251,6 +251,14 @@ namespace Pomona.Application.Services
                     var jewel = (await _uow.Jewelry.FindAll(x => x.ItemId.Equals(item.Id))).First();
                     jewel.Item = item;
                     respose = _mapper.Map<ItemProto>(jewel);
+                }
+
+                var imagePath = item.GetImagePath();
+                if (File.Exists(imagePath))
+                {
+                    respose.ImageName = Path.GetFileName(imagePath);
+                    var bytes = File.ReadAllBytes(imagePath);
+                    respose.Base64String = Convert.ToBase64String(bytes);
                 }
             }
             catch (Exception ex)

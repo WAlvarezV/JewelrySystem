@@ -20,7 +20,8 @@ service InventorySrv {
 
 message ItemRequest {
 	int32 Reference = 1;
-	string Description = 2;
+	int32 ItemTypeId = 2;
+	string Description = 3;
 }
 
 message DischargeRequest {
@@ -51,6 +52,8 @@ message ItemProto {
 	PersonProto Provider = 17;
 	TypeProto ItemType = 18;
 	TypeProto Brand = 19;
+	string ImageName = 20;
+	string Base64String = 21;
 }
 
 message ItemResponse { 

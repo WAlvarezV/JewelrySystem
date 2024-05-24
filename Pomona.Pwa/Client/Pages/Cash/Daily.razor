@@ -5,7 +5,16 @@
         <h3>Registro diario: @DateTimeToday.ToShortDateString()</h3>
     </div>
     <div class="card-body">
-
+        <div class="row">            
+            <div class="col-md-9">
+                <label class="form-label" for="sale">Descripción</label>
+                <input class="form-control" @bind="Record.Description" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="sale">Valor</label>
+                <input class="form-control" @bind="Record.Value" />
+            </div>
+        </div>
         <div class="row">
             <div class="col-md-3">
                 <label class="form-label" for="provider">Tipo de registro</label>
@@ -15,7 +24,6 @@
 
                 </select>
             </div>
-
             <div class="col-md-3">
                 <label class="form-label" for="brand">Medio de pago</label>
                 <select class="form-control mb-2 mr-sm-2" @bind="Record.PaymentMethod">
@@ -23,27 +31,19 @@
                     <option value="2">Tarjeta Crédito</option>
                     <option value="3">Tarjeta Débito</option>
                     <option value="4">Transferencia</option>
+                    <option value="5">ORO</option>
                 </select>
             </div>
-
             <div class="col-md-3">
-                <label class="form-label" for="sale">Ref/Contrato</label>
+                <label class="form-label" for="sale">Nro. Contrato</label>
                 <input class="form-control" @bind="Record.Number" />
             </div>
-
             <div class="col-md-3">
-                <label class="form-label" for="sale">Valor</label>
-                <input class="form-control" @bind="Record.Value" />
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-12">
-                <label class="form-label" for="sale">Descripción</label>
-                <input class="form-control" @bind="Record.Description" />
-            </div>
-        </div>
-
+                <label class="form-label" for="sale">Referencia</label>
+                <input class="form-control" @bind="Record.Reference" />
+            </div>                
+        </div>        
+        <br />
         <div class="card-footer bg-transparent">
             <div class="d-flex justify-content-end">
                 <div class="col-md-2">
@@ -55,69 +55,6 @@
             </div>
         </div>
         <br />
-        <ShowDailyRecords DateTimeToday="DateTimeToday" DailyRecords="DailyRecords"/>
-       @* <div class="table-responsive">
-            <table class="table table-sm table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th style="max-width: 20px;">Contrato</th>
-                        <th>Descripcion</th>
-                        <th style="max-width: 20px;">Referencia</th>
-                        <th>Entrada</th>
-                        <th>Salida</th>
-                        <th>Saldo</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var record in DailyRecords.Items)
-                    {
-                        var initValue = int.Parse(record.Value).ToString("C0", CultureInfo);
-                        var value = record.PaymentMethod.Equals("EFECTIVO")
-                        ? initValue
-                        : $"< {initValue} >";
-                        <tr>
-                            <td>@record.Number</td>
-                            <td>@record.Description</td>
-                            <td>@record.Number</td>
-                            @if (record.RecordType.Equals("INGRESO"))
-                            {
-                                <td>@value</td>
-                                <td></td>
-                            }
-                            else
-                            {
-                                <td></td>
-                                <td>@value</td>
-                            }
-                            <td></td>
-                        </tr>
-                    }
-                    <tr>
-                        <th colspan="3">Sub Total Efectivo</th>
-                        <th>@CashIn</th>
-                        <th></th>
-                        <th></th>                    
-                    </tr>
-                    <tr>
-                        <th colspan="3">Sub Total Otros Medios de Pago</th>
-                        <th>@OthersIn</th>
-                        <th></th>
-                        <th></th>
-                    </tr>
-                    <tr>
-                        <th colspan="3">Total</th>
-                        <th>@BalanceIn</th>
-                        <th>@BalanceOut</th>
-                        <th>@Balance</th>
-                    </tr>
-                    <tr>
-                        <th colspan="3">Cuadre @DateTimeToday.ToShortDateString()</th>
-                        <th>@CashIn</th>
-                        <th style="color:orangered">@BalanceOut</th>
-                        <th style="color:green">@CashBalance</th>
-                    </tr>
-                </tbody>
-            </table>
-        </div>*@
+        <ShowDailyRecords DateTimeSelected="DateTimeToday" DailyRecords="DailyRecords" />      
     </div>
 </div>

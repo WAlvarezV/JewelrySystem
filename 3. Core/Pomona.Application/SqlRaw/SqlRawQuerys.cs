@@ -6,7 +6,7 @@
         {
             var query = $@"SELECT
                             ROW_NUMBER() OVER( ORDER BY  tb.Date) AS Id,
-	                        CAST(tb.Date AS datetime) AS Date,
+	                        CONVERT(VARCHAR,tb.Date,103) + '' AS Date,
 	                        tb.RecordType, 
 	                        tb.PaymentMethod,
 	                        SUM(tb.Value) as Value

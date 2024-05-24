@@ -10,5 +10,6 @@ namespace Pomona.Domain.Entity
         public int Value { get; set; }
         public int EntityId { get; set; }
         public PaymentType PaymentType { get; set; }
+        public PaymentMethod PaymentMethod { get; set; }
     }
 }

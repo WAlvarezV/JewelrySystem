@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Pomona.Models.Models;
-using Pomona.Protos;
 using Pomona.Protos.Common;
 using Pomona.Protos.Contract;
 using Pomona.Pwa.Client.Custom;
@@ -77,6 +76,8 @@ namespace Pomona.Pwa.Client.Pages.Contract
             {
                 await WaitMessage("Registrando Abono.");
                 NewPayment.EntityId = ContractId;
+                NewPayment.Number = (int)Contract.Number;
+                NewPayment.PaymentMethod = string.IsNullOrWhiteSpace(NewPayment.PaymentMethod) ? "EFECTIVO" : NewPayment.PaymentMethod;
                 var res = await Clients.Contract().RegisterPaymentAsync(NewPayment);
                 await GetContract().ConfigureAwait(false);
                 NewPayment.Value = 0;

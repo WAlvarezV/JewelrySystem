@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Google.Protobuf.WellKnownTypes;
 using NLog;
 using Pomona.Application.Interfaces;
 using Pomona.Domain.Entity;
@@ -39,7 +40,6 @@ namespace Pomona.Application.Services
 
                 var newDailyRecord = _mapper.Map<DailyRecord>(record);
                 var inserted = _uow.DailyRecords.Insert(newDailyRecord);
-                newDailyRecord.ItemId = record.ItemId > 0 ? record.ItemId : null;
                 if (_uow.Save() > 0)
                 {
                     response.Message = "Resgistro agregado correctamente";
@@ -65,18 +65,10 @@ namespace Pomona.Application.Services
         public async Task<DailyRecords> GetDailyRecordsAsync(RecordsRequest request, CancellationToken cancelToken)
         {
             var response = new DailyRecords();
-            try
-            {
-                var toProcessRecords = _uow.ConsolidatedRecords.FromSqlRaw(SqlRaw.SqlRawQuerys.GetConsolidatedDailyRecordsQuery(request.StartDate, request.EndDate));
-            }
-            catch (Exception ex)
-            {
-                var error = $"RegisterDailyRecordAsync ExceptionError => {ex.Message} {(ex.InnerException != null ? $"InnerExceptionError => {ex.InnerException.Message}" : "")}";
-                Console.WriteLine(error);
-            }
-
-            var startDate = Convert.ToDateTime(request.StartDate);
-            var endDate = Convert.ToDateTime(request.EndDate);
+            TimeSpan ts = new(0, 0, 0);
+            var startDate = Convert.ToDateTime(request.StartDate).Date + ts;
+            ts = new TimeSpan(23, 59, 59);
+            var endDate = Convert.ToDateTime(request.EndDate).Date + ts;
 
             var dailyRecords = await _uow.DailyRecords.FindAll(x => x.Date >= startDate && x.Date <= endDate);
             if (dailyRecords.Any())
@@ -85,9 +77,34 @@ namespace Pomona.Application.Services
             return response;
         }
 
-        public Task<ConsolidatedRecords> GetConsolidatedRecordsAsync(RecordsRequest request, CancellationToken cancelToken)
+        public async Task<ConsolidatedRecordsResponse> GetConsolidatedRecordsAsync(RecordsRequest request, CancellationToken cancelToken)
         {
-            throw new NotImplementedException();
+            var consolidatedResponse = new ConsolidatedRecordsResponse();
+            var response = new Response();
+            try
+            {
+                var toProcessRecords = _uow.ConsolidatedRecords.FromSqlRaw(SqlRaw.SqlRawQuerys.GetConsolidatedDailyRecordsQuery(request.StartDate, request.EndDate));
+                var LstFromList = toProcessRecords.GroupBy(v => new { v.Date })
+                          .Select(x =>
+                                new ConsolidatedRecordProto
+                                {
+                                    Date = Timestamp.FromDateTime(Convert.ToDateTime(x.First().Date).ToUniversalTime()),
+                                    CashInValue = x.Any(i => i.RecordType.Equals("INGRESO") && i.PaymentMethod.Equals("EFECTIVO")) ? x.First(i => i.RecordType.Equals("INGRESO") && i.PaymentMethod.Equals("EFECTIVO")).Value : 0,
+                                    OthersInValue = x.Any(i => i.RecordType.Equals("INGRESO") && i.PaymentMethod.Equals("OTRO")) ? x.First(i => i.RecordType.Equals("INGRESO") && i.PaymentMethod.Equals("OTRO")).Value : 0,
+                                    CashOutValue = x.Any(i => i.RecordType.Equals("EGRESO")) ? x.First(i => i.RecordType.Equals("EGRESO")).Value : 0
+                                }).OrderBy(o => o.Date);
+
+                consolidatedResponse.Items.AddRange(LstFromList);
+                response.Message = "OK";
+
+            }
+            catch (Exception ex)
+            {
+                var error = $"RegisterDailyRecordAsync ExceptionError => {ex.Message} {(ex.InnerException != null ? $"InnerExceptionError => {ex.InnerException.Message}" : "")}";
+                Console.WriteLine(error);
+            }
+
+            return await Task.FromResult(consolidatedResponse);
         }
     }
 }

@@ -1,18 +1,15 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Pomona.Protos.Cash;
 using Pomona.Pwa.Client.Custom;
-using Pomona.Pwa.Shared;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Pomona.Pwa.Client.Pages.Cash
 {
     public class ShowDailyRecordsBase : CustomComponentBase
     {
         [Parameter] public DailyRecords DailyRecords { get; set; }
-        [Parameter] public DateTime DateTimeToday { get; set; }
-        [Parameter] public bool GetDailyRecords { get; set; }
+        [Parameter] public DateTime DateTimeSelected { get; set; }
         public string CashIn { get; set; }
         public string CashBalance { get; set; }
         public string OthersIn { get; set; }
@@ -20,14 +17,9 @@ namespace Pomona.Pwa.Client.Pages.Cash
         public string BalanceIn { get; set; }
         public string Balance { get; set; }
 
-        protected override async Task OnParametersSetAsync()
+        protected override void OnParametersSet()
         {
             base.OnParametersSet();
-            if (GetDailyRecords)
-            {
-                var date = DateTimeToday.ToString(Constants.DateParse);
-                DailyRecords = await Clients.Cash().GetDailyRecordsAsync(new RecordsRequest { StartDate = date, EndDate = date });
-            }
             SetValues();
         }
 

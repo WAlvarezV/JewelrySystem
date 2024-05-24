@@ -7,22 +7,32 @@ namespace Pomona.Pwa.Client.Pages.Inventory
     public partial class DischargeBase : CustomComponentBase
     {
         public ItemProto Item { get; set; } = new ItemProto();
+        private string _itemTypeId { get; set; } = "0";
         public string DateOfEntry { get; set; }
         public string CostValue { get; set; }
         public string Provider { get; set; }
         public int SaleValue { get; set; }
         public bool IsWatch { get; set; }
 
-        protected override void OnInitialized()
+        protected override void OnInitialized() => base.OnInitialized();
+        public string ItemTypeId
         {
-            base.OnInitialized();
+            get { return _itemTypeId; }
+            set { _itemTypeId = value; }
         }
 
         private async Task GetItem()
         {
+            if (ItemTypeId.Equals("0"))
+            {
+                await ErrorMessage($"Debe seleccionar un tipo de artículo.");
+                return;
+            }
+
             var request = new ItemRequest
             {
                 Reference = int.Parse(Pagination.Filter.Key),
+                ItemTypeId = int.Parse(ItemTypeId),
                 Description = Pagination.Filter.Other
             };
             Item = await Clients.Inventory().GetItemAsync(request);

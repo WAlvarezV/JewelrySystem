@@ -9,6 +9,7 @@ namespace Pomona.Pwa.Client.Pages.Inventory
     {
         [Parameter] public ItemProto Item { get; set; } = new ItemProto();
         [Parameter] public int Reference { get; set; }
+        [Parameter] public int ItemTypeId { get; set; }
         public string DateOfEntry { get; set; }
         public string DateOfSale { get; set; }
         public string CostValue { get; set; }
@@ -28,7 +29,7 @@ namespace Pomona.Pwa.Client.Pages.Inventory
 
         private async Task GetItem()
         {
-            Item = await Clients.Inventory().GetItemAsync(new ItemRequest { Reference = Reference });
+            Item = await Clients.Inventory().GetItemAsync(new ItemRequest { Reference = Reference, ItemTypeId = ItemTypeId });
             SetItemData();
         }
 

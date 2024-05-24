@@ -6,7 +6,21 @@
         <h3>Descargar</h3>
     </div>
 
-    <GenericFilter Pagination="Pagination" KeyText="Referencia" Search="FilteredSearch" Clear="ClearFilter" />
+    <div class="row">
+        <div class="col-md-3">
+            <label class="form-label" for="provider">Artículo *</label>
+            <select class="form-control mb-2 mr-sm-2" @bind="ItemTypeId">
+                <option value="0">-- Seleccione una opción --</option>
+                <option value="1">Anillos</option>
+                <option value="2">Aretes</option>
+                <option value="3">Cadenas</option>
+                <option value="4">Pulseras</option>
+                <option value="6">Dijes</option>
+                <option value="5">Relojes</option>   
+            </select>
+        </div>
+        <GenericFilter Pagination="Pagination" KeyText="Referencia" Search="FilteredSearch" Clear="ClearFilter" />
+    </div>
     <EditForm Model="@Item" OnSubmit="DischargeItem">
         @if (Item.Id > 0)
         {

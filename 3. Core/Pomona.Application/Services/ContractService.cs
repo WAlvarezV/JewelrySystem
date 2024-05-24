@@ -31,6 +31,7 @@ namespace Pomona.Application.Services
         {
             try
             {
+                var paymentMethod = System.Enum.Parse<PaymentMethod>(contract.PaymentMethod);
                 var client = new Person();
                 var persons = await _uow.Persons.FindAll(x => x.IdentificationNumber.Equals(contract.IdentificationNumber));
                 if (persons.Any())
@@ -55,10 +56,25 @@ namespace Pomona.Application.Services
                     EntityId = contractToInsert.Id,
                     Date = contractToInsert.Date,
                     PaymentType = PaymentType.Contrato,
-                    Value = contract.Payment
+                    Value = contract.Payment,
+                    PaymentMethod = paymentMethod
                 };
                 _uow.Payments.Insert(payment);
                 _uow.Save();
+
+                var newDailyRecord = new DailyRecord
+                {
+                    Date = contractToInsert.Date,
+                    Number = contractToInsert.Number.ToString(),
+                    Reference = contract.Reference > 0 ? contract.Reference : null,
+                    Value = contract.Payment,
+                    Description = contract.Description,
+                    RecordType = RecordType.INGRESO,
+                    PaymentMethod = paymentMethod
+                };
+                _uow.DailyRecords.Insert(newDailyRecord);
+                _uow.Save();
+
                 var response = $"Contrato número {contract.Number} registrado.";
                 return await Task.FromResult(new ContractResponse { Response = response }); ;
             }
@@ -75,7 +91,7 @@ namespace Pomona.Application.Services
             {
                 var response = new ContractsResponse();
                 var contracts = await _uow.Contracts.GetAll();
-                var mapped = _mapper.Map<IEnumerable<ContractProto>>(contracts);
+                var mapped = _mapper.Map<IEnumerable<ContractProto>>(contracts.OrderBy(x => x.DeliveryDate));
                 response.ItemsList.AddRange(mapped);
                 return response;
             }
@@ -114,16 +130,31 @@ namespace Pomona.Application.Services
             try
             {
                 var contract = _uow.Contracts.GetById(payment.EntityId);
-
+                var paymentMethod = System.Enum.Parse<PaymentMethod>(payment.PaymentMethod);
                 var paymentToInsert = new Payment
                 {
                     EntityId = payment.EntityId,
                     Date = DateTime.Now,
                     PaymentType = PaymentType.Contrato,
-                    Value = payment.Value
+                    Value = payment.Value,
+                    PaymentMethod = paymentMethod
                 };
                 _uow.Payments.Insert(paymentToInsert);
                 _uow.Save();
+
+                var newDailyRecord = new DailyRecord
+                {
+                    Date = paymentToInsert.Date,
+                    Number = payment.Number.ToString(),
+                    Reference = contract.Reference > 0 ? contract.Reference : null,
+                    Value = payment.Value,
+                    Description = $"Abono a contrato: {contract.Description.ToUpper()}",
+                    RecordType = RecordType.INGRESO,
+                    PaymentMethod = paymentMethod
+                };
+                _uow.DailyRecords.Insert(newDailyRecord);
+                _uow.Save();
+
                 var payments = await _uow.Payments.FindAll(x => x.EntityId.Equals(payment.EntityId));
                 contract.Balance = contract.Value - payments.Sum(x => x.Value);
                 _uow.Save();
