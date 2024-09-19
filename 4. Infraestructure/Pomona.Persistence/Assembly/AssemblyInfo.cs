@@ -8,3 +8,6 @@
 
 // 4. Infraestructure 
 [assembly: InternalsVisibleTo("Pomona.Infrastructure")]
+
+// 7. Test 
+[assembly: InternalsVisibleTo("Jewelry.Test")]

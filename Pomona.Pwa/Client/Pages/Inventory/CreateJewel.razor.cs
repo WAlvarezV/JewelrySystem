@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Pomona.Models.Models;
+using Pomona.Protos.Common;
 using Pomona.Protos.Inventory;
 using Pomona.Pwa.Client.Custom;
 using System;
@@ -20,6 +21,12 @@ namespace Pomona.Pwa.Client.Pages.Inventory
                 await WaitMessage("Registrando Nueva joya.");
                 var objToInsert = Mapper.Map<ItemProto>(Jewel);
                 var res = await Clients.Inventory().RegisterItemAsync(objToInsert);
+                if (res.StatusCode.Equals(Code.Failed))
+                {
+                    await CloseMessage();
+                    await ErrorMessage(res.Message);
+                    return;
+                }
                 ClearSoftModel();
                 await SuccessMessage($"¡Joya Registrada con Id:{res.Message} !");
             }

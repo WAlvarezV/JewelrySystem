@@ -4,6 +4,14 @@ package Pomona;
 
 message Response { 
     string Message = 1;
+    Code StatusCode = 2;
+}
+
+enum Code {
+    Unknown = 0;
+    Ok = 1;
+    Failed = 2;
+    Processing = 3;
 }
 
 message IdProto { 

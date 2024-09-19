@@ -110,5 +110,9 @@ namespace Pomona.Persistence.Repository
         }
 
         public IEnumerable<T> FromSqlRaw(string query) => _dbSet.FromSqlRaw(query).ToList();
+
+        public async Task<bool> AnyAsync(Expression<Func<T, bool>> expression)
+            => await _dbSet.AnyAsync(expression)
+            .ConfigureAwait(false);
     }
 }

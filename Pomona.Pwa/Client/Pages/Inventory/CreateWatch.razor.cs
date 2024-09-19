@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Pomona.Models.Models;
+using Pomona.Protos.Common;
 using Pomona.Protos.Inventory;
 using Pomona.Pwa.Client.Custom;
 using System;
@@ -19,7 +20,12 @@ namespace Pomona.Pwa.Client.Pages.Inventory
                 await WaitMessage("Registrando Nuevo Reloj.");
                 var objToInsert = Mapper.Map<ItemProto>(Watch);
                 var res = await Clients.Inventory().RegisterItemAsync(objToInsert);
-                //Watch = new WatchModel();
+                if (res.StatusCode.Equals(Code.Failed))
+                {
+                    await CloseMessage();
+                    await ErrorMessage(res.Message);
+                    return;
+                }
                 ClearSoftModel();
                 await SuccessMessage($"¡Reloj Registrado con Id:{res.Message} !");
             }

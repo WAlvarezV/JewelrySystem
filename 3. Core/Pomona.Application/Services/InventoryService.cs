@@ -32,6 +32,23 @@ namespace Pomona.Application.Services
         public async Task<Response> RegisterItemAsync(ItemProto item, CancellationToken cancelToken)
         {
             var respose = new Response();
+
+            var dbItem = (await _uow.Items
+                .FindAll(x => x.Reference.Equals(item.Reference)
+                && x.ItemTypeId.Equals(item.ItemTypeId)
+                && x.Active, null, "ItemType")
+                .ConfigureAwait(false))
+                .FirstOrDefault(defaultValue: null);
+
+            if (dbItem is not null)
+            {
+                respose.Message = $"ya se encuentra un {dbItem.ItemType.Name} registrado, con referencia: {dbItem.Reference}";
+                respose.StatusCode = Code.Failed;
+                return respose;
+            }
+
+
+
             try
             {
                 var newItem = _mapper.Map<Item>(item);
@@ -48,6 +65,7 @@ namespace Pomona.Application.Services
                     newJewel = _uow.Jewelry.Insert(newJewel);
                 }
                 _uow.Save();
+                respose.StatusCode = Code.Ok;
 
             }
             catch (Exception ex)
@@ -55,9 +73,15 @@ namespace Pomona.Application.Services
                 var error = $"RegisterItemAsync ExceptionError => {ex.Message} {(ex.InnerException != null ? $"InnerExceptionError => {ex.InnerException.Message}" : "")}";
                 _logger.Error(ex, error);
                 respose.Message = error;
+                respose.StatusCode = Code.Failed;
             }
-            return await Task.FromResult(respose);
+            return respose;
         }
+
+        private async Task<bool> ItemExistsAsync(ItemProto item)
+        => await _uow.Items
+                .AnyAsync(x => x.Reference.Equals(item.Reference) && x.ItemTypeId.Equals(item.ItemTypeId))
+                .ConfigureAwait(false);
 
         public async Task<WatchesResponse> GetWatchesAsync(Pagination pagination, CancellationToken cancelToken)
         {

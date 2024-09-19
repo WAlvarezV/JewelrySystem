@@ -20,5 +20,7 @@ namespace Pomona.Persistence.Repository
         Task<PaginationResponse<T>> Paginate(Pagination pagination, string includeProperties = "");
         Task<PaginationResponse<T>> FindAndPaginate(Expression<Func<T, bool>> filter, Pagination pagination, string includeProperties = "");
         IEnumerable<T> FromSqlRaw(string query);
+
+        public Task<bool> AnyAsync(Expression<Func<T, bool>> expression);
     }
 }
