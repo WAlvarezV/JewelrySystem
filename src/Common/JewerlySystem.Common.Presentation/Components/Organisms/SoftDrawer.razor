@@ -2,7 +2,7 @@
 
 <Drawer Visible="@Visible"
         Title="@Title"
-        Width="@Width"
+        Width="@EffectiveWidth"
         Placement="@Placement"
         Closable="true"
         MaskClosable="false"
@@ -17,10 +17,10 @@
         }
         @ChildContent
     </div>
-    @if (FooterContent != null)
+    @if (EffectiveFooter != null)
     {
         <div class="soft-drawer-footer">
-            @FooterContent
+            @EffectiveFooter
         </div>
     }
 </Drawer>
@@ -29,9 +29,13 @@
     [Parameter] public bool Visible { get; set; }
     [Parameter] public string Title { get; set; } = string.Empty;
     [Parameter] public string? Description { get; set; }
-    [Parameter] public string Width { get; set; } = "720";
+    [Parameter] public object? Width { get; set; } = "720";
     [Parameter] public DrawerPlacement Placement { get; set; } = DrawerPlacement.Right;
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter] public RenderFragment? FooterContent { get; set; }
+    [Parameter] public RenderFragment? Footer { get; set; }
+
+    private string EffectiveWidth => Width?.ToString() ?? "720";
+    private RenderFragment? EffectiveFooter => Footer ?? FooterContent;
 }

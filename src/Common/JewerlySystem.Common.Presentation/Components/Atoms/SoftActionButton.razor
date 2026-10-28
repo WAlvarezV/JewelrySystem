@@ -1,8 +1,8 @@
 @namespace JewerlySystem.Common.Presentation.Components.Atoms
 
-@if (!string.IsNullOrWhiteSpace(Tooltip))
+@if (!string.IsNullOrWhiteSpace(EffectiveTooltip))
 {
-    <Tooltip Title="@Tooltip">
+    <Tooltip Title="@EffectiveTooltip">
         <Button Shape="@ButtonShape.Circle"
                 Type="@Type"
                 Icon="@Icon"
@@ -25,9 +25,12 @@ else
 
 @code {
     [Parameter] public string? Tooltip { get; set; }
+    [Parameter] public string? TooltipText { get; set; }
     [Parameter] public ButtonType Type { get; set; } = ButtonType.Default;
     [Parameter] public string Icon { get; set; } = "edit";
     [Parameter] public bool Danger { get; set; }
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+
+    private string? EffectiveTooltip => !string.IsNullOrWhiteSpace(TooltipText) ? TooltipText : Tooltip;
 }

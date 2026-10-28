@@ -1,9 +1,34 @@
 @namespace JewerlySystem.Common.Presentation.Components.Organisms
 
 <div class="soft-filter-card">
-    @ChildContent
+    @if (!string.IsNullOrWhiteSpace(Title) || ResultCount.HasValue)
+    {
+        <div class="soft-filter-card-header d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+            @if (!string.IsNullOrWhiteSpace(Title))
+            {
+                <div class="d-flex align-items-center gap-2 fw-semibold text-secondary">
+                    @if (!string.IsNullOrWhiteSpace(Icon))
+                    {
+                        <Icon Type="@Icon" />
+                    }
+                    <span>@Title</span>
+                </div>
+            }
+            @if (ResultCount.HasValue)
+            {
+                <span class="text-muted small">Total: <b>@ResultCount.Value</b> registros</span>
+            }
+        </div>
+    }
+    @EffectiveFilters
 </div>
 
 @code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public int? ResultCount { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? Filters { get; set; }
+
+    private RenderFragment? EffectiveFilters => Filters ?? ChildContent;
 }

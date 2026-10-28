@@ -23,3 +23,28 @@
     font-weight: 700;
     color: var(--brand-blue, #1677ff);
 }
+
+.soft-detail-item.variant-danger .soft-detail-value {
+    color: var(--soft-danger, #ff4d4f) !important;
+    font-weight: 700;
+}
+
+.soft-detail-item.variant-success .soft-detail-value {
+    color: var(--soft-success, #52c41a) !important;
+    font-weight: 700;
+}
+
+.soft-detail-item.variant-primary .soft-detail-value {
+    color: var(--brand-blue, #1677ff) !important;
+    font-weight: 700;
+}
+
+.soft-detail-item.variant-warning .soft-detail-value {
+    color: #d48806 !important;
+    font-weight: 700;
+}
+
+.soft-detail-item.variant-info .soft-detail-value {
+    color: #13c2c2 !important;
+    font-weight: 700;
+}

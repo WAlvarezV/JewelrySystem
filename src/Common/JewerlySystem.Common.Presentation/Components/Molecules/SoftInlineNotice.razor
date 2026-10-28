@@ -1,16 +1,16 @@
 @namespace JewerlySystem.Common.Presentation.Components.Molecules
 
-<div class="soft-inline-notice @Type">
+<div class="soft-inline-notice @NormalizedType">
     <div class="soft-inline-notice-icon">
-        @if (Type == "warning")
+        @if (NormalizedType == "warning")
         {
             <Icon Type="exclamation-circle" Theme="@IconThemeType.Fill" />
         }
-        else if (Type == "error")
+        else if (NormalizedType == "error")
         {
             <Icon Type="close-circle" Theme="@IconThemeType.Fill" />
         }
-        else if (Type == "success")
+        else if (NormalizedType == "success")
         {
             <Icon Type="check-circle" Theme="@IconThemeType.Fill" />
         }
@@ -24,17 +24,41 @@
         {
             <div class="soft-inline-notice-title">@Title</div>
         }
-        @if (!string.IsNullOrWhiteSpace(Description))
+        @if (!string.IsNullOrWhiteSpace(EffectiveDescription))
         {
-            <div class="soft-inline-notice-desc">@Description</div>
+            <div class="soft-inline-notice-desc">@EffectiveDescription</div>
         }
         @ChildContent
     </div>
 </div>
 
 @code {
+    public enum NoticeType
+    {
+        Info,
+        Success,
+        Warning,
+        Error
+    }
+
     [Parameter] public string? Title { get; set; }
     [Parameter] public string? Description { get; set; }
-    [Parameter] public string Type { get; set; } = "info"; // info, success, warning, error
+    [Parameter] public string? Message { get; set; }
+    [Parameter] public string Type { get; set; } = "info";
     [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string? EffectiveDescription => !string.IsNullOrWhiteSpace(Message) ? Message : Description;
+
+    private string NormalizedType
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(Type)) return "info";
+            var lower = Type.ToLowerInvariant();
+            if (lower.Contains("warning")) return "warning";
+            if (lower.Contains("error")) return "error";
+            if (lower.Contains("success")) return "success";
+            return "info";
+        }
+    }
 }

@@ -5,7 +5,7 @@
             Title="@Title"
             SubTitle="@Subtitle">
         <Extra>
-            @ChildContent
+            @EffectiveExtra
         </Extra>
     </Result>
 </div>
@@ -15,4 +15,7 @@
     [Parameter] public string? Subtitle { get; set; }
     [Parameter] public ResultStatus Status { get; set; } = ResultStatus.Success;
     [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? ExtraActions { get; set; }
+
+    private RenderFragment? EffectiveExtra => ExtraActions ?? ChildContent;
 }

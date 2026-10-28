@@ -1,7 +1,13 @@
 @namespace JewerlySystem.Common.Presentation.Components.Molecules
 
 <span class="soft-tooltip-label">
-    <span class="soft-tooltip-label-text">@Text</span>
+    <span class="soft-tooltip-label-text">
+        @EffectiveText
+        @if (Required)
+        {
+            <span class="text-danger ms-1 fw-bold">*</span>
+        }
+    </span>
     @if (!string.IsNullOrWhiteSpace(TooltipText))
     {
         <Tooltip Title="@TooltipText">
@@ -12,5 +18,9 @@
 
 @code {
     [Parameter] public string Text { get; set; } = string.Empty;
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public bool Required { get; set; }
     [Parameter] public string? TooltipText { get; set; }
+
+    private string EffectiveText => !string.IsNullOrWhiteSpace(Label) ? Label : Text;
 }

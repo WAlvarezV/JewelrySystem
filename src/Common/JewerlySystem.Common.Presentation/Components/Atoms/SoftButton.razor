@@ -10,10 +10,15 @@
         HtmlType="@HtmlType"
         Class="@($"soft-btn {CssClass}")"
         OnClick="@OnClick">
+    @if (!string.IsNullOrEmpty(Text))
+    {
+        @Text
+    }
     @ChildContent
 </Button>
 
 @code {
+    [Parameter] public string? Text { get; set; }
     [Parameter] public ButtonType Type { get; set; } = ButtonType.Default;
     [Parameter] public ButtonSize Size { get; set; } = ButtonSize.Default;
     [Parameter] public string? Icon { get; set; }

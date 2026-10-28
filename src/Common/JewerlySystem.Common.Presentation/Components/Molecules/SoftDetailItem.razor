@@ -1,6 +1,6 @@
 @namespace JewerlySystem.Common.Presentation.Components.Molecules
 
-<div class="soft-detail-item @(Highlight ? "highlight" : "")">
+<div class="soft-detail-item @(Highlight || HighlightVariant != Variant.Default ? "highlight" : "") @GetVariantClass()">
     <span class="soft-detail-label">@Label</span>
     <span class="soft-detail-value">
         @if (ChildContent != null)
@@ -15,8 +15,29 @@
 </div>
 
 @code {
+    public enum Variant
+    {
+        Default,
+        Primary,
+        Success,
+        Danger,
+        Warning,
+        Info
+    }
+
     [Parameter] public string Label { get; set; } = string.Empty;
     [Parameter] public string? Value { get; set; }
     [Parameter] public bool Highlight { get; set; }
+    [Parameter] public Variant HighlightVariant { get; set; } = Variant.Default;
     [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string GetVariantClass() => HighlightVariant switch
+    {
+        Variant.Primary => "variant-primary",
+        Variant.Success => "variant-success",
+        Variant.Danger => "variant-danger",
+        Variant.Warning => "variant-warning",
+        Variant.Info => "variant-info",
+        _ => ""
+    };
 }

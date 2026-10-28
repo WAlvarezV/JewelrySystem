@@ -2,10 +2,10 @@
 
 <div class="soft-hero-header">
     <div class="soft-hero-content">
-        @if (!string.IsNullOrWhiteSpace(Icon))
+        @if (!string.IsNullOrWhiteSpace(EffectiveIcon))
         {
             <div class="soft-hero-icon">
-                <i class="@Icon"></i>
+                <i class="@EffectiveIcon"></i>
             </div>
         }
         <div class="soft-hero-titles">
@@ -16,10 +16,10 @@
             }
         </div>
     </div>
-    @if (ChildContent != null)
+    @if (EffectiveActions != null)
     {
         <div class="soft-hero-actions">
-            @ChildContent
+            @EffectiveActions
         </div>
     }
 </div>
@@ -28,5 +28,10 @@
     [Parameter] public string Title { get; set; } = string.Empty;
     [Parameter] public string? Subtitle { get; set; }
     [Parameter] public string? Icon { get; set; }
+    [Parameter] public string? IconClass { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? Actions { get; set; }
+
+    private string? EffectiveIcon => !string.IsNullOrWhiteSpace(IconClass) ? IconClass : Icon;
+    private RenderFragment? EffectiveActions => Actions ?? ChildContent;
 }

@@ -1,11 +1,42 @@
 @namespace JewerlySystem.Common.Presentation.Components.Atoms
 
-<Tag Color="@Color" Class="@($"soft-tag {CssClass}")">
+<Tag Color="@EffectiveColor" Class="@($"soft-tag {CssClass}")">
+    @if (!string.IsNullOrWhiteSpace(Icon))
+    {
+        <Icon Type="@Icon" Class="me-1" />
+    }
+    @if (!string.IsNullOrWhiteSpace(Text))
+    {
+        @Text
+    }
     @ChildContent
 </Tag>
 
 @code {
+    public enum TagVariant
+    {
+        Default,
+        Primary,
+        Success,
+        Warning,
+        Danger,
+        Info
+    }
+
     [Parameter] public string Color { get; set; } = "blue";
+    [Parameter] public object? Variant { get; set; }
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public string? Text { get; set; }
     [Parameter] public string? CssClass { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string EffectiveColor => Variant switch
+    {
+        TagVariant.Success => "green",
+        TagVariant.Danger => "red",
+        TagVariant.Warning => "gold",
+        TagVariant.Info => "blue",
+        TagVariant.Default => "default",
+        _ => Color
+    };
 }
