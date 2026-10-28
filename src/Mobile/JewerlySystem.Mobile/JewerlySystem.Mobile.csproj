@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+	<PropertyGroup>
+		<TargetFrameworks Condition="'$(BuildingForMaui)' == 'true'">net10.0-android;net10.0-ios</TargetFrameworks>
+		<TargetFrameworks Condition="'$(BuildingForMaui)' != 'true'">net10.0</TargetFrameworks>
+		<OutputType Condition="'$(BuildingForMaui)' == 'true'">Exe</OutputType>
+		<OutputType Condition="'$(BuildingForMaui)' != 'true'">Library</OutputType>
+		<RootNamespace>JewerlySystem.Mobile</RootNamespace>
+		<UseMaui Condition="'$(BuildingForMaui)' == 'true'">true</UseMaui>
+		<SingleProject>true</SingleProject>
+		<EnableDefaultCssItems>false</EnableDefaultCssItems>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+
+		<!-- Display name -->
+		<ApplicationTitle>JewerlySystem</ApplicationTitle>
+
+		<!-- App Identifier -->
+		<ApplicationId>com.jewerlysystem.app</ApplicationId>
+
+		<!-- Versions -->
+		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+		<ApplicationVersion>1</ApplicationVersion>
+
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Common\JewerlySystem.Common.Presentation\JewerlySystem.Common.Presentation.csproj" />
+		<ProjectReference Include="..\..\Modules\Auth\JewerlySystem.Modules.Auth.Presentation\JewerlySystem.Modules.Auth.Presentation.csproj" />
+		<ProjectReference Include="..\..\Modules\Contracts\JewerlySystem.Modules.Contracts.Presentation\JewerlySystem.Modules.Contracts.Presentation.csproj" />
+		<ProjectReference Include="..\..\Modules\Inventory\JewerlySystem.Modules.Inventory.Presentation\JewerlySystem.Modules.Inventory.Presentation.csproj" />
+		<ProjectReference Include="..\..\Modules\Cash\JewerlySystem.Modules.Cash.Presentation\JewerlySystem.Modules.Cash.Presentation.csproj" />
+		<ProjectReference Include="..\..\Modules\Customers\JewerlySystem.Modules.Customers.Presentation\JewerlySystem.Modules.Customers.Presentation.csproj" />
+		<ProjectReference Include="..\..\Modules\Invoicing\JewerlySystem.Modules.Invoicing.Presentation\JewerlySystem.Modules.Invoicing.Presentation.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" />
+	</ItemGroup>
+
+</Project>

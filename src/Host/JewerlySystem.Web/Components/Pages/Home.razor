@@ -1,0 +1,53 @@
+@page "/"
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="p-4 bg-white rounded shadow-sm border-0">
+                <h2 class="fw-bold text-dark">Bienvenido a JewerlySystem</h2>
+                <p class="text-muted mb-0">Plataforma Modular Monolith .NET 10 para gestión de joyería, empeños, inventario, caja y facturación.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-file-earmark-text text-primary fs-3 me-2"></i>
+                        <h5 class="card-title mb-0 fw-bold">Contratos</h5>
+                    </div>
+                    <p class="card-text text-muted">Gestión de contratos de compraventa, empeño, abonos y control de saldos.</p>
+                    <a href="contracts" class="btn btn-outline-primary btn-sm">Ver Contratos</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-box-seam text-warning fs-3 me-2"></i>
+                        <h5 class="card-title mb-0 fw-bold">Inventario</h5>
+                    </div>
+                    <p class="card-text text-muted">Control de stock de joyas de oro y relojería por marca y características.</p>
+                    <a href="inventory" class="btn btn-outline-warning btn-sm">Ver Inventario</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-shield-lock text-success fs-3 me-2"></i>
+                        <h5 class="card-title mb-0 fw-bold">Seguridad & Passkeys</h5>
+                    </div>
+                    <p class="card-text text-muted">Autenticación moderna biométrica FIDO2 / WebAuthn y doble factor (TOTP).</p>
+                    <a href="auth/passkeys" class="btn btn-outline-success btn-sm">Configurar Passkeys</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

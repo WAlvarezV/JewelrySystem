@@ -1,0 +1,90 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+  </Folder>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Host/">
+    <Project Path="src/Host/JewerlySystem.Web/JewerlySystem.Web.csproj" />
+  </Folder>
+  <Folder Name="/src/Mobile/">
+    <Project Path="src/Mobile/JewerlySystem.Mobile/JewerlySystem.Mobile.csproj" />
+  </Folder>
+  <Folder Name="/src/Common/">
+    <Project Path="src/Common/JewerlySystem.Common.Domain/JewerlySystem.Common.Domain.csproj" />
+    <Project Path="src/Common/JewerlySystem.Common.Application/JewerlySystem.Common.Application.csproj" />
+    <Project Path="src/Common/JewerlySystem.Common.Infrastructure/JewerlySystem.Common.Infrastructure.csproj" />
+    <Project Path="src/Common/JewerlySystem.Common.Presentation/JewerlySystem.Common.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Auth/">
+    <Project Path="src/Modules/Auth/JewerlySystem.Modules.Auth.Domain/JewerlySystem.Modules.Auth.Domain.csproj" />
+    <Project Path="src/Modules/Auth/JewerlySystem.Modules.Auth.Application/JewerlySystem.Modules.Auth.Application.csproj" />
+    <Project Path="src/Modules/Auth/JewerlySystem.Modules.Auth.Infrastructure/JewerlySystem.Modules.Auth.Infrastructure.csproj" />
+    <Project Path="src/Modules/Auth/JewerlySystem.Modules.Auth.Presentation/JewerlySystem.Modules.Auth.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Contracts/">
+    <Project Path="src/Modules/Contracts/JewerlySystem.Modules.Contracts.Domain/JewerlySystem.Modules.Contracts.Domain.csproj" />
+    <Project Path="src/Modules/Contracts/JewerlySystem.Modules.Contracts.Application/JewerlySystem.Modules.Contracts.Application.csproj" />
+    <Project Path="src/Modules/Contracts/JewerlySystem.Modules.Contracts.Infrastructure/JewerlySystem.Modules.Contracts.Infrastructure.csproj" />
+    <Project Path="src/Modules/Contracts/JewerlySystem.Modules.Contracts.Presentation/JewerlySystem.Modules.Contracts.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Inventory/">
+    <Project Path="src/Modules/Inventory/JewerlySystem.Modules.Inventory.Domain/JewerlySystem.Modules.Inventory.Domain.csproj" />
+    <Project Path="src/Modules/Inventory/JewerlySystem.Modules.Inventory.Application/JewerlySystem.Modules.Inventory.Application.csproj" />
+    <Project Path="src/Modules/Inventory/JewerlySystem.Modules.Inventory.Infrastructure/JewerlySystem.Modules.Inventory.Infrastructure.csproj" />
+    <Project Path="src/Modules/Inventory/JewerlySystem.Modules.Inventory.Presentation/JewerlySystem.Modules.Inventory.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Cash/">
+    <Project Path="src/Modules/Cash/JewerlySystem.Modules.Cash.Domain/JewerlySystem.Modules.Cash.Domain.csproj" />
+    <Project Path="src/Modules/Cash/JewerlySystem.Modules.Cash.Application/JewerlySystem.Modules.Cash.Application.csproj" />
+    <Project Path="src/Modules/Cash/JewerlySystem.Modules.Cash.Infrastructure/JewerlySystem.Modules.Cash.Infrastructure.csproj" />
+    <Project Path="src/Modules/Cash/JewerlySystem.Modules.Cash.Presentation/JewerlySystem.Modules.Cash.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Customers/">
+    <Project Path="src/Modules/Customers/JewerlySystem.Modules.Customers.Domain/JewerlySystem.Modules.Customers.Domain.csproj" />
+    <Project Path="src/Modules/Customers/JewerlySystem.Modules.Customers.Application/JewerlySystem.Modules.Customers.Application.csproj" />
+    <Project Path="src/Modules/Customers/JewerlySystem.Modules.Customers.Infrastructure/JewerlySystem.Modules.Customers.Infrastructure.csproj" />
+    <Project Path="src/Modules/Customers/JewerlySystem.Modules.Customers.Presentation/JewerlySystem.Modules.Customers.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Invoicing/">
+    <Project Path="src/Modules/Invoicing/JewerlySystem.Modules.Invoicing.Domain/JewerlySystem.Modules.Invoicing.Domain.csproj" />
+    <Project Path="src/Modules/Invoicing/JewerlySystem.Modules.Invoicing.Application/JewerlySystem.Modules.Invoicing.Application.csproj" />
+    <Project Path="src/Modules/Invoicing/JewerlySystem.Modules.Invoicing.Infrastructure/JewerlySystem.Modules.Invoicing.Infrastructure.csproj" />
+    <Project Path="src/Modules/Invoicing/JewerlySystem.Modules.Invoicing.Presentation/JewerlySystem.Modules.Invoicing.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/test/" />
+  <Folder Name="/test/Common/">
+    <Project Path="test/Common/JewerlySystem.Common.UnitTests/JewerlySystem.Common.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/test/Modules/" />
+  <Folder Name="/test/Modules/Auth/">
+    <Project Path="test/Modules/Auth/JewerlySystem.Modules.Auth.UnitTests/JewerlySystem.Modules.Auth.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/test/Modules/Contracts/">
+    <Project Path="test/Modules/Contracts/JewerlySystem.Modules.Contracts.UnitTests/JewerlySystem.Modules.Contracts.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/test/Modules/Inventory/">
+    <Project Path="test/Modules/Inventory/JewerlySystem.Modules.Inventory.UnitTests/JewerlySystem.Modules.Inventory.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/test/Modules/Cash/">
+    <Project Path="test/Modules/Cash/JewerlySystem.Modules.Cash.UnitTests/JewerlySystem.Modules.Cash.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/test/Modules/Customers/">
+    <Project Path="test/Modules/Customers/JewerlySystem.Modules.Customers.UnitTests/JewerlySystem.Modules.Customers.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/test/Modules/Invoicing/">
+    <Project Path="test/Modules/Invoicing/JewerlySystem.Modules.Invoicing.UnitTests/JewerlySystem.Modules.Invoicing.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/test/Architecture/">
+    <Project Path="test/Architecture/JewerlySystem.ArchitectureTests/JewerlySystem.ArchitectureTests.csproj" />
+  </Folder>
+  <Folder Name="/test/Integration/">
+    <Project Path="test/Integration/JewerlySystem.IntegrationTests/JewerlySystem.IntegrationTests.csproj" />
+  </Folder>
+  <Folder Name="/test/E2E/">
+    <Project Path="test/E2E/JewerlySystem.E2E.Tests/JewerlySystem.E2E.Tests.csproj" />
+  </Folder>
+</Solution>

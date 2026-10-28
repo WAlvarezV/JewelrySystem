@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Common\JewerlySystem.Common.Domain\JewerlySystem.Common.Domain.csproj" />
+    <ProjectReference Include="..\..\..\src\Common\JewerlySystem.Common.Application\JewerlySystem.Common.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\Common\JewerlySystem.Common.Infrastructure\JewerlySystem.Common.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Contracts\JewerlySystem.Modules.Contracts.Domain\JewerlySystem.Modules.Contracts.Domain.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Contracts\JewerlySystem.Modules.Contracts.Application\JewerlySystem.Modules.Contracts.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Contracts\JewerlySystem.Modules.Contracts.Infrastructure\JewerlySystem.Modules.Contracts.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Auth\JewerlySystem.Modules.Auth.Domain\JewerlySystem.Modules.Auth.Domain.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Auth\JewerlySystem.Modules.Auth.Application\JewerlySystem.Modules.Auth.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Auth\JewerlySystem.Modules.Auth.Infrastructure\JewerlySystem.Modules.Auth.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="NetArchTest.Rules" />
+  </ItemGroup>
+</Project>

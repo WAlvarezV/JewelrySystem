@@ -1,0 +1,202 @@
+@page "/login"
+@inject ISender Sender
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-gem fs-1 text-primary"></i>
+                        <h3 class="fw-bold mt-2">JewerlySystem</h3>
+                        <p class="text-muted small">Acceso seguro con Contraseña, MFA y Passkeys</p>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(_errorMessage))
+                    {
+                        <div class="alert alert-danger py-2 small" role="alert">
+                            @_errorMessage
+                        </div>
+                    }
+
+                    @if (_requiresMfa)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Código de Verificación MFA (TOTP)</label>
+                            <input @bind="_mfaCode" type="text" class="form-control" placeholder="123456" maxlength="6" autofocus />
+                            <div class="form-text">Ingresa el código de tu aplicación autenticadora.</div>
+                        </div>
+
+                        <button @onclick="HandleMfaSubmit" class="btn btn-primary w-100 py-2 fw-semibold" disabled="@_isLoading">
+                            @if (_isLoading)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                            }
+                            Verificar y Entrar
+                        </button>
+                    }
+                    else
+                    {
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Usuario o Correo</label>
+                            <input @bind="_username" type="text" class="form-control" placeholder="admin" autofocus />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Contraseña</label>
+                            <input @bind="_password" type="password" class="form-control" placeholder="••••••••" />
+                        </div>
+
+                        <button @onclick="HandlePasswordLogin" class="btn btn-primary w-100 py-2 fw-semibold mb-3" disabled="@_isLoading">
+                            @if (_isLoading)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                            }
+                            Iniciar Sesión
+                        </button>
+
+                        <div class="position-relative text-center my-3">
+                            <hr class="text-muted" />
+                            <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">o</span>
+                        </div>
+
+                        <button @onclick="HandlePasskeyLogin" type="button" class="btn btn-outline-secondary w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2" disabled="@_isLoading">
+                            <i class="bi bi-fingerprint fs-5"></i>
+                            <span>Entrar con Passkey / Biometría</span>
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _username = "";
+    private string _password = "";
+    private string _mfaCode = "";
+    private bool _requiresMfa;
+    private string? _userIdForMfa;
+    private bool _isLoading;
+    private string? _errorMessage;
+
+    private async Task HandlePasswordLogin()
+    {
+        _errorMessage = null;
+        if (string.IsNullOrWhiteSpace(_username) || string.IsNullOrWhiteSpace(_password))
+        {
+            _errorMessage = "Por favor completa usuario y contraseña.";
+            return;
+        }
+
+        _isLoading = true;
+        try
+        {
+            var command = new LoginWithPasswordCommand(_username, _password);
+            var result = await Sender.Send(command);
+
+            if (result.IsFailure)
+            {
+                _errorMessage = result.Error.Message;
+                return;
+            }
+
+            var response = result.Value;
+            if (response.RequiresTwoFactor)
+            {
+                _requiresMfa = true;
+                _userIdForMfa = response.UserId;
+            }
+            else if (response.Succeeded)
+            {
+                Navigation.NavigateTo("/", forceLoad: true);
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task HandleMfaSubmit()
+    {
+        if (string.IsNullOrWhiteSpace(_mfaCode))
+        {
+            _errorMessage = "Por favor ingresa el código MFA.";
+            return;
+        }
+
+        _isLoading = true;
+        try
+        {
+            var command = new LoginWithMfaCommand(_mfaCode);
+            var result = await Sender.Send(command);
+
+            if (result.IsFailure)
+            {
+                _errorMessage = result.Error.Message;
+                return;
+            }
+
+            if (result.Value)
+            {
+                Navigation.NavigateTo("/", forceLoad: true);
+            }
+            else
+            {
+                _errorMessage = "Código MFA incorrecto o expirado.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task HandlePasskeyLogin()
+    {
+        _errorMessage = null;
+        _isLoading = true;
+        try
+        {
+            var query = new GetPasskeyAssertionOptionsQuery(string.IsNullOrWhiteSpace(_username) ? null : _username);
+            var optResult = await Sender.Send(query);
+
+            if (optResult.IsFailure)
+            {
+                _errorMessage = optResult.Error.Message;
+                return;
+            }
+
+            var assertionJson = await JS.InvokeAsync<string>("webauthn.getAssertion", optResult.Value);
+            var verifyCommand = new VerifyPasskeyAssertionCommand(assertionJson);
+            var verifyResult = await Sender.Send(verifyCommand);
+
+            if (verifyResult.IsFailure)
+            {
+                _errorMessage = verifyResult.Error.Message;
+                return;
+            }
+
+            Navigation.NavigateTo("/", forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = "Error de autenticación con Passkey: " + ex.Message;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}

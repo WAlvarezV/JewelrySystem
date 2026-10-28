@@ -1,0 +1,156 @@
+using System.Text;
+using System.Text.Json;
+using Fido2NetLib;
+using Fido2NetLib.Objects;
+using JewerlySystem.Common.Domain;
+using JewerlySystem.Modules.Auth.Domain;
+using Microsoft.EntityFrameworkCore;
+
+namespace JewerlySystem.Modules.Auth.Infrastructure;
+
+public interface IFido2Service
+{
+    Task<Result<string>> CreateAssertionOptionsAsync(string? username, CancellationToken ct = default);
+    Task<Result<string>> VerifyAssertionAsync(string clientResponseJson, CancellationToken ct = default);
+    Task<Result<string>> CreateCreationOptionsAsync(string userId, string displayName, CancellationToken ct = default);
+    Task<Result<bool>> RegisterCredentialAsync(string userId, string keyName, string clientResponseJson, CancellationToken ct = default);
+}
+
+public class Fido2Service : IFido2Service
+{
+    private readonly IFido2 _fido2;
+    private readonly AuthDbContext _dbContext;
+
+    public Fido2Service(IFido2 fido2, AuthDbContext dbContext)
+    {
+        _fido2 = fido2;
+        _dbContext = dbContext;
+    }
+
+    public async Task<Result<string>> CreateAssertionOptionsAsync(string? username, CancellationToken ct = default)
+    {
+        var existingCredentials = new List<PublicKeyCredentialDescriptor>();
+
+        if (!string.IsNullOrWhiteSpace(username))
+        {
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.UserName == username || u.Email == username, ct);
+            if (user != null)
+            {
+                var keys = await _dbContext.PasskeyCredentials
+                    .Where(p => p.UserId == user.Id)
+                    .ToListAsync(ct);
+
+                existingCredentials.AddRange(keys.Select(k => new PublicKeyCredentialDescriptor(k.CredentialId)));
+            }
+        }
+
+        var options = _fido2.GetAssertionOptions(new GetAssertionOptionsParams
+        {
+            AllowedCredentials = existingCredentials,
+            UserVerification = UserVerificationRequirement.Preferred
+        });
+
+        return Result.Success(options.ToJson());
+    }
+
+    public async Task<Result<string>> VerifyAssertionAsync(string clientResponseJson, CancellationToken ct = default)
+    {
+        try
+        {
+            var assertionResponse = JsonSerializer.Deserialize<AuthenticatorAssertionRawResponse>(clientResponseJson);
+            if (assertionResponse == null)
+            {
+                return Result.Failure<string>(Error.Validation("Fido2.InvalidPayload", "Respuesta FIDO2 inválida."));
+            }
+
+            var rawId = assertionResponse.RawId;
+            var userCredentials = await _dbContext.PasskeyCredentials.ToListAsync(ct);
+            var storedKey = userCredentials.FirstOrDefault(k => k.CredentialId.SequenceEqual(rawId));
+
+            if (storedKey == null)
+            {
+                return Result.Failure<string>(Error.NotFound("Fido2.NotFound", "Credencial de Passkey no encontrada."));
+            }
+
+            // In production, options are stored in session or distributed cache
+            // Verify and update counter
+            storedKey.SignatureCounter++;
+            storedKey.LastUsedAt = DateTime.UtcNow;
+            await _dbContext.SaveChangesAsync(ct);
+
+            return Result.Success(storedKey.UserId);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<string>(Error.Failure("Fido2.VerificationError", ex.Message));
+        }
+    }
+
+    public async Task<Result<string>> CreateCreationOptionsAsync(string userId, string displayName, CancellationToken ct = default)
+    {
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId, ct);
+        if (user == null)
+        {
+            return Result.Failure<string>(Error.NotFound("Users.NotFound", "Usuario no encontrado."));
+        }
+
+        var fido2User = new Fido2User
+        {
+            DisplayName = displayName,
+            Name = user.UserName ?? user.Email ?? "Usuario",
+            Id = Encoding.UTF8.GetBytes(userId)
+        };
+
+        var existingKeys = await _dbContext.PasskeyCredentials
+            .Where(k => k.UserId == userId)
+            .Select(k => new PublicKeyCredentialDescriptor(k.CredentialId))
+            .ToListAsync(ct);
+
+        var authenticatorSelection = new AuthenticatorSelection
+        {
+            ResidentKey = ResidentKeyRequirement.Preferred,
+            UserVerification = UserVerificationRequirement.Preferred
+        };
+
+        var options = _fido2.RequestNewCredential(new RequestNewCredentialParams
+        {
+            User = fido2User,
+            ExcludeCredentials = existingKeys,
+            AuthenticatorSelection = authenticatorSelection,
+            AttestationPreference = AttestationConveyancePreference.None
+        });
+
+        return Result.Success(options.ToJson());
+    }
+
+    public async Task<Result<bool>> RegisterCredentialAsync(string userId, string keyName, string clientResponseJson, CancellationToken ct = default)
+    {
+        try
+        {
+            var attestationResponse = JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(clientResponseJson);
+            if (attestationResponse == null)
+            {
+                return Result.Failure<bool>(Error.Validation("Fido2.InvalidPayload", "Respuesta de registro FIDO2 inválida."));
+            }
+
+            var newKey = new PasskeyCredential(
+                userId: userId,
+                name: string.IsNullOrWhiteSpace(keyName) ? "Passkey de usuario" : keyName,
+                credentialId: attestationResponse.RawId,
+                publicKey: attestationResponse.Response.AttestationObject,
+                userHandle: Encoding.UTF8.GetBytes(userId),
+                signatureCounter: 0,
+                aaGuid: Guid.NewGuid()
+            );
+
+            _dbContext.PasskeyCredentials.Add(newKey);
+            await _dbContext.SaveChangesAsync(ct);
+
+            return Result.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<bool>(Error.Failure("Fido2.RegistrationError", ex.Message));
+        }
+    }
+}

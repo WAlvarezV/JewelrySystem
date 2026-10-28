@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\JewerlySystem.Modules.Contracts.Application\JewerlySystem.Modules.Contracts.Application.csproj" />
+    <ProjectReference Include="..\..\..\Common\JewerlySystem.Common.Infrastructure\JewerlySystem.Common.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+  </ItemGroup>
+</Project>
+

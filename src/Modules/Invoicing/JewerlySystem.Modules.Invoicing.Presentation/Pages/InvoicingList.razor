@@ -1,0 +1,70 @@
+@page "/invoices"
+@inject ISender Sender
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold"><i class="bi bi-receipt me-2"></i>Facturación y Cuentas por Pagar</h3>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="d-flex justify-content-center p-5">
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
+    }
+    else if (_invoices == null || !_invoices.Any())
+    {
+        <div class="card p-4 text-center text-muted">
+            <p class="mb-0">No hay facturas registradas.</p>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Factura #</th>
+                            <th>Fecha</th>
+                            <th>Límite de Pago</th>
+                            <th>Valor Total</th>
+                            <th>Abono</th>
+                            <th>Saldo Pendiente</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var inv in _invoices)
+                        {
+                            <tr>
+                                <td class="fw-semibold">#@inv.Number</td>
+                                <td>@inv.Date.ToShortDateString()</td>
+                                <td>@inv.PaymentLimitDate.ToShortDateString()</td>
+                                <td>@inv.Value.ToString("C0")</td>
+                                <td>@inv.CreditValue.ToString("C0")</td>
+                                <td class="fw-bold @(inv.BalanceValue > 0 ? "text-danger" : "text-success")">
+                                    @inv.BalanceValue.ToString("C0")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<InvoiceDto>? _invoices;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await Sender.Send(new GetInvoicesListQuery());
+        if (result.IsSuccess)
+        {
+            _invoices = result.Value;
+        }
+        _isLoading = false;
+    }
+}

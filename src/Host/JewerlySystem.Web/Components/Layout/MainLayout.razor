@@ -1,0 +1,22 @@
+@inherits LayoutComponentBase
+
+<div class="d-flex" style="min-height: 100vh;">
+    <div class="bg-dark text-white p-3" style="width: 260px; min-height: 100vh;">
+        <NavMenu />
+    </div>
+
+    <div class="flex-grow-1 d-flex flex-column bg-light">
+        <header class="navbar navbar-white bg-white border-bottom px-4 py-2 d-flex justify-content-between align-items-center">
+            <span class="text-muted small">Sistema de Joyería y Relojería</span>
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                    <i class="bi bi-shield-check me-1"></i> Passkeys & MFA Activo
+                </span>
+            </div>
+        </header>
+
+        <main class="p-4 flex-grow-1">
+            @Body
+        </main>
+    </div>
+</div>

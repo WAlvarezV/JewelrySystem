@@ -1,0 +1,70 @@
+@page "/inventory"
+@inject ISender Sender
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold"><i class="bi bi-box-seam me-2"></i>Inventario de Joyas y Relojes</h3>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="d-flex justify-content-center p-5">
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
+    }
+    else if (_items == null || !_items.Any())
+    {
+        <div class="card p-4 text-center text-muted">
+            <p class="mb-0">No hay artículos en inventario.</p>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Referencia</th>
+                            <th>Descripción</th>
+                            <th>Costo</th>
+                            <th>Fecha Entrada</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var i in _items)
+                        {
+                            <tr>
+                                <td class="fw-semibold">#@i.Reference</td>
+                                <td>@i.Description</td>
+                                <td>@i.CostValue.ToString("C0")</td>
+                                <td>@i.DateOfEntry.ToShortDateString()</td>
+                                <td>
+                                    <span class="badge @(i.Active ? "bg-success" : "bg-secondary")">
+                                        @(i.Active ? "Disponible" : "Vendido")
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<ItemDto>? _items;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await Sender.Send(new GetItemsListQuery());
+        if (result.IsSuccess)
+        {
+            _items = result.Value;
+        }
+        _isLoading = false;
+    }
+}

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\JewerlySystem.Modules.Auth.Domain\JewerlySystem.Modules.Auth.Domain.csproj" />
+    <ProjectReference Include="..\..\..\Common\JewerlySystem.Common.Application\JewerlySystem.Common.Application.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MediatR" />
+    <PackageReference Include="FluentValidation" />
+  </ItemGroup>
+</Project>
+

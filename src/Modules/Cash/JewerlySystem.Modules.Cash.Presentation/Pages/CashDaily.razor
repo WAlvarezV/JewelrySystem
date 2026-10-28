@@ -1,0 +1,74 @@
+@page "/cash"
+@inject ISender Sender
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold"><i class="bi bi-cash-stack me-2"></i>Movimientos Diarios de Caja</h3>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="d-flex justify-content-center p-5">
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
+    }
+    else if (_records == null || !_records.Any())
+    {
+        <div class="card p-4 text-center text-muted">
+            <p class="mb-0">No hay movimientos de caja registrados hoy.</p>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Número</th>
+                            <th>Fecha</th>
+                            <th>Descripción</th>
+                            <th>Tipo</th>
+                            <th>Medio de Pago</th>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var r in _records)
+                        {
+                            <tr>
+                                <td class="fw-semibold">#@r.Number</td>
+                                <td>@r.Date.ToShortDateString()</td>
+                                <td>@r.Description</td>
+                                <td>
+                                    <span class="badge @(r.RecordType == RecordType.INGRESO ? "bg-success" : "bg-danger")">
+                                        @r.RecordType
+                                    </span>
+                                </td>
+                                <td>@r.PaymentMethod</td>
+                                <td class="fw-bold @(r.RecordType == RecordType.INGRESO ? "text-success" : "text-danger")">
+                                    @(r.RecordType == RecordType.INGRESO ? "+" : "-")@r.Value.ToString("C0")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<DailyRecordDto>? _records;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await Sender.Send(new GetDailyRecordsListQuery());
+        if (result.IsSuccess)
+        {
+            _records = result.Value;
+        }
+        _isLoading = false;
+    }
+}

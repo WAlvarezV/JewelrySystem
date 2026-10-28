@@ -1,0 +1,84 @@
+@page "/auth/passkeys"
+@inject ISender Sender
+@inject IJSRuntime JS
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-key me-2"></i>Gestión de Passkeys (Llaves de Acceso)</h5>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted">Las Passkeys te permiten iniciar sesión de manera rápida y segura utilizando el sensor biométrico de tu teléfono (Touch ID, Face ID), Windows Hello o una llave de seguridad física.</p>
+
+                    @if (!string.IsNullOrEmpty(_message))
+                    {
+                        <div class="alert alert-info py-2 small">@_message</div>
+                    }
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nombre de la llave (opcional)</label>
+                        <input @bind="_keyName" class="form-control" placeholder="Ej: Mi iPhone 15, Laptop de trabajo" />
+                    </div>
+
+                    <button @onclick="RegisterNewPasskey" class="btn btn-primary fw-semibold" disabled="@_isLoading">
+                        @if (_isLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        <i class="bi bi-plus-circle me-1"></i> Registrar Nueva Passkey
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _keyName = "";
+    private bool _isLoading;
+    private string? _message;
+
+    private async Task RegisterNewPasskey()
+    {
+        _message = null;
+        _isLoading = true;
+        try
+        {
+            // Simulated user id for presentation; in full app, obtained from AuthenticationStateProvider
+            var userId = "current-user-id";
+            var displayName = "Usuario Pomona";
+
+            var optQuery = new GetPasskeyCreationOptionsQuery(userId, displayName);
+            var optResult = await Sender.Send(optQuery);
+
+            if (optResult.IsFailure)
+            {
+                _message = optResult.Error.Message;
+                return;
+            }
+
+            var attestationJson = await JS.InvokeAsync<string>("webauthn.createPasskey", optResult.Value);
+            var regCommand = new RegisterPasskeyCommand(userId, _keyName, attestationJson);
+            var regResult = await Sender.Send(regCommand);
+
+            if (regResult.IsFailure)
+            {
+                _message = regResult.Error.Message;
+                return;
+            }
+
+            _message = "¡Passkey registrada exitosamente!";
+            _keyName = "";
+        }
+        catch (Exception ex)
+        {
+            _message = "Error registrando Passkey: " + ex.Message;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}

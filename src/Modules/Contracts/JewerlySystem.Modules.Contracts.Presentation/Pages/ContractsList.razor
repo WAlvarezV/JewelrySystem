@@ -1,0 +1,97 @@
+@page "/contracts"
+@inject ISender Sender
+@inject NavigationManager Navigation
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold"><i class="bi bi-file-earmark-text me-2"></i>Contratos</h3>
+        <button class="btn btn-primary" @onclick="CreateNewContract">
+            <i class="bi bi-plus-lg me-1"></i> Nuevo Contrato
+        </button>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="d-flex justify-content-center p-5">
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
+    }
+    else if (_contracts == null || !_contracts.Any())
+    {
+        <div class="card p-4 text-center text-muted">
+            <p class="mb-0">No se encontraron contratos registrados.</p>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Número</th>
+                            <th>Fecha</th>
+                            <th>Entrega</th>
+                            <th>Valor</th>
+                            <th>Saldo</th>
+                            <th>Peso (g)</th>
+                            <th>Estado</th>
+                            <th>Descripción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in _contracts)
+                        {
+                            <tr>
+                                <td class="fw-semibold">#@c.Number</td>
+                                <td>@c.Date.ToShortDateString()</td>
+                                <td>@c.DeliveryDate.ToShortDateString()</td>
+                                <td>@c.Value.ToString("C0")</td>
+                                <td><span class="@(c.Balance > 0 ? "text-danger fw-semibold" : "text-success")">@c.Balance.ToString("C0")</span></td>
+                                <td>@c.Weight.ToString("F2")</td>
+                                <td>
+                                    <span class="badge @(c.State == ContractState.Recibido ? "bg-success" : "bg-primary")">
+                                        @c.State
+                                    </span>
+                                </td>
+                                <td class="text-truncate" style="max-width: 200px;">@c.Description</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<ContractDto>? _contracts;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadContracts();
+    }
+
+    private async Task LoadContracts()
+    {
+        _isLoading = true;
+        try
+        {
+            var result = await Sender.Send(new GetContractsListQuery());
+            if (result.IsSuccess)
+            {
+                _contracts = result.Value;
+            }
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void CreateNewContract()
+    {
+        // Navigation or modal
+    }
+}

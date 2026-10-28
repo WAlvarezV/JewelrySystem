@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Common\JewerlySystem.Common.Domain\JewerlySystem.Common.Domain.csproj" />
+  </ItemGroup>
+</Project>
+

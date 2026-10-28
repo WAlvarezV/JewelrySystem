@@ -1,0 +1,23 @@
+@using System.Reflection
+@using Microsoft.AspNetCore.Components.Routing
+
+<Router AppAssembly="@typeof(Main).Assembly" AdditionalAssemblies="AdditionalAssemblies">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" />
+    </Found>
+    <NotFound>
+        <p role="alert">Página no encontrada.</p>
+    </NotFound>
+</Router>
+
+@code {
+    private static readonly Assembly[] AdditionalAssemblies = new[]
+    {
+        typeof(Modules.Auth.Presentation.Pages.Login).Assembly,
+        typeof(Modules.Contracts.Presentation.Pages.ContractsList).Assembly,
+        typeof(Modules.Inventory.Presentation.Pages.InventoryList).Assembly,
+        typeof(Modules.Cash.Presentation.Pages.CashDaily).Assembly,
+        typeof(Modules.Customers.Presentation.Pages.CustomersList).Assembly,
+        typeof(Modules.Invoicing.Presentation.Pages.InvoicingList).Assembly,
+    };
+}
