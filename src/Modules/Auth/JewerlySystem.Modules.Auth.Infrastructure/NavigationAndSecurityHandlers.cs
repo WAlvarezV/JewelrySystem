@@ -33,6 +33,8 @@ public class NavigationAndSecurityHandlers :
     private readonly AuthDbContext _dbContext;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
+    private static volatile bool _isSeeded = false;
+    private static readonly SemaphoreSlim _seedLock = new(1, 1);
 
     public NavigationAndSecurityHandlers(
         AuthDbContext dbContext,
@@ -44,9 +46,37 @@ public class NavigationAndSecurityHandlers :
         _roleManager = roleManager;
     }
 
+    private static readonly SemaphoreSlim _dbLock = new(1, 1);
+
+    private async Task<T> ExecuteAsync<T>(Func<Task<T>> action)
+    {
+        await _dbLock.WaitAsync();
+        try
+        {
+            return await action();
+        }
+        finally
+        {
+            _dbLock.Release();
+        }
+    }
+
     private async Task EnsureNavigationSeededAsync(CancellationToken ct)
     {
-        // 1. Seed Modules and Menus if missing
+        if (_isSeeded)
+        {
+            return;
+        }
+
+        await _seedLock.WaitAsync(ct);
+        try
+        {
+            if (_isSeeded)
+            {
+                return;
+            }
+
+            // 1. Seed Modules and Menus if missing
         if (!await _dbContext.AppModules.AnyAsync(ct))
         {
             var defaultModules = new List<AppModule>
@@ -173,80 +203,108 @@ public class NavigationAndSecurityHandlers :
         }
 
         await _dbContext.SaveChangesAsync(ct);
-    }
-
-    public async Task<Result<IReadOnlyList<AppModuleDto>>> Handle(GetNavigationModulesQuery request, CancellationToken cancellationToken)
-    {
-        await EnsureNavigationSeededAsync(cancellationToken);
-
-        var modules = await _dbContext.AppModules
-            .Where(m => m.IsActive)
-            .OrderBy(m => m.Order)
-            .Select(m => new AppModuleDto(m.Id, m.Key, m.Name, m.Icon, m.Description, m.Order, m.IsActive))
-            .ToListAsync(cancellationToken);
-
-        return Result.Success<IReadOnlyList<AppModuleDto>>(modules);
-    }
-
-    public async Task<Result<IReadOnlyList<MenuDto>>> Handle(GetNavigationMenusQuery request, CancellationToken cancellationToken)
-    {
-        await EnsureNavigationSeededAsync(cancellationToken);
-
-        var query = _dbContext.MenuItems.AsQueryable();
-        if (!string.IsNullOrWhiteSpace(request.ModuleKey) && !request.ModuleKey.Equals("ALL", StringComparison.OrdinalIgnoreCase))
-        {
-            query = query.Where(m => m.ModuleKey == request.ModuleKey);
+        _isSeeded = true;
         }
-
-        var allItems = await query
-            .OrderBy(m => m.Order)
-            .Select(m => new MenuDto
-            {
-                Id = m.Id,
-                ModuleKey = m.ModuleKey,
-                ParentId = m.ParentId,
-                Name = m.Name,
-                Route = m.Route,
-                Icon = m.Icon,
-                Order = m.Order,
-                IsActive = m.IsActive,
-                RequiredPermission = m.RequiredPermission
-            })
-            .ToListAsync(cancellationToken);
-
-        // Build hierarchy for root menus
-        var rootMenus = allItems.Where(m => m.ParentId == null).ToList();
-        foreach (var root in rootMenus)
+        finally
         {
-            root.Children = allItems.Where(m => m.ParentId == root.Id).OrderBy(m => m.Order).ToList();
+            _seedLock.Release();
         }
-
-        return Result.Success<IReadOnlyList<MenuDto>>(rootMenus);
     }
 
-    public async Task<Result<IReadOnlyList<MenuDto>>> Handle(GetUserFavoritesQuery request, CancellationToken cancellationToken)
-    {
-        await EnsureNavigationSeededAsync(cancellationToken);
-
-        var pref = await _dbContext.UserPreferences.FirstOrDefaultAsync(p => p.UserId == request.UserId, cancellationToken);
-        var favoriteIds = new List<Guid>();
-        if (pref != null && !string.IsNullOrWhiteSpace(pref.FavoriteMenuIdsJson))
+    public Task<Result<IReadOnlyList<AppModuleDto>>> Handle(GetNavigationModulesQuery request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
         {
-            try
+            await EnsureNavigationSeededAsync(cancellationToken);
+
+            var modules = await _dbContext.AppModules
+                .AsNoTracking()
+                .Where(m => m.IsActive)
+                .OrderBy(m => m.Order)
+                .Select(m => new AppModuleDto(m.Id, m.Key, m.Name, m.Icon, m.Description, m.Order, m.IsActive))
+                .ToListAsync(cancellationToken);
+
+            return Result.Success<IReadOnlyList<AppModuleDto>>(modules);
+        });
+
+    public Task<Result<IReadOnlyList<MenuDto>>> Handle(GetNavigationMenusQuery request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
+        {
+            await EnsureNavigationSeededAsync(cancellationToken);
+
+            var query = _dbContext.MenuItems.AsNoTracking().AsQueryable();
+            if (!string.IsNullOrWhiteSpace(request.ModuleKey) && !request.ModuleKey.Equals("ALL", StringComparison.OrdinalIgnoreCase))
             {
-                favoriteIds = JsonSerializer.Deserialize<List<Guid>>(pref.FavoriteMenuIdsJson) ?? [];
+                query = query.Where(m => m.ModuleKey == request.ModuleKey);
             }
-            catch
-            {
-                favoriteIds = [];
-            }
-        }
 
-        // If user has no custom favorites set yet, provide default shortcuts
-        if (favoriteIds.Count == 0)
+            var allItems = await query
+                .OrderBy(m => m.Order)
+                .Select(m => new MenuDto
+                {
+                    Id = m.Id,
+                    ModuleKey = m.ModuleKey,
+                    ParentId = m.ParentId,
+                    Name = m.Name,
+                    Route = m.Route,
+                    Icon = m.Icon,
+                    Order = m.Order,
+                    IsActive = m.IsActive,
+                    RequiredPermission = m.RequiredPermission
+                })
+                .ToListAsync(cancellationToken);
+
+            // Build hierarchy for root menus
+            var rootMenus = allItems.Where(m => m.ParentId == null).ToList();
+            foreach (var root in rootMenus)
+            {
+                root.Children = allItems.Where(m => m.ParentId == root.Id).OrderBy(m => m.Order).ToList();
+            }
+
+            return Result.Success<IReadOnlyList<MenuDto>>(rootMenus);
+        });
+
+    public Task<Result<IReadOnlyList<MenuDto>>> Handle(GetUserFavoritesQuery request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
         {
-            var defaultFavs = await _dbContext.MenuItems
-                .Where(m => m.IsActive && (m.Route == "/contracts" || m.Route == "/inventory" || m.Route == "/cash"))
+            await EnsureNavigationSeededAsync(cancellationToken);
+
+            var pref = await _dbContext.UserPreferences.AsNoTracking().FirstOrDefaultAsync(p => p.UserId == request.UserId, cancellationToken);
+            var favoriteIds = new List<Guid>();
+            if (pref != null && !string.IsNullOrWhiteSpace(pref.FavoriteMenuIdsJson))
+            {
+                try
+                {
+                    favoriteIds = JsonSerializer.Deserialize<List<Guid>>(pref.FavoriteMenuIdsJson) ?? [];
+                }
+                catch
+                {
+                    favoriteIds = [];
+                }
+            }
+
+            // If user has no custom favorites set yet, provide default shortcuts
+            if (favoriteIds.Count == 0)
+            {
+                var defaultFavs = await _dbContext.MenuItems
+                    .AsNoTracking()
+                    .Where(m => m.IsActive && (m.Route == "/contracts" || m.Route == "/inventory" || m.Route == "/cash"))
+                    .Select(m => new MenuDto
+                    {
+                        Id = m.Id,
+                        ModuleKey = m.ModuleKey,
+                        Name = m.Name,
+                        Route = m.Route,
+                        Icon = m.Icon,
+                        Order = m.Order,
+                        IsActive = m.IsActive
+                    })
+                    .ToListAsync(cancellationToken);
+                return Result.Success<IReadOnlyList<MenuDto>>(defaultFavs);
+            }
+
+            var favorites = await _dbContext.MenuItems
+                .AsNoTracking()
+                .Where(m => favoriteIds.Contains(m.Id) && m.IsActive)
                 .Select(m => new MenuDto
                 {
                     Id = m.Id,
@@ -258,27 +316,12 @@ public class NavigationAndSecurityHandlers :
                     IsActive = m.IsActive
                 })
                 .ToListAsync(cancellationToken);
-            return Result.Success<IReadOnlyList<MenuDto>>(defaultFavs);
-        }
 
-        var favorites = await _dbContext.MenuItems
-            .Where(m => favoriteIds.Contains(m.Id) && m.IsActive)
-            .Select(m => new MenuDto
-            {
-                Id = m.Id,
-                ModuleKey = m.ModuleKey,
-                Name = m.Name,
-                Route = m.Route,
-                Icon = m.Icon,
-                Order = m.Order,
-                IsActive = m.IsActive
-            })
-            .ToListAsync(cancellationToken);
+            return Result.Success<IReadOnlyList<MenuDto>>(favorites);
+        });
 
-        return Result.Success<IReadOnlyList<MenuDto>>(favorites);
-    }
-
-    public async Task<Result<bool>> Handle(ToggleUserFavoriteCommand request, CancellationToken cancellationToken)
+    public Task<Result<bool>> Handle(ToggleUserFavoriteCommand request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
     {
         var pref = await _dbContext.UserPreferences.FirstOrDefaultAsync(p => p.UserId == request.UserId, cancellationToken);
         var favoriteIds = new List<Guid>();
@@ -320,9 +363,10 @@ public class NavigationAndSecurityHandlers :
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success(true);
-    }
+    });
 
-    public async Task<Result<Guid>> Handle(CreateModuleCommand request, CancellationToken cancellationToken)
+    public Task<Result<Guid>> Handle(CreateModuleCommand request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
     {
         var module = new AppModule
         {
@@ -338,9 +382,10 @@ public class NavigationAndSecurityHandlers :
         _dbContext.AppModules.Add(module);
         await _dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success(module.Id);
-    }
+    });
 
-    public async Task<Result<bool>> Handle(UpdateModuleCommand request, CancellationToken cancellationToken)
+    public Task<Result<bool>> Handle(UpdateModuleCommand request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
     {
         var module = await _dbContext.AppModules.FindAsync([request.Id], cancellationToken);
         if (module == null) return Result.Failure<bool>(Error.NotFound("Module.NotFound", "Módulo no encontrado."));
@@ -354,9 +399,10 @@ public class NavigationAndSecurityHandlers :
 
         await _dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success(true);
-    }
+    });
 
-    public async Task<Result<bool>> Handle(ToggleModuleStatusCommand request, CancellationToken cancellationToken)
+    public Task<Result<bool>> Handle(ToggleModuleStatusCommand request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
     {
         var module = await _dbContext.AppModules.FindAsync([request.Id], cancellationToken);
         if (module == null) return Result.Failure<bool>(Error.NotFound("Module.NotFound", "Módulo no encontrado."));
@@ -364,9 +410,10 @@ public class NavigationAndSecurityHandlers :
         module.IsActive = !module.IsActive;
         await _dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success(true);
-    }
+    });
 
-    public async Task<Result<Guid>> Handle(CreateMenuCommand request, CancellationToken cancellationToken)
+    public Task<Result<Guid>> Handle(CreateMenuCommand request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
     {
         var menu = new MenuItem
         {
@@ -383,9 +430,10 @@ public class NavigationAndSecurityHandlers :
         _dbContext.MenuItems.Add(menu);
         await _dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success(menu.Id);
-    }
+    });
 
-    public async Task<Result<bool>> Handle(UpdateMenuCommand request, CancellationToken cancellationToken)
+    public Task<Result<bool>> Handle(UpdateMenuCommand request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
     {
         var menu = await _dbContext.MenuItems.FindAsync([request.Id], cancellationToken);
         if (menu == null) return Result.Failure<bool>(Error.NotFound("Menu.NotFound", "Menú no encontrado."));
@@ -400,9 +448,10 @@ public class NavigationAndSecurityHandlers :
 
         await _dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success(true);
-    }
+    });
 
-    public async Task<Result<bool>> Handle(ToggleMenuStatusCommand request, CancellationToken cancellationToken)
+    public Task<Result<bool>> Handle(ToggleMenuStatusCommand request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
     {
         var menu = await _dbContext.MenuItems.FindAsync([request.Id], cancellationToken);
         if (menu == null) return Result.Failure<bool>(Error.NotFound("Menu.NotFound", "Menú no encontrado."));
@@ -410,9 +459,10 @@ public class NavigationAndSecurityHandlers :
         menu.IsActive = !menu.IsActive;
         await _dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success(true);
-    }
+    });
 
-    public async Task<Result<IReadOnlyList<UserItemDto>>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
+    public Task<Result<IReadOnlyList<UserItemDto>>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
     {
         var users = await _userManager.Users.ToListAsync(cancellationToken);
         var passkeyCounts = await _dbContext.PasskeyCredentials
@@ -439,9 +489,10 @@ public class NavigationAndSecurityHandlers :
         }
 
         return Result.Success<IReadOnlyList<UserItemDto>>(result);
-    }
+    });
 
-    public async Task<Result<string>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+    public Task<Result<string>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
     {
         var user = new ApplicationUser
         {
@@ -470,9 +521,10 @@ public class NavigationAndSecurityHandlers :
         }
 
         return Result.Success(user.Id);
-    }
+    });
 
-    public async Task<Result<bool>> Handle(ToggleUserStatusCommand request, CancellationToken cancellationToken)
+    public Task<Result<bool>> Handle(ToggleUserStatusCommand request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
     {
         var user = await _userManager.FindByIdAsync(request.UserId);
         if (user == null) return Result.Failure<bool>(Error.NotFound("User.NotFound", "Usuario no encontrado."));
@@ -480,9 +532,10 @@ public class NavigationAndSecurityHandlers :
         user.IsActive = !user.IsActive;
         await _userManager.UpdateAsync(user);
         return Result.Success(true);
-    }
+    });
 
-    public async Task<Result<bool>> Handle(AssignUserRoleCommand request, CancellationToken cancellationToken)
+    public Task<Result<bool>> Handle(AssignUserRoleCommand request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
     {
         var user = await _userManager.FindByIdAsync(request.UserId);
         if (user == null) return Result.Failure<bool>(Error.NotFound("User.NotFound", "Usuario no encontrado."));
@@ -497,9 +550,10 @@ public class NavigationAndSecurityHandlers :
         await _userManager.AddToRoleAsync(user, request.Role);
 
         return Result.Success(true);
-    }
+    });
 
-    public async Task<Result<IReadOnlyList<RoleItemDto>>> Handle(GetAllRolesQuery request, CancellationToken cancellationToken)
+    public Task<Result<IReadOnlyList<RoleItemDto>>> Handle(GetAllRolesQuery request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
     {
         var roles = await _roleManager.Roles.ToListAsync(cancellationToken);
         var result = new List<RoleItemDto>();
@@ -515,7 +569,7 @@ public class NavigationAndSecurityHandlers :
         }
 
         return Result.Success<IReadOnlyList<RoleItemDto>>(result);
-    }
+    });
 
     private static string GetRoleDescription(string roleName) => roleName switch
     {
@@ -527,7 +581,8 @@ public class NavigationAndSecurityHandlers :
         _ => "Rol de operación general del sistema"
     };
 
-    public async Task<Result<string>> Handle(CreateRoleCommand request, CancellationToken cancellationToken)
+    public Task<Result<string>> Handle(CreateRoleCommand request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
     {
         if (await _roleManager.RoleExistsAsync(request.Name))
         {
@@ -542,9 +597,10 @@ public class NavigationAndSecurityHandlers :
         }
 
         return Result.Success(role.Id);
-    }
+    });
 
-    public async Task<Result<IReadOnlyList<PermissionItemDto>>> Handle(GetPermissionsByRoleQuery request, CancellationToken cancellationToken)
+    public Task<Result<IReadOnlyList<PermissionItemDto>>> Handle(GetPermissionsByRoleQuery request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
     {
         await EnsureNavigationSeededAsync(cancellationToken);
 
@@ -590,9 +646,10 @@ public class NavigationAndSecurityHandlers :
         }
 
         return Result.Success<IReadOnlyList<PermissionItemDto>>(list);
-    }
+    });
 
-    public async Task<Result<bool>> Handle(SavePermissionsCommand request, CancellationToken cancellationToken)
+    public Task<Result<bool>> Handle(SavePermissionsCommand request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
     {
         var existing = await _dbContext.RolePermissions
             .Where(p => p.RoleName == request.RoleName)
@@ -617,9 +674,10 @@ public class NavigationAndSecurityHandlers :
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success(true);
-    }
+    });
 
-    public async Task<Result<IReadOnlyList<PasskeyItemDto>>> Handle(GetPasskeysByUserQuery request, CancellationToken cancellationToken)
+    public Task<Result<IReadOnlyList<PasskeyItemDto>>> Handle(GetPasskeysByUserQuery request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
     {
         var user = await _userManager.FindByIdAsync(request.UserId)
             ?? await _userManager.FindByEmailAsync(request.UserId)
@@ -634,9 +692,10 @@ public class NavigationAndSecurityHandlers :
             .ToListAsync(cancellationToken);
 
         return Result.Success<IReadOnlyList<PasskeyItemDto>>(keys);
-    }
+    });
 
-    public async Task<Result<bool>> Handle(DeletePasskeyCommand request, CancellationToken cancellationToken)
+    public Task<Result<bool>> Handle(DeletePasskeyCommand request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
     {
         var key = await _dbContext.PasskeyCredentials.FindAsync([request.Id], cancellationToken);
         if (key == null) return Result.Failure<bool>(Error.NotFound("Passkey.NotFound", "Passkey no encontrada."));
@@ -644,5 +703,5 @@ public class NavigationAndSecurityHandlers :
         _dbContext.PasskeyCredentials.Remove(key);
         await _dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success(true);
-    }
+    });
 }

@@ -171,17 +171,18 @@
     private bool _showFavDrawer;
     private string _lastModuleKey = "";
 
-    protected override async Task OnParametersSetAsync()
+    protected override void OnParametersSet()
     {
         if (_lastModuleKey != ActiveModuleKey)
         {
             _lastModuleKey = ActiveModuleKey;
-            await LoadMenusForActiveModuleAsync();
+            FilterMenus();
         }
     }
 
     protected override async Task OnInitializedAsync()
     {
+        _lastModuleKey = ActiveModuleKey;
         await LoadAllMenusAndFavoritesAsync();
     }
 
@@ -201,7 +202,7 @@
                 _favorites = favRes.Value.ToList();
             }
 
-            await LoadMenusForActiveModuleAsync();
+            FilterMenus();
         }
         catch
         {
@@ -213,24 +214,17 @@
         }
     }
 
-    private async Task LoadMenusForActiveModuleAsync()
+    private void FilterMenus()
     {
-        _isLoading = true;
-        try
+        if (string.IsNullOrWhiteSpace(ActiveModuleKey) || ActiveModuleKey.Equals("ALL", StringComparison.OrdinalIgnoreCase))
         {
-            var res = await Sender.Send(new GetNavigationMenusQuery(ActiveModuleKey));
-            if (res.IsSuccess)
-            {
-                _moduleMenus = res.Value.ToList();
-            }
+            _moduleMenus = _allMenus.Where(m => m.ParentId == null).ToList();
         }
-        catch
+        else
         {
-            _moduleMenus = [];
-        }
-        finally
-        {
-            _isLoading = false;
+            _moduleMenus = _allMenus
+                .Where(m => string.Equals(m.ModuleKey, ActiveModuleKey, StringComparison.OrdinalIgnoreCase))
+                .ToList();
         }
     }
 
