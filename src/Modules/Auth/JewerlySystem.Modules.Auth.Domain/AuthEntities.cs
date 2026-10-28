@@ -57,3 +57,48 @@ public class PasskeyCredential
         CreatedAt = DateTime.UtcNow;
     }
 }
+
+public class AppModule
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Key { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Icon { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public int Order { get; set; }
+    public bool IsActive { get; set; } = true;
+}
+
+public class MenuItem
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string ModuleKey { get; set; } = string.Empty;
+    public Guid? ParentId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Route { get; set; } = string.Empty;
+    public string Icon { get; set; } = string.Empty;
+    public int Order { get; set; }
+    public bool IsActive { get; set; } = true;
+    public string? RequiredPermission { get; set; }
+}
+
+public class UserMenuPreference
+{
+    public string UserId { get; set; } = string.Empty;
+    public string FavoriteMenuIdsJson { get; set; } = "[]";
+    public string ModuleOrderKeysJson { get; set; } = "[]";
+    public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+}
+
+public class RolePermission
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string RoleName { get; set; } = string.Empty;
+    public string ModuleKey { get; set; } = string.Empty;
+    public string MenuRoute { get; set; } = string.Empty;
+    public bool CanView { get; set; } = true;
+    public bool CanCreate { get; set; }
+    public bool CanEdit { get; set; }
+    public bool CanDelete { get; set; }
+    public bool CanAdmin { get; set; }
+}

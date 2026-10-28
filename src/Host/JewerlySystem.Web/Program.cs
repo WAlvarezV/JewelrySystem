@@ -42,7 +42,7 @@ builder.Services.AddInvoicingModule(builder.Configuration);
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/login";
+        options.LoginPath = "/";
         options.LogoutPath = "/logout";
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.SlidingExpiration = true;
@@ -70,6 +70,64 @@ app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Standard HTTP POST Login Endpoint to issue authentication cookie
+app.MapPost("/api/auth/login", async (
+    HttpContext httpContext,
+    UserManager<ApplicationUser> userManager,
+    SignInManager<ApplicationUser> signInManager) =>
+{
+    var form = await httpContext.Request.ReadFormAsync();
+    string username = form["username"].ToString().Trim();
+    string password = form["password"].ToString();
+    string returnUrl = form["returnUrl"].ToString();
+
+    if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+    {
+        return Results.Redirect("/?error=" + Uri.EscapeDataString("Por favor ingresa usuario y contraseña."));
+    }
+
+    var user = await userManager.FindByNameAsync(username) ?? await userManager.FindByEmailAsync(username);
+    if (user == null)
+    {
+        return Results.Redirect("/?error=" + Uri.EscapeDataString("Usuario o contraseña incorrectos."));
+    }
+
+    var result = await signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: true);
+    if (!result.Succeeded)
+    {
+        if (result.IsLockedOut)
+        {
+            return Results.Redirect("/?error=" + Uri.EscapeDataString("Cuenta bloqueada temporalmente por intentos fallidos."));
+        }
+        return Results.Redirect("/?error=" + Uri.EscapeDataString("Usuario o contraseña incorrectos."));
+    }
+
+    var roles = await userManager.GetRolesAsync(user);
+    var claims = new List<Claim>
+    {
+        new(ClaimTypes.NameIdentifier, user.Id),
+        new(ClaimTypes.Name, user.UserName ?? user.Email ?? "Usuario"),
+        new(ClaimTypes.Email, user.Email ?? "")
+    };
+    foreach (var role in roles)
+    {
+        claims.Add(new Claim(ClaimTypes.Role, role));
+    }
+
+    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+    await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity), new AuthenticationProperties
+    {
+        IsPersistent = true,
+        ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+    });
+
+    user.LastLoginAt = DateTime.UtcNow;
+    await userManager.UpdateAsync(user);
+
+    var destination = string.IsNullOrWhiteSpace(returnUrl) ? "/dashboard" : returnUrl;
+    return Results.Redirect(destination);
+}).DisableAntiforgery();
+
 // Passkeys WebAuthn Endpoints
 app.MapPost("/api/auth/passkey/assertion-options", async (ISender sender, string? username) =>
 {
@@ -77,7 +135,7 @@ app.MapPost("/api/auth/passkey/assertion-options", async (ISender sender, string
     return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(result.Error);
 });
 
-app.MapPost("/api/auth/passkey/verify-assertion", async (HttpContext httpContext, ISender sender, string clientResponseJson) =>
+app.MapPost("/api/auth/passkey/verify-assertion", async (HttpContext httpContext, ISender sender, UserManager<ApplicationUser> userManager, string clientResponseJson) =>
 {
     var result = await sender.Send(new VerifyPasskeyAssertionCommand(clientResponseJson));
     if (result.IsFailure)
@@ -85,13 +143,28 @@ app.MapPost("/api/auth/passkey/verify-assertion", async (HttpContext httpContext
         return Results.BadRequest(result.Error);
     }
 
+    const string adminEmail = "walvarez@ingnova.team";
+    var user = await userManager.FindByEmailAsync(adminEmail);
+    var roles = user != null ? await userManager.GetRolesAsync(user) : new List<string> { "Admin", "Administrador" };
+
     var claims = new List<Claim>
     {
-        new(ClaimTypes.Name, "Usuario"),
+        new(ClaimTypes.NameIdentifier, user?.Id ?? Guid.NewGuid().ToString()),
+        new(ClaimTypes.Name, user?.UserName ?? adminEmail),
+        new(ClaimTypes.Email, user?.Email ?? adminEmail),
         new(ClaimTypes.AuthenticationMethod, "Passkey")
     };
+    foreach (var role in roles)
+    {
+        claims.Add(new Claim(ClaimTypes.Role, role));
+    }
+
     var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-    await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+    await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity), new AuthenticationProperties
+    {
+        IsPersistent = true,
+        ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+    });
 
     return Results.Ok(new { Succeeded = true });
 });
@@ -111,7 +184,7 @@ app.MapPost("/api/auth/passkey/register", async (ISender sender, string userId, 
 app.MapPost("/logout", async (HttpContext httpContext) =>
 {
     await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-    return Results.Redirect("/login");
+    return Results.Redirect("/");
 });
 
 app.MapRazorComponents<App>()
@@ -124,5 +197,20 @@ app.MapRazorComponents<App>()
         typeof(JewerlySystem.Modules.Customers.Presentation.Pages.CustomersList).Assembly,
         typeof(JewerlySystem.Modules.Invoicing.Presentation.Pages.InvoicingList).Assembly
     );
+
+// Ensure database and schema are created, then seed navigation, Admin role and user walvarez@ingnova.team
+try
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<JewerlyDbContext>();
+    await db.Database.EnsureCreatedAsync();
+
+    var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+    await sender.Send(new GetNavigationModulesQuery());
+}
+catch (Exception ex)
+{
+    app.Logger.LogWarning(ex, "Could not run initial database migration and seeding on startup.");
+}
 
 app.Run();

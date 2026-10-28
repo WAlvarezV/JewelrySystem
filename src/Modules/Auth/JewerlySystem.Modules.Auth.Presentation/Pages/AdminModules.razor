@@ -1,0 +1,292 @@
+@page "/admin/modules"
+@attribute [Authorize]
+@inject ISender Sender
+
+<div class="container-fluid mt-3">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold mb-1"><i class="bi bi-grid-fill text-primary me-2"></i>Configuración de Módulos</h3>
+            <p class="text-muted small mb-0">Gestione los módulos principales del sistema, sus íconos de barra lateral, orden y visibilidad.</p>
+        </div>
+        <button class="btn btn-primary d-flex align-items-center gap-2" @onclick="OpenCreateModuleModal">
+            <i class="bi bi-plus-lg"></i>
+            <span>Nuevo Módulo</span>
+        </button>
+    </div>
+
+    <!-- Feedback Alerts -->
+    @if (!string.IsNullOrEmpty(_message))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@_message
+            <button type="button" class="btn-close" @onclick="() => _message = null"></button>
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(_errorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>@_errorMessage
+            <button type="button" class="btn-close" @onclick="() => _errorMessage = null"></button>
+        </div>
+    }
+
+    <!-- Modules Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3" style="width: 80px;">Orden</th>
+                        <th style="width: 70px;">Ícono</th>
+                        <th>Clave (Key)</th>
+                        <th>Nombre del Módulo</th>
+                        <th>Descripción</th>
+                        <th>Estado</th>
+                        <th class="text-end pe-3">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (_isLoading)
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center p-5">
+                                <div class="spinner-border text-primary" role="status"></div>
+                            </td>
+                        </tr>
+                    }
+                    else if (!_modules.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center p-4 text-muted">
+                                No hay módulos registrados.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var mod in _modules.OrderBy(m => m.Order))
+                        {
+                            <tr>
+                                <td class="ps-3 fw-bold text-muted">#@mod.Order</td>
+                                <td>
+                                    <div class="icon-preview bg-light text-primary border rounded p-2 text-center fs-5">
+                                        <i class="bi @mod.Icon"></i>
+                                    </div>
+                                </td>
+                                <td><span class="badge bg-dark-subtle text-dark font-monospace">@mod.Key</span></td>
+                                <td class="fw-semibold">@mod.Name</td>
+                                <td class="text-muted small">@mod.Description</td>
+                                <td>
+                                    @if (mod.IsActive)
+                                    {
+                                        <span class="badge bg-success-subtle text-success">Activo</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger">Inactivo</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-3">
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" title="Editar Módulo" @onclick="() => OpenEditModuleModal(mod)">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn @(mod.IsActive ? "btn-outline-warning" : "btn-outline-success")"
+                                                title="@(mod.IsActive ? "Desactivar" : "Activar")"
+                                                @onclick="() => ToggleModuleStatusAsync(mod.Id)">
+                                            <i class="bi @(mod.IsActive ? "bi-eye-slash" : "bi-eye")"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Crear / Editar Módulo -->
+@if (_showModal)
+{
+    <div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">@(_isEditing ? "Editar Módulo" : "Nuevo Módulo")</h5>
+                    <button type="button" class="btn-close" @onclick="() => _showModal = false"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Clave Única (Key) *</label>
+                        <input @bind="_key" type="text" class="form-control font-monospace" placeholder="ej. CONTRACTS" disabled="@_isEditing" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nombre del Módulo *</label>
+                        <input @bind="_name" type="text" class="form-control" placeholder="ej. Contratos de Empeño" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Clase Ícono (Bootstrap Icons) *</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="bi @_icon"></i></span>
+                            <input @bind="_icon" type="text" class="form-control" placeholder="bi-file-earmark-text" />
+                        </div>
+                        <div class="form-text small">Ejemplo: bi-gem, bi-box-seam, bi-receipt, bi-people</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Descripción</label>
+                        <textarea @bind="_description" class="form-control" rows="2" placeholder="Breve resumen del propósito de este módulo"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Orden de Visualización</label>
+                        <input @bind="_order" type="number" class="form-control" min="1" max="100" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => _showModal = false">Cancelar</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveModuleAsync">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .icon-preview {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+@code {
+    private List<AppModuleDto> _modules = [];
+    private bool _isLoading = true;
+    private string? _message;
+    private string? _errorMessage;
+
+    // Modal state
+    private bool _showModal;
+    private bool _isEditing;
+    private Guid _editingId;
+    private string _key = "";
+    private string _name = "";
+    private string _icon = "bi-app";
+    private string _description = "";
+    private int _order = 1;
+    private bool _isActive = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadModulesAsync();
+    }
+
+    private async Task LoadModulesAsync()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+        try
+        {
+            var res = await Sender.Send(new GetNavigationModulesQuery());
+            if (res.IsSuccess)
+            {
+                _modules = res.Value.ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void OpenCreateModuleModal()
+    {
+        _isEditing = false;
+        _key = "";
+        _name = "";
+        _icon = "bi-app";
+        _description = "";
+        _order = (_modules.Count > 0 ? _modules.Max(m => m.Order) + 1 : 1);
+        _isActive = true;
+        _showModal = true;
+    }
+
+    private void OpenEditModuleModal(AppModuleDto module)
+    {
+        _isEditing = true;
+        _editingId = module.Id;
+        _key = module.Key;
+        _name = module.Name;
+        _icon = module.Icon;
+        _description = module.Description;
+        _order = module.Order;
+        _isActive = module.IsActive;
+        _showModal = true;
+    }
+
+    private async Task SaveModuleAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_key) || string.IsNullOrWhiteSpace(_name))
+        {
+            _errorMessage = "Clave y Nombre son campos obligatorios.";
+            return;
+        }
+
+        try
+        {
+            if (_isEditing)
+            {
+                var cmd = new UpdateModuleCommand(_editingId, _key, _name, _icon, _description, _order, _isActive);
+                var res = await Sender.Send(cmd);
+                if (res.IsSuccess)
+                {
+                    _message = "Módulo actualizado correctamente.";
+                    _showModal = false;
+                    await LoadModulesAsync();
+                }
+                else _errorMessage = res.Error.Message;
+            }
+            else
+            {
+                var cmd = new CreateModuleCommand(_key, _name, _icon, _description, _order);
+                var res = await Sender.Send(cmd);
+                if (res.IsSuccess)
+                {
+                    _message = "Módulo creado exitosamente.";
+                    _showModal = false;
+                    await LoadModulesAsync();
+                }
+                else _errorMessage = res.Error.Message;
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private async Task ToggleModuleStatusAsync(Guid id)
+    {
+        try
+        {
+            var res = await Sender.Send(new ToggleModuleStatusCommand(id));
+            if (res.IsSuccess)
+            {
+                _message = "Estado del módulo modificado.";
+                await LoadModulesAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+}

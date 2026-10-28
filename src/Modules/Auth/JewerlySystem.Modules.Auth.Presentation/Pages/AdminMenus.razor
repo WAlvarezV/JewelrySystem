@@ -1,0 +1,348 @@
+@page "/admin/menus"
+@attribute [Authorize]
+@inject ISender Sender
+
+<div class="container-fluid mt-3">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold mb-1"><i class="bi bi-list-ul text-primary me-2"></i>Configuración de Menús</h3>
+            <p class="text-muted small mb-0">Defina la estructura de navegación, rutas y opciones accesibles para cada módulo del sistema.</p>
+        </div>
+        <button class="btn btn-primary d-flex align-items-center gap-2" @onclick="OpenCreateMenuModal">
+            <i class="bi bi-plus-lg"></i>
+            <span>Nuevo Menú</span>
+        </button>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-3">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                        <input @bind="_search" @bind:event="oninput" type="text" class="form-control" placeholder="Buscar por título o ruta..." />
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <select @bind="_selectedModuleFilter" class="form-select">
+                        <option value="">Todos los Módulos</option>
+                        @foreach (var mod in _modules)
+                        {
+                            <option value="@mod.Key">@mod.Name (@mod.Key)</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2 text-end">
+                    <button class="btn btn-outline-secondary w-100" @onclick="LoadDataAsync">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Refrescar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Alerts -->
+    @if (!string.IsNullOrEmpty(_message))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@_message
+            <button type="button" class="btn-close" @onclick="() => _message = null"></button>
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(_errorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>@_errorMessage
+            <button type="button" class="btn-close" @onclick="() => _errorMessage = null"></button>
+        </div>
+    }
+
+    <!-- Menus Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3" style="width: 80px;">Orden</th>
+                        <th style="width: 70px;">Ícono</th>
+                        <th>Nombre del Menú</th>
+                        <th>Ruta en Navegador</th>
+                        <th>Módulo Asociado</th>
+                        <th>Estado</th>
+                        <th class="text-end pe-3">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (_isLoading)
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center p-5">
+                                <div class="spinner-border text-primary" role="status"></div>
+                            </td>
+                        </tr>
+                    }
+                    else if (!FilteredMenus.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center p-4 text-muted">
+                                No se encontraron menús configurados.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var menu in FilteredMenus)
+                        {
+                            <tr>
+                                <td class="ps-3 fw-bold text-muted">#@menu.Order</td>
+                                <td>
+                                    <div class="icon-preview bg-light text-primary border rounded p-2 text-center fs-5">
+                                        <i class="bi @menu.Icon"></i>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">@menu.Name</div>
+                                    @if (menu.Children.Any())
+                                    {
+                                        <div class="text-muted small">@menu.Children.Count submenú(s)</div>
+                                    }
+                                </td>
+                                <td><code class="text-primary">@menu.Route</code></td>
+                                <td>
+                                    <span class="badge bg-secondary-subtle text-secondary border">@menu.ModuleKey</span>
+                                </td>
+                                <td>
+                                    @if (menu.IsActive)
+                                    {
+                                        <span class="badge bg-success-subtle text-success">Visible</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger">Oculto</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-3">
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" title="Editar Menú" @onclick="() => OpenEditMenuModal(menu)">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn @(menu.IsActive ? "btn-outline-warning" : "btn-outline-success")"
+                                                title="@(menu.IsActive ? "Ocultar" : "Mostrar")"
+                                                @onclick="() => ToggleMenuStatusAsync(menu.Id)">
+                                            <i class="bi @(menu.IsActive ? "bi-eye-slash" : "bi-eye")"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Crear / Editar Menú -->
+@if (_showModal)
+{
+    <div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">@(_isEditing ? "Editar Menú" : "Nuevo Menú")</h5>
+                    <button type="button" class="btn-close" @onclick="() => _showModal = false"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Módulo Perteneciente *</label>
+                        <select @bind="_moduleKey" class="form-select">
+                            @foreach (var mod in _modules)
+                            {
+                                <option value="@mod.Key">@mod.Name (@mod.Key)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nombre del Menú *</label>
+                        <input @bind="_name" type="text" class="form-control" placeholder="ej. Nuevo Contrato" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Ruta (Route) *</label>
+                        <input @bind="_route" type="text" class="form-control font-monospace" placeholder="/contracts/new" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Ícono (Bootstrap Icons) *</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="bi @_icon"></i></span>
+                            <input @bind="_icon" type="text" class="form-control" placeholder="bi-link-45deg" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Orden</label>
+                        <input @bind="_order" type="number" class="form-control" min="1" max="100" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => _showModal = false">Cancelar</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveMenuAsync">Guardar Menú</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .icon-preview {
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+@code {
+    private List<MenuDto> _menus = [];
+    private List<AppModuleDto> _modules = [];
+    private bool _isLoading = true;
+    private string _search = "";
+    private string _selectedModuleFilter = "";
+    private string? _message;
+    private string? _errorMessage;
+
+    // Modal state
+    private bool _showModal;
+    private bool _isEditing;
+    private Guid _editingId;
+    private string _moduleKey = "CONTRACTS";
+    private string _name = "";
+    private string _route = "/";
+    private string _icon = "bi-app";
+    private int _order = 1;
+    private bool _isActive = true;
+
+    private IEnumerable<MenuDto> FilteredMenus => _menus
+        .Where(m =>
+            (string.IsNullOrWhiteSpace(_selectedModuleFilter) || m.ModuleKey == _selectedModuleFilter) &&
+            (string.IsNullOrWhiteSpace(_search) ||
+             m.Name.Contains(_search, StringComparison.OrdinalIgnoreCase) ||
+             m.Route.Contains(_search, StringComparison.OrdinalIgnoreCase)));
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+        try
+        {
+            var modRes = await Sender.Send(new GetNavigationModulesQuery());
+            if (modRes.IsSuccess)
+            {
+                _modules = modRes.Value.ToList();
+            }
+
+            var menuRes = await Sender.Send(new GetNavigationMenusQuery());
+            if (menuRes.IsSuccess)
+            {
+                _menus = menuRes.Value.ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void OpenCreateMenuModal()
+    {
+        _isEditing = false;
+        _moduleKey = _modules.FirstOrDefault()?.Key ?? "CONTRACTS";
+        _name = "";
+        _route = "/";
+        _icon = "bi-app";
+        _order = _menus.Count + 1;
+        _isActive = true;
+        _showModal = true;
+    }
+
+    private void OpenEditMenuModal(MenuDto menu)
+    {
+        _isEditing = true;
+        _editingId = menu.Id;
+        _moduleKey = menu.ModuleKey;
+        _name = menu.Name;
+        _route = menu.Route;
+        _icon = menu.Icon;
+        _order = menu.Order;
+        _isActive = menu.IsActive;
+        _showModal = true;
+    }
+
+    private async Task SaveMenuAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_name) || string.IsNullOrWhiteSpace(_route))
+        {
+            _errorMessage = "Nombre y Ruta son obligatorios.";
+            return;
+        }
+
+        try
+        {
+            if (_isEditing)
+            {
+                var cmd = new UpdateMenuCommand(_editingId, _moduleKey, _name, _route, _icon, _order, _isActive);
+                var res = await Sender.Send(cmd);
+                if (res.IsSuccess)
+                {
+                    _message = "Menú actualizado con éxito.";
+                    _showModal = false;
+                    await LoadDataAsync();
+                }
+                else _errorMessage = res.Error.Message;
+            }
+            else
+            {
+                var cmd = new CreateMenuCommand(_moduleKey, _name, _route, _icon, _order);
+                var res = await Sender.Send(cmd);
+                if (res.IsSuccess)
+                {
+                    _message = "Menú creado exitosamente.";
+                    _showModal = false;
+                    await LoadDataAsync();
+                }
+                else _errorMessage = res.Error.Message;
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private async Task ToggleMenuStatusAsync(Guid id)
+    {
+        try
+        {
+            var res = await Sender.Send(new ToggleMenuStatusCommand(id));
+            if (res.IsSuccess)
+            {
+                _message = "Visibilidad del menú modificada.";
+                await LoadDataAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+}

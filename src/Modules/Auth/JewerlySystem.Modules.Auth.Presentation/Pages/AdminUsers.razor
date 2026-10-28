@@ -1,0 +1,470 @@
+@page "/admin/users"
+@attribute [Authorize]
+@inject ISender Sender
+
+<div class="container-fluid mt-3">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold mb-1"><i class="bi bi-people-fill text-primary me-2"></i>Gestión de Usuarios</h3>
+            <p class="text-muted small mb-0">Administre las cuentas del sistema, credenciales de acceso, roles y estados de autenticación.</p>
+        </div>
+        <button class="btn btn-primary d-flex align-items-center gap-2" @onclick="OpenCreateUserModal">
+            <i class="bi bi-person-plus-fill"></i>
+            <span>Nuevo Usuario</span>
+        </button>
+    </div>
+
+    <!-- Metrics Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-md-3">
+            <div class="card border-0 shadow-sm p-3 border-start border-primary border-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold">Total Usuarios</div>
+                        <h4 class="fw-bold mb-0 mt-1">@_users.Count</h4>
+                    </div>
+                    <i class="bi bi-people text-primary fs-3"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card border-0 shadow-sm p-3 border-start border-success border-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold">Usuarios Activos</div>
+                        <h4 class="fw-bold mb-0 mt-1">@_users.Count(u => u.IsActive)</h4>
+                    </div>
+                    <i class="bi bi-check-circle text-success fs-3"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card border-0 shadow-sm p-3 border-start border-info border-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold">Con Doble Factor (MFA)</div>
+                        <h4 class="fw-bold mb-0 mt-1">@_users.Count(u => u.TwoFactorEnabled)</h4>
+                    </div>
+                    <i class="bi bi-shield-lock text-info fs-3"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card border-0 shadow-sm p-3 border-start border-warning border-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold">Con Passkeys Biométricas</div>
+                        <h4 class="fw-bold mb-0 mt-1">@_users.Count(u => u.PasskeyCount > 0)</h4>
+                    </div>
+                    <i class="bi bi-fingerprint text-warning fs-3"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-3">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                        <input @bind="_searchTerm" @bind:event="oninput" type="text" class="form-control" placeholder="Buscar por usuario, correo o teléfono..." />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select @bind="_roleFilter" class="form-select">
+                        <option value="">Todos los Roles</option>
+                        @foreach (var role in _allRoles)
+                        {
+                            <option value="@role.Name">@role.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2 text-end">
+                    <button class="btn btn-outline-secondary w-100" @onclick="LoadDataAsync">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Refrescar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Alerts -->
+    @if (!string.IsNullOrEmpty(_message))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@_message
+            <button type="button" class="btn-close" @onclick="() => _message = null"></button>
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(_errorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>@_errorMessage
+            <button type="button" class="btn-close" @onclick="() => _errorMessage = null"></button>
+        </div>
+    }
+
+    <!-- Users Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Usuario</th>
+                        <th>Email / Teléfono</th>
+                        <th>Roles Asignados</th>
+                        <th>Seguridad</th>
+                        <th>Estado</th>
+                        <th>Fecha Creación</th>
+                        <th class="text-end pe-3">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (_isLoading)
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center p-5">
+                                <div class="spinner-border text-primary" role="status"></div>
+                            </td>
+                        </tr>
+                    }
+                    else if (!FilteredUsers.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center p-4 text-muted">
+                                No se encontraron usuarios que coincidan con la búsqueda.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var user in FilteredUsers)
+                        {
+                            <tr>
+                                <td class="ps-3">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="avatar-circle bg-primary-subtle text-primary fw-bold">
+                                            @(user.UserName.Length > 0 ? user.UserName[0].ToString().ToUpper() : "U")
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">@user.UserName</div>
+                                            <div class="text-muted small">ID: @user.Id.Substring(0, Math.Min(8, user.Id.Length))...</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div><i class="bi bi-envelope me-1 text-muted"></i>@user.Email</div>
+                                    @if (!string.IsNullOrEmpty(user.PhoneNumber))
+                                    {
+                                        <div class="text-muted small"><i class="bi bi-telephone me-1"></i>@user.PhoneNumber</div>
+                                    }
+                                </td>
+                                <td>
+                                    @if (user.Roles.Any())
+                                    {
+                                        @foreach (var role in user.Roles)
+                                        {
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle me-1">@role</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary-subtle text-secondary">Sin Rol</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        @if (user.TwoFactorEnabled)
+                                        {
+                                            <span class="badge bg-info-subtle text-info border border-info-subtle" title="MFA Habilitado">
+                                                <i class="bi bi-shield-check"></i> MFA
+                                            </span>
+                                        }
+                                        @if (user.PasskeyCount > 0)
+                                        {
+                                            <span class="badge bg-warning-subtle text-dark border border-warning-subtle" title="@user.PasskeyCount passkey(s) registrada(s)">
+                                                <i class="bi bi-fingerprint"></i> @user.PasskeyCount Passkey
+                                            </span>
+                                        }
+                                        @if (!user.TwoFactorEnabled && user.PasskeyCount == 0)
+                                        {
+                                            <span class="badge bg-light text-muted border">Básica</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (user.IsActive)
+                                    {
+                                        <span class="badge bg-success-subtle text-success">Activo</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger">Inactivo</span>
+                                    }
+                                </td>
+                                <td class="text-muted small">
+                                    @user.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                                </td>
+                                <td class="text-end pe-3">
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" title="Asignar Rol" @onclick="() => OpenAssignRoleModal(user)">
+                                            <i class="bi bi-shield-gear"></i>
+                                        </button>
+                                        <button class="btn @(user.IsActive ? "btn-outline-warning" : "btn-outline-success")"
+                                                title="@(user.IsActive ? "Desactivar" : "Activar")"
+                                                @onclick="() => ToggleUserStatusAsync(user.Id)">
+                                            <i class="bi @(user.IsActive ? "bi-person-x" : "bi-person-check")"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Crear Usuario -->
+@if (_showCreateModal)
+{
+    <div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-person-plus-fill me-2 text-primary"></i>Crear Nuevo Usuario</h5>
+                    <button type="button" class="btn-close" @onclick="() => _showCreateModal = false"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nombre de Usuario *</label>
+                        <input @bind="_newUserName" type="text" class="form-control" placeholder="ej. juan.perez" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Correo Electrónico *</label>
+                        <input @bind="_newEmail" type="email" class="form-control" placeholder="juan@pomona.com" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Teléfono</label>
+                        <input @bind="_newPhone" type="text" class="form-control" placeholder="+57 300 1234567" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Contraseña Inicial *</label>
+                        <input @bind="_newPassword" type="password" class="form-control" placeholder="••••••••" />
+                        <div class="form-text small">Mínimo 6 caracteres.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Rol Asignado *</label>
+                        <select @bind="_newRole" class="form-select">
+                            @foreach (var role in _allRoles)
+                            {
+                                <option value="@role.Name">@role.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => _showCreateModal = false">Cancelar</button>
+                    <button type="button" class="btn btn-primary" @onclick="CreateUserAsync">Guardar Usuario</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal: Asignar Rol -->
+@if (_showRoleModal && _selectedUser != null)
+{
+    <div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-shield-gear me-2 text-primary"></i>Asignar Rol a @_selectedUser.UserName</h5>
+                    <button type="button" class="btn-close" @onclick="() => _showRoleModal = false"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small">Selecciona el rol principal para este usuario. Se actualizarán sus permisos en el sistema.</p>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Rol</label>
+                        <select @bind="_selectedRoleToAssign" class="form-select">
+                            @foreach (var role in _allRoles)
+                            {
+                                <option value="@role.Name">@role.Name - @role.Description</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => _showRoleModal = false">Cancelar</button>
+                    <button type="button" class="btn btn-primary" @onclick="AssignRoleAsync">Asignar Rol</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .avatar-circle {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+@code {
+    private List<UserItemDto> _users = [];
+    private List<RoleItemDto> _allRoles = [];
+    private bool _isLoading = true;
+    private string _searchTerm = "";
+    private string _roleFilter = "";
+    private string? _message;
+    private string? _errorMessage;
+
+    // Create modal state
+    private bool _showCreateModal;
+    private string _newUserName = "";
+    private string _newEmail = "";
+    private string _newPhone = "";
+    private string _newPassword = "";
+    private string _newRole = "Tasador";
+
+    // Assign role modal state
+    private bool _showRoleModal;
+    private UserItemDto? _selectedUser;
+    private string _selectedRoleToAssign = "Tasador";
+
+    private IEnumerable<UserItemDto> FilteredUsers => _users
+        .Where(u =>
+            (string.IsNullOrWhiteSpace(_searchTerm) ||
+             u.UserName.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ||
+             u.Email.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ||
+             u.PhoneNumber.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase)) &&
+            (string.IsNullOrWhiteSpace(_roleFilter) || u.Roles.Contains(_roleFilter)));
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+        try
+        {
+            var userResult = await Sender.Send(new GetAllUsersQuery());
+            if (userResult.IsSuccess)
+            {
+                _users = userResult.Value.ToList();
+            }
+
+            var roleResult = await Sender.Send(new GetAllRolesQuery());
+            if (roleResult.IsSuccess)
+            {
+                _allRoles = roleResult.Value.ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = "Error al cargar datos de usuarios: " + ex.Message;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void OpenCreateUserModal()
+    {
+        _newUserName = "";
+        _newEmail = "";
+        _newPhone = "";
+        _newPassword = "";
+        _newRole = _allRoles.FirstOrDefault()?.Name ?? "Tasador";
+        _showCreateModal = true;
+    }
+
+    private async Task CreateUserAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_newUserName) || string.IsNullOrWhiteSpace(_newEmail) || string.IsNullOrWhiteSpace(_newPassword))
+        {
+            _errorMessage = "Por favor completa los campos requeridos.";
+            return;
+        }
+
+        try
+        {
+            var cmd = new CreateUserCommand(_newUserName, _newEmail, _newPassword, _newRole, _newPhone);
+            var res = await Sender.Send(cmd);
+            if (res.IsSuccess)
+            {
+                _message = "Usuario creado exitosamente.";
+                _showCreateModal = false;
+                await LoadDataAsync();
+            }
+            else
+            {
+                _errorMessage = res.Error.Message;
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private void OpenAssignRoleModal(UserItemDto user)
+    {
+        _selectedUser = user;
+        _selectedRoleToAssign = user.Roles.FirstOrDefault() ?? _allRoles.FirstOrDefault()?.Name ?? "Tasador";
+        _showRoleModal = true;
+    }
+
+    private async Task AssignRoleAsync()
+    {
+        if (_selectedUser == null) return;
+        try
+        {
+            var cmd = new AssignUserRoleCommand(_selectedUser.Id, _selectedRoleToAssign);
+            var res = await Sender.Send(cmd);
+            if (res.IsSuccess)
+            {
+                _message = $"Rol '{_selectedRoleToAssign}' asignado a {_selectedUser.UserName}.";
+                _showRoleModal = false;
+                await LoadDataAsync();
+            }
+            else
+            {
+                _errorMessage = res.Error.Message;
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private async Task ToggleUserStatusAsync(string userId)
+    {
+        try
+        {
+            var res = await Sender.Send(new ToggleUserStatusCommand(userId));
+            if (res.IsSuccess)
+            {
+                _message = "Estado del usuario actualizado.";
+                await LoadDataAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+}

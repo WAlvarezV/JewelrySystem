@@ -1,52 +1,253 @@
-<div class="top-row ps-3 navbar navbar-dark bg-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand d-flex align-items-center gap-2" href="">
-            <i class="bi bi-gem text-warning fs-4"></i>
-            <span class="fw-bold">JewerlySystem</span>
-        </a>
+@inject ISender Sender
+@inject NavigationManager Navigation
+
+<div class="nav-menu-container d-flex flex-column h-100 bg-white border-end">
+    <!-- Active Module Title & Action -->
+    <div class="nav-menu-header p-3 border-bottom d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2 overflow-hidden">
+            <span class="badge bg-primary-subtle text-primary p-2 rounded-3">
+                <i class="bi @ActiveModuleIcon fs-6"></i>
+            </span>
+            <div class="fw-bold text-truncate text-dark" style="font-size: 0.95rem;">
+                @ActiveModuleTitle
+            </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-warning border-0 p-1" title="Gestionar Favoritos" @onclick="() => _showFavDrawer = true">
+            <i class="bi bi-star-fill text-warning fs-5"></i>
+        </button>
+    </div>
+
+    <!-- Scrollable Menu Content -->
+    <div class="nav-menu-body flex-grow-1 overflow-auto p-2">
+        <!-- Favoritos Section (SI.SIOT Style) -->
+        @if (_favorites.Any())
+        {
+            <div class="nav-favorites-section mb-3">
+                <div class="d-flex align-items-center justify-content-between px-2 py-1 text-muted small fw-semibold">
+                    <span><i class="bi bi-star-fill text-warning me-1"></i>FAVORITOS</span>
+                    <button type="button" class="btn btn-link p-0 text-decoration-none small text-muted" style="font-size: 0.75rem;" @onclick="() => _showFavDrawer = true">
+                        Editar
+                    </button>
+                </div>
+                <ul class="nav flex-column gap-1 mt-1">
+                    @foreach (var fav in _favorites)
+                    {
+                        <li class="nav-item">
+                            <NavLink class="nav-link nav-favorite-link d-flex align-items-center gap-2 px-2 py-1 rounded-2 text-dark small" href="@fav.Route" Match="NavLinkMatch.All">
+                                <i class="bi @(string.IsNullOrEmpty(fav.Icon) ? "bi-arrow-right-short" : fav.Icon) text-warning"></i>
+                                <span class="text-truncate">@fav.Name</span>
+                            </NavLink>
+                        </li>
+                    }
+                </ul>
+                <hr class="my-2 text-muted opacity-25" />
+            </div>
+        }
+
+        <!-- Module Menus Section -->
+        <div class="nav-module-menus">
+            <div class="px-2 py-1 text-muted small fw-semibold text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                OPCIONES DE @ActiveModuleKey
+            </div>
+
+            @if (_isLoading)
+            {
+                <div class="text-center p-4">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                </div>
+            }
+            else if (!_moduleMenus.Any())
+            {
+                <div class="text-muted small p-3 text-center">
+                    No hay menús registrados para este módulo.
+                </div>
+            }
+            else
+            {
+                <ul class="nav flex-column gap-1 mt-1">
+                    @foreach (var item in _moduleMenus)
+                    {
+                        <li class="nav-item">
+                            <NavLink class="nav-link nav-item-link d-flex align-items-center gap-2 px-3 py-2 rounded-2 text-dark" href="@item.Route" Match="NavLinkMatch.Prefix">
+                                <i class="bi @item.Icon text-secondary fs-6"></i>
+                                <span class="fw-medium">@item.Name</span>
+                            </NavLink>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
     </div>
 </div>
 
-<div class="flex-column p-2">
-    <div class="nav-item px-2 py-1">
-        <NavLink class="nav-link text-white d-flex align-items-center gap-2" href="" Match="NavLinkMatch.All">
-            <i class="bi bi-speedometer2"></i> Inicio
-        </NavLink>
+<!-- Modal: Administrador de Favoritos (SI.SIOT Style Drawer) -->
+@if (_showFavDrawer)
+{
+    <div class="modal fade show d-block" style="background: rgba(0,0,0,0.5); z-index: 1060;" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-star-fill text-warning me-2"></i>Personalizar Favoritos</h5>
+                    <button type="button" class="btn-close" @onclick="() => _showFavDrawer = false"></button>
+                </div>
+                <div class="modal-body p-4" style="max-height: 450px; overflow-y: auto;">
+                    <p class="text-muted small mb-3">Marca con una estrella los accesos rápidos que deseas fijar en la sección de favoritos:</p>
+                    <div class="list-group list-group-flush">
+                        @foreach (var menu in _allMenus)
+                        {
+                            bool isFav = _favorites.Any(f => f.Id == menu.Id);
+                            <div class="list-group-item d-flex align-items-center justify-content-between py-2 px-2 border-0 border-bottom">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi @menu.Icon text-muted"></i>
+                                    <div>
+                                        <div class="fw-semibold small">@menu.Name</div>
+                                        <div class="text-muted" style="font-size: 0.75rem;">@menu.ModuleKey &bull; @menu.Route</div>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm @(isFav ? "btn-warning text-dark" : "btn-outline-secondary") rounded-circle p-1"
+                                        style="width: 32px; height: 32px;"
+                                        @onclick="() => ToggleFavoriteAsync(menu)">
+                                    <i class="bi @(isFav ? "bi-star-fill" : "bi-star")"></i>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" @onclick="() => _showFavDrawer = false">Listo</button>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="nav-item px-2 py-1">
-        <NavLink class="nav-link text-white d-flex align-items-center gap-2" href="contracts">
-            <i class="bi bi-file-earmark-text"></i> Contratos
-        </NavLink>
-    </div>
-    <div class="nav-item px-2 py-1">
-        <NavLink class="nav-link text-white d-flex align-items-center gap-2" href="inventory">
-            <i class="bi bi-box-seam"></i> Inventario
-        </NavLink>
-    </div>
-    <div class="nav-item px-2 py-1">
-        <NavLink class="nav-link text-white d-flex align-items-center gap-2" href="customers">
-            <i class="bi bi-people"></i> Clientes
-        </NavLink>
-    </div>
-    <div class="nav-item px-2 py-1">
-        <NavLink class="nav-link text-white d-flex align-items-center gap-2" href="cash">
-            <i class="bi bi-cash-stack"></i> Caja
-        </NavLink>
-    </div>
-    <div class="nav-item px-2 py-1">
-        <NavLink class="nav-link text-white d-flex align-items-center gap-2" href="invoices">
-            <i class="bi bi-receipt"></i> Facturación
-        </NavLink>
-    </div>
-    <hr class="text-white-50 my-2" />
-    <div class="nav-item px-2 py-1">
-        <NavLink class="nav-link text-white d-flex align-items-center gap-2" href="auth/passkeys">
-            <i class="bi bi-fingerprint"></i> Mis Passkeys
-        </NavLink>
-    </div>
-    <div class="nav-item px-2 py-1">
-        <NavLink class="nav-link text-white d-flex align-items-center gap-2" href="login">
-            <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
-        </NavLink>
-    </div>
-</div>
+}
+
+<style>
+    .nav-item-link {
+        color: #374151;
+        transition: all 0.15s ease-in-out;
+    }
+    .nav-item-link:hover {
+        background-color: #f3f4f6;
+        color: #111827;
+    }
+    .nav-item-link.active {
+        background-color: #e0e7ff;
+        color: #3730a3 !important;
+        font-weight: 600;
+    }
+    .nav-item-link.active i {
+        color: #4f46e5 !important;
+    }
+    .nav-favorite-link {
+        transition: background-color 0.15s;
+    }
+    .nav-favorite-link:hover {
+        background-color: #fef3c7;
+    }
+    .nav-favorite-link.active {
+        background-color: #fef3c7;
+        color: #92400e !important;
+        font-weight: 600;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public string ActiveModuleKey { get; set; } = "CONTRACTS";
+
+    [Parameter]
+    public string ActiveModuleTitle { get; set; } = "Contratos";
+
+    [Parameter]
+    public string ActiveModuleIcon { get; set; } = "bi-file-earmark-text";
+
+    [Parameter]
+    public string UserId { get; set; } = "system-user";
+
+    private List<MenuDto> _moduleMenus = [];
+    private List<MenuDto> _allMenus = [];
+    private List<MenuDto> _favorites = [];
+    private bool _isLoading = true;
+    private bool _showFavDrawer;
+    private string _lastModuleKey = "";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_lastModuleKey != ActiveModuleKey)
+        {
+            _lastModuleKey = ActiveModuleKey;
+            await LoadMenusForActiveModuleAsync();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAllMenusAndFavoritesAsync();
+    }
+
+    private async Task LoadAllMenusAndFavoritesAsync()
+    {
+        try
+        {
+            var allRes = await Sender.Send(new GetNavigationMenusQuery());
+            if (allRes.IsSuccess)
+            {
+                _allMenus = allRes.Value.ToList();
+            }
+
+            var favRes = await Sender.Send(new GetUserFavoritesQuery(UserId));
+            if (favRes.IsSuccess)
+            {
+                _favorites = favRes.Value.ToList();
+            }
+
+            await LoadMenusForActiveModuleAsync();
+        }
+        catch
+        {
+            // fallback
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task LoadMenusForActiveModuleAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            var res = await Sender.Send(new GetNavigationMenusQuery(ActiveModuleKey));
+            if (res.IsSuccess)
+            {
+                _moduleMenus = res.Value.ToList();
+            }
+        }
+        catch
+        {
+            _moduleMenus = [];
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task ToggleFavoriteAsync(MenuDto menu)
+    {
+        try
+        {
+            await Sender.Send(new ToggleUserFavoriteCommand(UserId, menu.Id));
+            var favRes = await Sender.Send(new GetUserFavoritesQuery(UserId));
+            if (favRes.IsSuccess)
+            {
+                _favorites = favRes.Value.ToList();
+            }
+        }
+        catch
+        {
+            // ignore
+        }
+    }
+}

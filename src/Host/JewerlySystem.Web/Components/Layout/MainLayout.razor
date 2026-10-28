@@ -1,22 +1,158 @@
 @inherits LayoutComponentBase
+@inject ISender Sender
+@inject NavigationManager Navigation
 
-<div class="d-flex" style="min-height: 100vh;">
-    <div class="bg-dark text-white p-3" style="width: 260px; min-height: 100vh;">
-        <NavMenu />
-    </div>
+<AuthorizeView>
+    <Authorized>
+        <div class="app-container d-flex" style="height: 100vh; overflow: hidden;">
+            <!-- 1. PRIMARY RAIL (SI.SIOT Style Module Bar) -->
+            <aside class="app-primary-rail d-flex flex-column align-items-center py-2 bg-dark text-white border-end" style="width: 74px; min-width: 74px; z-index: 1020; background-color: #111827 !important;">
+                <!-- Brand / Logo -->
+                <div class="rail-logo my-2 text-center">
+                    <a href="dashboard" class="text-decoration-none">
+                        <div class="d-inline-flex p-2 rounded-3 bg-primary text-white shadow-sm">
+                            <i class="bi bi-gem fs-4"></i>
+                        </div>
+                    </a>
+                    <div class="text-white-50" style="font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px;">JS 2.0</div>
+                </div>
 
-    <div class="flex-grow-1 d-flex flex-column bg-light">
-        <header class="navbar navbar-white bg-white border-bottom px-4 py-2 d-flex justify-content-between align-items-center">
-            <span class="text-muted small">Sistema de Joyería y Relojería</span>
-            <div class="d-flex align-items-center gap-3">
-                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-                    <i class="bi bi-shield-check me-1"></i> Passkeys & MFA Activo
-                </span>
+                <hr class="w-75 my-2 border-secondary opacity-25" />
+
+                <!-- Module Navigation Buttons -->
+                <nav class="rail-modules-nav d-flex flex-column align-items-center gap-2 w-100 px-1 overflow-auto flex-grow-1">
+                    @foreach (var mod in _modules)
+                    {
+                        bool isActive = string.Equals(_activeModuleKey, mod.Key, StringComparison.OrdinalIgnoreCase);
+                        <button type="button"
+                                class="rail-module-btn w-100 d-flex flex-column align-items-center justify-content-center py-2 px-1 border-0 rounded-3 text-decoration-none @(isActive ? "active" : "")"
+                                title="@mod.Name: @mod.Description"
+                                @onclick="() => SelectModule(mod)">
+                            <i class="bi @mod.Icon fs-4 mb-1"></i>
+                            <span class="rail-module-label text-truncate w-100 text-center" style="font-size: 0.68rem; font-weight: 500;">
+                                @mod.Name
+                            </span>
+                        </button>
+                    }
+                </nav>
+
+                <!-- Bottom User Avatar -->
+                <div class="mt-auto py-2 text-center w-100 border-top border-secondary border-opacity-25">
+                    <div class="avatar-small mx-auto rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center shadow-sm"
+                         title="Usuario: @(context.User.Identity?.Name ?? "Admin")"
+                         style="width: 36px; height: 36px; font-size: 0.85rem;">
+                        @(context.User.Identity?.Name?.Length > 0 ? context.User.Identity.Name[0].ToString().ToUpper() : "U")
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 2. SIDER WITH NAVMENU (Filtered by Active Module + Favorites) -->
+            <aside class="soft-sider h-100 bg-white" style="width: 250px; min-width: 250px;">
+                <NavMenu ActiveModuleKey="@_activeModuleKey"
+                         ActiveModuleTitle="@_activeModuleTitle"
+                         ActiveModuleIcon="@_activeModuleIcon"
+                         UserId="@(context.User.Identity?.Name ?? "system-user")" />
+            </aside>
+
+            <!-- 3. MAIN CONTENT WORKSPACE -->
+            <div class="app-main-workspace flex-grow-1 d-flex flex-column h-100 bg-light" style="overflow-y: auto;">
+                <!-- Header Topbar -->
+                <header class="navbar navbar-white bg-white border-bottom px-4 py-2 d-flex justify-content-between align-items-center sticky-top shadow-sm">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted small">Módulo actual:</span>
+                        <span class="badge bg-primary text-white px-2 py-1 fw-semibold">
+                            <i class="bi @_activeModuleIcon me-1"></i> @_activeModuleTitle
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                            <i class="bi bi-shield-check me-1"></i> MFA & Passkeys Activo
+                        </span>
+
+                        <div class="vr my-1 text-muted"></div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="small fw-semibold text-dark">
+                                @(context.User.Identity?.Name ?? "Usuario Conectado")
+                            </span>
+                            <form method="post" action="/logout" class="d-inline">
+                                <AntiforgeryToken />
+                                <button type="submit" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 py-1 px-2" title="Cerrar sesión">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span>Salir</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Page Body -->
+                <main class="p-4 flex-grow-1">
+                    @Body
+                </main>
             </div>
-        </header>
-
-        <main class="p-4 flex-grow-1">
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <!-- Unauthenticated View: Fullscreen Centered Login, Zero Menu -->
+        <div class="min-vh-100 d-flex flex-column bg-light align-items-center justify-content-center p-3">
             @Body
-        </main>
-    </div>
-</div>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+<style>
+    .rail-module-btn {
+        background-color: transparent;
+        color: #9ca3af;
+        transition: all 0.2s ease-in-out;
+        cursor: pointer;
+    }
+    .rail-module-btn:hover {
+        background-color: #1f2937;
+        color: #ffffff;
+    }
+    .rail-module-btn.active {
+        background-color: #2563eb !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.4);
+    }
+    .rail-module-btn.active i {
+        color: #ffffff;
+    }
+</style>
+
+@code {
+    private List<AppModuleDto> _modules = [];
+    private string _activeModuleKey = "CONTRACTS";
+    private string _activeModuleTitle = "Contratos";
+    private string _activeModuleIcon = "bi-file-earmark-text";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var res = await Sender.Send(new GetNavigationModulesQuery());
+            if (res.IsSuccess && res.Value.Any())
+            {
+                _modules = res.Value.ToList();
+                var first = _modules.First();
+                _activeModuleKey = first.Key;
+                _activeModuleTitle = first.Name;
+                _activeModuleIcon = first.Icon;
+            }
+        }
+        catch
+        {
+            // fallback
+        }
+    }
+
+    private void SelectModule(AppModuleDto module)
+    {
+        _activeModuleKey = module.Key;
+        _activeModuleTitle = module.Name;
+        _activeModuleIcon = module.Icon;
+    }
+}

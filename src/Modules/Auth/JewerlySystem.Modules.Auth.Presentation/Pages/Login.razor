@@ -1,23 +1,28 @@
+@page "/"
 @page "/login"
+@attribute [AllowAnonymous]
 @inject ISender Sender
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-4">
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+        <div class="col-12 col-sm-10 col-md-7 col-lg-5 col-xl-4">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-4 p-md-5">
                     <div class="text-center mb-4">
-                        <i class="bi bi-gem fs-1 text-primary"></i>
-                        <h3 class="fw-bold mt-2">JewerlySystem</h3>
+                        <div class="d-inline-flex p-3 rounded-circle bg-primary bg-opacity-10 text-primary mb-2">
+                            <i class="bi bi-gem fs-2"></i>
+                        </div>
+                        <h3 class="fw-bold text-dark mt-2">JewerlySystem</h3>
                         <p class="text-muted small">Acceso seguro con Contraseña, MFA y Passkeys</p>
                     </div>
 
-                    @if (!string.IsNullOrEmpty(_errorMessage))
+                    @if (!string.IsNullOrEmpty(ErrorFromQuery) || !string.IsNullOrEmpty(_errorMessage))
                     {
-                        <div class="alert alert-danger py-2 small" role="alert">
-                            @_errorMessage
+                        <div class="alert alert-danger py-2 small d-flex align-items-center gap-2" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <span>@(ErrorFromQuery ?? _errorMessage)</span>
                         </div>
                     }
 
@@ -25,11 +30,11 @@
                     {
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Código de Verificación MFA (TOTP)</label>
-                            <input @bind="_mfaCode" type="text" class="form-control" placeholder="123456" maxlength="6" autofocus />
-                            <div class="form-text">Ingresa el código de tu aplicación autenticadora.</div>
+                            <input @bind="_mfaCode" type="text" class="form-control form-control-lg text-center letter-spacing" placeholder="000000" maxlength="6" autofocus />
+                            <div class="form-text small">Ingresa el código temporal de tu app de autenticación.</div>
                         </div>
 
-                        <button @onclick="HandleMfaSubmit" class="btn btn-primary w-100 py-2 fw-semibold" disabled="@_isLoading">
+                        <button @onclick="HandleMfaSubmit" class="btn btn-primary btn-lg w-100 fw-semibold" disabled="@_isLoading">
                             @if (_isLoading)
                             {
                                 <span class="spinner-border spinner-border-sm me-2"></span>
@@ -39,88 +44,68 @@
                     }
                     else
                     {
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Usuario o Correo</label>
-                            <input @bind="_username" type="text" class="form-control" placeholder="admin" autofocus />
-                        </div>
+                        <form method="post" action="/api/auth/login">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Usuario o Correo</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white text-muted"><i class="bi bi-person"></i></span>
+                                    <input name="username" type="text" class="form-control" placeholder="walvarez@ingnova.team" autofocus required />
+                                </div>
+                            </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Contraseña</label>
-                            <input @bind="_password" type="password" class="form-control" placeholder="••••••••" />
-                        </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Contraseña</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white text-muted"><i class="bi bi-lock"></i></span>
+                                    <input name="password" type="password" class="form-control" placeholder="••••••••" required />
+                                </div>
+                            </div>
 
-                        <button @onclick="HandlePasswordLogin" class="btn btn-primary w-100 py-2 fw-semibold mb-3" disabled="@_isLoading">
-                            @if (_isLoading)
-                            {
-                                <span class="spinner-border spinner-border-sm me-2"></span>
-                            }
-                            Iniciar Sesión
-                        </button>
+                            <button type="submit" class="btn btn-primary btn-lg w-100 fw-semibold mb-3 shadow-sm">
+                                Iniciar Sesión
+                            </button>
+                        </form>
 
                         <div class="position-relative text-center my-3">
                             <hr class="text-muted" />
-                            <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">o</span>
+                            <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">o ingresa con</span>
                         </div>
 
-                        <button @onclick="HandlePasskeyLogin" type="button" class="btn btn-outline-secondary w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2" disabled="@_isLoading">
-                            <i class="bi bi-fingerprint fs-5"></i>
-                            <span>Entrar con Passkey / Biometría</span>
+                        <button @onclick="HandlePasskeyLogin" type="button" class="btn btn-outline-dark btn-lg w-100 fw-semibold d-flex align-items-center justify-content-center gap-2" disabled="@_isLoading">
+                            <i class="bi bi-fingerprint fs-4 text-primary"></i>
+                            <span>Passkey / Biometría</span>
                         </button>
                     }
                 </div>
+            </div>
+            <div class="text-center text-muted small mt-3">
+                &copy; 2026 JewerlySystem &bull; Todos los derechos reservados
             </div>
         </div>
     </div>
 </div>
 
 @code {
-    private string _username = "";
-    private string _password = "";
+    [SupplyParameterFromQuery(Name = "error")]
+    public string? ErrorFromQuery { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
     private string _mfaCode = "";
     private bool _requiresMfa;
-    private string? _userIdForMfa;
     private bool _isLoading;
     private string? _errorMessage;
 
-    private async Task HandlePasswordLogin()
+    protected override async Task OnInitializedAsync()
     {
-        _errorMessage = null;
-        if (string.IsNullOrWhiteSpace(_username) || string.IsNullOrWhiteSpace(_password))
+        if (AuthStateTask != null)
         {
-            _errorMessage = "Por favor completa usuario y contraseña.";
-            return;
-        }
-
-        _isLoading = true;
-        try
-        {
-            var command = new LoginWithPasswordCommand(_username, _password);
-            var result = await Sender.Send(command);
-
-            if (result.IsFailure)
+            var authState = await AuthStateTask;
+            if (authState.User.Identity?.IsAuthenticated == true)
             {
-                _errorMessage = result.Error.Message;
-                return;
+                Navigation.NavigateTo("/dashboard");
             }
-
-            var response = result.Value;
-            if (response.RequiresTwoFactor)
-            {
-                _requiresMfa = true;
-                _userIdForMfa = response.UserId;
-            }
-            else if (response.Succeeded)
-            {
-                Navigation.NavigateTo("/", forceLoad: true);
-            }
-        }
-        catch (Exception ex)
-        {
-            _errorMessage = ex.Message;
-        }
-        finally
-        {
-            _isLoading = false;
         }
     }
 
@@ -146,7 +131,7 @@
 
             if (result.Value)
             {
-                Navigation.NavigateTo("/", forceLoad: true);
+                Navigation.NavigateTo("/dashboard", forceLoad: true);
             }
             else
             {
@@ -169,7 +154,7 @@
         _isLoading = true;
         try
         {
-            var query = new GetPasskeyAssertionOptionsQuery(string.IsNullOrWhiteSpace(_username) ? null : _username);
+            var query = new GetPasskeyAssertionOptionsQuery(null);
             var optResult = await Sender.Send(query);
 
             if (optResult.IsFailure)
@@ -188,7 +173,7 @@
                 return;
             }
 
-            Navigation.NavigateTo("/", forceLoad: true);
+            Navigation.NavigateTo("/dashboard", forceLoad: true);
         }
         catch (Exception ex)
         {

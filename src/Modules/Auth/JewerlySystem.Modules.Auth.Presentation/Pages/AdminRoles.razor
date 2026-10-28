@@ -1,0 +1,188 @@
+@page "/admin/roles"
+@attribute [Authorize]
+@inject ISender Sender
+@inject NavigationManager Navigation
+
+<div class="container-fluid mt-3">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold mb-1"><i class="bi bi-person-badge text-primary me-2"></i>Roles de Seguridad</h3>
+            <p class="text-muted small mb-0">Defina perfiles de acceso que agrupan privilegios para asignar a los usuarios del sistema.</p>
+        </div>
+        <button class="btn btn-primary d-flex align-items-center gap-2" @onclick="() => _showCreateModal = true">
+            <i class="bi bi-shield-plus"></i>
+            <span>Nuevo Rol</span>
+        </button>
+    </div>
+
+    <!-- Feedback Alerts -->
+    @if (!string.IsNullOrEmpty(_message))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@_message
+            <button type="button" class="btn-close" @onclick="() => _message = null"></button>
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(_errorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>@_errorMessage
+            <button type="button" class="btn-close" @onclick="() => _errorMessage = null"></button>
+        </div>
+    }
+
+    <!-- Roles Grid -->
+    <div class="row g-4">
+        @if (_isLoading)
+        {
+            <div class="col-12 text-center p-5">
+                <div class="spinner-border text-primary" role="status"></div>
+            </div>
+        }
+        else
+        {
+            @foreach (var role in _roles)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="avatar-role bg-primary-subtle text-primary fs-4">
+                                    <i class="bi bi-shield-lock-fill"></i>
+                                </div>
+                                <span class="badge bg-light text-muted border px-2 py-1">
+                                    <i class="bi bi-people me-1"></i> @role.UserCount usuario(s)
+                                </span>
+                            </div>
+
+                            <h5 class="fw-bold mb-2">@role.Name</h5>
+                            <p class="text-muted small flex-grow-1">@role.Description</p>
+
+                            <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                                <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1"
+                                        @onclick="() => GoToPermissions(role.Name)">
+                                    <i class="bi bi-key-fill"></i>
+                                    <span>Configurar Permisos</span>
+                                </button>
+                                <span class="text-muted small">Activo</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<!-- Modal: Crear Rol -->
+@if (_showCreateModal)
+{
+    <div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-shield-plus me-2 text-primary"></i>Crear Nuevo Rol</h5>
+                    <button type="button" class="btn-close" @onclick="() => _showCreateModal = false"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nombre del Rol *</label>
+                        <input @bind="_newRoleName" type="text" class="form-control" placeholder="ej. Auditor" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Descripción</label>
+                        <textarea @bind="_newRoleDesc" class="form-control" rows="3" placeholder="Detalle de responsabilidades asignadas a este rol"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => _showCreateModal = false">Cancelar</button>
+                    <button type="button" class="btn btn-primary" @onclick="CreateRoleAsync">Crear Rol</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .avatar-role {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+@code {
+    private List<RoleItemDto> _roles = [];
+    private bool _isLoading = true;
+    private string? _message;
+    private string? _errorMessage;
+
+    // Modal state
+    private bool _showCreateModal;
+    private string _newRoleName = "";
+    private string _newRoleDesc = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRolesAsync();
+    }
+
+    private async Task LoadRolesAsync()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+        try
+        {
+            var res = await Sender.Send(new GetAllRolesQuery());
+            if (res.IsSuccess)
+            {
+                _roles = res.Value.ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task CreateRoleAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_newRoleName))
+        {
+            _errorMessage = "El nombre del rol es obligatorio.";
+            return;
+        }
+
+        try
+        {
+            var cmd = new CreateRoleCommand(_newRoleName, _newRoleDesc);
+            var res = await Sender.Send(cmd);
+            if (res.IsSuccess)
+            {
+                _message = $"Rol '{_newRoleName}' creado exitosamente.";
+                _showCreateModal = false;
+                _newRoleName = "";
+                _newRoleDesc = "";
+                await LoadRolesAsync();
+            }
+            else _errorMessage = res.Error.Message;
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private void GoToPermissions(string roleName)
+    {
+        Navigation.NavigateTo($"/admin/permissions?role={Uri.EscapeDataString(roleName)}");
+    }
+}
