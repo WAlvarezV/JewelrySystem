@@ -92,7 +92,7 @@ namespace Pomona.Application.Services
                 var response = new ContractsResponse();
                 var contracts = await _uow.Contracts.GetAll();
                 var mapped = _mapper.Map<IEnumerable<ContractProto>>(contracts.OrderBy(x => x.DeliveryDate));
-                response.ItemsList.AddRange(mapped);
+                response.ItemsList.AddRange(mapped.OrderByDescending(x => x.DeliveryDate));
                 return response;
             }
             catch (Exception ex)
