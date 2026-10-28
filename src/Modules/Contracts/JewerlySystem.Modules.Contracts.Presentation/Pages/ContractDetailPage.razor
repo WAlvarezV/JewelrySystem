@@ -25,7 +25,7 @@
     else
     {
         <!-- Hero Header -->
-        <SoftHeroHeader Title="@($"Contrato Prendario #{_contract.Number}")"
+        <SoftHeroHeader Title="@($"Contrato #{_contract.Number}")"
                         Subtitle="@($"Cliente #{_contract.PersonId} | Emisión: {_contract.Date:dd/MM/yyyy}")"
                         Icon="bi bi-file-earmark-check">
             <SoftButton Icon="arrow-left" OnClick="@(() => Navigation.NavigateTo("/contracts"))">Volver</SoftButton>
@@ -42,7 +42,7 @@
         <div class="row g-3 mb-3">
             <div class="col-12 col-sm-6 col-md-4">
                 <div class="soft-card p-3">
-                    <span class="text-muted small text-uppercase fw-semibold">Valor del Préstamo</span>
+                    <span class="text-muted small text-uppercase fw-semibold">Valor Total Contratado</span>
                     <h4 class="fw-bold mt-1 mb-0 text-dark">@_contract.Value.ToString("C0")</h4>
                 </div>
             </div>
@@ -56,7 +56,7 @@
             </div>
             <div class="col-12 col-sm-6 col-md-4">
                 <div class="soft-card p-3">
-                    <span class="text-muted small text-uppercase fw-semibold">Vencimiento</span>
+                    <span class="text-muted small text-uppercase fw-semibold">Fecha Prometida de Entrega</span>
                     @{
                         int daysLeft = (_contract.DeliveryDate.Date - DateTime.Today).Days;
                         bool isExpired = daysLeft < 0 && _contract.Balance > 0;
@@ -71,16 +71,16 @@
             </div>
         </div>
 
-        <!-- SoftDetailCard: Prenda & Condiciones -->
-        <SoftDetailCard Title="Detalles de la Prenda y Términos Contractuales">
-            <SoftDetailItem Label="Peso en Oro">@_contract.Weight.ToString("N1") g</SoftDetailItem>
+        <!-- SoftDetailCard: Mercancía & Condiciones -->
+        <SoftDetailCard Title="Especificaciones del Contrato y Joya">
+            <SoftDetailItem Label="Peso en Metal">@_contract.Weight.ToString("N1") g</SoftDetailItem>
             <SoftDetailItem Label="Estado del Contrato">
                 <SoftTag Color="blue">@_contract.State</SoftTag>
             </SoftDetailItem>
-            <SoftDetailItem Label="Referencia Interna">
-                @(_contract.Reference?.ToString() ?? "S/R")
+            <SoftDetailItem Label="Referencia de Inventario">
+                @(_contract.Reference?.ToString() ?? "N/A")
             </SoftDetailItem>
-            <SoftDetailItem Label="Descripción de la Prenda" Highlight="true">
+            <SoftDetailItem Label="Descripción del Trabajo o Joya" Highlight="true">
                 @_contract.Description
             </SoftDetailItem>
         </SoftDetailCard>

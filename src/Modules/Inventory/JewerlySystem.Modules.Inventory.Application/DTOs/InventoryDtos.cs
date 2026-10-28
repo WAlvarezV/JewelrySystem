@@ -68,3 +68,41 @@ public record WatchSummaryDto(
 public record InventoryConsolidatedDto(
     List<JewelSummaryDto> Jewelry,
     List<WatchSummaryDto> Watches);
+
+public record JewelListItemDto(
+    int Id,
+    int Reference,
+    int CostValue,
+    DateTime DateOfEntry,
+    DateTime? DateOfSale,
+    int? SaleValue,
+    string Description,
+    bool Active,
+    int ItemTypeId,
+    string ItemTypeName,
+    int? ProviderId,
+    double Weight,
+    int GramValue,
+    int? Length);
+
+public record WatchListItemDto(
+    int Id,
+    int Reference,
+    int CostValue,
+    DateTime DateOfEntry,
+    DateTime? DateOfSale,
+    int? SaleValue,
+    string Description,
+    bool Active,
+    int ItemTypeId,
+    int? ProviderId,
+    int BrandId,
+    string BrandName,
+    GenderType GenderType,
+    string CaseNumber);
+
+public record InventoryCatalogDto(
+    List<JewelListItemDto> Jewelry,
+    List<WatchListItemDto> Watches,
+    List<ItemTypeDto> ItemTypes,
+    List<BrandDto> Brands);

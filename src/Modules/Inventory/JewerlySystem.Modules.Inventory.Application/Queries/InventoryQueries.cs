@@ -1,6 +1,7 @@
 using JewerlySystem.Common.Application;
 using JewerlySystem.Common.Domain;
 using JewerlySystem.Modules.Inventory.Application.DTOs;
+using JewerlySystem.Modules.Inventory.Domain;
 
 namespace JewerlySystem.Modules.Inventory.Application.Queries;
 
@@ -181,5 +182,88 @@ public class GetConsolidatedInventoryQueryHandler : IQueryHandler<GetConsolidate
         }
 
         return Result.Success(new InventoryConsolidatedDto(jewelSummary, watchSummary));
+    }
+}
+
+public record GetInventoryCatalogQuery : IQuery<InventoryCatalogDto>;
+
+public class GetInventoryCatalogQueryHandler : IQueryHandler<GetInventoryCatalogQuery, InventoryCatalogDto>
+{
+    private readonly IInventoryRepository _repository;
+
+    public GetInventoryCatalogQueryHandler(IInventoryRepository repository)
+    {
+        _repository = repository;
+    }
+
+    public async Task<Result<InventoryCatalogDto>> Handle(GetInventoryCatalogQuery request, CancellationToken cancellationToken)
+    {
+        var items = await _repository.ListItemsAsync(ct: cancellationToken);
+        var itemTypes = await _repository.GetItemTypesAsync(cancellationToken);
+        var brands = await _repository.GetBrandsAsync(cancellationToken);
+        var jewelry = await _repository.ListJewelryAsync(cancellationToken);
+        var watches = await _repository.ListWatchesAsync(cancellationToken);
+
+        var jewelMap = jewelry.ToDictionary(j => j.ItemId);
+        var watchMap = watches.ToDictionary(w => w.ItemId);
+        var typeMap = itemTypes.ToDictionary(t => t.Id, t => t.Name);
+        var brandMap = brands.ToDictionary(b => b.Id, b => b.Name);
+
+        var jewelList = new List<JewelListItemDto>();
+        var watchList = new List<WatchListItemDto>();
+
+        foreach (var item in items)
+        {
+            if (item.ItemTypeId == 5) // Watch
+            {
+                watchMap.TryGetValue(item.Id, out var w);
+                var brandId = w?.BrandId ?? 0;
+                brandMap.TryGetValue(brandId, out var brandName);
+
+                watchList.Add(new WatchListItemDto(
+                    item.Id,
+                    item.Reference,
+                    item.CostValue,
+                    item.DateOfEntry,
+                    item.DateOfSale,
+                    item.SaleValue,
+                    item.Description,
+                    item.Active,
+                    item.ItemTypeId,
+                    item.ProviderId,
+                    brandId,
+                    brandName ?? "General",
+                    w?.GenderType ?? GenderType.Unisex,
+                    w?.CaseNumber ?? "-"
+                ));
+            }
+            else // Jewelry
+            {
+                jewelMap.TryGetValue(item.Id, out var j);
+                typeMap.TryGetValue(item.ItemTypeId, out var typeName);
+
+                jewelList.Add(new JewelListItemDto(
+                    item.Id,
+                    item.Reference,
+                    item.CostValue,
+                    item.DateOfEntry,
+                    item.DateOfSale,
+                    item.SaleValue,
+                    item.Description,
+                    item.Active,
+                    item.ItemTypeId,
+                    typeName ?? "Joya",
+                    item.ProviderId,
+                    j?.Weight ?? 0,
+                    j?.GramValue ?? 0,
+                    j?.Length
+                ));
+            }
+        }
+
+        var typesDtos = itemTypes.Select(t => t.ToDto()).ToList();
+        var brandDtos = brands.Select(b => b.ToDto()).ToList();
+
+        return Result.Success(new InventoryCatalogDto(jewelList, watchList, typesDtos, brandDtos));
     }
 }

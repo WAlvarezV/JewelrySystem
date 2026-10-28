@@ -6,10 +6,12 @@
 @inject NavigationManager Navigation
 @inject IMessageService Message
 
-<div class="inventory-container">
-    <SoftHeroHeader Title="Catálogo de Inventario"
-                    Subtitle="Control integral de joyas, relojes y artículos en stock activo o descargado"
-                    Icon="bi bi-box-seam">
+<div class="inventory-container step-fade-in">
+    <!-- Hero Header -->
+    <SoftHeroHeader Title="@(_activeGroup == "JEWELRY" ? "Catálogo de Joyería" : "Catálogo de Relojería")"
+                    Subtitle="@(_activeGroup == "JEWELRY" ? "Control de piezas en metales preciosos, pesajes, valorización y stock activo" : "Control de piezas de alta gama, marcas, seriales de caja y valor comercial")"
+                    Icon="@(_activeGroup == "JEWELRY" ? "bi bi-gem" : "bi bi-watch")">
+        <SoftButton Icon="reload" OnClick="LoadInventoryCatalogAsync">Actualizar</SoftButton>
         <SoftButton Text="Consolidado"
                     Icon="pie-chart"
                     Type="ButtonType.Dashed"
@@ -19,197 +21,688 @@
                     Danger="true"
                     Type="ButtonType.Default"
                     OnClick="@(() => Navigation.NavigateTo("/inventory/discharge"))" />
-        <SoftButton Text="Nueva Joya"
-                    Icon="plus-circle"
-                    Type="ButtonType.Default"
-                    OnClick="@(() => Navigation.NavigateTo("/inventory/jewels/new"))" />
-        <SoftButton Text="Nuevo Reloj"
-                    Icon="plus-circle"
-                    Type="ButtonType.Primary"
-                    OnClick="@(() => Navigation.NavigateTo("/inventory/watches/new"))" />
-    </SoftHeroHeader>
-
-    <!-- Métricas del Catálogo -->
-    <div class="metrics-grid mb-4">
-        <div class="metric-card">
-            <div class="metric-icon bg-blue-subtle text-primary">
-                <i class="bi bi-boxes"></i>
-            </div>
-            <div class="metric-content">
-                <span class="metric-label">En Stock Activo</span>
-                <span class="metric-value">@_items.Count(x => x.Active)</span>
-            </div>
-        </div>
-
-        <div class="metric-card">
-            <div class="metric-icon bg-warning-subtle text-warning">
-                <i class="bi bi-gem"></i>
-            </div>
-            <div class="metric-content">
-                <span class="metric-label">Joyas Disponibles</span>
-                <span class="metric-value">@_items.Count(x => x.Active && x.ItemTypeId != 5)</span>
-            </div>
-        </div>
-
-        <div class="metric-card">
-            <div class="metric-icon bg-info-subtle text-info">
-                <i class="bi bi-watch"></i>
-            </div>
-            <div class="metric-content">
-                <span class="metric-label">Relojes Disponibles</span>
-                <span class="metric-value">@_items.Count(x => x.Active && x.ItemTypeId == 5)</span>
-            </div>
-        </div>
-
-        <div class="metric-card">
-            <div class="metric-icon bg-secondary-subtle text-secondary">
-                <i class="bi bi-box-arrow-right"></i>
-            </div>
-            <div class="metric-content">
-                <span class="metric-label">Artículos Descargados</span>
-                <span class="metric-value">@_items.Count(x => !x.Active)</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Barra de Búsqueda y Filtros -->
-    <SoftFilterCard>
-        <div class="row g-3 align-items-center">
-            <div class="col-12 col-md-5">
-                <Input Placeholder="Buscar por referencia o descripción..."
-                       PrefixIcon="search"
-                       @bind-Value="_searchTerm"
-                       AllowClear="true" />
-            </div>
-            <div class="col-12 col-md-4">
-                <Select TItemValue="int"
-                        TItem="ItemTypeFilterOption"
-                        DataSource="@_typeFilterOptions"
-                        @bind-Value="_selectedTypeFilter"
-                        ValueName="@nameof(ItemTypeFilterOption.Id)"
-                        LabelName="@nameof(ItemTypeFilterOption.Name)"
-                        Placeholder="Filtrar por tipo..." />
-            </div>
-            <div class="col-12 col-md-3">
-                <Select TItemValue="string"
-                        TItem="StatusFilterOption"
-                        DataSource="@_statusFilterOptions"
-                        @bind-Value="_selectedStatusFilter"
-                        ValueName="@nameof(StatusFilterOption.Value)"
-                        LabelName="@nameof(StatusFilterOption.Label)"
-                        Placeholder="Estado..." />
-            </div>
-        </div>
-    </SoftFilterCard>
-
-    <!-- Tabla Principal de Inventario -->
-    <div class="table-container shadow-sm rounded-3">
-        @if (_isLoading)
+        @if (_activeGroup == "JEWELRY")
         {
-            <div class="text-center py-5">
-                <Spin Size="SpinSize.Large" Tip="Cargando catálogo..." />
-            </div>
-        }
-        else if (!FilteredItems.Any())
-        {
-            <div class="py-5">
-                <SoftResultView Status="ResultStatus.Info"
-                                Title="No se encontraron artículos"
-                                Subtitle="No hay productos que coincidan con los criterios de búsqueda seleccionados.">
-                    <SoftButton Text="Nueva Joya"
-                                Type="ButtonType.Default"
-                                OnClick="@(() => Navigation.NavigateTo("/inventory/jewels/new"))" />
-                    <SoftButton Text="Nuevo Reloj"
-                                Type="ButtonType.Primary"
-                                OnClick="@(() => Navigation.NavigateTo("/inventory/watches/new"))" />
-                </SoftResultView>
-            </div>
+            <SoftButton Type="@ButtonType.Primary"
+                        Icon="plus-circle"
+                        OnClick="OpenCreateJewelDrawer">
+                Nueva Joya
+            </SoftButton>
         }
         else
         {
-            <Table TItem="ItemDto"
-                   DataSource="@FilteredItems"
-                   Responsive="true"
-                   Size="TableSize.Middle"
-                   RowKey="@(x => x.Reference.ToString())">
-                <PropertyColumn Property="c => c.Reference" Title="Referencia" Width="120">
-                    <span class="ref-badge">#@context.Reference</span>
-                </PropertyColumn>
-                <PropertyColumn Property="c => c.ItemTypeId" Title="Tipo" Width="140">
-                    @{
-                        var isWatch = context.ItemTypeId == 5;
-                    }
-                    <SoftTag Color="@(isWatch ? "cyan" : "gold")">
-                        <i class="bi @(isWatch ? "bi-watch" : "bi-gem") me-1"></i>
-                        @GetTypeName(context.ItemTypeId)
-                    </SoftTag>
-                </PropertyColumn>
-                <PropertyColumn Property="c => c.Description" Title="Descripción" Ellipsis="true" />
-                <PropertyColumn Property="c => c.CostValue" Title="Costo" Align="ColumnAlign.Right" Width="130">
-                    <span class="cost-text">@context.CostValue.ToString("C0")</span>
-                </PropertyColumn>
-                <PropertyColumn Property="c => c.SaleValue" Title="Venta Sugerida" Align="ColumnAlign.Right" Width="140">
-                    <span class="sale-text">@((context.SaleValue ?? (int)(context.CostValue * 1.3)).ToString("C0"))</span>
-                </PropertyColumn>
-                <PropertyColumn Property="c => c.DateOfEntry" Title="Ingreso" Width="110">
-                    <span class="date-text">@context.DateOfEntry.ToString("dd/MM/yyyy")</span>
-                </PropertyColumn>
-                <PropertyColumn Property="c => c.Active" Title="Estado" Width="120" Align="ColumnAlign.Center">
-                    @if (context.Active)
-                    {
-                        <SoftTag Color="green">Disponible</SoftTag>
-                    }
-                    else
-                    {
-                        <SoftTag Color="default">Descargado</SoftTag>
-                    }
-                </PropertyColumn>
-                <ActionColumn Title="Acciones" Align="ColumnAlign.Center" Width="90">
-                    @if (context.Active)
-                    {
-                        <SoftActionButton Icon="export"
-                                          TooltipText="Descargar / Vender"
-                                          OnClick="@(() => Navigation.NavigateTo("/inventory/discharge"))" />
-                    }
-                    else
-                    {
-                        <span class="sold-date">@context.DateOfSale?.ToString("dd/MM/yy")</span>
-                    }
-                </ActionColumn>
-            </Table>
+            <SoftButton Type="@ButtonType.Primary"
+                        Icon="plus-circle"
+                        OnClick="OpenCreateWatchDrawer">
+                Nuevo Reloj
+            </SoftButton>
         }
+    </SoftHeroHeader>
+
+    <!-- Group Selector (Joyería vs Relojes) -->
+    <div class="group-switcher-bar d-flex align-items-center justify-content-between mb-4 p-2 bg-white rounded-3 shadow-sm border">
+        <div class="d-flex align-items-center gap-3">
+            <RadioGroup @bind-Value="_activeGroup" ButtonStyle="@RadioButtonStyle.Solid">
+                <Radio RadioButton="true" Value="@("JEWELRY")">
+                    <span class="fs-6"><i class="bi bi-gem me-1 text-warning"></i> <b>Grupo Joyería</b> (@_jewelryItems.Count(x => x.Active))</span>
+                </Radio>
+                <Radio RadioButton="true" Value="@("WATCHES")">
+                    <span class="fs-6"><i class="bi bi-watch me-1 text-primary"></i> <b>Grupo Relojes</b> (@_watchItems.Count(x => x.Active))</span>
+                </Radio>
+            </RadioGroup>
+        </div>
+
+        <div class="d-none d-md-flex align-items-center gap-2 text-muted small pe-2">
+            <span>Módulo Activo: <b>INVENTARIO</b> &bull;</span>
+            <span>Categoría: <b>@(_activeGroup == "JEWELRY" ? "Metales Preciosos" : "Alta Relojería")</b></span>
+        </div>
     </div>
+
+    @if (_activeGroup == "JEWELRY")
+    {
+        <!-- Métricas del Grupo Joyería -->
+        <div class="metrics-grid mb-4">
+            <div class="metric-card">
+                <div class="metric-icon bg-warning-subtle text-warning">
+                    <i class="bi bi-gem"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Joyas Disponibles</span>
+                    <span class="metric-value">@_jewelryItems.Count(x => x.Active)</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon bg-blue-subtle text-primary">
+                    <i class="bi bi-speedometer2"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Peso Total en Stock</span>
+                    <span class="metric-value">@(_jewelryItems.Where(x => x.Active).Sum(x => x.Weight).ToString("F1")) g</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon bg-secondary-subtle text-danger">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Inversión Costo Joyas</span>
+                    <span class="metric-value">@_jewelryItems.Where(x => x.Active).Sum(x => (long)x.CostValue).ToString("C0")</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon bg-info-subtle text-success">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Venta Sugerida Total</span>
+                    <span class="metric-value">@_jewelryItems.Where(x => x.Active).Sum(x => (long)(x.SaleValue ?? (int)(x.CostValue * 1.3))).ToString("C0")</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barra de Búsqueda y Filtros Joyería -->
+        <SoftFilterCard>
+            <div class="row g-3 align-items-center">
+                <div class="col-12 col-md-5">
+                    <Input Placeholder="Buscar joya por referencia o descripción..."
+                           PrefixIcon="search"
+                           @bind-Value="_searchJewelryTerm"
+                           AllowClear="true" />
+                </div>
+                <div class="col-12 col-md-4">
+                    <Select TItemValue="int"
+                            TItem="ItemTypeDto"
+                            DataSource="@_jewelryTypeOptions"
+                            @bind-Value="_selectedJewelryTypeFilter"
+                            ValueName="@nameof(ItemTypeDto.Id)"
+                            LabelName="@nameof(ItemTypeDto.Name)"
+                            Placeholder="Tipo de joya..." />
+                </div>
+                <div class="col-12 col-md-3">
+                    <Select TItemValue="string"
+                            TItem="StatusFilterOption"
+                            DataSource="@_statusFilterOptions"
+                            @bind-Value="_selectedJewelryStatusFilter"
+                            ValueName="@nameof(StatusFilterOption.Value)"
+                            LabelName="@nameof(StatusFilterOption.Label)"
+                            Placeholder="Estado..." />
+                </div>
+            </div>
+        </SoftFilterCard>
+
+        <!-- Tabla de Joyería -->
+        <div class="table-container shadow-sm rounded-3">
+            @if (_isLoading)
+            {
+                <div class="text-center py-5">
+                    <Spin Size="SpinSize.Large" Tip="Cargando catálogo de joyería..." />
+                </div>
+            }
+            else if (!FilteredJewelry.Any())
+            {
+                <div class="py-5">
+                    <SoftResultView Status="ResultStatus.Info"
+                                    Title="No se encontraron joyas"
+                                    Subtitle="No hay piezas de joyería que coincidan con los filtros seleccionados.">
+                        <SoftButton Type="@ButtonType.Primary"
+                                    Icon="plus-circle"
+                                    OnClick="OpenCreateJewelDrawer">
+                            Registrar Nueva Joya
+                        </SoftButton>
+                    </SoftResultView>
+                </div>
+            }
+            else
+            {
+                <Table TItem="JewelListItemDto"
+                       DataSource="@FilteredJewelry"
+                       Responsive="true"
+                       Size="TableSize.Middle"
+                       RowKey="@(x => x.Reference.ToString())">
+                    <PropertyColumn Property="c => c.Reference" Title="Referencia" Width="110px">
+                        <span class="ref-badge">#@context.Reference</span>
+                    </PropertyColumn>
+                    <PropertyColumn Property="c => c.ItemTypeName" Title="Tipo" Width="130px">
+                        <SoftTag Color="gold">
+                            <i class="bi bi-gem me-1"></i>
+                            @context.ItemTypeName
+                        </SoftTag>
+                    </PropertyColumn>
+                    <PropertyColumn Property="c => c.Description" Title="Descripción" Ellipsis="true">
+                        <span class="fw-medium text-dark">@context.Description</span>
+                        @if (context.Length.HasValue && context.Length.Value > 0)
+                        {
+                            <span class="badge bg-light text-muted ms-1">@context.Length cm</span>
+                        }
+                    </PropertyColumn>
+                    <PropertyColumn Property="c => c.Weight" Title="Peso (g)" Align="ColumnAlign.Right" Width="100px">
+                        <span class="fw-bold">@context.Weight.ToString("F2") g</span>
+                    </PropertyColumn>
+                    <PropertyColumn Property="c => c.CostValue" Title="Costo Total" Align="ColumnAlign.Right" Width="130px">
+                        <span class="cost-text">@context.CostValue.ToString("C0")</span>
+                    </PropertyColumn>
+                    <PropertyColumn Property="c => c.SaleValue" Title="Venta Sugerida" Align="ColumnAlign.Right" Width="135px">
+                        <span class="sale-text">@((context.SaleValue ?? (int)(context.CostValue * 1.3)).ToString("C0"))</span>
+                    </PropertyColumn>
+                    <PropertyColumn Property="c => c.DateOfEntry" Title="Ingreso" Width="110px">
+                        <span class="date-text">@context.DateOfEntry.ToString("dd/MM/yyyy")</span>
+                    </PropertyColumn>
+                    <PropertyColumn Property="c => c.Active" Title="Estado" Width="120px" Align="ColumnAlign.Center">
+                        @if (context.Active)
+                        {
+                            <SoftTag Color="green">Disponible</SoftTag>
+                        }
+                        else
+                        {
+                            <SoftTag Color="default">Descargado</SoftTag>
+                        }
+                    </PropertyColumn>
+                    <ActionColumn Title="Acciones" Align="ColumnAlign.Center" Width="90px">
+                        @if (context.Active)
+                        {
+                            <SoftActionButton Icon="export"
+                                              TooltipText="Descargar / Vender"
+                                              OnClick="@(() => Navigation.NavigateTo("/inventory/discharge"))" />
+                        }
+                        else
+                        {
+                            <span class="sold-date">@context.DateOfSale?.ToString("dd/MM/yy")</span>
+                        }
+                    </ActionColumn>
+                </Table>
+            }
+        </div>
+    }
+    else
+    {
+        <!-- Métricas del Grupo Relojes -->
+        <div class="metrics-grid mb-4">
+            <div class="metric-card">
+                <div class="metric-icon bg-info-subtle text-info">
+                    <i class="bi bi-watch"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Relojes Disponibles</span>
+                    <span class="metric-value">@_watchItems.Count(x => x.Active)</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon bg-blue-subtle text-primary">
+                    <i class="bi bi-tag"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Marcas Representadas</span>
+                    <span class="metric-value">@_watchItems.Where(x => x.Active).Select(x => x.BrandName).Distinct().Count()</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon bg-secondary-subtle text-danger">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Inversión Costo Relojes</span>
+                    <span class="metric-value">@_watchItems.Where(x => x.Active).Sum(x => (long)x.CostValue).ToString("C0")</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon bg-warning-subtle text-success">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Venta Sugerida Total</span>
+                    <span class="metric-value">@_watchItems.Where(x => x.Active).Sum(x => (long)(x.SaleValue ?? (int)(x.CostValue * 1.3))).ToString("C0")</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barra de Búsqueda y Filtros Relojes -->
+        <SoftFilterCard>
+            <div class="row g-3 align-items-center">
+                <div class="col-12 col-md-4">
+                    <Input Placeholder="Buscar por serial, marca o descripción..."
+                           PrefixIcon="search"
+                           @bind-Value="_searchWatchTerm"
+                           AllowClear="true" />
+                </div>
+                <div class="col-12 col-md-3">
+                    <Select TItemValue="int"
+                            TItem="BrandFilterOption"
+                            DataSource="@_brandFilterOptions"
+                            @bind-Value="_selectedWatchBrandFilter"
+                            ValueName="@nameof(BrandFilterOption.Id)"
+                            LabelName="@nameof(BrandFilterOption.Name)"
+                            Placeholder="Filtrar por marca..." />
+                </div>
+                <div class="col-12 col-md-3">
+                    <Select TItemValue="string"
+                            TItem="GenderFilterOption"
+                            DataSource="@_genderFilterOptions"
+                            @bind-Value="_selectedWatchGenderFilter"
+                            ValueName="@nameof(GenderFilterOption.Value)"
+                            LabelName="@nameof(GenderFilterOption.Label)"
+                            Placeholder="Género..." />
+                </div>
+                <div class="col-12 col-md-2">
+                    <Select TItemValue="string"
+                            TItem="StatusFilterOption"
+                            DataSource="@_statusFilterOptions"
+                            @bind-Value="_selectedWatchStatusFilter"
+                            ValueName="@nameof(StatusFilterOption.Value)"
+                            LabelName="@nameof(StatusFilterOption.Label)"
+                            Placeholder="Estado..." />
+                </div>
+            </div>
+        </SoftFilterCard>
+
+        <!-- Tabla de Relojes -->
+        <div class="table-container shadow-sm rounded-3">
+            @if (_isLoading)
+            {
+                <div class="text-center py-5">
+                    <Spin Size="SpinSize.Large" Tip="Cargando catálogo de relojes..." />
+                </div>
+            }
+            else if (!FilteredWatches.Any())
+            {
+                <div class="py-5">
+                    <SoftResultView Status="ResultStatus.Info"
+                                    Title="No se encontraron relojes"
+                                    Subtitle="No hay relojes que coincidan con los filtros seleccionados.">
+                        <SoftButton Type="@ButtonType.Primary"
+                                    Icon="plus-circle"
+                                    OnClick="OpenCreateWatchDrawer">
+                            Registrar Nuevo Reloj
+                        </SoftButton>
+                    </SoftResultView>
+                </div>
+            }
+            else
+            {
+                <Table TItem="WatchListItemDto"
+                       DataSource="@FilteredWatches"
+                       Responsive="true"
+                       Size="TableSize.Middle"
+                       RowKey="@(x => x.Reference.ToString())">
+                    <PropertyColumn Property="c => c.Reference" Title="Referencia" Width="110px">
+                        <span class="ref-badge">#@context.Reference</span>
+                    </PropertyColumn>
+                    <PropertyColumn Property="c => c.BrandName" Title="Marca" Width="130px">
+                        <SoftTag Color="cyan">
+                            <i class="bi bi-watch me-1"></i>
+                            @context.BrandName
+                        </SoftTag>
+                    </PropertyColumn>
+                    <PropertyColumn Property="c => c.CaseNumber" Title="Caja / Serial" Width="130px">
+                        <span class="fw-semibold text-dark">@context.CaseNumber</span>
+                    </PropertyColumn>
+                    <PropertyColumn Property="c => c.GenderType" Title="Género" Width="110px">
+                        <span class="badge bg-light text-dark">@context.GenderType</span>
+                    </PropertyColumn>
+                    <PropertyColumn Property="c => c.Description" Title="Descripción" Ellipsis="true">
+                        <span class="text-muted">@context.Description</span>
+                    </PropertyColumn>
+                    <PropertyColumn Property="c => c.CostValue" Title="Costo" Align="ColumnAlign.Right" Width="120px">
+                        <span class="cost-text">@context.CostValue.ToString("C0")</span>
+                    </PropertyColumn>
+                    <PropertyColumn Property="c => c.SaleValue" Title="Venta Sugerida" Align="ColumnAlign.Right" Width="135px">
+                        <span class="sale-text">@((context.SaleValue ?? (int)(context.CostValue * 1.3)).ToString("C0"))</span>
+                    </PropertyColumn>
+                    <PropertyColumn Property="c => c.DateOfEntry" Title="Ingreso" Width="110px">
+                        <span class="date-text">@context.DateOfEntry.ToString("dd/MM/yyyy")</span>
+                    </PropertyColumn>
+                    <PropertyColumn Property="c => c.Active" Title="Estado" Width="120px" Align="ColumnAlign.Center">
+                        @if (context.Active)
+                        {
+                            <SoftTag Color="green">Disponible</SoftTag>
+                        }
+                        else
+                        {
+                            <SoftTag Color="default">Descargado</SoftTag>
+                        }
+                    </PropertyColumn>
+                    <ActionColumn Title="Acciones" Align="ColumnAlign.Center" Width="90px">
+                        @if (context.Active)
+                        {
+                            <SoftActionButton Icon="export"
+                                              TooltipText="Descargar / Vender"
+                                              OnClick="@(() => Navigation.NavigateTo("/inventory/discharge"))" />
+                        }
+                        else
+                        {
+                            <span class="sold-date">@context.DateOfSale?.ToString("dd/MM/yy")</span>
+                        }
+                    </ActionColumn>
+                </Table>
+            }
+        </div>
+    }
+
+    <!-- SoftDrawer: Registrar Nueva Joya -->
+    <SoftDrawer Visible="@_drawerJewelVisible"
+                Title="Registrar Nueva Joya"
+                Description="Ingrese especificaciones de la joya, peso, gramaje y valorización comercial"
+                Width="720"
+                OnClose="CloseJewelDrawer">
+        <ChildContent>
+            <Form Model="@_jewelFormModel" Layout="@FormLayout.Vertical">
+                <!-- 1. Clasificación y Proveedor -->
+                <SoftFormBox Title="1. Tipo de Joya y Origen"
+                             Subtitle="Seleccione la categoría de joyería y el origen o proveedor">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <FormItem Label="Tipo de Joya" Required="true">
+                                <Select TItem="ItemTypeDto"
+                                        TItemValue="int"
+                                        DataSource="@_itemTypes.Where(t => t.Id != 5).ToList()"
+                                        @bind-Value="_jewelFormModel.ItemTypeId"
+                                        ValueName="@nameof(ItemTypeDto.Id)"
+                                        LabelName="@nameof(ItemTypeDto.Name)"
+                                        Placeholder="Seleccione tipo de joya..." />
+                            </FormItem>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <FormItem Label="Proveedor / Origen">
+                                <Select TItem="JewerlySystem.Modules.Customers.Application.DTOs.PersonDto"
+                                        TItemValue="int?"
+                                        DataSource="@_providers"
+                                        @bind-Value="_jewelFormModel.ProviderId"
+                                        ValueName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.Id)"
+                                        LabelName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.FullName)"
+                                        Placeholder="-- Proveedor General / Stock Interno --"
+                                        AllowClear="true" />
+                            </FormItem>
+                        </div>
+                    </div>
+                </SoftFormBox>
+
+                <!-- 2. Pesaje y Tarifas -->
+                <SoftFormBox Title="2. Pesaje y Tarifas por Gramo"
+                             Subtitle="Defina el peso exacto en gramos y las tarifas de costo y venta proyectada">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-12 col-md-4">
+                            <FormItem Label="Peso en Gramos (g)" Required="true">
+                                <AntDesign.InputNumber TValue="double"
+                                                       @bind-Value="_jewelFormModel.Weight"
+                                                       Step="0.01"
+                                                       Min="0.01"
+                                                       Style="width: 100%; font-weight: bold;"
+                                                       OnChange="@(_ => RecalculateJewelValues())" />
+                            </FormItem>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <FormItem Label="Valor Gr. Costo ($)" Required="true">
+                                <AntDesign.InputNumber TValue="int"
+                                                       @bind-Value="_jewelFormModel.GramValue"
+                                                       Step="1000"
+                                                       Min="1"
+                                                       Style="width: 100%;"
+                                                       OnChange="@(_ => RecalculateJewelValues())" />
+                            </FormItem>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <FormItem Label="Valor Gr. Venta ($)">
+                                <AntDesign.InputNumber TValue="int"
+                                                       @bind-Value="_jewelFormModel.GramSaleValue"
+                                                       Step="1000"
+                                                       Min="1"
+                                                       Style="width: 100%; font-weight: bold; color: var(--soft-success, #52c41a);"
+                                                       OnChange="@(_ => RecalculateJewelValues())" />
+                            </FormItem>
+                        </div>
+
+                        @if (_jewelFormModel.ItemTypeId is 3 or 4)
+                        {
+                            <div class="col-12 col-md-4">
+                                <FormItem Label="Largo (cm)">
+                                    <AntDesign.InputNumber TValue="int?"
+                                                           @bind-Value="_jewelFormModel.Length"
+                                                           Min="1"
+                                                           Style="width: 100%;" />
+                                </FormItem>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="mt-3">
+                        <SoftDetailCard Title="Resumen Económico Proyectado">
+                            <div class="row g-3 text-center">
+                                <div class="col-12 col-md-4">
+                                    <SoftDetailItem Label="Costo Total Calculado"
+                                                    Value="@_calculatedJewelCost.ToString("C0")"
+                                                    HighlightVariant="SoftDetailItem.Variant.Danger" />
+                                    <div class="text-muted small">Peso (@_jewelFormModel.Weight.ToString("F2") g) × Costo Gr.</div>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <SoftDetailItem Label="Venta Total Sugerida"
+                                                    Value="@_calculatedJewelSale.ToString("C0")"
+                                                    HighlightVariant="SoftDetailItem.Variant.Success" />
+                                    <div class="text-muted small">Peso (@_jewelFormModel.Weight.ToString("F2") g) × Venta Gr.</div>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <SoftDetailItem Label="Margen Proyectado"
+                                                    Value="@((_calculatedJewelSale - _calculatedJewelCost).ToString("C0"))"
+                                                    HighlightVariant="SoftDetailItem.Variant.Primary" />
+                                    <div class="text-muted small">Ganancia bruta estimada</div>
+                                </div>
+                            </div>
+                        </SoftDetailCard>
+                    </div>
+                </SoftFormBox>
+
+                <!-- 3. Descripción -->
+                <SoftFormBox Title="3. Descripción del Artículo"
+                             Subtitle="Detalle material (oro 18k, 14k, plata), piedras preciosas, tallas, grabado...">
+                    <FormItem Label="Descripción Detallada" Required="true">
+                        <TextArea Rows="3"
+                                  @bind-Value="_jewelFormModel.Description"
+                                  Placeholder="Describa el diseño de la joya, ley del metal, acabados, engastes o particularidades..."
+                                  MaxLength="500"
+                                  ShowCount="true" />
+                    </FormItem>
+                </SoftFormBox>
+            </Form>
+        </ChildContent>
+        <FooterContent>
+            <SoftButton OnClick="CloseJewelDrawer">Cancelar</SoftButton>
+            <SoftButton Type="@ButtonType.Primary"
+                        Loading="@_isSavingJewel"
+                        OnClick="SaveJewelAsync">
+                Guardar Joya en Stock
+            </SoftButton>
+        </FooterContent>
+    </SoftDrawer>
+
+    <!-- SoftDrawer: Registrar Nuevo Reloj -->
+    <SoftDrawer Visible="@_drawerWatchVisible"
+                Title="Registrar Reloj en Inventario"
+                Description="Ingrese la información del fabricante, serial de caja, género y valor comercial"
+                Width="720"
+                OnClose="CloseWatchDrawer">
+        <ChildContent>
+            <Form Model="@_watchFormModel" Layout="@FormLayout.Vertical">
+                <!-- 1. Marca, Origen y Clasificación -->
+                <SoftFormBox Title="1. Marca, Origen y Clasificación"
+                             Subtitle="Información del fabricante, género objetivo y procedencia">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <FormItem Label="Marca del Reloj" Required="true">
+                                <Select TItem="BrandDto"
+                                        TItemValue="int"
+                                        DataSource="@_brands"
+                                        @bind-Value="_watchFormModel.BrandId"
+                                        ValueName="@nameof(BrandDto.Id)"
+                                        LabelName="@nameof(BrandDto.Name)"
+                                        Placeholder="Seleccione marca..." />
+                            </FormItem>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <FormItem Label="Género / Segmento" Required="true">
+                                <Select TItem="GenderTypeOption"
+                                        TItemValue="GenderType"
+                                        DataSource="@_genderOptions"
+                                        @bind-Value="_watchFormModel.GenderType"
+                                        ValueName="@nameof(GenderTypeOption.Value)"
+                                        LabelName="@nameof(GenderTypeOption.Label)"
+                                        Placeholder="Seleccione género..." />
+                            </FormItem>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <FormItem Label="Proveedor / Origen">
+                                <Select TItem="JewerlySystem.Modules.Customers.Application.DTOs.PersonDto"
+                                        TItemValue="int?"
+                                        DataSource="@_providers"
+                                        @bind-Value="_watchFormModel.ProviderId"
+                                        ValueName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.Id)"
+                                        LabelName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.FullName)"
+                                        Placeholder="-- Stock Interno / Empeño --"
+                                        AllowClear="true" />
+                            </FormItem>
+                        </div>
+                    </div>
+                </SoftFormBox>
+
+                <!-- 2. Seriales y Valores -->
+                <SoftFormBox Title="2. Identificación y Precios"
+                             Subtitle="Serial de tapa o caja y valores de costo y venta">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-12 col-md-4">
+                            <FormItem Label="Nro. de Caja / Serial" Required="true">
+                                <Input Placeholder="Ej. W-984210"
+                                       @bind-Value="_watchFormModel.CaseNumber" />
+                            </FormItem>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <FormItem Label="Valor Costo ($)" Required="true">
+                                <AntDesign.InputNumber TValue="int"
+                                                       @bind-Value="_watchFormModel.CostValue"
+                                                       Step="10000"
+                                                       Min="1"
+                                                       Style="width: 100%; font-weight: bold; color: var(--soft-danger, #ff4d4f);"
+                                                       OnChange="@(_ => StateHasChanged())" />
+                            </FormItem>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <FormItem Label="Valor Venta Sugerido ($)">
+                                <AntDesign.InputNumber TValue="int"
+                                                       @bind-Value="_watchFormModel.SaleValue"
+                                                       Step="10000"
+                                                       Min="1"
+                                                       Style="width: 100%; font-weight: bold; color: var(--soft-success, #52c41a);"
+                                                       OnChange="@(_ => StateHasChanged())" />
+                            </FormItem>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <SoftDetailCard Title="Resumen Comercial Proyectado">
+                            <div class="row g-3 text-center">
+                                <div class="col-12 col-md-4">
+                                    <SoftDetailItem Label="Inversión Costo"
+                                                    Value="@_watchFormModel.CostValue.ToString("C0")"
+                                                    HighlightVariant="SoftDetailItem.Variant.Danger" />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <SoftDetailItem Label="Precio Venta Sugerido"
+                                                    Value="@_watchFormModel.SaleValue.ToString("C0")"
+                                                    HighlightVariant="SoftDetailItem.Variant.Success" />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <SoftDetailItem Label="Margen Comercial"
+                                                    Value="@((_watchFormModel.SaleValue - _watchFormModel.CostValue).ToString("C0"))"
+                                                    HighlightVariant="SoftDetailItem.Variant.Primary" />
+                                </div>
+                            </div>
+                        </SoftDetailCard>
+                    </div>
+                </SoftFormBox>
+
+                <!-- 3. Descripción -->
+                <SoftFormBox Title="3. Descripción del Reloj"
+                             Subtitle="Modelo, movimiento (automático/cuarzo), pulso, cristal, estado estético...">
+                    <FormItem Label="Descripción Detallada" Required="true">
+                        <TextArea Rows="3"
+                                  @bind-Value="_watchFormModel.Description"
+                                  Placeholder="Detalle características: maquinaria, bisel, pulso en acero/cuero, resistencia al agua..."
+                                  MaxLength="500"
+                                  ShowCount="true" />
+                    </FormItem>
+                </SoftFormBox>
+            </Form>
+        </ChildContent>
+        <FooterContent>
+            <SoftButton OnClick="CloseWatchDrawer">Cancelar</SoftButton>
+            <SoftButton Type="@ButtonType.Primary"
+                        Loading="@_isSavingWatch"
+                        OnClick="SaveWatchAsync">
+                Guardar Reloj en Stock
+            </SoftButton>
+        </FooterContent>
+    </SoftDrawer>
 </div>
 
 @code {
-    private List<ItemDto> _items = new();
+    [SupplyParameterFromQuery(Name = "group")]
+    public string? GroupQuery { get; set; }
+
+    private string _activeGroup = "JEWELRY";
     private bool _isLoading = true;
-    private string _searchTerm = string.Empty;
-    private int _selectedTypeFilter = 0;
-    private string _selectedStatusFilter = string.Empty;
 
-    public class ItemTypeFilterOption
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-    }
+    // Master Catalog Data
+    private List<JewelListItemDto> _jewelryItems = new();
+    private List<WatchListItemDto> _watchItems = new();
+    private List<ItemTypeDto> _itemTypes = new();
+    private List<BrandDto> _brands = new();
+    private List<JewerlySystem.Modules.Customers.Application.DTOs.PersonDto> _providers = new();
 
+    // Filters for Jewelry
+    private string _searchJewelryTerm = string.Empty;
+    private int _selectedJewelryTypeFilter = 0;
+    private string _selectedJewelryStatusFilter = string.Empty;
+    private List<ItemTypeDto> _jewelryTypeOptions = new();
+
+    // Filters for Watches
+    private string _searchWatchTerm = string.Empty;
+    private int _selectedWatchBrandFilter = 0;
+    private string _selectedWatchGenderFilter = string.Empty;
+    private string _selectedWatchStatusFilter = string.Empty;
+    private List<BrandFilterOption> _brandFilterOptions = new();
+
+    // Shared filter options
     public class StatusFilterOption
     {
         public string Value { get; set; } = string.Empty;
         public string Label { get; set; } = string.Empty;
     }
 
-    private readonly List<ItemTypeFilterOption> _typeFilterOptions = new()
+    public class BrandFilterOption
     {
-        new() { Id = 0, Name = "Todos los Tipos" },
-        new() { Id = 1, Name = "Anillos" },
-        new() { Id = 2, Name = "Aretes" },
-        new() { Id = 3, Name = "Cadenas" },
-        new() { Id = 4, Name = "Pulseras" },
-        new() { Id = 6, Name = "Dijes" },
-        new() { Id = 5, Name = "Relojes" },
-    };
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    public class GenderFilterOption
+    {
+        public string Value { get; set; } = string.Empty;
+        public string Label { get; set; } = string.Empty;
+    }
+
+    public class GenderTypeOption
+    {
+        public GenderType Value { get; set; }
+        public string Label { get; set; } = string.Empty;
+    }
 
     private readonly List<StatusFilterOption> _statusFilterOptions = new()
     {
@@ -218,29 +711,94 @@
         new() { Value = "sold", Label = "Descargados / Vendidos" },
     };
 
-    private List<ItemDto> FilteredItems
+    private readonly List<GenderFilterOption> _genderFilterOptions = new()
+    {
+        new() { Value = "", Label = "Todos los Géneros" },
+        new() { Value = "Hombre", Label = "Hombre / Caballero" },
+        new() { Value = "Mujer", Label = "Mujer / Dama" },
+        new() { Value = "Unisex", Label = "Unisex" }
+    };
+
+    private readonly List<GenderTypeOption> _genderOptions = new()
+    {
+        new() { Value = GenderType.Hombre, Label = "Caballero / Hombre" },
+        new() { Value = GenderType.Mujer, Label = "Dama / Mujer" },
+        new() { Value = GenderType.Unisex, Label = "Unisex" }
+    };
+
+    // Drawers State
+    private bool _drawerJewelVisible;
+    private bool _isSavingJewel;
+    private JewelFormModel _jewelFormModel = new();
+    private int _calculatedJewelCost;
+    private int _calculatedJewelSale;
+
+    private bool _drawerWatchVisible;
+    private bool _isSavingWatch;
+    private WatchFormModel _watchFormModel = new();
+
+    // Filtered lists
+    private List<JewelListItemDto> FilteredJewelry
     {
         get
         {
-            var list = _items.AsEnumerable();
+            var list = _jewelryItems.AsEnumerable();
 
-            if (!string.IsNullOrWhiteSpace(_searchTerm))
+            if (!string.IsNullOrWhiteSpace(_searchJewelryTerm))
             {
-                var term = _searchTerm.Trim().ToLowerInvariant();
+                var term = _searchJewelryTerm.Trim().ToLowerInvariant();
                 list = list.Where(i => i.Reference.ToString().Contains(term) ||
                                        (i.Description != null && i.Description.ToLowerInvariant().Contains(term)));
             }
 
-            if (_selectedTypeFilter > 0)
+            if (_selectedJewelryTypeFilter > 0)
             {
-                list = list.Where(i => i.ItemTypeId == _selectedTypeFilter);
+                list = list.Where(i => i.ItemTypeId == _selectedJewelryTypeFilter);
             }
 
-            if (_selectedStatusFilter == "active")
+            if (_selectedJewelryStatusFilter == "active")
             {
                 list = list.Where(i => i.Active);
             }
-            else if (_selectedStatusFilter == "sold")
+            else if (_selectedJewelryStatusFilter == "sold")
+            {
+                list = list.Where(i => !i.Active);
+            }
+
+            return list.ToList();
+        }
+    }
+
+    private List<WatchListItemDto> FilteredWatches
+    {
+        get
+        {
+            var list = _watchItems.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(_searchWatchTerm))
+            {
+                var term = _searchWatchTerm.Trim().ToLowerInvariant();
+                list = list.Where(i => i.Reference.ToString().Contains(term) ||
+                                       i.CaseNumber.ToLowerInvariant().Contains(term) ||
+                                       i.BrandName.ToLowerInvariant().Contains(term) ||
+                                       (i.Description != null && i.Description.ToLowerInvariant().Contains(term)));
+            }
+
+            if (_selectedWatchBrandFilter > 0)
+            {
+                list = list.Where(i => i.BrandId == _selectedWatchBrandFilter);
+            }
+
+            if (!string.IsNullOrWhiteSpace(_selectedWatchGenderFilter))
+            {
+                list = list.Where(i => i.GenderType.ToString().Equals(_selectedWatchGenderFilter, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (_selectedWatchStatusFilter == "active")
+            {
+                list = list.Where(i => i.Active);
+            }
+            else if (_selectedWatchStatusFilter == "sold")
             {
                 list = list.Where(i => !i.Active);
             }
@@ -251,18 +809,81 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadInventoryAsync();
+        ApplyRouteOrQueryGroup();
+        await LoadProvidersAsync();
+        await LoadInventoryCatalogAsync();
     }
 
-    private async Task LoadInventoryAsync()
+    protected override void OnParametersSet()
+    {
+        ApplyRouteOrQueryGroup();
+    }
+
+    private void ApplyRouteOrQueryGroup()
+    {
+        var uri = Navigation.Uri.ToLowerInvariant();
+        if (!string.IsNullOrWhiteSpace(GroupQuery))
+        {
+            if (GroupQuery.Equals("watches", StringComparison.OrdinalIgnoreCase) || GroupQuery.Equals("relojes", StringComparison.OrdinalIgnoreCase))
+            {
+                _activeGroup = "WATCHES";
+                return;
+            }
+            if (GroupQuery.Equals("jewelry", StringComparison.OrdinalIgnoreCase) || GroupQuery.Equals("joyeria", StringComparison.OrdinalIgnoreCase))
+            {
+                _activeGroup = "JEWELRY";
+                return;
+            }
+        }
+
+        if (uri.Contains("/watches"))
+        {
+            _activeGroup = "WATCHES";
+        }
+        else if (uri.Contains("/jewelry"))
+        {
+            _activeGroup = "JEWELRY";
+        }
+    }
+
+    private async Task LoadProvidersAsync()
+    {
+        try
+        {
+            var provResult = await Sender.Send(new JewerlySystem.Modules.Customers.Application.Queries.GetCustomersListQuery(JewerlySystem.Modules.Customers.Domain.PersonType.Proveedor));
+            if (provResult.IsSuccess)
+            {
+                _providers = provResult.Value;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading providers: {ex.Message}");
+        }
+    }
+
+    private async Task LoadInventoryCatalogAsync()
     {
         _isLoading = true;
         try
         {
-            var result = await Sender.Send(new GetItemsListQuery());
+            var result = await Sender.Send(new GetInventoryCatalogQuery());
             if (result.IsSuccess)
             {
-                _items = result.Value;
+                _jewelryItems = result.Value.Jewelry;
+                _watchItems = result.Value.Watches;
+                _itemTypes = result.Value.ItemTypes;
+                _brands = result.Value.Brands;
+
+                _jewelryTypeOptions = new List<ItemTypeDto> { new(0, "Todos los Tipos de Joya") };
+                _jewelryTypeOptions.AddRange(_itemTypes.Where(t => t.Id != 5));
+
+                _brandFilterOptions = new List<BrandFilterOption> { new() { Id = 0, Name = "Todas las Marcas" } };
+                _brandFilterOptions.AddRange(_brands.Select(b => new BrandFilterOption { Id = b.Id, Name = b.Name }));
+            }
+            else
+            {
+                Message.Error($"Error al consultar catálogo: {result.Error.Message}");
             }
         }
         catch (Exception ex)
@@ -275,14 +896,196 @@
         }
     }
 
-    private string GetTypeName(int typeId) => typeId switch
+    // ================== JOYAS DRAWER ==================
+    private void OpenCreateJewelDrawer()
     {
-        1 => "Anillo",
-        2 => "Aretes",
-        3 => "Cadena",
-        4 => "Pulsera",
-        5 => "Reloj",
-        6 => "Dije",
-        _ => "Joya"
-    };
+        _jewelFormModel = new JewelFormModel
+        {
+            ItemTypeId = _itemTypes.FirstOrDefault(t => t.Id != 5)?.Id ?? 1,
+            GramValue = 200000,
+            GramSaleValue = 260000,
+            Weight = 0,
+            Description = string.Empty
+        };
+        RecalculateJewelValues();
+        _drawerJewelVisible = true;
+    }
+
+    private void CloseJewelDrawer()
+    {
+        _drawerJewelVisible = false;
+    }
+
+    private void RecalculateJewelValues()
+    {
+        _calculatedJewelCost = (int)Math.Round(_jewelFormModel.Weight * _jewelFormModel.GramValue);
+        _calculatedJewelSale = (int)Math.Round(_jewelFormModel.Weight * _jewelFormModel.GramSaleValue);
+    }
+
+    private async Task SaveJewelAsync()
+    {
+        if (_jewelFormModel.ItemTypeId <= 0)
+        {
+            Message.Warning("Debe seleccionar un tipo de joya válido.");
+            return;
+        }
+
+        if (_jewelFormModel.Weight <= 0)
+        {
+            Message.Warning("El peso de la joya debe ser mayor a 0 gramos.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_jewelFormModel.Description))
+        {
+            Message.Warning("La descripción de la joya es requerida.");
+            return;
+        }
+
+        RecalculateJewelValues();
+        if (_calculatedJewelCost <= 0)
+        {
+            Message.Warning("El costo total calculado debe ser mayor a 0.");
+            return;
+        }
+
+        _isSavingJewel = true;
+        try
+        {
+            var cmd = new CreateJewelItemCommand(
+                CostValue: _calculatedJewelCost,
+                DateOfEntry: DateTime.UtcNow,
+                Description: _jewelFormModel.Description.Trim(),
+                ItemTypeId: _jewelFormModel.ItemTypeId,
+                Weight: _jewelFormModel.Weight,
+                GramValue: _jewelFormModel.GramValue,
+                Length: _jewelFormModel.Length,
+                ProviderId: _jewelFormModel.ProviderId
+            );
+
+            var result = await Sender.Send(cmd);
+            if (result.IsSuccess)
+            {
+                Message.Success($"¡Joya registrada con éxito en inventario con ID #{result.Value}!");
+                _drawerJewelVisible = false;
+                await LoadInventoryCatalogAsync();
+            }
+            else
+            {
+                Message.Error(result.Error.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            Message.Error($"Error al guardar joya: {ex.Message}");
+        }
+        finally
+        {
+            _isSavingJewel = false;
+        }
+    }
+
+    // ================== RELOJES DRAWER ==================
+    private void OpenCreateWatchDrawer()
+    {
+        _watchFormModel = new WatchFormModel
+        {
+            BrandId = _brands.FirstOrDefault()?.Id ?? 1,
+            GenderType = GenderType.Hombre,
+            CostValue = 100000,
+            SaleValue = 150000,
+            CaseNumber = string.Empty,
+            Description = string.Empty
+        };
+        _drawerWatchVisible = true;
+    }
+
+    private void CloseWatchDrawer()
+    {
+        _drawerWatchVisible = false;
+    }
+
+    private async Task SaveWatchAsync()
+    {
+        if (_watchFormModel.BrandId <= 0)
+        {
+            Message.Warning("Debe seleccionar una marca de reloj válida.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_watchFormModel.CaseNumber))
+        {
+            Message.Warning("El número de caja o serial es requerido.");
+            return;
+        }
+
+        if (_watchFormModel.CostValue <= 0)
+        {
+            Message.Warning("El costo debe ser mayor a 0.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_watchFormModel.Description))
+        {
+            Message.Warning("La descripción del reloj es requerida.");
+            return;
+        }
+
+        _isSavingWatch = true;
+        try
+        {
+            var cmd = new CreateWatchItemCommand(
+                CostValue: _watchFormModel.CostValue,
+                DateOfEntry: DateTime.UtcNow,
+                Description: _watchFormModel.Description.Trim(),
+                ItemTypeId: 5,
+                GenderType: _watchFormModel.GenderType,
+                CaseNumber: _watchFormModel.CaseNumber.Trim(),
+                BrandId: _watchFormModel.BrandId,
+                ProviderId: _watchFormModel.ProviderId
+            );
+
+            var result = await Sender.Send(cmd);
+            if (result.IsSuccess)
+            {
+                Message.Success($"¡Reloj registrado con éxito con referencia #{result.Value}!");
+                _drawerWatchVisible = false;
+                await LoadInventoryCatalogAsync();
+            }
+            else
+            {
+                Message.Error(result.Error.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            Message.Error($"Error al guardar reloj: {ex.Message}");
+        }
+        finally
+        {
+            _isSavingWatch = false;
+        }
+    }
+
+    public class JewelFormModel
+    {
+        public int ItemTypeId { get; set; } = 1;
+        public int? ProviderId { get; set; }
+        public double Weight { get; set; }
+        public int GramValue { get; set; } = 200000;
+        public int GramSaleValue { get; set; } = 260000;
+        public int? Length { get; set; }
+        public string Description { get; set; } = string.Empty;
+    }
+
+    public class WatchFormModel
+    {
+        public int BrandId { get; set; }
+        public GenderType GenderType { get; set; } = GenderType.Hombre;
+        public int? ProviderId { get; set; }
+        public string CaseNumber { get; set; } = string.Empty;
+        public int CostValue { get; set; } = 100000;
+        public int SaleValue { get; set; } = 150000;
+        public string Description { get; set; } = string.Empty;
+    }
 }

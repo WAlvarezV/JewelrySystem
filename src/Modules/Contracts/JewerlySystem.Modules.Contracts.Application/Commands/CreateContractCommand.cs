@@ -23,7 +23,7 @@ public class CreateContractCommandValidator : AbstractValidator<CreateContractCo
     public CreateContractCommandValidator()
     {
         RuleFor(x => x.Value).GreaterThan(0).WithMessage("El valor del contrato debe ser mayor a 0.");
-        RuleFor(x => x.Weight).GreaterThan(0).WithMessage("El peso debe ser mayor a 0.");
+        RuleFor(x => x.Weight).GreaterThanOrEqualTo(0).WithMessage("El peso no puede ser negativo.");
         RuleFor(x => x.Description).NotEmpty().WithMessage("La descripción es obligatoria.");
         RuleFor(x => x.PersonId).GreaterThan(0).WithMessage("El cliente es obligatorio.");
         RuleFor(x => x.DeliveryDate).GreaterThanOrEqualTo(x => x.Date).WithMessage("La fecha de entrega debe ser posterior a la fecha del contrato.");

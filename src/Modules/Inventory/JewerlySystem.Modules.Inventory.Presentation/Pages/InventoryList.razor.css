@@ -2,6 +2,12 @@
     padding: 0 0.5rem 2rem 0.5rem;
 }
 
+.group-switcher-bar {
+    background: #ffffff;
+    border-radius: var(--soft-border-radius-md, 12px) !important;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
 .metrics-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));

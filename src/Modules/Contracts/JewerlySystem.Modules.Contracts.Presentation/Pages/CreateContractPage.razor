@@ -7,14 +7,31 @@
 
 <div class="create-contract-view step-fade-in">
     <!-- Hero Header -->
-    <SoftHeroHeader Title="Registrar Contrato Prendario"
-                    Subtitle="Diligencie la prenda en custodia, liquidación del avalúo y datos del titular"
+    <SoftHeroHeader Title="Registrar Nuevo Contrato o Pedido"
+                    Subtitle="Plan separe de mercancía en inventario, orden de reparación o fabricación sobre medida"
                     Icon="bi bi-file-earmark-plus">
         <SoftButton Icon="arrow-left" OnClick="@(() => Navigation.NavigateTo("/contracts"))">Volver a Contratos</SoftButton>
     </SoftHeroHeader>
 
     <div class="soft-card p-4">
         <Form Model="@_formModel" Layout="@FormLayout.Vertical">
+            <!-- Modalidad del Contrato -->
+            <SoftFormBox Title="Modalidad del Contrato">
+                <FormItem Label="Seleccione el tipo de contrato">
+                    <RadioGroup @bind-Value="_formModel.ContractKind" ButtonStyle="@RadioButtonStyle.Solid">
+                        <Radio RadioButton="true" Value="@("SEPARE")">
+                            <i class="bi bi-box-seam me-1"></i> Separación de Mercancía (Plan Separe)
+                        </Radio>
+                        <Radio RadioButton="true" Value="@("REPARACION")">
+                            <i class="bi bi-tools me-1"></i> Reparación de Joya / Reloj
+                        </Radio>
+                        <Radio RadioButton="true" Value="@("FABRICACION")">
+                            <i class="bi bi-gem me-1"></i> Fabricación de Joya (Hechura)
+                        </Radio>
+                    </RadioGroup>
+                </FormItem>
+            </SoftFormBox>
+
             <!-- Step 1: Cliente -->
             <StepLabel Number="1" Text="Información del Cliente / Titular" IsActive="true" />
             <SoftFormBox Title="Identificación del Titular">
@@ -54,74 +71,116 @@
                 </div>
             </SoftFormBox>
 
-            <!-- Step 2: Prenda -->
-            <StepLabel Number="2" Text="Datos de la Prenda en Custodia" IsActive="true" />
-            <SoftFormBox Title="Descripción de la Joya o Bien">
+            <!-- Step 2: Especificaciones del Trabajo -->
+            <StepLabel Number="2" Text="Datos del Trabajo o Mercancía" IsActive="true" />
+            <SoftFormBox Title="@(_formModel.ContractKind == "SEPARE" ? "Mercancía Separada" : "Detalle de Joyería")">
                 <div class="row g-3">
-                    <div class="col-12 col-md-3">
-                        <FormItem Label="Peso en Gramos (g)" Required="true">
-                            <AntDesign.InputNumber @bind-Value="_formModel.Weight"
-                                                   Min="0.1"
-                                                   Step="0.1"
-                                                   Class="w-100" />
-                        </FormItem>
-                    </div>
-                    <div class="col-12 col-md-9">
-                        <FormItem Label="Descripción de la Prenda" Required="true">
+                    @if (_formModel.ContractKind == "SEPARE")
+                    {
+                        <div class="col-12 col-md-4">
+                            <FormItem Label="Referencia en Inventario">
+                                <AntDesign.InputNumber @bind-Value="_formModel.Reference"
+                                                       Placeholder="Ej: 1042"
+                                                       Class="w-100" />
+                            </FormItem>
+                        </div>
+                    }
+
+                    @if (_formModel.ContractKind != "SEPARE")
+                    {
+                        <div class="col-12 col-md-4">
+                            <FormItem Label="Peso en Oro / Metal (g)">
+                                <AntDesign.InputNumber @bind-Value="_formModel.Weight"
+                                                       Min="0.0"
+                                                       Step="0.1"
+                                                       Class="w-100" />
+                            </FormItem>
+                        </div>
+                        <div class="col-12 col-md-8">
+                            <FormItem Label="Taller u Orfebre Asignado (Opcional)">
+                                <Select TItem="JewerlySystem.Modules.Customers.Application.DTOs.PersonDto"
+                                        TItemValue="int?"
+                                        DataSource="@_workshops"
+                                        @bind-Value="_formModel.ProviderId"
+                                        ValueName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.Id)"
+                                        LabelName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.FullName)"
+                                        Placeholder="-- Seleccione Taller / Orfebre --"
+                                        AllowClear="true" />
+                            </FormItem>
+                        </div>
+                    }
+
+                    <div class="col-12">
+                        <FormItem Label="Descripción del Contrato" Required="true">
                             <TextArea @bind-Value="_formModel.Description"
                                       Rows="2"
-                                      Placeholder="Detalle las características (ej: Cadena de oro 18k tejido lazo con dije de cruz)..." />
+                                      Placeholder="@(_formModel.ContractKind == "SEPARE"
+                                          ? "Detalle de la joya o reloj apartado de vitrina..."
+                                          : (_formModel.ContractKind == "REPARACION"
+                                              ? "Describa la reparación solicitada (ej: cambio de broche, pulido y rodiado)..."
+                                              : "Especifique el diseño a fabricar (ej: cadena tejido fígaro 60cm oro 18k)..."))" />
                         </FormItem>
                     </div>
                 </div>
             </SoftFormBox>
 
-            <!-- Step 3: Condiciones Financieras -->
-            <StepLabel Number="3" Text="Condiciones Financieras y Liquidación" IsActive="true" />
-            <SoftFormBox Title="Valores y Plazos del Contrato">
+            <!-- Step 3: Valores Económicos -->
+            <StepLabel Number="3" Text="Condiciones Económicas y Liquidación" IsActive="true" />
+            <SoftFormBox Title="Precios, Abono y Entrega">
                 <div class="row g-3">
-                    <div class="col-12 col-md-3">
-                        <FormItem Label="Valor del Préstamo ($)" Required="true">
+                    <div class="col-12 col-md-4">
+                        <FormItem Label="Valor Total del Contrato ($)" Required="true">
                             <AntDesign.InputNumber @bind-Value="_formModel.Value"
-                                                   Min="10000"
+                                                   Min="1000"
                                                    Step="50000"
                                                    Class="w-100" />
                         </FormItem>
                     </div>
-                    <div class="col-12 col-md-3">
-                        <FormItem Label="Desembolso Inicial ($)">
+                    <div class="col-12 col-md-4">
+                        <FormItem Label="Abono Inicial ($)">
                             <AntDesign.InputNumber @bind-Value="_formModel.InitialPayment"
                                                    Min="0"
                                                    Step="50000"
                                                    Class="w-100" />
                         </FormItem>
                     </div>
-                    <div class="col-12 col-md-3">
-                        <FormItem Label="Tasa de Interés Mensual (%)" Required="true">
-                            <AntDesign.InputNumber @bind-Value="_formModel.Percentage"
-                                                   Min="1"
-                                                   Max="50"
-                                                   Step="1"
-                                                   Class="w-100" />
+                    <div class="col-12 col-md-4">
+                        <FormItem Label="Medio de Pago del Abono">
+                            <Select TItem="PaymentMethodOption"
+                                    TItemValue="PaymentMethod"
+                                    DataSource="@_paymentMethodOptions"
+                                    @bind-Value="_formModel.PaymentMethod"
+                                    ValueName="@nameof(PaymentMethodOption.Value)"
+                                    LabelName="@nameof(PaymentMethodOption.Label)" />
                         </FormItem>
                     </div>
-                    <div class="col-12 col-md-3">
-                        <FormItem Label="Fecha de Vencimiento">
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <FormItem Label="Fecha de Entrega Prometida">
                             <DatePicker @bind-Value="_formModel.DeliveryDate" Format="dd/MM/yyyy" Class="w-100" />
                         </FormItem>
                     </div>
                 </div>
 
-                <SoftDetailCard Title="Resumen de Liquidación del Contrato">
-                    <SoftDetailItem Label="Valor Prestado">@_formModel.Value.ToString("C0")</SoftDetailItem>
-                    <SoftDetailItem Label="Desembolso Inicial">@_formModel.InitialPayment.ToString("C0")</SoftDetailItem>
-                    <SoftDetailItem Label="Interés Estimado Mensual">
-                        @((_formModel.Value * _formModel.Percentage / 100).ToString("C0"))
-                    </SoftDetailItem>
-                    <SoftDetailItem Label="Saldo Pendiente Inicial" Highlight="true">
-                        @Math.Max(0, _formModel.Value - _formModel.InitialPayment).ToString("C0")
-                    </SoftDetailItem>
-                </SoftDetailCard>
+                <div class="mt-3">
+                    <SoftDetailCard Title="Resumen Económico">
+                        <div class="row g-2 text-center">
+                            <div class="col-4">
+                                <SoftDetailItem Label="Valor Total" Value="@_formModel.Value.ToString("C0")" />
+                            </div>
+                            <div class="col-4">
+                                <SoftDetailItem Label="Abono Inicial" Value="@_formModel.InitialPayment.ToString("C0")" />
+                            </div>
+                            <div class="col-4">
+                                <SoftDetailItem Label="Saldo Pendiente"
+                                                Value="@Math.Max(0, _formModel.Value - _formModel.InitialPayment).ToString("C0")"
+                                                HighlightVariant="@(_formModel.Value - _formModel.InitialPayment > 0 ? SoftDetailItem.Variant.Danger : SoftDetailItem.Variant.Success)" />
+                            </div>
+                        </div>
+                    </SoftDetailCard>
+                </div>
             </SoftFormBox>
 
             <SoftDivider />
@@ -131,7 +190,7 @@
                 <SoftButton Type="@ButtonType.Primary"
                             Loading="@_isSubmitting"
                             OnClick="HandleSubmitAsync">
-                    Generar y Firmar Contrato
+                    Guardar y Generar Contrato
                 </SoftButton>
             </div>
         </Form>
@@ -140,8 +199,24 @@
 
 @code {
     private List<JewerlySystem.Modules.Customers.Application.DTOs.IdentificationTypeDto> _idTypes = new();
+    private List<JewerlySystem.Modules.Customers.Application.DTOs.PersonDto> _workshops = new();
     private CreateContractFormModel _formModel = new();
     private bool _isSubmitting;
+
+    public class PaymentMethodOption
+    {
+        public PaymentMethod Value { get; set; }
+        public string Label { get; set; } = string.Empty;
+    }
+
+    private readonly List<PaymentMethodOption> _paymentMethodOptions = new()
+    {
+        new() { Value = PaymentMethod.EFECTIVO, Label = "Efectivo" },
+        new() { Value = PaymentMethod.TRANSFERENCIA, Label = "Transferencia Bancaria" },
+        new() { Value = PaymentMethod.TARJETA_DEBITO, Label = "Tarjeta Débito" },
+        new() { Value = PaymentMethod.TARJETA_CREDITO, Label = "Tarjeta Crédito" },
+        new() { Value = PaymentMethod.ORO, Label = "ORO (Canje / Metal)" }
+    };
 
     protected override async Task OnInitializedAsync()
     {
@@ -153,6 +228,12 @@
             {
                 _formModel.IdentificationTypeId = _idTypes.First().Id;
             }
+        }
+
+        var workRes = await Sender.Send(new JewerlySystem.Modules.Customers.Application.Queries.GetCustomersListQuery(JewerlySystem.Modules.Customers.Domain.PersonType.Proveedor));
+        if (workRes.IsSuccess)
+        {
+            _workshops = workRes.Value;
         }
     }
 
@@ -194,7 +275,7 @@
         }
         if (string.IsNullOrWhiteSpace(_formModel.Description))
         {
-            MessageService.Error("La descripción de la prenda es obligatoria.");
+            MessageService.Error("La descripción del trabajo o mercancía es obligatoria.");
             return;
         }
         if (_formModel.Value <= 0)
@@ -206,7 +287,6 @@
         _isSubmitting = true;
         try
         {
-            // Auto-create customer if needed
             int customerId = _formModel.CustomerId;
             if (customerId <= 0)
             {
@@ -228,23 +308,23 @@
             }
 
             var cmd = new CreateContractCommand(
-                Reference: null,
+                Reference: _formModel.ContractKind == "SEPARE" ? _formModel.Reference : null,
                 Date: DateTime.Today,
                 DeliveryDate: _formModel.DeliveryDate,
                 Value: _formModel.Value,
                 Weight: _formModel.Weight,
                 Description: _formModel.Description.Trim(),
                 PersonId: customerId,
-                ProviderId: null,
+                ProviderId: _formModel.ProviderId,
                 FatherId: null,
                 InitialPayment: _formModel.InitialPayment > 0 ? _formModel.InitialPayment : null,
-                PaymentMethod: JewerlySystem.Modules.Contracts.Domain.PaymentMethod.EFECTIVO
+                PaymentMethod: _formModel.PaymentMethod
             );
 
             var result = await Sender.Send(cmd);
             if (result.IsSuccess)
             {
-                MessageService.Success("Contrato prendario generado exitosamente.");
+                MessageService.Success($"¡Contrato #{result.Value} generado exitosamente!");
                 Navigation.NavigateTo($"/contracts/{result.Value}");
             }
             else
@@ -260,18 +340,21 @@
 
     public class CreateContractFormModel
     {
+        public string ContractKind { get; set; } = "SEPARE";
         public int CustomerId { get; set; }
         public int IdentificationTypeId { get; set; }
         public string IdentificationNumber { get; set; } = string.Empty;
         public string CustomerFullName { get; set; } = string.Empty;
         public string? CustomerCellPhone { get; set; }
 
-        public double Weight { get; set; } = 5.0;
+        public int? Reference { get; set; }
+        public double Weight { get; set; } = 0.0;
+        public int? ProviderId { get; set; }
         public string Description { get; set; } = string.Empty;
 
-        public int Value { get; set; } = 500000;
-        public int InitialPayment { get; set; }
-        public int Percentage { get; set; } = 5;
-        public DateTime DeliveryDate { get; set; } = DateTime.Today.AddDays(30);
+        public int Value { get; set; } = 250000;
+        public int InitialPayment { get; set; } = 50000;
+        public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.EFECTIVO;
+        public DateTime DeliveryDate { get; set; } = DateTime.Today.AddDays(15);
     }
 }
