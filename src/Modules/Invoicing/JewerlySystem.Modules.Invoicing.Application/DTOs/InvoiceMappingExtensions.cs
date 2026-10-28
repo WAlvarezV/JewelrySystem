@@ -15,7 +15,8 @@ public static class InvoiceMappingExtensions
         i.Value,
         i.CreditValue,
         i.BalanceValue,
-        i.ProviderId
+        i.ProviderId,
+        i.Description
     );
 
     public static InvoiceDto ToDto(this Invoice invoice) => new(
@@ -26,7 +27,8 @@ public static class InvoiceMappingExtensions
         invoice.Value,
         invoice.CreditValue,
         invoice.BalanceValue,
-        invoice.ProviderId
+        invoice.ProviderId,
+        invoice.Description
     );
 
     public static IQueryable<InvoiceDto> ProjectToDto(this IQueryable<Invoice> query) => query.Select(InvoiceDtoProjection);

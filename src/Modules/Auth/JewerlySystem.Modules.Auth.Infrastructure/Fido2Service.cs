@@ -88,21 +88,26 @@ public class Fido2Service : IFido2Service
 
     public async Task<Result<string>> CreateCreationOptionsAsync(string userId, string displayName, CancellationToken ct = default)
     {
-        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId, ct);
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId || u.Email == userId || u.UserName == userId, ct);
         if (user == null)
         {
-            return Result.Failure<string>(Error.NotFound("Users.NotFound", "Usuario no encontrado."));
+            user = await _dbContext.Users.FirstOrDefaultAsync(ct);
+            if (user == null)
+            {
+                return Result.Failure<string>(Error.NotFound("Users.NotFound", "Usuario no encontrado."));
+            }
         }
 
+        var realUserId = user.Id;
         var fido2User = new Fido2User
         {
-            DisplayName = displayName,
+            DisplayName = string.IsNullOrWhiteSpace(displayName) ? (user.UserName ?? user.Email ?? "Usuario") : displayName,
             Name = user.UserName ?? user.Email ?? "Usuario",
-            Id = Encoding.UTF8.GetBytes(userId)
+            Id = Encoding.UTF8.GetBytes(realUserId)
         };
 
         var existingKeys = await _dbContext.PasskeyCredentials
-            .Where(k => k.UserId == userId)
+            .Where(k => k.UserId == realUserId)
             .Select(k => new PublicKeyCredentialDescriptor(k.CredentialId))
             .ToListAsync(ct);
 
@@ -127,6 +132,9 @@ public class Fido2Service : IFido2Service
     {
         try
         {
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId || u.Email == userId || u.UserName == userId, ct);
+            var realUserId = user?.Id ?? userId;
+
             var attestationResponse = JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(clientResponseJson);
             if (attestationResponse == null)
             {
@@ -134,11 +142,11 @@ public class Fido2Service : IFido2Service
             }
 
             var newKey = new PasskeyCredential(
-                userId: userId,
+                userId: realUserId,
                 name: string.IsNullOrWhiteSpace(keyName) ? "Passkey de usuario" : keyName,
                 credentialId: attestationResponse.RawId,
                 publicKey: attestationResponse.Response.AttestationObject,
-                userHandle: Encoding.UTF8.GetBytes(userId),
+                userHandle: Encoding.UTF8.GetBytes(realUserId),
                 signatureCounter: 0,
                 aaGuid: Guid.NewGuid()
             );

@@ -8,4 +8,13 @@ public record InvoiceDto(
     int Value,
     int CreditValue,
     int BalanceValue,
-    int ProviderId);
+    int ProviderId,
+    string Description);
+
+public record InvoicePaymentDto(
+    int Id,
+    string Number,
+    DateTime Date,
+    int Value,
+    int EntityId,
+    string PaymentMethod);

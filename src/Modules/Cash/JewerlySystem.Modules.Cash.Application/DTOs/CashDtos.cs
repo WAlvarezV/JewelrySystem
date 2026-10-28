@@ -17,3 +17,12 @@ public record ConsolidatedRecordDto(
     int TotalIngresos,
     int TotalEgresos,
     int Balance);
+
+public record CashRangeConsolidatedItemDto(
+    DateTime Date,
+    int CashInValue,
+    int OthersInValue,
+    int TotalInValue,
+    int CashOutValue,
+    int TotalNetValue,
+    int CashBalanceValue);

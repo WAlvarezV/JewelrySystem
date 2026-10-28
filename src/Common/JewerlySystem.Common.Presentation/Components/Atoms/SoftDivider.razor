@@ -1,0 +1,13 @@
+@namespace JewerlySystem.Common.Presentation.Components.Atoms
+
+<Divider Dashed="@Dashed" Class="soft-divider">
+    @if (!string.IsNullOrWhiteSpace(Text))
+    {
+        <span class="soft-divider-text">@Text</span>
+    }
+</Divider>
+
+@code {
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public bool Dashed { get; set; }
+}

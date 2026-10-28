@@ -1,71 +1,552 @@
 @page "/invoices"
+@page "/facturas"
 @attribute [Authorize]
 @inject ISender Sender
+@inject NavigationManager Navigation
+@inject IMessageService MessageService
 
-<div class="container-fluid mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="fw-bold"><i class="bi bi-receipt me-2"></i>Facturación y Cuentas por Pagar</h3>
-    </div>
+<div class="invoicing-view step-fade-in">
+    <!-- Hero Header -->
+    <SoftHeroHeader Title="Facturas de Proveedores (Cuentas por Pagar)"
+                    Subtitle="Registro de compras a proveedores, detalle de lo comprado, abonos y saldos pendientes"
+                    Icon="bi bi-receipt">
+        <SoftButton Icon="reload" OnClick="LoadInvoices">Actualizar</SoftButton>
+        <SoftButton Type="@ButtonType.Primary" Icon="plus" OnClick="OpenCreateDrawer">Nueva Factura</SoftButton>
+    </SoftHeroHeader>
 
+    <!-- Metrics Summary -->
+    <Row Gutter="16" Class="mb-3">
+        <Col Xs="24" Sm="12" Md="6">
+            <div class="soft-card p-3">
+                <span class="text-muted small text-uppercase fw-semibold">Facturas Registradas</span>
+                <h4 class="fw-bold mt-1 mb-0 text-dark">@_allInvoices.Count</h4>
+            </div>
+        </Col>
+        <Col Xs="24" Sm="12" Md="6">
+            <div class="soft-card p-3">
+                <span class="text-muted small text-uppercase fw-semibold">Total Compras</span>
+                <h4 class="fw-bold mt-1 mb-0 text-primary">@_allInvoices.Sum(x => (long)x.Value).ToString("C0")</h4>
+            </div>
+        </Col>
+        <Col Xs="24" Sm="12" Md="6">
+            <div class="soft-card p-3">
+                <span class="text-muted small text-uppercase fw-semibold">Total Abonado</span>
+                <h4 class="fw-bold mt-1 mb-0 text-success">@_allInvoices.Sum(x => (long)x.CreditValue).ToString("C0")</h4>
+            </div>
+        </Col>
+        <Col Xs="24" Sm="12" Md="6">
+            <div class="soft-card p-3">
+                <span class="text-muted small text-uppercase fw-semibold">Saldo Pendiente de Pago</span>
+                <h4 class="fw-bold mt-1 mb-0 text-danger">@_allInvoices.Sum(x => (long)x.BalanceValue).ToString("C0")</h4>
+            </div>
+        </Col>
+    </Row>
+
+    <!-- Filters Card -->
+    <SoftFilterCard>
+        <Row Gutter="16">
+            <Col Xs="24" Sm="12" Md="10">
+                <Input Placeholder="Buscar por factura o qué se compró..."
+                       @bind-Value="_searchTerm"
+                       AllowClear="true"
+                       PrefixIcon="search" />
+            </Col>
+            <Col Xs="24" Sm="12" Md="10">
+                <RadioGroup @bind-Value="_statusFilter" ButtonStyle="@RadioButtonStyle.Solid">
+                    <Radio RadioButton="true" Value="@("ALL")">Todas</Radio>
+                    <Radio RadioButton="true" Value="@("PENDING")">Con Saldo</Radio>
+                    <Radio RadioButton="true" Value="@("PAID")">Pagadas</Radio>
+                </RadioGroup>
+            </Col>
+            <Col Xs="24" Sm="24" Md="4" Class="text-end">
+                <span class="text-muted small">Mostrando: <b>@FilteredInvoices.Count</b> facturas</span>
+            </Col>
+        </Row>
+    </SoftFilterCard>
+
+    <!-- Data Table / Empty / Loading -->
     @if (_isLoading)
     {
-        <div class="d-flex justify-content-center p-5">
-            <div class="spinner-border text-primary" role="status"></div>
+        <div class="soft-card p-5 text-center">
+            <Spin Tip="Cargando facturas de proveedores..." />
         </div>
     }
-    else if (_invoices == null || !_invoices.Any())
+    else if (!FilteredInvoices.Any())
     {
-        <div class="card p-4 text-center text-muted">
-            <p class="mb-0">No hay facturas registradas.</p>
-        </div>
+        <SoftResultView Status="@ResultStatus.Info"
+                        Title="No se encontraron facturas"
+                        Subtitle="No hay facturas registradas que coincidan con los criterios de búsqueda.">
+            <SoftButton Type="@ButtonType.Primary" Icon="plus" OnClick="OpenCreateDrawer">Registrar Factura</SoftButton>
+        </SoftResultView>
     }
     else
     {
-        <div class="card shadow-sm border-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Factura #</th>
-                            <th>Fecha</th>
-                            <th>Límite de Pago</th>
-                            <th>Valor Total</th>
-                            <th>Abono</th>
-                            <th>Saldo Pendiente</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var inv in _invoices)
+        <div class="soft-card overflow-hidden">
+            <Table TItem="InvoiceDto"
+                   DataSource="@FilteredInvoices"
+                   Responsive="true"
+                   Size="@TableSize.Middle">
+                <PropertyColumn Property="i => i.Number" Title="Nro. Factura" Width="140px">
+                    <span class="fw-bold text-dark">@context.Number</span>
+                </PropertyColumn>
+                <PropertyColumn Property="i => i.ProviderId" Title="Proveedor" Width="180px">
+                    <span class="fw-semibold">@GetProviderName(context.ProviderId)</span>
+                </PropertyColumn>
+                <PropertyColumn Property="i => i.Description" Title="¿Qué se compró?">
+                    <span class="text-muted">@(string.IsNullOrEmpty(context.Description) ? "Sin descripción" : context.Description)</span>
+                </PropertyColumn>
+                <PropertyColumn Property="i => i.Date" Title="Fecha" Width="110px">
+                    @context.Date.ToString("dd/MM/yyyy")
+                </PropertyColumn>
+                <PropertyColumn Property="i => i.PaymentLimitDate" Title="Límite Pago" Width="110px">
+                    @context.PaymentLimitDate.ToString("dd/MM/yyyy")
+                </PropertyColumn>
+                <PropertyColumn Property="i => i.Value" Title="Valor Compra" Width="120px">
+                    <span class="fw-semibold">@context.Value.ToString("C0")</span>
+                </PropertyColumn>
+                <PropertyColumn Property="i => i.CreditValue" Title="Abonado" Width="120px">
+                    <span class="text-success fw-semibold">@context.CreditValue.ToString("C0")</span>
+                </PropertyColumn>
+                <PropertyColumn Property="i => i.BalanceValue" Title="Saldo Pendiente" Width="130px">
+                    <span class="@(context.BalanceValue > 0 ? "text-danger fw-bold" : "text-muted")">
+                        @context.BalanceValue.ToString("C0")
+                    </span>
+                </PropertyColumn>
+                <PropertyColumn Property="i => i.BalanceValue" Title="Estado" Width="110px">
+                    @{
+                        bool isPaid = context.BalanceValue <= 0;
+                    }
+                    <SoftTag Color="@(isPaid ? "green" : "red")">
+                        @(isPaid ? "PAGADA" : "PENDIENTE")
+                    </SoftTag>
+                </PropertyColumn>
+                <ActionColumn Title="Acciones" Width="100px">
+                    <div class="d-flex gap-1 justify-content-center">
+                        <SoftActionButton Icon="history"
+                                          Tooltip="Historial de Abonos"
+                                          OnClick="() => ViewPayments(context)" />
+                        @if (context.BalanceValue > 0)
                         {
-                            <tr>
-                                <td class="fw-semibold">#@inv.Number</td>
-                                <td>@inv.Date.ToShortDateString()</td>
-                                <td>@inv.PaymentLimitDate.ToShortDateString()</td>
-                                <td>@inv.Value.ToString("C0")</td>
-                                <td>@inv.CreditValue.ToString("C0")</td>
-                                <td class="fw-bold @(inv.BalanceValue > 0 ? "text-danger" : "text-success")">
-                                    @inv.BalanceValue.ToString("C0")
-                                </td>
-                            </tr>
+                            <SoftActionButton Icon="dollar"
+                                              Type="@ButtonType.Primary"
+                                              Tooltip="Registrar Abono"
+                                              OnClick="() => OpenPaymentModal(context)" />
                         }
-                    </tbody>
-                </table>
-            </div>
+                    </div>
+                </ActionColumn>
+            </Table>
         </div>
     }
+
+    <!-- SoftDrawer: Registrar Factura de Proveedor -->
+    <SoftDrawer Visible="@_createDrawerVisible"
+                Title="Registrar Factura de Proveedor"
+                Description="Registre lo comprado, número de factura del proveedor, costos y abono inicial"
+                Width="720"
+                OnClose="CloseCreateDrawer">
+        <ChildContent>
+            <Form Model="@_createModel" Layout="@FormLayout.Vertical">
+                <SoftFormBox Title="Datos de la Factura y Proveedor">
+                    <Row Gutter="16">
+                        <Col Span="12">
+                            <FormItem Label="Proveedor" Required="true">
+                                <Select TItem="JewerlySystem.Modules.Customers.Application.DTOs.PersonDto"
+                                        TItemValue="int"
+                                        @bind-Value="_createModel.ProviderId"
+                                        DataSource="@_providers"
+                                        LabelName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.FullName)"
+                                        ValueName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.Id)"
+                                        Placeholder="Seleccione proveedor..." />
+                            </FormItem>
+                        </Col>
+                        <Col Span="12">
+                            <FormItem Label="Nro. Factura del Proveedor">
+                                <Input @bind-Value="_createModel.InvoiceNumber" Placeholder="Ej: FAC-98745" />
+                            </FormItem>
+                        </Col>
+                    </Row>
+
+                    <FormItem Label="¿Qué se ha comprado? (Descripción de la Mercancía)" Required="true">
+                        <TextArea @bind-Value="_createModel.Description"
+                                  Rows="3"
+                                  Placeholder="Especifique el lote o piezas adquiridas (ej: 5 Cadenas de oro 18k, 3 Anillos solitario, 2 Relojes Orient automáticos...)" />
+                    </FormItem>
+                </SoftFormBox>
+
+                <SoftFormBox Title="Fechas de Emisión y Vencimiento">
+                    <Row Gutter="16">
+                        <Col Span="12">
+                            <FormItem Label="Fecha de Emisión">
+                                <DatePicker @bind-Value="_createModel.Date" Format="dd/MM/yyyy" Class="w-100" />
+                            </FormItem>
+                        </Col>
+                        <Col Span="12">
+                            <FormItem Label="Fecha Límite de Pago">
+                                <DatePicker @bind-Value="_createModel.PaymentLimitDate" Format="dd/MM/yyyy" Class="w-100" />
+                            </FormItem>
+                        </Col>
+                    </Row>
+                </SoftFormBox>
+
+                <SoftFormBox Title="Valores y Abono Inicial">
+                    <Row Gutter="16">
+                        <Col Span="12">
+                            <FormItem Label="Valor Total de la Compra ($)" Required="true">
+                                <AntDesign.InputNumber @bind-Value="_createModel.Value"
+                                                       Min="0"
+                                                       Step="50000"
+                                                       Class="w-100" />
+                            </FormItem>
+                        </Col>
+                        <Col Span="12">
+                            <FormItem Label="Abono Inicial Realizado ($)">
+                                <AntDesign.InputNumber @bind-Value="_createModel.CreditValue"
+                                                       Min="0"
+                                                       Step="50000"
+                                                       Class="w-100" />
+                            </FormItem>
+                        </Col>
+                    </Row>
+
+                    @if (_createModel.CreditValue > 0)
+                    {
+                        <FormItem Label="Medio de Pago del Abono Inicial">
+                            <Select TItem="string"
+                                    TItemValue="string"
+                                    @bind-Value="_createModel.InitialPaymentMethod"
+                                    DataSource="@_paymentMethods"
+                                    Placeholder="Seleccione medio de pago..." />
+                        </FormItem>
+                    }
+
+                    <!-- Soft Detail Card: Balance Preview -->
+                    <SoftDetailCard Title="Resumen Financiero de la Factura">
+                        <SoftDetailItem Label="Total Compra">
+                            @_createModel.Value.ToString("C0")
+                        </SoftDetailItem>
+                        <SoftDetailItem Label="Abono Inicial" Highlight="false">
+                            @_createModel.CreditValue.ToString("C0")
+                        </SoftDetailItem>
+                        <SoftDetailItem Label="Saldo Pendiente a Proveedor" Highlight="true">
+                            @Math.Max(0, _createModel.Value - _createModel.CreditValue).ToString("C0")
+                        </SoftDetailItem>
+                    </SoftDetailCard>
+                </SoftFormBox>
+            </Form>
+        </ChildContent>
+        <FooterContent>
+            <SoftButton OnClick="CloseCreateDrawer">Cancelar</SoftButton>
+            <SoftButton Type="@ButtonType.Primary"
+                        Loading="@_isSaving"
+                        OnClick="SaveInvoice">
+                Guardar Factura
+            </SoftButton>
+        </FooterContent>
+    </SoftDrawer>
+
+    <!-- SoftDrawer: Historial de Abonos -->
+    <SoftDrawer Visible="@_paymentsDrawerVisible"
+                Title="@($"Historial de Pagos - Factura #{_selectedInvoice?.Number}")"
+                Description="@($"Proveedor: {GetProviderName(_selectedInvoice?.ProviderId ?? 0)}")"
+                Width="600"
+                OnClose="() => _paymentsDrawerVisible = false">
+        <ChildContent>
+            @if (_selectedInvoice != null)
+            {
+                <SoftDetailCard Title="Estado Actual de la Cuenta">
+                    <SoftDetailItem Label="Total Compra">@_selectedInvoice.Value.ToString("C0")</SoftDetailItem>
+                    <SoftDetailItem Label="Total Pagado">@_selectedInvoice.CreditValue.ToString("C0")</SoftDetailItem>
+                    <SoftDetailItem Label="Saldo Pendiente" Highlight="true">@_selectedInvoice.BalanceValue.ToString("C0")</SoftDetailItem>
+                </SoftDetailCard>
+            }
+
+            @if (_isLoadingPayments)
+            {
+                <div class="text-center p-4">
+                    <Spin Tip="Cargando abonos..." />
+                </div>
+            }
+            else if (!_invoicePayments.Any())
+            {
+                <SoftInlineNotice Title="Sin abonos registrados"
+                                  Description="Aún no se han registrado abonos para esta factura."
+                                  Type="info" />
+            }
+            else
+            {
+                <Table TItem="InvoicePaymentDto"
+                       DataSource="@_invoicePayments"
+                       Size="@TableSize.Small">
+                    <PropertyColumn Property="p => p.Date" Title="Fecha" Width="120px">
+                        @context.Date.ToString("dd/MM/yyyy")
+                    </PropertyColumn>
+                    <PropertyColumn Property="p => p.PaymentMethod" Title="Medio de Pago" Width="150px">
+                        <SoftTag Color="blue">@context.PaymentMethod</SoftTag>
+                    </PropertyColumn>
+                    <PropertyColumn Property="p => p.Value" Title="Valor Abonado">
+                        <span class="text-success fw-bold">@context.Value.ToString("C0")</span>
+                    </PropertyColumn>
+                </Table>
+            }
+        </ChildContent>
+        <FooterContent>
+            <SoftButton OnClick="() => _paymentsDrawerVisible = false">Cerrar</SoftButton>
+        </FooterContent>
+    </SoftDrawer>
+
+    <!-- Modal: Registrar Abono -->
+    <Modal Visible="@_paymentModalVisible"
+           Title="@($"Registrar Abono a Factura #{_selectedInvoice?.Number}")"
+           OnCancel="() => _paymentModalVisible = false"
+           OnOk="SavePayment"
+           ConfirmLoading="@_isSavingPayment">
+        <Form Model="@_paymentFormModel" Layout="@FormLayout.Vertical">
+            @if (_selectedInvoice != null)
+            {
+                <div class="mb-3">
+                    <span class="text-muted small">Saldo Pendiente Actual:</span>
+                    <h5 class="text-danger fw-bold mb-0">@_selectedInvoice.BalanceValue.ToString("C0")</h5>
+                </div>
+            }
+
+            <FormItem Label="Monto del Abono ($)" Required="true">
+                <AntDesign.InputNumber @bind-Value="_paymentFormModel.Amount"
+                                       Min="1000"
+                                       Max="@(_selectedInvoice?.BalanceValue ?? 999999999)"
+                                       Step="50000"
+                                       Class="w-100" />
+            </FormItem>
+
+            <FormItem Label="Medio de Pago" Required="true">
+                <Select TItem="string"
+                        TItemValue="string"
+                        @bind-Value="_paymentFormModel.PaymentMethod"
+                        DataSource="@_paymentMethods" />
+            </FormItem>
+        </Form>
+    </Modal>
 </div>
 
 @code {
-    private List<InvoiceDto>? _invoices;
+    private List<InvoiceDto> _allInvoices = new();
+    private List<JewerlySystem.Modules.Customers.Application.DTOs.PersonDto> _providers = new();
+    private List<InvoicePaymentDto> _invoicePayments = new();
+    private readonly List<string> _paymentMethods = new() { "EFECTIVO", "TRANSFERENCIA", "CHEQUE", "CONSIGNACION", "ORO" };
+
     private bool _isLoading = true;
+    private string _searchTerm = string.Empty;
+    private string _statusFilter = "ALL";
+
+    // Create Drawer
+    private bool _createDrawerVisible;
+    private bool _isSaving;
+    private CreateInvoiceModel _createModel = new();
+
+    // Payments Drawer
+    private bool _paymentsDrawerVisible;
+    private bool _isLoadingPayments;
+    private InvoiceDto? _selectedInvoice;
+
+    // Payment Modal
+    private bool _paymentModalVisible;
+    private bool _isSavingPayment;
+    private PaymentFormModel _paymentFormModel = new();
+
+    private string GetProviderName(int providerId)
+    {
+        return _providers.FirstOrDefault(p => p.Id == providerId)?.FullName ?? $"Proveedor #{providerId}";
+    }
+
+    private List<InvoiceDto> FilteredInvoices => _allInvoices
+        .Where(i => _statusFilter == "ALL"
+            || (_statusFilter == "PENDING" && i.BalanceValue > 0)
+            || (_statusFilter == "PAID" && i.BalanceValue <= 0))
+        .Where(i => string.IsNullOrWhiteSpace(_searchTerm)
+            || i.Number.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase)
+            || (i.Description != null && i.Description.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase))
+            || GetProviderName(i.ProviderId).Contains(_searchTerm, StringComparison.OrdinalIgnoreCase))
+        .ToList();
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await Sender.Send(new GetInvoicesListQuery());
-        if (result.IsSuccess)
+        await LoadProviders();
+        await LoadInvoices();
+    }
+
+    private async Task LoadProviders()
+    {
+        var res = await Sender.Send(new JewerlySystem.Modules.Customers.Application.Queries.GetCustomersListQuery(
+            JewerlySystem.Modules.Customers.Domain.PersonType.Proveedor));
+        if (res.IsSuccess)
         {
-            _invoices = result.Value;
+            _providers = res.Value;
         }
-        _isLoading = false;
+    }
+
+    private async Task LoadInvoices()
+    {
+        _isLoading = true;
+        try
+        {
+            var res = await Sender.Send(new GetInvoicesListQuery());
+            if (res.IsSuccess)
+            {
+                _allInvoices = res.Value;
+            }
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void OpenCreateDrawer()
+    {
+        _createModel = new CreateInvoiceModel
+        {
+            Date = DateTime.Today,
+            PaymentLimitDate = DateTime.Today.AddDays(30),
+            ProviderId = _providers.FirstOrDefault()?.Id ?? 0,
+            InitialPaymentMethod = "EFECTIVO"
+        };
+        _createDrawerVisible = true;
+    }
+
+    private void CloseCreateDrawer()
+    {
+        _createDrawerVisible = false;
+    }
+
+    private async Task SaveInvoice()
+    {
+        if (_createModel.ProviderId <= 0)
+        {
+            MessageService.Error("Debe seleccionar un proveedor.");
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(_createModel.Description))
+        {
+            MessageService.Error("Especifique qué se ha comprado.");
+            return;
+        }
+        if (_createModel.Value <= 0)
+        {
+            MessageService.Error("El valor de la compra debe ser mayor a 0.");
+            return;
+        }
+
+        _isSaving = true;
+        try
+        {
+            var cmd = new CreateInvoiceCommand(
+                Date: _createModel.Date,
+                PaymentLimitDate: _createModel.PaymentLimitDate,
+                Value: _createModel.Value,
+                CreditValue: _createModel.CreditValue,
+                ProviderId: _createModel.ProviderId,
+                Description: _createModel.Description.Trim(),
+                InvoiceNumber: _createModel.InvoiceNumber?.Trim(),
+                InitialPaymentMethod: _createModel.InitialPaymentMethod
+            );
+
+            var res = await Sender.Send(cmd);
+            if (res.IsSuccess)
+            {
+                MessageService.Success("Factura registrada exitosamente.");
+                _createDrawerVisible = false;
+                await LoadInvoices();
+            }
+            else
+            {
+                MessageService.Error(res.Error.Message);
+            }
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private async Task ViewPayments(InvoiceDto inv)
+    {
+        _selectedInvoice = inv;
+        _paymentsDrawerVisible = true;
+        _isLoadingPayments = true;
+        try
+        {
+            var res = await Sender.Send(new GetInvoicePaymentsQuery(inv.Id));
+            if (res.IsSuccess)
+            {
+                _invoicePayments = res.Value;
+            }
+            else
+            {
+                _invoicePayments = new();
+            }
+        }
+        finally
+        {
+            _isLoadingPayments = false;
+        }
+    }
+
+    private void OpenPaymentModal(InvoiceDto inv)
+    {
+        _selectedInvoice = inv;
+        _paymentFormModel = new PaymentFormModel
+        {
+            Amount = Math.Min(500000, inv.BalanceValue),
+            PaymentMethod = "EFECTIVO"
+        };
+        _paymentModalVisible = true;
+    }
+
+    private async Task SavePayment()
+    {
+        if (_selectedInvoice == null) return;
+        if (_paymentFormModel.Amount <= 0)
+        {
+            MessageService.Error("El monto del abono debe ser mayor a 0.");
+            return;
+        }
+
+        _isSavingPayment = true;
+        try
+        {
+            var cmd = new PayInvoiceCommand(_selectedInvoice.Id, _paymentFormModel.Amount, _paymentFormModel.PaymentMethod);
+            var res = await Sender.Send(cmd);
+            if (res.IsSuccess)
+            {
+                MessageService.Success("Abono registrado exitosamente.");
+                _paymentModalVisible = false;
+                await LoadInvoices();
+            }
+            else
+            {
+                MessageService.Error(res.Error.Message);
+            }
+        }
+        finally
+        {
+            _isSavingPayment = false;
+        }
+    }
+
+    public class CreateInvoiceModel
+    {
+        public DateTime Date { get; set; } = DateTime.Today;
+        public DateTime PaymentLimitDate { get; set; } = DateTime.Today.AddDays(30);
+        public int Value { get; set; }
+        public int CreditValue { get; set; }
+        public int ProviderId { get; set; }
+        public string? InvoiceNumber { get; set; }
+        public string? Description { get; set; }
+        public string InitialPaymentMethod { get; set; } = "EFECTIVO";
+    }
+
+    public class PaymentFormModel
+    {
+        public int Amount { get; set; }
+        public string PaymentMethod { get; set; } = "EFECTIVO";
     }
 }

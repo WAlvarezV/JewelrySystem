@@ -1,0 +1,24 @@
+::deep .soft-btn {
+    border-radius: var(--soft-border-radius-md, 8px);
+    font-weight: 500;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+::deep .soft-btn.ant-btn-primary {
+    background: var(--brand-blue-gradient, linear-gradient(135deg, #1677ff 0%, #0958d9 100%));
+    border: none;
+    box-shadow: 0 2px 6px rgba(22, 119, 255, 0.25);
+}
+
+::deep .soft-btn.ant-btn-primary:hover {
+    box-shadow: 0 4px 12px rgba(22, 119, 255, 0.4);
+    transform: translateY(-1px);
+}
+
+::deep .soft-btn.ant-btn-primary:active {
+    transform: translateY(0);
+}

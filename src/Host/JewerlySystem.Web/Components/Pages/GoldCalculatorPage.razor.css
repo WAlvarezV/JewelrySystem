@@ -1,0 +1,53 @@
+.calculator-container {
+    padding: 0 0.5rem 2rem 0.5rem;
+}
+
+.param-hint {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--soft-neutral-muted, #8c8c8c);
+    margin-top: 0.25rem;
+}
+
+.result-box {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.metric-card-inner {
+    padding: 1rem;
+    background: #fafafa;
+    border-radius: var(--soft-border-radius-md, 12px);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.metric-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--soft-neutral-muted, #8c8c8c);
+    text-transform: uppercase;
+    margin-bottom: 0.35rem;
+}
+
+.metric-big-val {
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.metric-subhint {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--soft-neutral-muted, #8c8c8c);
+    margin-top: 0.35rem;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

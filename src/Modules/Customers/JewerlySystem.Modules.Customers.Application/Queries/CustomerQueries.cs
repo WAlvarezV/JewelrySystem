@@ -28,6 +28,24 @@ public class GetCustomerByIdQueryHandler : IQueryHandler<GetCustomerByIdQuery, P
     }
 }
 
+public record GetCustomerByIdentificationQuery(string IdentificationNumber) : IQuery<PersonDto?>;
+
+public class GetCustomerByIdentificationQueryHandler : IQueryHandler<GetCustomerByIdentificationQuery, PersonDto?>
+{
+    private readonly ICustomerRepository _repository;
+
+    public GetCustomerByIdentificationQueryHandler(ICustomerRepository repository)
+    {
+        _repository = repository;
+    }
+
+    public async Task<Result<PersonDto?>> Handle(GetCustomerByIdentificationQuery request, CancellationToken cancellationToken)
+    {
+        var person = await _repository.GetByIdentificationAsync(request.IdentificationNumber, cancellationToken);
+        return Result.Success<PersonDto?>(person?.ToDto());
+    }
+}
+
 public record GetCustomersListQuery(PersonType? Type = null, string? SearchTerm = null) : IQuery<List<PersonDto>>;
 
 public class GetCustomersListQueryHandler : IQueryHandler<GetCustomersListQuery, List<PersonDto>>

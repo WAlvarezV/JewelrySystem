@@ -1,0 +1,9 @@
+@namespace JewerlySystem.Common.Presentation.Components.Organisms
+
+<div class="soft-filter-card">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

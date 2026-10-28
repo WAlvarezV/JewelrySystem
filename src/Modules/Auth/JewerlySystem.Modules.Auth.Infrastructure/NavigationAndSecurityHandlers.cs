@@ -26,7 +26,9 @@ public class NavigationAndSecurityHandlers :
     IQueryHandler<GetAllRolesQuery, IReadOnlyList<RoleItemDto>>,
     ICommandHandler<CreateRoleCommand, string>,
     IQueryHandler<GetPermissionsByRoleQuery, IReadOnlyList<PermissionItemDto>>,
-    ICommandHandler<SavePermissionsCommand, bool>
+    ICommandHandler<SavePermissionsCommand, bool>,
+    IQueryHandler<GetPasskeysByUserQuery, IReadOnlyList<PasskeyItemDto>>,
+    ICommandHandler<DeletePasskeyCommand, bool>
 {
     private readonly AuthDbContext _dbContext;
     private readonly UserManager<ApplicationUser> _userManager;
@@ -60,10 +62,24 @@ public class NavigationAndSecurityHandlers :
             var defaultMenus = new List<MenuItem>
             {
                 new() { Id = Guid.Parse("11111111-1111-1111-1111-111111111111"), ModuleKey = "CONTRACTS", Name = "Todos los Contratos", Route = "/contracts", Icon = "bi-file-earmark-text", Order = 1, IsActive = true },
+                new() { Id = Guid.Parse("11111111-1111-1111-1111-111111111112"), ModuleKey = "CONTRACTS", Name = "Nuevo Contrato", Route = "/contracts/new", Icon = "bi-plus-circle", Order = 2, IsActive = true },
+                new() { Id = Guid.Parse("11111111-1111-1111-1111-111111111113"), ModuleKey = "CONTRACTS", Name = "Calculadora Ley Oro", Route = "/utilities/gold-calculator", Icon = "bi-calculator", Order = 3, IsActive = true },
+
                 new() { Id = Guid.Parse("22222222-2222-2222-2222-222222222222"), ModuleKey = "INVENTORY", Name = "Catálogo de Joyas y Relojes", Route = "/inventory", Icon = "bi-box-seam", Order = 1, IsActive = true },
+                new() { Id = Guid.Parse("22222222-2222-2222-2222-222222222223"), ModuleKey = "INVENTORY", Name = "Nueva Joya", Route = "/inventory/jewels/new", Icon = "bi-gem", Order = 2, IsActive = true },
+                new() { Id = Guid.Parse("22222222-2222-2222-2222-222222222224"), ModuleKey = "INVENTORY", Name = "Nuevo Reloj", Route = "/inventory/watches/new", Icon = "bi-watch", Order = 3, IsActive = true },
+                new() { Id = Guid.Parse("22222222-2222-2222-2222-222222222225"), ModuleKey = "INVENTORY", Name = "Descargar Artículo", Route = "/inventory/discharge", Icon = "bi-box-arrow-right", Order = 4, IsActive = true },
+                new() { Id = Guid.Parse("22222222-2222-2222-2222-222222222226"), ModuleKey = "INVENTORY", Name = "Consolidado de Inventario", Route = "/inventory/consolidated", Icon = "bi-pie-chart", Order = 5, IsActive = true },
+
                 new() { Id = Guid.Parse("33333333-3333-3333-3333-333333333333"), ModuleKey = "CUSTOMERS", Name = "Directorio de Clientes", Route = "/customers", Icon = "bi-people", Order = 1, IsActive = true },
-                new() { Id = Guid.Parse("44444444-4444-4444-4444-444444444444"), ModuleKey = "CASH", Name = "Arqueo Diario", Route = "/cash", Icon = "bi-cash-stack", Order = 1, IsActive = true },
+                new() { Id = Guid.Parse("33333333-3333-3333-3333-333333333334"), ModuleKey = "CUSTOMERS", Name = "Nuevo Cliente / Proveedor", Route = "/customers/new", Icon = "bi-person-plus", Order = 2, IsActive = true },
+
+                new() { Id = Guid.Parse("44444444-4444-4444-4444-444444444444"), ModuleKey = "CASH", Name = "Arqueo y Movimientos", Route = "/cash", Icon = "bi-cash-stack", Order = 1, IsActive = true },
+                new() { Id = Guid.Parse("44444444-4444-4444-4444-444444444445"), ModuleKey = "CASH", Name = "Consolidado de Caja", Route = "/cash/consolidated", Icon = "bi-calendar3-range", Order = 2, IsActive = true },
+
                 new() { Id = Guid.Parse("55555555-5555-5555-5555-555555555555"), ModuleKey = "INVOICING", Name = "Facturas Emitidas", Route = "/invoices", Icon = "bi-receipt", Order = 1, IsActive = true },
+                new() { Id = Guid.Parse("55555555-5555-5555-5555-555555555556"), ModuleKey = "INVOICING", Name = "Nueva Factura", Route = "/invoices/new", Icon = "bi-plus-circle", Order = 2, IsActive = true },
+
                 new() { Id = Guid.Parse("66666666-6666-6666-6666-666666666661"), ModuleKey = "ADMIN", Name = "Usuarios del Sistema", Route = "/admin/users", Icon = "bi-people-fill", Order = 1, IsActive = true },
                 new() { Id = Guid.Parse("66666666-6666-6666-6666-666666666662"), ModuleKey = "ADMIN", Name = "Configuración de Módulos", Route = "/admin/modules", Icon = "bi-grid-fill", Order = 2, IsActive = true },
                 new() { Id = Guid.Parse("66666666-6666-6666-6666-666666666663"), ModuleKey = "ADMIN", Name = "Configuración de Menús", Route = "/admin/menus", Icon = "bi-list-ul", Order = 3, IsActive = true },
@@ -600,6 +616,33 @@ public class NavigationAndSecurityHandlers :
         _dbContext.RolePermissions.AddRange(toAdd);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
+        return Result.Success(true);
+    }
+
+    public async Task<Result<IReadOnlyList<PasskeyItemDto>>> Handle(GetPasskeysByUserQuery request, CancellationToken cancellationToken)
+    {
+        var user = await _userManager.FindByIdAsync(request.UserId)
+            ?? await _userManager.FindByEmailAsync(request.UserId)
+            ?? await _userManager.FindByNameAsync(request.UserId);
+
+        var targetId = user?.Id ?? request.UserId;
+
+        var keys = await _dbContext.PasskeyCredentials
+            .Where(k => k.UserId == targetId)
+            .OrderByDescending(k => k.CreatedAt)
+            .Select(k => new PasskeyItemDto(k.Id, k.Name, k.CreatedAt, k.LastUsedAt))
+            .ToListAsync(cancellationToken);
+
+        return Result.Success<IReadOnlyList<PasskeyItemDto>>(keys);
+    }
+
+    public async Task<Result<bool>> Handle(DeletePasskeyCommand request, CancellationToken cancellationToken)
+    {
+        var key = await _dbContext.PasskeyCredentials.FindAsync([request.Id], cancellationToken);
+        if (key == null) return Result.Failure<bool>(Error.NotFound("Passkey.NotFound", "Passkey no encontrada."));
+
+        _dbContext.PasskeyCredentials.Remove(key);
+        await _dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success(true);
     }
 }

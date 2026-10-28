@@ -35,3 +35,36 @@ public record BrandDto(
 public record ItemTypeDto(
     int Id,
     string Name);
+
+public record ItemDetailDto(
+    int Id,
+    int Reference,
+    int CostValue,
+    DateTime DateOfEntry,
+    DateTime? DateOfSale,
+    int? SaleValue,
+    string Description,
+    bool Active,
+    int ItemTypeId,
+    string ItemTypeName,
+    int? ProviderId,
+    JewelDto? Jewel,
+    WatchDto? Watch);
+
+public record JewelSummaryDto(
+    string Type,
+    int Quantity,
+    double Weight,
+    long SaleValue,
+    long CostValue);
+
+public record WatchSummaryDto(
+    string Type,
+    string Other,
+    int Quantity,
+    long SaleValue,
+    long CostValue);
+
+public record InventoryConsolidatedDto(
+    List<JewelSummaryDto> Jewelry,
+    List<WatchSummaryDto> Watches);

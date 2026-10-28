@@ -1,0 +1,262 @@
+@page "/inventory/discharge"
+@page "/discharge"
+@attribute [Authorize]
+@inject ISender Sender
+@inject NavigationManager Navigation
+@inject IMessageService Message
+
+<div class="discharge-container">
+    <SoftHeroHeader Title="Descargar / Salida de Artículo"
+                    Subtitle="Registre la venta, liquidación o salida de un artículo en inventario activo"
+                    Icon="bi bi-box-arrow-right">
+        <SoftButton Text="Volver al Catálogo"
+                    Icon="arrow-left"
+                    Type="ButtonType.Dashed"
+                    OnClick="@(() => Navigation.NavigateTo("/inventory"))" />
+    </SoftHeroHeader>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-10">
+            <!-- Barra de Búsqueda de Referencia -->
+            <SoftFilterCard>
+                <div class="row g-3 align-items-center">
+                    <div class="col-12 col-md-8">
+                        <AntDesign.InputNumber TValue="int?"
+                                               @bind-Value="_searchReference"
+                                               Placeholder="Ingrese número de referencia (ej. 1001)..."
+                                               Style="width: 100%; font-size: 1.1rem; font-weight: bold;" />
+                    </div>
+                    <div class="col-12 col-md-4 d-flex gap-2">
+                        <SoftButton Text="Buscar Artículo"
+                                    Icon="search"
+                                    Type="ButtonType.Primary"
+                                    Loading="@_isSearching"
+                                    OnClick="SearchItemAsync" />
+                        @if (_searchedItem != null)
+                        {
+                            <SoftButton Text="Limpiar"
+                                        Icon="clear"
+                                        Type="ButtonType.Default"
+                                        OnClick="ClearSearch" />
+                        }
+                    </div>
+                </div>
+            </SoftFilterCard>
+
+            @if (_searchedItem != null)
+            {
+                <!-- Detalle del Artículo Encontrado -->
+                <div class="mb-4">
+                    <SoftDetailCard Title="@($"Referencia #{_searchedItem.Reference} — {_searchedItem.ItemTypeName}")">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="detail-subtitle">Especificaciones registradas en el catálogo</span>
+                            @if (_searchedItem.Active)
+                            {
+                                <SoftTag Color="green">Activo en Stock</SoftTag>
+                            }
+                            else
+                            {
+                                <SoftTag Color="default">Ya Descargado</SoftTag>
+                            }
+                        </div>
+
+                        <div class="row g-3 text-center mb-3">
+                            <div class="col-12 col-md-4">
+                                <SoftDetailItem Label="Fecha de Ingreso"
+                                                Value="@_searchedItem.DateOfEntry.ToString("dd/MM/yyyy")" />
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <SoftDetailItem Label="Costo Registrado"
+                                                Value="@_searchedItem.CostValue.ToString("C0")"
+                                                HighlightVariant="SoftDetailItem.Variant.Danger" />
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <SoftDetailItem Label="Venta Base Sugerida"
+                                                Value="@((_searchedItem.SaleValue ?? (int)(_searchedItem.CostValue * 1.3)).ToString("C0"))"
+                                                HighlightVariant="SoftDetailItem.Variant.Success" />
+                            </div>
+                        </div>
+
+                        @if (_searchedItem.Jewel != null)
+                        {
+                            <div class="row g-3 text-center border-top pt-3 mb-3">
+                                <div class="col-12 col-md-4">
+                                    <SoftDetailItem Label="Peso Joya"
+                                                    Value="@($"{_searchedItem.Jewel.Weight:F2} g")"
+                                                    HighlightVariant="SoftDetailItem.Variant.Warning" />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <SoftDetailItem Label="Tarifa por Gramo"
+                                                    Value="@_searchedItem.Jewel.GramValue.ToString("C0")" />
+                                </div>
+                                @if (_searchedItem.Jewel.Length.HasValue)
+                                {
+                                    <div class="col-12 col-md-4">
+                                        <SoftDetailItem Label="Longitud"
+                                                        Value="@($"{_searchedItem.Jewel.Length} cm")" />
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                        @if (_searchedItem.Watch != null)
+                        {
+                            <div class="row g-3 text-center border-top pt-3 mb-3">
+                                <div class="col-12 col-md-6">
+                                    <SoftDetailItem Label="Serial / Nro. Caja"
+                                                    Value="@_searchedItem.Watch.CaseNumber" />
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <SoftDetailItem Label="Género"
+                                                    Value="@_searchedItem.Watch.GenderType.ToString()" />
+                                </div>
+                            </div>
+                        }
+
+                        <div class="border-top pt-2">
+                            <span class="detail-label">Descripción:</span>
+                            <p class="detail-desc mb-0">@_searchedItem.Description</p>
+                        </div>
+                    </SoftDetailCard>
+                </div>
+
+                @if (_searchedItem.Active)
+                {
+                    <!-- Formulario de Descarga -->
+                    <SoftFormBox Title="Completar Descarga por Venta"
+                                 Subtitle="Ingrese la fecha real de venta y el valor definitivo acordado con el cliente">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-12 col-md-6">
+                                <SoftTooltipLabel Label="Fecha de Venta / Descarga" Required="true" TooltipText="Fecha en que se formaliza la salida" />
+                                <DatePicker TValue="DateTime"
+                                            @bind-Value="_saleDate"
+                                            Format="dd/MM/yyyy"
+                                            Style="width: 100%;" />
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <SoftTooltipLabel Label="Valor Definitivo de Venta ($)" Required="true" TooltipText="Monto pactado total recibido por el artículo" />
+                                <AntDesign.InputNumber TValue="int"
+                                                       @bind-Value="_saleValue"
+                                                       Min="1"
+                                                       Step="5000"
+                                                       Style="width: 100%; font-weight: bold; font-size: 1.1rem; color: var(--soft-success, #52c41a);" />
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 pt-4 border-top mt-4">
+                            <SoftButton Text="Cancelar"
+                                        Icon="close"
+                                        Type="ButtonType.Dashed"
+                                        OnClick="ClearSearch" />
+                            <SoftButton Text="Confirmar Descarga"
+                                        Icon="check"
+                                        Type="ButtonType.Primary"
+                                        Danger="true"
+                                        Loading="@_isDischarging"
+                                        OnClick="HandleDischargeAsync" />
+                        </div>
+                    </SoftFormBox>
+                }
+                else
+                {
+                    <SoftInlineNotice Type="SoftInlineNotice.NoticeType.Info"
+                                      Title="Artículo Ya Descargado"
+                                      Message="@($"Este artículo ya fue descargado previamente el {_searchedItem.DateOfSale:dd/MM/yyyy} por valor de {_searchedItem.SaleValue:C0}.")" />
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private int? _searchReference;
+    private ItemDetailDto? _searchedItem;
+    private bool _isSearching = false;
+    private bool _isDischarging = false;
+
+    private DateTime _saleDate = DateTime.Today;
+    private int _saleValue = 0;
+
+    private void ClearSearch()
+    {
+        _searchedItem = null;
+        _searchReference = null;
+    }
+
+    private async Task SearchItemAsync()
+    {
+        if (!_searchReference.HasValue || _searchReference.Value <= 0)
+        {
+            Message.Warning("Por favor ingrese un número de referencia válido.");
+            return;
+        }
+
+        _isSearching = true;
+        _searchedItem = null;
+
+        try
+        {
+            var result = await Sender.Send(new GetItemByReferenceQuery(_searchReference.Value));
+            if (result.IsSuccess && result.Value != null)
+            {
+                _searchedItem = result.Value;
+                _saleValue = _searchedItem.SaleValue ?? (int)(_searchedItem.CostValue * 1.3);
+                _saleDate = DateTime.Today;
+            }
+            else
+            {
+                Message.Error($"No se encontró ningún artículo con la referencia #{_searchReference.Value}.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Message.Error($"Error al buscar artículo: {ex.Message}");
+        }
+        finally
+        {
+            _isSearching = false;
+        }
+    }
+
+    private async Task HandleDischargeAsync()
+    {
+        if (_searchedItem == null) return;
+
+        if (_saleValue <= 0)
+        {
+            Message.Warning("El valor definitivo de venta debe ser mayor a 0.");
+            return;
+        }
+
+        _isDischarging = true;
+
+        try
+        {
+            var cmd = new DischargeItemCommand(
+                ItemId: _searchedItem.Id,
+                SaleDate: _saleDate,
+                SaleValue: _saleValue
+            );
+
+            var result = await Sender.Send(cmd);
+            if (!result.IsSuccess)
+            {
+                Message.Error(result.Error.Message);
+                return;
+            }
+
+            Message.Success($"¡Artículo #{_searchedItem.Reference} descargado con éxito por valor de {_saleValue:C0}!");
+            _searchedItem = null;
+            _searchReference = null;
+        }
+        catch (Exception ex)
+        {
+            Message.Error($"Ocurrió un error: {ex.Message}");
+        }
+        finally
+        {
+            _isDischarging = false;
+        }
+    }
+}

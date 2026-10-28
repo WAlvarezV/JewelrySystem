@@ -1,0 +1,12 @@
+@namespace JewerlySystem.Common.Presentation.Components.Atoms
+
+<div class="step-label-container @(IsActive ? "active" : "")">
+    <div class="step-label-badge">@Number</div>
+    <span class="step-label-text">@Text</span>
+</div>
+
+@code {
+    [Parameter] public int Number { get; set; }
+    [Parameter] public string Text { get; set; } = string.Empty;
+    [Parameter] public bool IsActive { get; set; }
+}

@@ -1,0 +1,23 @@
+@namespace JewerlySystem.Common.Presentation.Components.Atoms
+
+<div class="soft-form-box">
+    @if (!string.IsNullOrWhiteSpace(Title))
+    {
+        <div class="soft-form-box-header">
+            <h5 class="soft-form-box-title">@Title</h5>
+            @if (!string.IsNullOrWhiteSpace(Subtitle))
+            {
+                <span class="soft-form-box-subtitle">@Subtitle</span>
+            }
+        </div>
+    }
+    <div class="soft-form-box-content">
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Subtitle { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

@@ -1,0 +1,20 @@
+.soft-pagination-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+    padding: 12px 0 4px;
+}
+
+::deep .ant-pagination-item {
+    border-radius: var(--soft-border-radius-sm, 6px);
+}
+
+::deep .ant-pagination-item-active {
+    border-color: var(--brand-blue, #1677ff);
+    background-color: var(--brand-blue-light, #e6f4ff);
+}
+
+::deep .ant-pagination-item-active a {
+    color: var(--brand-blue, #1677ff);
+    font-weight: 600;
+}

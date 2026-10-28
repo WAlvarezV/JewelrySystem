@@ -1,0 +1,14 @@
+@namespace JewerlySystem.Common.Presentation.Components.Molecules
+
+<div class="step-header">
+    <h4 class="step-header-title">@Title</h4>
+    @if (!string.IsNullOrWhiteSpace(Description))
+    {
+        <p class="step-header-description">@Description</p>
+    }
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public string? Description { get; set; }
+}

@@ -1,0 +1,26 @@
+.soft-detail-card {
+    background-color: var(--soft-bg-light, #f8fafc);
+    border: 1px solid var(--soft-border-color, #e2e8f0);
+    border-radius: var(--soft-border-radius-lg, 12px);
+    padding: 18px;
+    margin-bottom: 16px;
+}
+
+.soft-detail-card-header {
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--soft-border-color, #e2e8f0);
+}
+
+.soft-detail-card-title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--soft-text-title, #0f172a);
+}
+
+.soft-detail-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}

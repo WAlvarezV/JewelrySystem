@@ -65,4 +65,46 @@ public class CustomerTests
         result.ShouldHaveValidationErrorFor(x => x.IdentificationNumber);
         result.ShouldHaveValidationErrorFor(x => x.FullName);
     }
+
+    [Fact]
+    public async Task UpdateCustomerCommandHandler_ShouldUpdateFieldsSuccessfully()
+    {
+        // Arrange
+        var repository = Substitute.For<ICustomerRepository>();
+        var person = new Person(1, "10203040", "Juan Perez", "3000000000", "juan@test.com", PersonType.Cliente) { Id = 5 };
+        repository.GetByIdAsync(5, Arg.Any<CancellationToken>()).Returns(person);
+
+        var handler = new UpdateCustomerCommandHandler(repository);
+        var command = new UpdateCustomerCommand(5, 2, "10203040-9", "Juan Perez S.A.S.", "3111111111", "juan@corp.com", PersonType.Proveedor);
+
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal("Juan Perez S.A.S.", person.FullName);
+        Assert.Equal(PersonType.Proveedor, person.PersonType);
+        Assert.Equal("10203040-9", person.IdentificationNumber);
+        await repository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task GetCustomerByIdentificationQueryHandler_ShouldReturnDto_WhenFound()
+    {
+        // Arrange
+        var repository = Substitute.For<ICustomerRepository>();
+        var person = new Person(1, "55443322", "Ana Lopez", "3220000000", "ana@test.com", PersonType.Cliente) { Id = 8 };
+        repository.GetByIdentificationAsync("55443322", Arg.Any<CancellationToken>()).Returns(person);
+
+        var handler = new JewerlySystem.Modules.Customers.Application.Queries.GetCustomerByIdentificationQueryHandler(repository);
+
+        // Act
+        var result = await handler.Handle(new JewerlySystem.Modules.Customers.Application.Queries.GetCustomerByIdentificationQuery("55443322"), CancellationToken.None);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
+        Assert.Equal("Ana Lopez", result.Value.FullName);
+        Assert.Equal("55443322", result.Value.IdentificationNumber);
+    }
 }

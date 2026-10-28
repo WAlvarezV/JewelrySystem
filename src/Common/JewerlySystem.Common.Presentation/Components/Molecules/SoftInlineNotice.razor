@@ -1,0 +1,40 @@
+@namespace JewerlySystem.Common.Presentation.Components.Molecules
+
+<div class="soft-inline-notice @Type">
+    <div class="soft-inline-notice-icon">
+        @if (Type == "warning")
+        {
+            <Icon Type="exclamation-circle" Theme="@IconThemeType.Fill" />
+        }
+        else if (Type == "error")
+        {
+            <Icon Type="close-circle" Theme="@IconThemeType.Fill" />
+        }
+        else if (Type == "success")
+        {
+            <Icon Type="check-circle" Theme="@IconThemeType.Fill" />
+        }
+        else
+        {
+            <Icon Type="info-circle" Theme="@IconThemeType.Fill" />
+        }
+    </div>
+    <div class="soft-inline-notice-content">
+        @if (!string.IsNullOrWhiteSpace(Title))
+        {
+            <div class="soft-inline-notice-title">@Title</div>
+        }
+        @if (!string.IsNullOrWhiteSpace(Description))
+        {
+            <div class="soft-inline-notice-desc">@Description</div>
+        }
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public string Type { get; set; } = "info"; // info, success, warning, error
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

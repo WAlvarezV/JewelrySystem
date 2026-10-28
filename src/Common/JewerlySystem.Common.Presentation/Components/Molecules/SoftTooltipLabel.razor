@@ -1,0 +1,16 @@
+@namespace JewerlySystem.Common.Presentation.Components.Molecules
+
+<span class="soft-tooltip-label">
+    <span class="soft-tooltip-label-text">@Text</span>
+    @if (!string.IsNullOrWhiteSpace(TooltipText))
+    {
+        <Tooltip Title="@TooltipText">
+            <Icon Type="info-circle" Theme="@IconThemeType.Outline" Class="soft-tooltip-label-icon" />
+        </Tooltip>
+    }
+</span>
+
+@code {
+    [Parameter] public string Text { get; set; } = string.Empty;
+    [Parameter] public string? TooltipText { get; set; }
+}

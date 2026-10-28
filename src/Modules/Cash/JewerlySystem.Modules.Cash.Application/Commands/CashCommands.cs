@@ -11,7 +11,8 @@ public record CreateDailyRecordCommand(
     string Description,
     int Value,
     RecordType RecordType,
-    PaymentMethod PaymentMethod) : ICommand<int>;
+    PaymentMethod PaymentMethod,
+    string? Number = null) : ICommand<int>;
 
 public class CreateDailyRecordCommandValidator : AbstractValidator<CreateDailyRecordCommand>
 {
@@ -33,11 +34,13 @@ public class CreateDailyRecordCommandHandler : ICommandHandler<CreateDailyRecord
 
     public async Task<Result<int>> Handle(CreateDailyRecordCommand request, CancellationToken cancellationToken)
     {
-        var nextNum = await _repository.GetNextRecordNumberAsync(cancellationToken);
+        var recordNumber = !string.IsNullOrWhiteSpace(request.Number)
+            ? request.Number
+            : (await _repository.GetNextRecordNumberAsync(cancellationToken)).ToString();
 
         var record = new DailyRecord(
             date: request.Date,
-            number: nextNum.ToString(),
+            number: recordNumber,
             reference: request.Reference,
             description: request.Description,
             value: request.Value,

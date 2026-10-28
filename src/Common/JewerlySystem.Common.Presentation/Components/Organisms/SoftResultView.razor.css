@@ -1,0 +1,20 @@
+.soft-result-view {
+    background-color: var(--soft-bg-surface, #ffffff);
+    border: 1px solid var(--soft-border-color, #e2e8f0);
+    border-radius: var(--soft-border-radius-lg, 12px);
+    padding: 36px 24px;
+    margin: 20px 0;
+    box-shadow: var(--soft-box-shadow, 0 4px 16px rgba(0, 0, 0, 0.06));
+    text-align: center;
+}
+
+::deep .ant-result-title {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--soft-text-title, #0f172a);
+}
+
+::deep .ant-result-subtitle {
+    font-size: 0.95rem;
+    color: var(--soft-text-muted, #64748b);
+}

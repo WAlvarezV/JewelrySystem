@@ -1,0 +1,211 @@
+@page "/inventory/consolidated"
+@page "/consolidated"
+@attribute [Authorize]
+@inject ISender Sender
+@inject NavigationManager Navigation
+@inject IMessageService Message
+
+<div class="consolidated-container">
+    <SoftHeroHeader Title="Consolidado de Inventario"
+                    Subtitle="Balance general de existencias activas clasificado por joyería y relojería"
+                    Icon="bi bi-pie-chart">
+        <SoftButton Text="Actualizar"
+                    Icon="reload"
+                    Type="ButtonType.Dashed"
+                    OnClick="LoadConsolidatedAsync" />
+        <SoftButton Text="Ver Catálogo"
+                    Icon="unordered-list"
+                    Type="ButtonType.Primary"
+                    OnClick="@(() => Navigation.NavigateTo("/inventory"))" />
+    </SoftHeroHeader>
+
+    @if (_isLoading)
+    {
+        <div class="text-center py-5">
+            <Spin Size="SpinSize.Large" Tip="Calculando balance consolidado de inventario..." />
+        </div>
+    }
+    else if (_data == null)
+    {
+        <SoftInlineNotice Type="SoftInlineNotice.NoticeType.Warning"
+                          Title="Sin Información"
+                          Message="No se pudo obtener la consolidación de existencias." />
+    }
+    else
+    {
+        <!-- Resumen de Métricas Ejecutivas -->
+        <div class="metrics-grid mb-4">
+            <div class="metric-card">
+                <div class="metric-icon bg-warning-subtle text-warning">
+                    <i class="bi bi-gem"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Total Joyas en Stock</span>
+                    <span class="metric-value">@_data.Jewelry.Sum(x => x.Quantity) und</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon bg-gold-subtle text-warning-emphasis">
+                    <i class="bi bi-speedometer2"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Peso Oro Total</span>
+                    <span class="metric-value">@_data.Jewelry.Sum(x => x.Weight).ToString("F2") g</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon bg-danger-subtle text-danger">
+                    <i class="bi bi-wallet2"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Inversión Costo Total</span>
+                    <span class="metric-value text-danger">
+                        @((_data.Jewelry.Sum(x => x.CostValue) + _data.Watches.Sum(x => x.CostValue)).ToString("C0"))
+                    </span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon bg-success-subtle text-success">
+                    <i class="bi bi-cash-coin"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Valor Venta Estimado</span>
+                    <span class="metric-value text-success">
+                        @((_data.Jewelry.Sum(x => x.SaleValue) + _data.Watches.Sum(x => x.SaleValue)).ToString("C0"))
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. JOYERÍA POR CATEGORÍA -->
+        <div class="section-card mb-4 shadow-sm rounded-3">
+            <div class="section-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-gem text-warning fs-5"></i>
+                    <h5 class="fw-bold mb-0">Inventario de Joyería por Categoría</h5>
+                </div>
+                <SoftTag Color="gold">
+                    @_data.Jewelry.Sum(x => x.Quantity) artículos
+                </SoftTag>
+            </div>
+
+            <Table TItem="JewelSummaryDto"
+                   DataSource="@_data.Jewelry"
+                   Responsive="true"
+                   Size="TableSize.Middle">
+                <PropertyColumn Property="c => c.Type" Title="Tipo de Joya">
+                    <span class="fw-semibold">@context.Type</span>
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.Quantity" Title="Cantidad" Align="ColumnAlign.Center" Width="100">
+                    <span class="fw-bold">@context.Quantity</span>
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.Weight" Title="Peso Total" Align="ColumnAlign.Center" Width="130">
+                    <span class="fw-bold text-warning-emphasis">@context.Weight.ToString("F2") g</span>
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.CostValue" Title="Valor Costo" Align="ColumnAlign.Right" Width="140">
+                    <span class="text-danger fw-semibold">@context.CostValue.ToString("C0")</span>
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.SaleValue" Title="Valor Venta" Align="ColumnAlign.Right" Width="140">
+                    <span class="text-success fw-semibold">@context.SaleValue.ToString("C0")</span>
+                </PropertyColumn>
+                <ActionColumn Title="Margen Proyectado" Align="ColumnAlign.Right" Width="140">
+                    <span class="fw-bold text-primary">@((context.SaleValue - context.CostValue).ToString("C0"))</span>
+                </ActionColumn>
+            </Table>
+
+            <div class="table-summary-bar">
+                <div class="row align-items-center fw-bold">
+                    <div class="col-3">TOTAL JOYERÍA</div>
+                    <div class="col-2 text-center">@_data.Jewelry.Sum(x => x.Quantity) und</div>
+                    <div class="col-2 text-center text-warning-emphasis">@_data.Jewelry.Sum(x => x.Weight).ToString("F2") g</div>
+                    <div class="col-2 text-end text-danger">@_data.Jewelry.Sum(x => x.CostValue).ToString("C0")</div>
+                    <div class="col-3 text-end text-success">@_data.Jewelry.Sum(x => x.SaleValue).ToString("C0")</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. RELOJERÍA -->
+        <div class="section-card shadow-sm rounded-3">
+            <div class="section-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-watch text-info fs-5"></i>
+                    <h5 class="fw-bold mb-0">Inventario de Relojería</h5>
+                </div>
+                <SoftTag Color="cyan">
+                    @_data.Watches.Sum(x => x.Quantity) unidades
+                </SoftTag>
+            </div>
+
+            <Table TItem="WatchSummaryDto"
+                   DataSource="@_data.Watches"
+                   Responsive="true"
+                   Size="TableSize.Middle">
+                <PropertyColumn Property="c => c.Type" Title="Marca / Modelo">
+                    <span class="fw-semibold">@context.Type</span>
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.Other" Title="Género" Width="130">
+                    <SoftTag Color="default">@context.Other</SoftTag>
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.Quantity" Title="Cantidad" Align="ColumnAlign.Center" Width="100">
+                    <span class="fw-bold">@context.Quantity</span>
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.CostValue" Title="Valor Costo" Align="ColumnAlign.Right" Width="140">
+                    <span class="text-danger fw-semibold">@context.CostValue.ToString("C0")</span>
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.SaleValue" Title="Valor Venta" Align="ColumnAlign.Right" Width="140">
+                    <span class="text-success fw-semibold">@context.SaleValue.ToString("C0")</span>
+                </PropertyColumn>
+                <ActionColumn Title="Margen Proyectado" Align="ColumnAlign.Right" Width="140">
+                    <span class="fw-bold text-primary">@((context.SaleValue - context.CostValue).ToString("C0"))</span>
+                </ActionColumn>
+            </Table>
+
+            <div class="table-summary-bar">
+                <div class="row align-items-center fw-bold">
+                    <div class="col-4">TOTAL RELOJERÍA</div>
+                    <div class="col-2 text-center">@_data.Watches.Sum(x => x.Quantity) und</div>
+                    <div class="col-3 text-end text-danger">@_data.Watches.Sum(x => x.CostValue).ToString("C0")</div>
+                    <div class="col-3 text-end text-success">@_data.Watches.Sum(x => x.SaleValue).ToString("C0")</div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private InventoryConsolidatedDto? _data;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadConsolidatedAsync();
+    }
+
+    private async Task LoadConsolidatedAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            var result = await Sender.Send(new GetConsolidatedInventoryQuery());
+            if (result.IsSuccess)
+            {
+                _data = result.Value;
+            }
+            else
+            {
+                Message.Error(result.Error.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            Message.Error($"Error al cargar consolidado: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}

@@ -1,0 +1,34 @@
+.soft-drawer-desc-banner {
+    font-size: 0.88rem;
+    color: var(--soft-text-muted, #64748b);
+    padding: 10px 14px;
+    background-color: var(--soft-bg-light, #f8fafc);
+    border-radius: var(--soft-border-radius-md, 8px);
+    margin-bottom: 20px;
+    border: 1px solid var(--soft-border-color, #e2e8f0);
+}
+
+.soft-drawer-body {
+    padding: 8px 4px 24px;
+}
+
+.soft-drawer-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    padding-top: 20px;
+    margin-top: 20px;
+    border-top: 1px solid var(--soft-border-color, #e2e8f0);
+}
+
+::deep .ant-drawer-header {
+    border-bottom: 1px solid var(--soft-border-color, #e2e8f0);
+    padding: 16px 24px;
+}
+
+::deep .ant-drawer-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--soft-text-title, #0f172a);
+}

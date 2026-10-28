@@ -1,0 +1,68 @@
+/* ==========================================================================
+   SI.SIOT SOFT UI DESIGN SYSTEM TOKENS & OVERRIDES
+   ========================================================================== */
+
+:root {
+    /* Brand Colors */
+    --brand-blue: #1677ff;
+    --brand-blue-hover: #4096ff;
+    --brand-blue-light: #e6f4ff;
+    --brand-blue-gradient: linear-gradient(135deg, #1677ff 0%, #0958d9 100%);
+    --brand-navy: #0f172a;
+
+    /* Status Colors */
+    --soft-success: #52c41a;
+    --soft-success-light: #f6ffed;
+    --soft-warning: #faad14;
+    --soft-warning-light: #fffbe6;
+    --soft-error: #ff4d4f;
+    --soft-error-light: #fff2f0;
+
+    /* Soft UI Radii */
+    --soft-border-radius-sm: 6px;
+    --soft-border-radius-md: 8px;
+    --soft-border-radius-lg: 12px;
+    --soft-border-radius-xl: 16px;
+
+    /* Soft UI Shadows */
+    --soft-box-shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.04);
+    --soft-box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    --soft-box-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.10);
+
+    /* Neutral Colors */
+    --soft-bg-light: #f8fafc;
+    --soft-bg-surface: #ffffff;
+    --soft-border-color: #e2e8f0;
+    --soft-text-title: #0f172a;
+    --soft-text-body: #334155;
+    --soft-text-muted: #64748b;
+}
+
+/* Base Soft UI Overrides */
+.soft-card {
+    background: var(--soft-bg-surface);
+    border-radius: var(--soft-border-radius-lg);
+    box-shadow: var(--soft-box-shadow);
+    border: 1px solid var(--soft-border-color);
+    transition: all 0.2s ease-in-out;
+}
+
+.soft-card:hover {
+    box-shadow: var(--soft-box-shadow-hover);
+}
+
+/* Animations */
+.step-fade-in {
+    animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -1,0 +1,277 @@
+@page "/contracts/new"
+@page "/contrato/registrar"
+@attribute [Authorize]
+@inject ISender Sender
+@inject NavigationManager Navigation
+@inject IMessageService MessageService
+
+<div class="create-contract-view step-fade-in">
+    <!-- Hero Header -->
+    <SoftHeroHeader Title="Registrar Contrato Prendario"
+                    Subtitle="Diligencie la prenda en custodia, liquidación del avalúo y datos del titular"
+                    Icon="bi bi-file-earmark-plus">
+        <SoftButton Icon="arrow-left" OnClick="@(() => Navigation.NavigateTo("/contracts"))">Volver a Contratos</SoftButton>
+    </SoftHeroHeader>
+
+    <div class="soft-card p-4">
+        <Form Model="@_formModel" Layout="@FormLayout.Vertical">
+            <!-- Step 1: Cliente -->
+            <StepLabel Number="1" Text="Información del Cliente / Titular" IsActive="true" />
+            <SoftFormBox Title="Identificación del Titular">
+                <div class="row g-3">
+                    <div class="col-12 col-md-3">
+                        <FormItem Label="Tipo Documento" Required="true">
+                            <Select TItem="JewerlySystem.Modules.Customers.Application.DTOs.IdentificationTypeDto"
+                                    TItemValue="int"
+                                    @bind-Value="_formModel.IdentificationTypeId"
+                                    DataSource="@_idTypes"
+                                    LabelName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.IdentificationTypeDto.Name)"
+                                    ValueName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.IdentificationTypeDto.Id)" />
+                        </FormItem>
+                    </div>
+                    <div class="col-12 col-md-5">
+                        <FormItem Label="Número de Documento" Required="true">
+                            <Input @bind-Value="_formModel.IdentificationNumber"
+                                   Placeholder="Ingrese documento..." />
+                        </FormItem>
+                    </div>
+                    <div class="col-12 col-md-4 d-flex align-items-end mb-4">
+                        <SoftButton Icon="search" OnClick="SearchCustomerByIdentificationAsync">Buscar Cliente</SoftButton>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <FormItem Label="Nombre Completo" Required="true">
+                            <Input @bind-Value="_formModel.CustomerFullName" Placeholder="Nombre y apellidos" />
+                        </FormItem>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <FormItem Label="Teléfono / Celular">
+                            <Input @bind-Value="_formModel.CustomerCellPhone" Placeholder="Ej: 3001234567" />
+                        </FormItem>
+                    </div>
+                </div>
+            </SoftFormBox>
+
+            <!-- Step 2: Prenda -->
+            <StepLabel Number="2" Text="Datos de la Prenda en Custodia" IsActive="true" />
+            <SoftFormBox Title="Descripción de la Joya o Bien">
+                <div class="row g-3">
+                    <div class="col-12 col-md-3">
+                        <FormItem Label="Peso en Gramos (g)" Required="true">
+                            <AntDesign.InputNumber @bind-Value="_formModel.Weight"
+                                                   Min="0.1"
+                                                   Step="0.1"
+                                                   Class="w-100" />
+                        </FormItem>
+                    </div>
+                    <div class="col-12 col-md-9">
+                        <FormItem Label="Descripción de la Prenda" Required="true">
+                            <TextArea @bind-Value="_formModel.Description"
+                                      Rows="2"
+                                      Placeholder="Detalle las características (ej: Cadena de oro 18k tejido lazo con dije de cruz)..." />
+                        </FormItem>
+                    </div>
+                </div>
+            </SoftFormBox>
+
+            <!-- Step 3: Condiciones Financieras -->
+            <StepLabel Number="3" Text="Condiciones Financieras y Liquidación" IsActive="true" />
+            <SoftFormBox Title="Valores y Plazos del Contrato">
+                <div class="row g-3">
+                    <div class="col-12 col-md-3">
+                        <FormItem Label="Valor del Préstamo ($)" Required="true">
+                            <AntDesign.InputNumber @bind-Value="_formModel.Value"
+                                                   Min="10000"
+                                                   Step="50000"
+                                                   Class="w-100" />
+                        </FormItem>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <FormItem Label="Desembolso Inicial ($)">
+                            <AntDesign.InputNumber @bind-Value="_formModel.InitialPayment"
+                                                   Min="0"
+                                                   Step="50000"
+                                                   Class="w-100" />
+                        </FormItem>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <FormItem Label="Tasa de Interés Mensual (%)" Required="true">
+                            <AntDesign.InputNumber @bind-Value="_formModel.Percentage"
+                                                   Min="1"
+                                                   Max="50"
+                                                   Step="1"
+                                                   Class="w-100" />
+                        </FormItem>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <FormItem Label="Fecha de Vencimiento">
+                            <DatePicker @bind-Value="_formModel.DeliveryDate" Format="dd/MM/yyyy" Class="w-100" />
+                        </FormItem>
+                    </div>
+                </div>
+
+                <SoftDetailCard Title="Resumen de Liquidación del Contrato">
+                    <SoftDetailItem Label="Valor Prestado">@_formModel.Value.ToString("C0")</SoftDetailItem>
+                    <SoftDetailItem Label="Desembolso Inicial">@_formModel.InitialPayment.ToString("C0")</SoftDetailItem>
+                    <SoftDetailItem Label="Interés Estimado Mensual">
+                        @((_formModel.Value * _formModel.Percentage / 100).ToString("C0"))
+                    </SoftDetailItem>
+                    <SoftDetailItem Label="Saldo Pendiente Inicial" Highlight="true">
+                        @Math.Max(0, _formModel.Value - _formModel.InitialPayment).ToString("C0")
+                    </SoftDetailItem>
+                </SoftDetailCard>
+            </SoftFormBox>
+
+            <SoftDivider />
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <SoftButton OnClick="@(() => Navigation.NavigateTo("/contracts"))">Cancelar</SoftButton>
+                <SoftButton Type="@ButtonType.Primary"
+                            Loading="@_isSubmitting"
+                            OnClick="HandleSubmitAsync">
+                    Generar y Firmar Contrato
+                </SoftButton>
+            </div>
+        </Form>
+    </div>
+</div>
+
+@code {
+    private List<JewerlySystem.Modules.Customers.Application.DTOs.IdentificationTypeDto> _idTypes = new();
+    private CreateContractFormModel _formModel = new();
+    private bool _isSubmitting;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var idRes = await Sender.Send(new JewerlySystem.Modules.Customers.Application.Queries.GetIdentificationTypesQuery());
+        if (idRes.IsSuccess)
+        {
+            _idTypes = idRes.Value;
+            if (_idTypes.Any())
+            {
+                _formModel.IdentificationTypeId = _idTypes.First().Id;
+            }
+        }
+    }
+
+    private async Task SearchCustomerByIdentificationAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_formModel.IdentificationNumber))
+        {
+            MessageService.Warning("Ingrese un número de documento para buscar.");
+            return;
+        }
+
+        var res = await Sender.Send(new JewerlySystem.Modules.Customers.Application.Queries.GetCustomerByIdentificationQuery(_formModel.IdentificationNumber.Trim()));
+        if (res.IsSuccess && res.Value != null)
+        {
+            _formModel.CustomerId = res.Value.Id;
+            _formModel.CustomerFullName = res.Value.FullName;
+            _formModel.CustomerCellPhone = res.Value.CellPhone;
+            _formModel.IdentificationTypeId = res.Value.IdentificationTypeId;
+            MessageService.Success($"Cliente encontrado: {res.Value.FullName}");
+        }
+        else
+        {
+            _formModel.CustomerId = 0;
+            MessageService.Info("Cliente nuevo. Complete los datos para crearlo automáticamente.");
+        }
+    }
+
+    private async Task HandleSubmitAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_formModel.CustomerFullName))
+        {
+            MessageService.Error("El nombre del cliente es obligatorio.");
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(_formModel.IdentificationNumber))
+        {
+            MessageService.Error("El número de documento es obligatorio.");
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(_formModel.Description))
+        {
+            MessageService.Error("La descripción de la prenda es obligatoria.");
+            return;
+        }
+        if (_formModel.Value <= 0)
+        {
+            MessageService.Error("El valor del contrato debe ser mayor a 0.");
+            return;
+        }
+
+        _isSubmitting = true;
+        try
+        {
+            // Auto-create customer if needed
+            int customerId = _formModel.CustomerId;
+            if (customerId <= 0)
+            {
+                var createCustCmd = new JewerlySystem.Modules.Customers.Application.Commands.CreateCustomerCommand(
+                    IdentificationTypeId: _formModel.IdentificationTypeId,
+                    IdentificationNumber: _formModel.IdentificationNumber.Trim(),
+                    FullName: _formModel.CustomerFullName.Trim(),
+                    CellPhone: _formModel.CustomerCellPhone?.Trim() ?? string.Empty,
+                    Email: string.Empty,
+                    PersonType: JewerlySystem.Modules.Customers.Domain.PersonType.Cliente
+                );
+                var custResult = await Sender.Send(createCustCmd);
+                if (!custResult.IsSuccess)
+                {
+                    MessageService.Error(custResult.Error.Message);
+                    return;
+                }
+                customerId = custResult.Value;
+            }
+
+            var cmd = new CreateContractCommand(
+                Reference: null,
+                Date: DateTime.Today,
+                DeliveryDate: _formModel.DeliveryDate,
+                Value: _formModel.Value,
+                Weight: _formModel.Weight,
+                Description: _formModel.Description.Trim(),
+                PersonId: customerId,
+                ProviderId: null,
+                FatherId: null,
+                InitialPayment: _formModel.InitialPayment > 0 ? _formModel.InitialPayment : null,
+                PaymentMethod: JewerlySystem.Modules.Contracts.Domain.PaymentMethod.EFECTIVO
+            );
+
+            var result = await Sender.Send(cmd);
+            if (result.IsSuccess)
+            {
+                MessageService.Success("Contrato prendario generado exitosamente.");
+                Navigation.NavigateTo($"/contracts/{result.Value}");
+            }
+            else
+            {
+                MessageService.Error(result.Error.Message);
+            }
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    public class CreateContractFormModel
+    {
+        public int CustomerId { get; set; }
+        public int IdentificationTypeId { get; set; }
+        public string IdentificationNumber { get; set; } = string.Empty;
+        public string CustomerFullName { get; set; } = string.Empty;
+        public string? CustomerCellPhone { get; set; }
+
+        public double Weight { get; set; } = 5.0;
+        public string Description { get; set; } = string.Empty;
+
+        public int Value { get; set; } = 500000;
+        public int InitialPayment { get; set; }
+        public int Percentage { get; set; } = 5;
+        public DateTime DeliveryDate { get; set; } = DateTime.Today.AddDays(30);
+    }
+}

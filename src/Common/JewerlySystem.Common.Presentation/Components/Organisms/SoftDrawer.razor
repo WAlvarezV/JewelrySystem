@@ -1,0 +1,37 @@
+@namespace JewerlySystem.Common.Presentation.Components.Organisms
+
+<Drawer Visible="@Visible"
+        Title="@Title"
+        Width="@Width"
+        Placement="@Placement"
+        Closable="true"
+        MaskClosable="false"
+        Class="soft-drawer"
+        OnClose="@OnClose">
+    <div class="soft-drawer-body">
+        @if (!string.IsNullOrWhiteSpace(Description))
+        {
+            <div class="soft-drawer-desc-banner">
+                @Description
+            </div>
+        }
+        @ChildContent
+    </div>
+    @if (FooterContent != null)
+    {
+        <div class="soft-drawer-footer">
+            @FooterContent
+        </div>
+    }
+</Drawer>
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public string Width { get; set; } = "720";
+    [Parameter] public DrawerPlacement Placement { get; set; } = DrawerPlacement.Right;
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? FooterContent { get; set; }
+}

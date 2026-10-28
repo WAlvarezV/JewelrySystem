@@ -1,0 +1,17 @@
+.step-header {
+    margin-bottom: 24px;
+}
+
+.step-header-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--soft-text-title, #0f172a);
+    letter-spacing: -0.3px;
+}
+
+.step-header-description {
+    margin: 4px 0 0;
+    font-size: 0.88rem;
+    color: var(--soft-text-muted, #64748b);
+}

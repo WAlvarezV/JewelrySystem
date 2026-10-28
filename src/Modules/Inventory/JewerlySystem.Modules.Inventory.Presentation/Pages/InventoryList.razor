@@ -1,71 +1,288 @@
 @page "/inventory"
+@page "/jewelry"
+@page "/watches"
 @attribute [Authorize]
 @inject ISender Sender
+@inject NavigationManager Navigation
+@inject IMessageService Message
 
-<div class="container-fluid mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="fw-bold"><i class="bi bi-box-seam me-2"></i>Inventario de Joyas y Relojes</h3>
-    </div>
+<div class="inventory-container">
+    <SoftHeroHeader Title="Catálogo de Inventario"
+                    Subtitle="Control integral de joyas, relojes y artículos en stock activo o descargado"
+                    Icon="bi bi-box-seam">
+        <SoftButton Text="Consolidado"
+                    Icon="pie-chart"
+                    Type="ButtonType.Dashed"
+                    OnClick="@(() => Navigation.NavigateTo("/inventory/consolidated"))" />
+        <SoftButton Text="Descargar"
+                    Icon="export"
+                    Danger="true"
+                    Type="ButtonType.Default"
+                    OnClick="@(() => Navigation.NavigateTo("/inventory/discharge"))" />
+        <SoftButton Text="Nueva Joya"
+                    Icon="plus-circle"
+                    Type="ButtonType.Default"
+                    OnClick="@(() => Navigation.NavigateTo("/inventory/jewels/new"))" />
+        <SoftButton Text="Nuevo Reloj"
+                    Icon="plus-circle"
+                    Type="ButtonType.Primary"
+                    OnClick="@(() => Navigation.NavigateTo("/inventory/watches/new"))" />
+    </SoftHeroHeader>
 
-    @if (_isLoading)
-    {
-        <div class="d-flex justify-content-center p-5">
-            <div class="spinner-border text-primary" role="status"></div>
-        </div>
-    }
-    else if (_items == null || !_items.Any())
-    {
-        <div class="card p-4 text-center text-muted">
-            <p class="mb-0">No hay artículos en inventario.</p>
-        </div>
-    }
-    else
-    {
-        <div class="card shadow-sm border-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Referencia</th>
-                            <th>Descripción</th>
-                            <th>Costo</th>
-                            <th>Fecha Entrada</th>
-                            <th>Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var i in _items)
-                        {
-                            <tr>
-                                <td class="fw-semibold">#@i.Reference</td>
-                                <td>@i.Description</td>
-                                <td>@i.CostValue.ToString("C0")</td>
-                                <td>@i.DateOfEntry.ToShortDateString()</td>
-                                <td>
-                                    <span class="badge @(i.Active ? "bg-success" : "bg-secondary")">
-                                        @(i.Active ? "Disponible" : "Vendido")
-                                    </span>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+    <!-- Métricas del Catálogo -->
+    <div class="metrics-grid mb-4">
+        <div class="metric-card">
+            <div class="metric-icon bg-blue-subtle text-primary">
+                <i class="bi bi-boxes"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-label">En Stock Activo</span>
+                <span class="metric-value">@_items.Count(x => x.Active)</span>
             </div>
         </div>
-    }
+
+        <div class="metric-card">
+            <div class="metric-icon bg-warning-subtle text-warning">
+                <i class="bi bi-gem"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-label">Joyas Disponibles</span>
+                <span class="metric-value">@_items.Count(x => x.Active && x.ItemTypeId != 5)</span>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-icon bg-info-subtle text-info">
+                <i class="bi bi-watch"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-label">Relojes Disponibles</span>
+                <span class="metric-value">@_items.Count(x => x.Active && x.ItemTypeId == 5)</span>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-icon bg-secondary-subtle text-secondary">
+                <i class="bi bi-box-arrow-right"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-label">Artículos Descargados</span>
+                <span class="metric-value">@_items.Count(x => !x.Active)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barra de Búsqueda y Filtros -->
+    <SoftFilterCard>
+        <div class="row g-3 align-items-center">
+            <div class="col-12 col-md-5">
+                <Input Placeholder="Buscar por referencia o descripción..."
+                       PrefixIcon="search"
+                       @bind-Value="_searchTerm"
+                       AllowClear="true" />
+            </div>
+            <div class="col-12 col-md-4">
+                <Select TItemValue="int"
+                        TItem="ItemTypeFilterOption"
+                        DataSource="@_typeFilterOptions"
+                        @bind-Value="_selectedTypeFilter"
+                        ValueName="@nameof(ItemTypeFilterOption.Id)"
+                        LabelName="@nameof(ItemTypeFilterOption.Name)"
+                        Placeholder="Filtrar por tipo..." />
+            </div>
+            <div class="col-12 col-md-3">
+                <Select TItemValue="string"
+                        TItem="StatusFilterOption"
+                        DataSource="@_statusFilterOptions"
+                        @bind-Value="_selectedStatusFilter"
+                        ValueName="@nameof(StatusFilterOption.Value)"
+                        LabelName="@nameof(StatusFilterOption.Label)"
+                        Placeholder="Estado..." />
+            </div>
+        </div>
+    </SoftFilterCard>
+
+    <!-- Tabla Principal de Inventario -->
+    <div class="table-container shadow-sm rounded-3">
+        @if (_isLoading)
+        {
+            <div class="text-center py-5">
+                <Spin Size="SpinSize.Large" Tip="Cargando catálogo..." />
+            </div>
+        }
+        else if (!FilteredItems.Any())
+        {
+            <div class="py-5">
+                <SoftResultView Status="ResultStatus.Info"
+                                Title="No se encontraron artículos"
+                                Subtitle="No hay productos que coincidan con los criterios de búsqueda seleccionados.">
+                    <SoftButton Text="Nueva Joya"
+                                Type="ButtonType.Default"
+                                OnClick="@(() => Navigation.NavigateTo("/inventory/jewels/new"))" />
+                    <SoftButton Text="Nuevo Reloj"
+                                Type="ButtonType.Primary"
+                                OnClick="@(() => Navigation.NavigateTo("/inventory/watches/new"))" />
+                </SoftResultView>
+            </div>
+        }
+        else
+        {
+            <Table TItem="ItemDto"
+                   DataSource="@FilteredItems"
+                   Responsive="true"
+                   Size="TableSize.Middle"
+                   RowKey="@(x => x.Reference.ToString())">
+                <PropertyColumn Property="c => c.Reference" Title="Referencia" Width="120">
+                    <span class="ref-badge">#@context.Reference</span>
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.ItemTypeId" Title="Tipo" Width="140">
+                    @{
+                        var isWatch = context.ItemTypeId == 5;
+                    }
+                    <SoftTag Color="@(isWatch ? "cyan" : "gold")">
+                        <i class="bi @(isWatch ? "bi-watch" : "bi-gem") me-1"></i>
+                        @GetTypeName(context.ItemTypeId)
+                    </SoftTag>
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.Description" Title="Descripción" Ellipsis="true" />
+                <PropertyColumn Property="c => c.CostValue" Title="Costo" Align="ColumnAlign.Right" Width="130">
+                    <span class="cost-text">@context.CostValue.ToString("C0")</span>
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.SaleValue" Title="Venta Sugerida" Align="ColumnAlign.Right" Width="140">
+                    <span class="sale-text">@((context.SaleValue ?? (int)(context.CostValue * 1.3)).ToString("C0"))</span>
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.DateOfEntry" Title="Ingreso" Width="110">
+                    <span class="date-text">@context.DateOfEntry.ToString("dd/MM/yyyy")</span>
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.Active" Title="Estado" Width="120" Align="ColumnAlign.Center">
+                    @if (context.Active)
+                    {
+                        <SoftTag Color="green">Disponible</SoftTag>
+                    }
+                    else
+                    {
+                        <SoftTag Color="default">Descargado</SoftTag>
+                    }
+                </PropertyColumn>
+                <ActionColumn Title="Acciones" Align="ColumnAlign.Center" Width="90">
+                    @if (context.Active)
+                    {
+                        <SoftActionButton Icon="export"
+                                          TooltipText="Descargar / Vender"
+                                          OnClick="@(() => Navigation.NavigateTo("/inventory/discharge"))" />
+                    }
+                    else
+                    {
+                        <span class="sold-date">@context.DateOfSale?.ToString("dd/MM/yy")</span>
+                    }
+                </ActionColumn>
+            </Table>
+        }
+    </div>
 </div>
 
 @code {
-    private List<ItemDto>? _items;
+    private List<ItemDto> _items = new();
     private bool _isLoading = true;
+    private string _searchTerm = string.Empty;
+    private int _selectedTypeFilter = 0;
+    private string _selectedStatusFilter = string.Empty;
+
+    public class ItemTypeFilterOption
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    public class StatusFilterOption
+    {
+        public string Value { get; set; } = string.Empty;
+        public string Label { get; set; } = string.Empty;
+    }
+
+    private readonly List<ItemTypeFilterOption> _typeFilterOptions = new()
+    {
+        new() { Id = 0, Name = "Todos los Tipos" },
+        new() { Id = 1, Name = "Anillos" },
+        new() { Id = 2, Name = "Aretes" },
+        new() { Id = 3, Name = "Cadenas" },
+        new() { Id = 4, Name = "Pulseras" },
+        new() { Id = 6, Name = "Dijes" },
+        new() { Id = 5, Name = "Relojes" },
+    };
+
+    private readonly List<StatusFilterOption> _statusFilterOptions = new()
+    {
+        new() { Value = "", Label = "Todos los Estados" },
+        new() { Value = "active", Label = "Disponibles en Stock" },
+        new() { Value = "sold", Label = "Descargados / Vendidos" },
+    };
+
+    private List<ItemDto> FilteredItems
+    {
+        get
+        {
+            var list = _items.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(_searchTerm))
+            {
+                var term = _searchTerm.Trim().ToLowerInvariant();
+                list = list.Where(i => i.Reference.ToString().Contains(term) ||
+                                       (i.Description != null && i.Description.ToLowerInvariant().Contains(term)));
+            }
+
+            if (_selectedTypeFilter > 0)
+            {
+                list = list.Where(i => i.ItemTypeId == _selectedTypeFilter);
+            }
+
+            if (_selectedStatusFilter == "active")
+            {
+                list = list.Where(i => i.Active);
+            }
+            else if (_selectedStatusFilter == "sold")
+            {
+                list = list.Where(i => !i.Active);
+            }
+
+            return list.ToList();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await Sender.Send(new GetItemsListQuery());
-        if (result.IsSuccess)
-        {
-            _items = result.Value;
-        }
-        _isLoading = false;
+        await LoadInventoryAsync();
     }
+
+    private async Task LoadInventoryAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            var result = await Sender.Send(new GetItemsListQuery());
+            if (result.IsSuccess)
+            {
+                _items = result.Value;
+            }
+        }
+        catch (Exception ex)
+        {
+            Message.Error($"Error al cargar inventario: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private string GetTypeName(int typeId) => typeId switch
+    {
+        1 => "Anillo",
+        2 => "Aretes",
+        3 => "Cadena",
+        4 => "Pulsera",
+        5 => "Reloj",
+        6 => "Dije",
+        _ => "Joya"
+    };
 }

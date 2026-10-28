@@ -1,0 +1,32 @@
+@namespace JewerlySystem.Common.Presentation.Components.Organisms
+
+<div class="soft-hero-header">
+    <div class="soft-hero-content">
+        @if (!string.IsNullOrWhiteSpace(Icon))
+        {
+            <div class="soft-hero-icon">
+                <i class="@Icon"></i>
+            </div>
+        }
+        <div class="soft-hero-titles">
+            <h3 class="soft-hero-title">@Title</h3>
+            @if (!string.IsNullOrWhiteSpace(Subtitle))
+            {
+                <p class="soft-hero-subtitle">@Subtitle</p>
+            }
+        </div>
+    </div>
+    @if (ChildContent != null)
+    {
+        <div class="soft-hero-actions">
+            @ChildContent
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public string? Subtitle { get; set; }
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

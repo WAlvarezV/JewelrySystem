@@ -65,3 +65,40 @@ public class GetCashConsolidatedQueryHandler : IQueryHandler<GetCashConsolidated
         return Result.Success(consolidated.ToDto());
     }
 }
+
+public record GetCashConsolidatedRangeQuery(DateTime StartDate, DateTime EndDate) : IQuery<List<CashRangeConsolidatedItemDto>>;
+
+public class GetCashConsolidatedRangeQueryHandler : IQueryHandler<GetCashConsolidatedRangeQuery, List<CashRangeConsolidatedItemDto>>
+{
+    private readonly ICashRepository _repository;
+
+    public GetCashConsolidatedRangeQueryHandler(ICashRepository repository)
+    {
+        _repository = repository;
+    }
+
+    public async Task<Result<List<CashRangeConsolidatedItemDto>>> Handle(GetCashConsolidatedRangeQuery request, CancellationToken cancellationToken)
+    {
+        var allRecords = await _repository.ListAsync(ct: cancellationToken);
+        var inRange = allRecords
+            .Where(r => r.Date.Date >= request.StartDate.Date && r.Date.Date <= request.EndDate.Date)
+            .GroupBy(r => r.Date.Date)
+            .OrderBy(g => g.Key);
+
+        var list = new List<CashRangeConsolidatedItemDto>();
+        foreach (var grp in inRange)
+        {
+            var date = grp.Key;
+            var cashIn = grp.Where(r => r.RecordType == RecordType.INGRESO && r.PaymentMethod == PaymentMethod.EFECTIVO).Sum(r => r.Value);
+            var othersIn = grp.Where(r => r.RecordType == RecordType.INGRESO && r.PaymentMethod != PaymentMethod.EFECTIVO).Sum(r => r.Value);
+            var totalIn = cashIn + othersIn;
+            var cashOut = grp.Where(r => r.RecordType == RecordType.EGRESO).Sum(r => r.Value);
+            var totalNet = totalIn - cashOut;
+            var cashBalance = cashIn - cashOut;
+
+            list.Add(new CashRangeConsolidatedItemDto(date, cashIn, othersIn, totalIn, cashOut, totalNet, cashBalance));
+        }
+
+        return Result.Success(list);
+    }
+}

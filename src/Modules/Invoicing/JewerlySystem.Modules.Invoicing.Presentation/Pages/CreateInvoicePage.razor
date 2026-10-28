@@ -1,0 +1,201 @@
+@page "/invoices/new"
+@page "/facturas/nueva"
+@attribute [Authorize]
+@inject ISender Sender
+@inject NavigationManager Navigation
+@inject IMessageService MessageService
+
+<div class="create-invoice-view step-fade-in">
+    <!-- Hero Header -->
+    <SoftHeroHeader Title="Registrar Factura de Proveedor"
+                    Subtitle="Registro de compras a proveedores, detalle de qué se compró, abonos iniciales y saldos"
+                    Icon="bi bi-receipt-cutoff">
+        <SoftButton Icon="arrow-left" OnClick="@(() => Navigation.NavigateTo("/invoices"))">Volver a Facturas</SoftButton>
+    </SoftHeroHeader>
+
+    <div class="soft-card p-4">
+        <Form Model="@_formModel" Layout="@FormLayout.Vertical">
+            <!-- Step 1 -->
+            <StepLabel Number="1" Text="Proveedor y Factura" IsActive="true" />
+            <SoftFormBox Title="Identificación de la Factura">
+                <Row Gutter="16">
+                    <Col Xs="24" Md="12">
+                        <FormItem Label="Proveedor de Mercancía" Required="true">
+                            <Select TItem="JewerlySystem.Modules.Customers.Application.DTOs.PersonDto"
+                                    TItemValue="int"
+                                    @bind-Value="_formModel.ProviderId"
+                                    DataSource="@_providers"
+                                    LabelName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.FullName)"
+                                    ValueName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.Id)"
+                                    Placeholder="Seleccione proveedor..." />
+                        </FormItem>
+                    </Col>
+                    <Col Xs="24" Md="12">
+                        <FormItem Label="Nro. de Factura del Proveedor">
+                            <Input @bind-Value="_formModel.InvoiceNumber" Placeholder="Ej: FAC-45892" />
+                        </FormItem>
+                    </Col>
+                </Row>
+
+                <Row Gutter="16">
+                    <Col Xs="24" Md="12">
+                        <FormItem Label="Fecha de Emisión">
+                            <DatePicker @bind-Value="_formModel.Date" Format="dd/MM/yyyy" Class="w-100" />
+                        </FormItem>
+                    </Col>
+                    <Col Xs="24" Md="12">
+                        <FormItem Label="Fecha Límite de Pago">
+                            <DatePicker @bind-Value="_formModel.PaymentLimitDate" Format="dd/MM/yyyy" Class="w-100" />
+                        </FormItem>
+                    </Col>
+                </Row>
+            </SoftFormBox>
+
+            <!-- Step 2 -->
+            <StepLabel Number="2" Text="Detalle de la Mercancía" IsActive="true" />
+            <SoftFormBox Title="¿Qué se ha comprado?">
+                <FormItem Label="Descripción detallada de las piezas adquiridas" Required="true">
+                    <TextArea @bind-Value="_formModel.Description"
+                              Rows="4"
+                              Placeholder="Especifique el detalle exacto de las joyas, relojes o insumos adquiridos (ej: 6 Cadenas de oro 18k tejido militar, 4 Dijes corazón, 2 Relojes Citizen cuarzo dama)..." />
+                </FormItem>
+            </SoftFormBox>
+
+            <!-- Step 3 -->
+            <StepLabel Number="3" Text="Valores y Formas de Pago" IsActive="true" />
+            <SoftFormBox Title="Liquidación Financiera">
+                <Row Gutter="16">
+                    <Col Xs="24" Md="8">
+                        <FormItem Label="Valor Total de la Compra ($)" Required="true">
+                            <AntDesign.InputNumber @bind-Value="_formModel.Value"
+                                                   Min="0"
+                                                   Step="50000"
+                                                   Class="w-100" />
+                        </FormItem>
+                    </Col>
+                    <Col Xs="24" Md="8">
+                        <FormItem Label="Abono Inicial Pagado ($)">
+                            <AntDesign.InputNumber @bind-Value="_formModel.CreditValue"
+                                                   Min="0"
+                                                   Step="50000"
+                                                   Class="w-100" />
+                        </FormItem>
+                    </Col>
+                    <Col Xs="24" Md="8">
+                        <FormItem Label="Medio de Pago del Abono">
+                            <Select TItem="string"
+                                    TItemValue="string"
+                                    @bind-Value="_formModel.InitialPaymentMethod"
+                                    DataSource="@_paymentMethods" />
+                        </FormItem>
+                    </Col>
+                </Row>
+
+                <SoftDetailCard Title="Resumen de Saldos y Cuentas por Pagar">
+                    <SoftDetailItem Label="Valor Compra">
+                        @_formModel.Value.ToString("C0")
+                    </SoftDetailItem>
+                    <SoftDetailItem Label="Abono Inicial">
+                        @_formModel.CreditValue.ToString("C0")
+                    </SoftDetailItem>
+                    <SoftDetailItem Label="Saldo Pendiente de Pago" Highlight="true">
+                        @Math.Max(0, _formModel.Value - _formModel.CreditValue).ToString("C0")
+                    </SoftDetailItem>
+                </SoftDetailCard>
+            </SoftFormBox>
+
+            <SoftDivider />
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <SoftButton OnClick="@(() => Navigation.NavigateTo("/invoices"))">Cancelar</SoftButton>
+                <SoftButton Type="@ButtonType.Primary"
+                            Loading="@_isSubmitting"
+                            OnClick="HandleSubmitAsync">
+                    Registrar Factura
+                </SoftButton>
+            </div>
+        </Form>
+    </div>
+</div>
+
+@code {
+    private List<JewerlySystem.Modules.Customers.Application.DTOs.PersonDto> _providers = new();
+    private readonly List<string> _paymentMethods = new() { "EFECTIVO", "TRANSFERENCIA", "CHEQUE", "CONSIGNACION", "ORO" };
+    private CreateInvoiceFormModel _formModel = new();
+    private bool _isSubmitting;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var res = await Sender.Send(new JewerlySystem.Modules.Customers.Application.Queries.GetCustomersListQuery(
+            JewerlySystem.Modules.Customers.Domain.PersonType.Proveedor));
+        if (res.IsSuccess)
+        {
+            _providers = res.Value;
+            if (_providers.Any())
+            {
+                _formModel.ProviderId = _providers.First().Id;
+            }
+        }
+    }
+
+    private async Task HandleSubmitAsync()
+    {
+        if (_formModel.ProviderId <= 0)
+        {
+            MessageService.Error("Debe seleccionar un proveedor.");
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(_formModel.Description))
+        {
+            MessageService.Error("Especifique qué se ha comprado en el detalle.");
+            return;
+        }
+        if (_formModel.Value <= 0)
+        {
+            MessageService.Error("El valor de la factura debe ser mayor a 0.");
+            return;
+        }
+
+        _isSubmitting = true;
+        try
+        {
+            var cmd = new CreateInvoiceCommand(
+                Date: _formModel.Date,
+                PaymentLimitDate: _formModel.PaymentLimitDate,
+                Value: _formModel.Value,
+                CreditValue: _formModel.CreditValue,
+                ProviderId: _formModel.ProviderId,
+                Description: _formModel.Description.Trim(),
+                InvoiceNumber: _formModel.InvoiceNumber?.Trim(),
+                InitialPaymentMethod: _formModel.InitialPaymentMethod
+            );
+
+            var result = await Sender.Send(cmd);
+            if (result.IsSuccess)
+            {
+                MessageService.Success("Factura de proveedor registrada correctamente.");
+                Navigation.NavigateTo("/invoices");
+            }
+            else
+            {
+                MessageService.Error(result.Error.Message);
+            }
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    public class CreateInvoiceFormModel
+    {
+        public int ProviderId { get; set; }
+        public string? InvoiceNumber { get; set; }
+        public DateTime Date { get; set; } = DateTime.Today;
+        public DateTime PaymentLimitDate { get; set; } = DateTime.Today.AddDays(30);
+        public string? Description { get; set; }
+        public int Value { get; set; } = 1000000;
+        public int CreditValue { get; set; }
+        public string InitialPaymentMethod { get; set; } = "EFECTIVO";
+    }
+}

@@ -1,0 +1,12 @@
+::deep .soft-divider {
+    margin: 16px 0;
+    border-color: var(--soft-border-color, #e2e8f0);
+}
+
+.soft-divider-text {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--soft-text-muted, #64748b);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}

@@ -1,0 +1,12 @@
+::deep .soft-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+}
+
+::deep .soft-action-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.14);
+}

@@ -155,4 +155,85 @@ public class ContractTests
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Value);
     }
+
+    [Fact]
+    public async Task CreateContractCommandHandler_ShouldRegisterInitialPayment_WhenInitialPaymentIsProvided()
+    {
+        // Arrange
+        var repository = Substitute.For<IContractRepository>();
+        repository.GetNextContractNumberAsync(Arg.Any<CancellationToken>()).Returns(106);
+
+        var handler = new CreateContractCommandHandler(repository);
+        var command = new CreateContractCommand(
+            Reference: 888,
+            Date: DateTime.UtcNow,
+            DeliveryDate: DateTime.UtcNow.AddDays(30),
+            Value: 1_000_000,
+            Weight: 15.0,
+            Description: "Cadena de oro",
+            PersonId: 4,
+            InitialPayment: 300_000,
+            PaymentMethod: PaymentMethod.EFECTIVO
+        );
+
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        await repository.Received(1).AddAsync(Arg.Is<Contract>(c => c.Balance == 700_000), Arg.Any<CancellationToken>());
+        await repository.Received(1).AddPaymentAsync(Arg.Is<Payment>(p => p.Value == 300_000), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task UpdateContractCommandHandler_ShouldUpdateFieldsSuccessfully()
+    {
+        // Arrange
+        var repository = Substitute.For<IContractRepository>();
+        var contract = new Contract(1, null, DateTime.UtcNow, DateTime.UtcNow.AddDays(10), 100_000, ContractState.Registrado, 100_000, 2.0, "Anillo", 1) { Id = 1 };
+        repository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(contract);
+
+        var handler = new UpdateContractCommandHandler(repository);
+        var command = new UpdateContractCommand(
+            Id: 1,
+            Reference: 9999,
+            DeliveryDate: DateTime.UtcNow.AddDays(20),
+            Description: "Anillo modificado",
+            State: ContractState.Recibido
+        );
+
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(9999, contract.Reference);
+        Assert.Equal("Anillo modificado", contract.Description);
+        Assert.Equal(ContractState.Recibido, contract.State);
+        await repository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task GetContractPaymentsQueryHandler_ShouldReturnPaymentsList()
+    {
+        // Arrange
+        var repository = Substitute.For<IContractRepository>();
+        var payments = new List<Payment>
+        {
+            new("1", DateTime.UtcNow, 100_000, 1, PaymentType.Contrato, PaymentMethod.EFECTIVO),
+            new("2", DateTime.UtcNow, 50_000, 1, PaymentType.Contrato, PaymentMethod.TRANSFERENCIA)
+        };
+        repository.GetPaymentsByContractIdAsync(1, Arg.Any<CancellationToken>()).Returns(payments);
+
+        var handler = new JewerlySystem.Modules.Contracts.Application.Queries.GetContractPaymentsQueryHandler(repository);
+
+        // Act
+        var result = await handler.Handle(new JewerlySystem.Modules.Contracts.Application.Queries.GetContractPaymentsQuery(1), CancellationToken.None);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(2, result.Value.Count);
+        Assert.Equal(100_000, result.Value[0].Value);
+        Assert.Equal(PaymentMethod.EFECTIVO, result.Value[0].PaymentMethod);
+    }
 }

@@ -72,4 +72,78 @@ public class InventoryTests
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Weight);
     }
+
+    [Fact]
+    public async Task CreateWatchItemCommandHandler_ShouldAddWatchAndItem_Successfully()
+    {
+        // Arrange
+        var repository = Substitute.For<IInventoryRepository>();
+        repository.GetNextItemReferenceAsync(Arg.Any<CancellationToken>()).Returns(505);
+
+        var handler = new CreateWatchItemCommandHandler(repository);
+        var command = new CreateWatchItemCommand(
+            CostValue: 1_200_000,
+            DateOfEntry: DateTime.UtcNow,
+            Description: "Reloj Tissot PRX",
+            ItemTypeId: 5,
+            GenderType: GenderType.Hombre,
+            CaseNumber: "T137.410.11",
+            BrandId: 2
+        );
+
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        await repository.Received(1).AddItemAsync(Arg.Is<Item>(i => i.Reference == 505 && i.CostValue == 1_200_000), Arg.Any<CancellationToken>());
+        await repository.Received(1).AddWatchAsync(Arg.Is<Watch>(w => w.CaseNumber == "T137.410.11" && w.BrandId == 2), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task DischargeItemCommandHandler_ShouldMarkItemInactive_AndSetSaleDetails()
+    {
+        // Arrange
+        var repository = Substitute.For<IInventoryRepository>();
+        var item = new Item(100, 50_000, DateTime.UtcNow.AddDays(-10), "Anillo", 1) { Id = 10 };
+        repository.GetItemByIdAsync(10, Arg.Any<CancellationToken>()).Returns(item);
+
+        var handler = new DischargeItemCommandHandler(repository);
+        var command = new DischargeItemCommand(10, DateTime.UtcNow, 85_000);
+
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.False(item.Active);
+        Assert.Equal(85_000, item.SaleValue);
+        await repository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task GetItemByReferenceQueryHandler_ShouldReturnDetailedItem_WhenExists()
+    {
+        // Arrange
+        var repository = Substitute.For<IInventoryRepository>();
+        var item = new Item(777, 200_000, DateTime.UtcNow, "Dije de oro", 6) { Id = 20 };
+        var jewel = new Jewel(20, 3.5, 220_000);
+
+        repository.GetItemByReferenceAsync(777, Arg.Any<CancellationToken>()).Returns(item);
+        repository.GetJewelByItemIdAsync(20, Arg.Any<CancellationToken>()).Returns(jewel);
+        repository.GetItemTypesAsync(Arg.Any<CancellationToken>()).Returns(new List<ItemType> { new(6, "Dijes") });
+
+        var handler = new JewerlySystem.Modules.Inventory.Application.Queries.GetItemByReferenceQueryHandler(repository);
+
+        // Act
+        var result = await handler.Handle(new JewerlySystem.Modules.Inventory.Application.Queries.GetItemByReferenceQuery(777), CancellationToken.None);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
+        Assert.Equal(777, result.Value.Reference);
+        Assert.Equal("Dijes", result.Value.ItemTypeName);
+        Assert.NotNull(result.Value.Jewel);
+        Assert.Equal(3.5, result.Value.Jewel.Weight);
+    }
 }

@@ -1,0 +1,22 @@
+@namespace JewerlySystem.Common.Presentation.Components.Molecules
+
+<div class="soft-detail-item @(Highlight ? "highlight" : "")">
+    <span class="soft-detail-label">@Label</span>
+    <span class="soft-detail-value">
+        @if (ChildContent != null)
+        {
+            @ChildContent
+        }
+        else
+        {
+            @Value
+        }
+    </span>
+</div>
+
+@code {
+    [Parameter] public string Label { get; set; } = string.Empty;
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public bool Highlight { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

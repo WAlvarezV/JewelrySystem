@@ -1,0 +1,336 @@
+@page "/contracts/{Id:int}"
+@page "/contrato/{Id:int}"
+@attribute [Authorize]
+@inject ISender Sender
+@inject NavigationManager Navigation
+@inject IMessageService MessageService
+
+<div class="contract-detail-view step-fade-in">
+    @if (_isLoading)
+    {
+        <div class="soft-card p-5 text-center">
+            <Spin Tip="Cargando detalles del contrato..." />
+        </div>
+    }
+    else if (_contract == null)
+    {
+        <SoftResultView Status="@ResultStatus.Warning"
+                        Title="Contrato no encontrado"
+                        Subtitle="El contrato solicitado no existe en el sistema o fue removido.">
+            <SoftButton Type="@ButtonType.Primary" OnClick="@(() => Navigation.NavigateTo("/contracts"))">
+                Volver a Contratos
+            </SoftButton>
+        </SoftResultView>
+    }
+    else
+    {
+        <!-- Hero Header -->
+        <SoftHeroHeader Title="@($"Contrato Prendario #{_contract.Number}")"
+                        Subtitle="@($"Cliente #{_contract.PersonId} | Emisión: {_contract.Date:dd/MM/yyyy}")"
+                        Icon="bi bi-file-earmark-check">
+            <SoftButton Icon="arrow-left" OnClick="@(() => Navigation.NavigateTo("/contracts"))">Volver</SoftButton>
+            <SoftButton Icon="edit" OnClick="() => _showEditDrawer = true">Modificar</SoftButton>
+            @if (_contract.Balance > 0)
+            {
+                <SoftButton Type="@ButtonType.Primary" Icon="dollar" OnClick="() => _showPaymentModal = true">
+                    Registrar Abono
+                </SoftButton>
+            }
+        </SoftHeroHeader>
+
+        <!-- Metrics Row -->
+        <div class="row g-3 mb-3">
+            <div class="col-12 col-sm-6 col-md-4">
+                <div class="soft-card p-3">
+                    <span class="text-muted small text-uppercase fw-semibold">Valor del Préstamo</span>
+                    <h4 class="fw-bold mt-1 mb-0 text-dark">@_contract.Value.ToString("C0")</h4>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4">
+                <div class="soft-card p-3">
+                    <span class="text-muted small text-uppercase fw-semibold">Saldo Pendiente</span>
+                    <h4 class="fw-bold mt-1 mb-0 @(_contract.Balance > 0 ? "text-danger" : "text-success")">
+                        @_contract.Balance.ToString("C0")
+                    </h4>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4">
+                <div class="soft-card p-3">
+                    <span class="text-muted small text-uppercase fw-semibold">Vencimiento</span>
+                    @{
+                        int daysLeft = (_contract.DeliveryDate.Date - DateTime.Today).Days;
+                        bool isExpired = daysLeft < 0 && _contract.Balance > 0;
+                    }
+                    <div class="d-flex align-items-center justify-content-between mt-1">
+                        <h5 class="fw-bold mb-0">@_contract.DeliveryDate.ToString("dd/MM/yyyy")</h5>
+                        <SoftTag Color="@(isExpired ? "red" : "green")">
+                            @(isExpired ? $"Vencido ({Math.Abs(daysLeft)}d)" : $"Al día ({daysLeft}d)")
+                        </SoftTag>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SoftDetailCard: Prenda & Condiciones -->
+        <SoftDetailCard Title="Detalles de la Prenda y Términos Contractuales">
+            <SoftDetailItem Label="Peso en Oro">@_contract.Weight.ToString("N1") g</SoftDetailItem>
+            <SoftDetailItem Label="Estado del Contrato">
+                <SoftTag Color="blue">@_contract.State</SoftTag>
+            </SoftDetailItem>
+            <SoftDetailItem Label="Referencia Interna">
+                @(_contract.Reference?.ToString() ?? "S/R")
+            </SoftDetailItem>
+            <SoftDetailItem Label="Descripción de la Prenda" Highlight="true">
+                @_contract.Description
+            </SoftDetailItem>
+        </SoftDetailCard>
+
+        <!-- Historial de Abonos Table -->
+        <div class="soft-card p-4 mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-clock-history me-2 text-primary"></i>Historial de Pagos y Abonos
+                </h5>
+                <span class="text-muted small">Total Pagado: <b class="text-success">@_payments.Sum(p => (long)p.Value).ToString("C0")</b></span>
+            </div>
+
+            @if (!_payments.Any())
+            {
+                <SoftInlineNotice Title="Sin abonos registrados"
+                                  Description="Este contrato no registra abonos aún. El saldo total permanece en deuda."
+                                  Type="info" />
+            }
+            else
+            {
+                <Table TItem="PaymentDto"
+                       DataSource="@_payments"
+                       Responsive="true"
+                       Size="@TableSize.Middle">
+                    <PropertyColumn Property="p => p.Number" Title="Comprobante" Width="140px">
+                        <span class="fw-semibold">#@context.Number</span>
+                    </PropertyColumn>
+                    <PropertyColumn Property="p => p.Date" Title="Fecha" Width="130px">
+                        @context.Date.ToString("dd/MM/yyyy HH:mm")
+                    </PropertyColumn>
+                    <PropertyColumn Property="p => p.PaymentMethod" Title="Medio de Pago" Width="150px">
+                        <SoftTag Color="blue">@context.PaymentMethod</SoftTag>
+                    </PropertyColumn>
+                    <PropertyColumn Property="p => p.Value" Title="Valor Abonado">
+                        <span class="text-success fw-bold">+@context.Value.ToString("C0")</span>
+                    </PropertyColumn>
+                </Table>
+            }
+        </div>
+
+        <!-- SoftDrawer: Modificar Contrato -->
+        <SoftDrawer Visible="@_showEditDrawer"
+                    Title="@($"Modificar Contrato #{_contract.Number}")"
+                    Description="Ajuste los términos o descripción de la prenda en custodia"
+                    Width="720"
+                    OnClose="() => _showEditDrawer = false">
+            <ChildContent>
+                <Form Model="@_editModel" Layout="@FormLayout.Vertical">
+                    <SoftFormBox Title="Prenda y Términos">
+                        <FormItem Label="Descripción de la Prenda" Required="true">
+                            <TextArea @bind-Value="_editModel.Description" Rows="3" />
+                        </FormItem>
+
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <FormItem Label="Fecha de Vencimiento">
+                                    <DatePicker @bind-Value="_editModel.DeliveryDate" Format="dd/MM/yyyy" Class="w-100" />
+                                </FormItem>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <FormItem Label="Estado del Contrato">
+                                    <Select TItem="ContractState"
+                                            TItemValue="ContractState"
+                                            @bind-Value="_editModel.State"
+                                            DataSource="@_stateOptions" />
+                                </FormItem>
+                            </div>
+                        </div>
+                    </SoftFormBox>
+                </Form>
+            </ChildContent>
+            <FooterContent>
+                <SoftButton OnClick="() => _showEditDrawer = false">Cancelar</SoftButton>
+                <SoftButton Type="@ButtonType.Primary"
+                            Loading="@_isSavingEdit"
+                            OnClick="SaveContractEdit">
+                    Guardar Cambios
+                </SoftButton>
+            </FooterContent>
+        </SoftDrawer>
+
+        <!-- Modal: Registrar Abono -->
+        <Modal Visible="@_showPaymentModal"
+               Title="@($"Registrar Abono a Contrato #{_contract.Number}")"
+               OnCancel="() => _showPaymentModal = false"
+               OnOk="SavePayment"
+               ConfirmLoading="@_isSavingPayment">
+            <Form Model="@_paymentModel" Layout="@FormLayout.Vertical">
+                <div class="mb-3">
+                    <span class="text-muted small">Saldo Pendiente:</span>
+                    <h5 class="text-danger fw-bold mb-0">@_contract.Balance.ToString("C0")</h5>
+                </div>
+
+                <FormItem Label="Monto del Abono ($)" Required="true">
+                    <AntDesign.InputNumber @bind-Value="_paymentModel.Amount"
+                                           Min="1000"
+                                           Max="@_contract.Balance"
+                                           Step="50000"
+                                           Class="w-100" />
+                </FormItem>
+
+                <FormItem Label="Medio de Pago" Required="true">
+                    <Select TItem="PaymentMethod"
+                            TItemValue="PaymentMethod"
+                            @bind-Value="_paymentModel.PaymentMethod"
+                            DataSource="@_paymentMethodOptions" />
+                </FormItem>
+            </Form>
+        </Modal>
+    }
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private ContractDto? _contract;
+    private List<PaymentDto> _payments = new();
+    private bool _isLoading = true;
+
+    // Edit Drawer
+    private bool _showEditDrawer;
+    private bool _isSavingEdit;
+    private EditContractModel _editModel = new();
+    private readonly List<ContractState> _stateOptions = Enum.GetValues<ContractState>().ToList();
+
+    // Payment Modal
+    private bool _showPaymentModal;
+    private bool _isSavingPayment;
+    private PaymentModel _paymentModel = new();
+    private readonly List<PaymentMethod> _paymentMethodOptions = Enum.GetValues<PaymentMethod>().ToList();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadContractDetailsAsync();
+    }
+
+    private async Task LoadContractDetailsAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            var res = await Sender.Send(new GetContractByIdQuery(Id));
+            if (res.IsSuccess)
+            {
+                _contract = res.Value;
+                _editModel = new EditContractModel
+                {
+                    Description = _contract.Description,
+                    DeliveryDate = _contract.DeliveryDate,
+                    State = _contract.State
+                };
+            }
+
+            var paymentsRes = await Sender.Send(new GetContractPaymentsQuery(Id));
+            if (paymentsRes.IsSuccess)
+            {
+                _payments = paymentsRes.Value;
+            }
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task SaveContractEdit()
+    {
+        if (_contract == null) return;
+        if (string.IsNullOrWhiteSpace(_editModel.Description))
+        {
+            MessageService.Error("La descripción es obligatoria.");
+            return;
+        }
+
+        _isSavingEdit = true;
+        try
+        {
+            var cmd = new UpdateContractCommand(
+                Id: _contract.Id,
+                Reference: _contract.Reference,
+                DeliveryDate: _editModel.DeliveryDate,
+                Description: _editModel.Description.Trim(),
+                State: _editModel.State
+            );
+
+            var res = await Sender.Send(cmd);
+            if (res.IsSuccess)
+            {
+                MessageService.Success("Contrato actualizado correctamente.");
+                _showEditDrawer = false;
+                await LoadContractDetailsAsync();
+            }
+            else
+            {
+                MessageService.Error(res.Error.Message);
+            }
+        }
+        finally
+        {
+            _isSavingEdit = false;
+        }
+    }
+
+    private async Task SavePayment()
+    {
+        if (_contract == null) return;
+        if (_paymentModel.Amount <= 0)
+        {
+            MessageService.Error("El monto del abono debe ser mayor a 0.");
+            return;
+        }
+
+        _isSavingPayment = true;
+        try
+        {
+            var cmd = new RegisterPaymentCommand(
+                ContractId: _contract.Id,
+                Value: _paymentModel.Amount,
+                PaymentMethod: _paymentModel.PaymentMethod
+            );
+
+            var res = await Sender.Send(cmd);
+            if (res.IsSuccess)
+            {
+                MessageService.Success("Abono registrado exitosamente.");
+                _showPaymentModal = false;
+                await LoadContractDetailsAsync();
+            }
+            else
+            {
+                MessageService.Error(res.Error.Message);
+            }
+        }
+        finally
+        {
+            _isSavingPayment = false;
+        }
+    }
+
+    public class EditContractModel
+    {
+        public string Description { get; set; } = string.Empty;
+        public DateTime DeliveryDate { get; set; }
+        public ContractState State { get; set; }
+    }
+
+    public class PaymentModel
+    {
+        public int Amount { get; set; } = 50000;
+        public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.EFECTIVO;
+    }
+}

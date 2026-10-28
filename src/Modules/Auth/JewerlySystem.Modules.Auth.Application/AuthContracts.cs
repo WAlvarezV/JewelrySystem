@@ -38,6 +38,12 @@ public record GetPasskeyCreationOptionsQuery(string UserId, string DisplayName)
 public record RegisterPasskeyCommand(string UserId, string KeyName, string AttestationResponseJson)
     : ICommand<bool>;
 
+public record PasskeyItemDto(Guid Id, string Name, DateTime CreatedAt, DateTime? LastUsedAt);
+
+public record GetPasskeysByUserQuery(string UserId) : IQuery<IReadOnlyList<PasskeyItemDto>>;
+
+public record DeletePasskeyCommand(Guid Id, string UserId) : ICommand<bool>;
+
 // ==========================================
 // DTOs & CQRS for Modules, Menus & Favorites
 // ==========================================

@@ -55,3 +55,51 @@ public class CreateCustomerCommandHandler : ICommandHandler<CreateCustomerComman
         return Result.Success(person.Id);
     }
 }
+
+public record UpdateCustomerCommand(
+    int Id,
+    int IdentificationTypeId,
+    string IdentificationNumber,
+    string FullName,
+    string CellPhone,
+    string Email,
+    PersonType PersonType) : ICommand<bool>;
+
+public class UpdateCustomerCommandValidator : AbstractValidator<UpdateCustomerCommand>
+{
+    public UpdateCustomerCommandValidator()
+    {
+        RuleFor(x => x.Id).GreaterThan(0).WithMessage("ID inválido.");
+        RuleFor(x => x.IdentificationNumber).NotEmpty().WithMessage("El número de identificación es obligatorio.");
+        RuleFor(x => x.FullName).NotEmpty().WithMessage("El nombre completo es obligatorio.");
+    }
+}
+
+public class UpdateCustomerCommandHandler : ICommandHandler<UpdateCustomerCommand, bool>
+{
+    private readonly ICustomerRepository _repository;
+
+    public UpdateCustomerCommandHandler(ICustomerRepository repository)
+    {
+        _repository = repository;
+    }
+
+    public async Task<Result<bool>> Handle(UpdateCustomerCommand request, CancellationToken cancellationToken)
+    {
+        var person = await _repository.GetByIdAsync(request.Id, cancellationToken);
+        if (person == null)
+        {
+            return Result.Failure<bool>(Error.NotFound("Customers.NotFound", $"Persona con ID {request.Id} no encontrada."));
+        }
+
+        person.IdentificationTypeId = request.IdentificationTypeId;
+        person.IdentificationNumber = request.IdentificationNumber;
+        person.FullName = request.FullName;
+        person.CellPhone = request.CellPhone;
+        person.Email = request.Email;
+        person.PersonType = request.PersonType;
+
+        await _repository.SaveChangesAsync(cancellationToken);
+        return Result.Success(true);
+    }
+}

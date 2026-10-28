@@ -1,67 +1,326 @@
 @page "/customers"
+@page "/clientes"
+@page "/proveedores"
 @attribute [Authorize]
 @inject ISender Sender
+@inject NavigationManager Navigation
+@inject IMessageService MessageService
 
-<div class="container-fluid mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="fw-bold"><i class="bi bi-people me-2"></i>Clientes</h3>
-    </div>
+<div class="customers-view step-fade-in">
+    <!-- Hero Header -->
+    <SoftHeroHeader Title="Directorio de Clientes y Proveedores"
+                    Subtitle="Gestión unificada de clientes prendarios, compradores y proveedores"
+                    Icon="bi bi-people">
+        <SoftButton Icon="reload" OnClick="LoadCustomers">Actualizar</SoftButton>
+        <SoftButton Type="@ButtonType.Primary" Icon="user-add" OnClick="OpenCreateDrawer">Nuevo Registro</SoftButton>
+    </SoftHeroHeader>
 
+    <!-- Filters Card -->
+    <SoftFilterCard>
+        <Row Gutter="16">
+            <Col Xs="24" Sm="12" Md="10">
+                <Input Placeholder="Buscar por documento, nombre o celular..."
+                       @bind-Value="_searchTerm"
+                       AllowClear="true"
+                       PrefixIcon="search" />
+            </Col>
+            <Col Xs="24" Sm="12" Md="10">
+                <RadioGroup @bind-Value="_filterTab" ButtonStyle="@RadioButtonStyle.Solid">
+                    <Radio RadioButton="true" Value="@("ALL")">Todos</Radio>
+                    <Radio RadioButton="true" Value="@("CLIENT")">Clientes</Radio>
+                    <Radio RadioButton="true" Value="@("PROVIDER")">Proveedores</Radio>
+                </RadioGroup>
+            </Col>
+            <Col Xs="24" Sm="24" Md="4" Class="text-end">
+                <span class="text-muted small">Total: <b>@FilteredCustomers.Count</b> registros</span>
+            </Col>
+        </Row>
+    </SoftFilterCard>
+
+    <!-- Data Table / Empty / Loading -->
     @if (_isLoading)
     {
-        <div class="d-flex justify-content-center p-5">
-            <div class="spinner-border text-primary" role="status"></div>
+        <div class="soft-card p-5 text-center">
+            <Spin Tip="Cargando directorio de clientes..." />
         </div>
     }
-    else if (_customers == null || !_customers.Any())
+    else if (!FilteredCustomers.Any())
     {
-        <div class="card p-4 text-center text-muted">
-            <p class="mb-0">No hay clientes registrados.</p>
-        </div>
+        <SoftResultView Status="@ResultStatus.Info"
+                        Title="No se encontraron registros"
+                        Subtitle="No hay clientes ni proveedores que coincidan con los criterios de búsqueda.">
+            <SoftButton Type="@ButtonType.Primary" Icon="user-add" OnClick="OpenCreateDrawer">Registrar Primero</SoftButton>
+        </SoftResultView>
     }
     else
     {
-        <div class="card shadow-sm border-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Documento</th>
-                            <th>Nombre Completo</th>
-                            <th>Celular</th>
-                            <th>Correo</th>
-                            <th>Tipo</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var c in _customers)
-                        {
-                            <tr>
-                                <td class="fw-semibold">@c.IdentificationNumber</td>
-                                <td>@c.FullName</td>
-                                <td>@c.CellPhone</td>
-                                <td>@c.Email</td>
-                                <td><span class="badge bg-secondary">@c.PersonType</span></td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+        <div class="soft-card overflow-hidden">
+            <Table TItem="PersonDto"
+                   DataSource="@FilteredCustomers"
+                   Responsive="true"
+                   Size="@TableSize.Middle">
+                <PropertyColumn Property="c => c.PersonType" Title="Tipo" Width="130px">
+                    @{
+                        bool isCustomer = context.PersonType == PersonType.Cliente;
+                    }
+                    <SoftTag Color="@(isCustomer ? "blue" : "purple")">
+                        @(isCustomer ? "Cliente" : "Proveedor")
+                    </SoftTag>
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.IdentificationNumber" Title="Nro. Documento" Width="160px">
+                    <span class="fw-semibold">@context.IdentificationNumber</span>
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.FullName" Title="Nombre Completo / Razón Social">
+                    <span class="fw-bold text-dark">@context.FullName</span>
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.CellPhone" Title="Teléfono / Celular" Width="150px">
+                    @(string.IsNullOrEmpty(context.CellPhone) ? "-" : context.CellPhone)
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.Email" Title="Correo Electrónico">
+                    @(string.IsNullOrEmpty(context.Email) ? "-" : context.Email)
+                </PropertyColumn>
+                <ActionColumn Title="Acciones" Width="90px">
+                    <SoftActionButton Icon="edit"
+                                      Tooltip="Editar registro"
+                                      OnClick="() => OpenEditDrawer(context)" />
+                </ActionColumn>
+            </Table>
         </div>
     }
+
+    <!-- SoftDrawer: Create / Edit Form -->
+    <SoftDrawer Visible="@_drawerVisible"
+                Title="@(_isEditing ? "Editar Registro" : "Nuevo Cliente / Proveedor")"
+                Description="Complete los datos del contacto o empresa asociada"
+                Width="720"
+                OnClose="CloseDrawer">
+        <ChildContent>
+            <Form Model="@_formModel" Layout="@FormLayout.Vertical">
+                <SoftFormBox Title="Tipo de Registro">
+                    <FormItem Label="Rol del Contacto">
+                        <RadioGroup @bind-Value="_formModel.PersonType" ButtonStyle="@RadioButtonStyle.Solid">
+                            <Radio RadioButton="true" Value="@PersonType.Cliente">Cliente Empeñante / Comprador</Radio>
+                            <Radio RadioButton="true" Value="@PersonType.Proveedor">Proveedor de Mercancía</Radio>
+                        </RadioGroup>
+                    </FormItem>
+                </SoftFormBox>
+
+                <SoftFormBox Title="Identificación y Datos Básicos">
+                    <Row Gutter="16">
+                        <Col Span="12">
+                            <FormItem Label="Tipo de Documento" Required="true">
+                                <Select TItem="IdentificationTypeDto"
+                                        TItemValue="int"
+                                        @bind-Value="_formModel.IdentificationTypeId"
+                                        DataSource="@_idTypes"
+                                        LabelName="@nameof(IdentificationTypeDto.Name)"
+                                        ValueName="@nameof(IdentificationTypeDto.Id)"
+                                        Placeholder="Seleccione tipo..." />
+                            </FormItem>
+                        </Col>
+                        <Col Span="12">
+                            <FormItem Label="Número de Documento" Required="true">
+                                <Input @bind-Value="_formModel.IdentificationNumber" Placeholder="Ej: 1020304050" />
+                            </FormItem>
+                        </Col>
+                    </Row>
+
+                    <FormItem Label="Nombre Completo / Razón Social" Required="true">
+                        <Input @bind-Value="_formModel.FullName" Placeholder="Ej: Juan Pérez o Inversiones Oro S.A.S." />
+                    </FormItem>
+                </SoftFormBox>
+
+                <SoftFormBox Title="Datos de Contacto">
+                    <Row Gutter="16">
+                        <Col Span="12">
+                            <FormItem Label="Teléfono / Celular">
+                                <Input @bind-Value="_formModel.CellPhone" Placeholder="Ej: 3001234567" />
+                            </FormItem>
+                        </Col>
+                        <Col Span="12">
+                            <FormItem Label="Correo Electrónico">
+                                <Input @bind-Value="_formModel.Email" Placeholder="contacto@ejemplo.com" />
+                            </FormItem>
+                        </Col>
+                    </Row>
+                </SoftFormBox>
+            </Form>
+        </ChildContent>
+        <FooterContent>
+            <SoftButton OnClick="CloseDrawer">Cancelar</SoftButton>
+            <SoftButton Type="@ButtonType.Primary"
+                        Loading="@_isSaving"
+                        OnClick="SaveCustomer">
+                @(_isEditing ? "Actualizar Registro" : "Guardar Registro")
+            </SoftButton>
+        </FooterContent>
+    </SoftDrawer>
 </div>
 
 @code {
-    private List<PersonDto>? _customers;
+    private List<PersonDto> _allCustomers = new();
+    private List<IdentificationTypeDto> _idTypes = new();
     private bool _isLoading = true;
+    private string _searchTerm = string.Empty;
+    private string _filterTab = "ALL";
+
+    // Drawer state
+    private bool _drawerVisible;
+    private bool _isEditing;
+    private bool _isSaving;
+    private int _editingId;
+    private CustomerFormModel _formModel = new();
+
+    private List<PersonDto> FilteredCustomers => _allCustomers
+        .Where(c => _filterTab == "ALL"
+            || (_filterTab == "CLIENT" && c.PersonType == PersonType.Cliente)
+            || (_filterTab == "PROVIDER" && c.PersonType == PersonType.Proveedor))
+        .Where(c => string.IsNullOrWhiteSpace(_searchTerm)
+            || c.IdentificationNumber.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase)
+            || c.FullName.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase)
+            || (c.CellPhone != null && c.CellPhone.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase)))
+        .ToList();
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await Sender.Send(new GetCustomersListQuery());
-        if (result.IsSuccess)
+        await LoadIdentificationTypes();
+        await LoadCustomers();
+    }
+
+    private async Task LoadIdentificationTypes()
+    {
+        var res = await Sender.Send(new GetIdentificationTypesQuery());
+        if (res.IsSuccess)
         {
-            _customers = result.Value;
+            _idTypes = res.Value;
         }
-        _isLoading = false;
+    }
+
+    private async Task LoadCustomers()
+    {
+        _isLoading = true;
+        try
+        {
+            var res = await Sender.Send(new GetCustomersListQuery());
+            if (res.IsSuccess)
+            {
+                _allCustomers = res.Value;
+            }
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void OpenCreateDrawer()
+    {
+        _isEditing = false;
+        _editingId = 0;
+        _formModel = new CustomerFormModel
+        {
+            IdentificationTypeId = _idTypes.FirstOrDefault()?.Id ?? 1,
+            PersonType = PersonType.Cliente
+        };
+        _drawerVisible = true;
+    }
+
+    private void OpenEditDrawer(PersonDto dto)
+    {
+        _isEditing = true;
+        _editingId = dto.Id;
+        _formModel = new CustomerFormModel
+        {
+            IdentificationTypeId = dto.IdentificationTypeId,
+            IdentificationNumber = dto.IdentificationNumber,
+            FullName = dto.FullName,
+            CellPhone = dto.CellPhone,
+            Email = dto.Email,
+            PersonType = dto.PersonType
+        };
+        _drawerVisible = true;
+    }
+
+    private void CloseDrawer()
+    {
+        _drawerVisible = false;
+    }
+
+    private async Task SaveCustomer()
+    {
+        if (string.IsNullOrWhiteSpace(_formModel.FullName))
+        {
+            MessageService.Error("El nombre completo es requerido.");
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(_formModel.IdentificationNumber))
+        {
+            MessageService.Error("El número de documento es requerido.");
+            return;
+        }
+
+        _isSaving = true;
+        try
+        {
+            if (_isEditing)
+            {
+                var cmd = new UpdateCustomerCommand(
+                    _editingId,
+                    _formModel.IdentificationTypeId,
+                    _formModel.IdentificationNumber.Trim(),
+                    _formModel.FullName.Trim(),
+                    _formModel.CellPhone?.Trim() ?? string.Empty,
+                    _formModel.Email?.Trim() ?? string.Empty,
+                    _formModel.PersonType
+                );
+                var res = await Sender.Send(cmd);
+                if (res.IsSuccess)
+                {
+                    MessageService.Success("Registro actualizado correctamente.");
+                    _drawerVisible = false;
+                    await LoadCustomers();
+                }
+                else
+                {
+                    MessageService.Error(res.Error.Message);
+                }
+            }
+            else
+            {
+                var cmd = new CreateCustomerCommand(
+                    _formModel.IdentificationTypeId,
+                    _formModel.IdentificationNumber.Trim(),
+                    _formModel.FullName.Trim(),
+                    _formModel.CellPhone?.Trim() ?? string.Empty,
+                    _formModel.Email?.Trim() ?? string.Empty,
+                    _formModel.PersonType
+                );
+                var res = await Sender.Send(cmd);
+                if (res.IsSuccess)
+                {
+                    MessageService.Success("Registro creado correctamente.");
+                    _drawerVisible = false;
+                    await LoadCustomers();
+                }
+                else
+                {
+                    MessageService.Error(res.Error.Message);
+                }
+            }
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    public class CustomerFormModel
+    {
+        public int IdentificationTypeId { get; set; }
+        public string IdentificationNumber { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
+        public string? CellPhone { get; set; }
+        public string? Email { get; set; }
+        public PersonType PersonType { get; set; } = PersonType.Cliente;
     }
 }

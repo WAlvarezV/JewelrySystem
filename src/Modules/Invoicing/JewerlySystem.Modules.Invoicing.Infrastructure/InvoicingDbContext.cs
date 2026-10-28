@@ -9,6 +9,7 @@ public class InvoicingDbContext : DbContext
     private readonly AuditInterceptor? _auditInterceptor;
 
     public DbSet<Invoice> Invoices => Set<Invoice>();
+    public DbSet<InvoicePayment> Payments => Set<InvoicePayment>();
 
     public InvoicingDbContext(DbContextOptions<InvoicingDbContext> options, AuditInterceptor? auditInterceptor = null)
         : base(options)
@@ -27,6 +28,14 @@ public class InvoicingDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(InvoiceConfig).Assembly);
+        modelBuilder.ApplyConfiguration(new InvoiceConfig());
+        modelBuilder.Entity<InvoicePayment>(b =>
+        {
+            b.ToTable("Payments");
+            b.HasKey(p => p.Id);
+            b.Property(p => p.Number).HasMaxLength(50);
+            b.Property(p => p.PaymentType).HasMaxLength(50);
+            b.Property(p => p.PaymentMethod).HasMaxLength(50);
+        });
     }
 }

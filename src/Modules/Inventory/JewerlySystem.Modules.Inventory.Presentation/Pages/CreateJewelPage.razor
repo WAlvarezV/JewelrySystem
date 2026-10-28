@@ -1,0 +1,293 @@
+@page "/inventory/jewels/new"
+@page "/new/jewel/{ItemTypeId:int?}"
+@attribute [Authorize]
+@inject ISender Sender
+@inject NavigationManager Navigation
+@inject IMessageService Message
+
+<div class="create-jewel-container">
+    <SoftHeroHeader Title="Registrar Nueva Joya"
+                    Subtitle="Ingrese especificaciones de la joya, peso, gramaje y valorización comercial"
+                    Icon="bi bi-gem">
+        <SoftButton Text="Volver al Catálogo"
+                    Icon="arrow-left"
+                    Type="ButtonType.Dashed"
+                    OnClick="@(() => Navigation.NavigateTo("/inventory"))" />
+    </SoftHeroHeader>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-10">
+            <!-- 1. Clasificación y Proveedor -->
+            <SoftFormBox Title="1. Tipo de Joya y Origen"
+                         Subtitle="Seleccione la categoría de joyería y el origen o proveedor">
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <SoftTooltipLabel Label="Tipo de Joya" Required="true" TooltipText="Categoría física del artículo a ingresar" />
+                        <Select TItem="ItemTypeDto"
+                                TItemValue="int"
+                                DataSource="@_itemTypes.Where(t => t.Id != 5).ToList()"
+                                @bind-Value="_formModel.ItemTypeId"
+                                ValueName="@nameof(ItemTypeDto.Id)"
+                                LabelName="@nameof(ItemTypeDto.Name)"
+                                Placeholder="Seleccione tipo de joya..." />
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <SoftTooltipLabel Label="Proveedor / Origen" TooltipText="Tercero proveedor o stock interno de la joyería" />
+                        <Select TItem="JewerlySystem.Modules.Customers.Application.DTOs.PersonDto"
+                                TItemValue="int?"
+                                DataSource="@_providers"
+                                @bind-Value="_formModel.ProviderId"
+                                ValueName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.Id)"
+                                LabelName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.FullName)"
+                                Placeholder="-- Proveedor General / Stock Interno --"
+                                AllowClear="true" />
+                    </div>
+                </div>
+            </SoftFormBox>
+
+            <!-- 2. Pesaje y Tarifas -->
+            <SoftFormBox Title="2. Pesaje y Tarifas por Gramo"
+                         Subtitle="Defina el peso exacto en gramos y las tarifas de costo y venta proyectada">
+                <div class="row g-3 align-items-end">
+                    <div class="col-12 col-md-3">
+                        <SoftTooltipLabel Label="Peso en Gramos (g)" Required="true" TooltipText="Peso neto verificado en balanza de precisión" />
+                        <AntDesign.InputNumber TValue="double"
+                                               @bind-Value="_formModel.Weight"
+                                               Step="0.01"
+                                               Min="0.01"
+                                               Style="width: 100%; font-weight: bold;"
+                                               OnChange="@(_ => RecalculateValues())" />
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                        <SoftTooltipLabel Label="Valor Gr. Costo ($)" Required="true" TooltipText="Costo por gramo pactado de compra o fundición" />
+                        <AntDesign.InputNumber TValue="int"
+                                               @bind-Value="_formModel.GramValue"
+                                               Step="1000"
+                                               Min="1"
+                                               Style="width: 100%;"
+                                               OnChange="@(_ => RecalculateValues())" />
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                        <SoftTooltipLabel Label="Valor Gr. Venta ($)" TooltipText="Tarifa sugerida por gramo para venta al público" />
+                        <AntDesign.InputNumber TValue="int"
+                                               @bind-Value="_formModel.GramSaleValue"
+                                               Step="1000"
+                                               Min="1"
+                                               Style="width: 100%; font-weight: bold; color: var(--soft-success, #52c41a);"
+                                               OnChange="@(_ => RecalculateValues())" />
+                    </div>
+
+                    @if (NeedLengthField)
+                    {
+                        <div class="col-12 col-md-3">
+                            <SoftTooltipLabel Label="Largo (cm)" TooltipText="Longitud en centímetros para cadenas o pulseras" />
+                            <AntDesign.InputNumber TValue="int?"
+                                                   @bind-Value="_formModel.Length"
+                                                   Min="1"
+                                                   Style="width: 100%;" />
+                        </div>
+                    }
+                </div>
+            </SoftFormBox>
+
+            <!-- 3. Resumen Económico -->
+            <div class="mb-4">
+                <SoftDetailCard Title="Resumen Económico Proyectado">
+                    <div class="row g-3 text-center">
+                        <div class="col-12 col-md-4">
+                            <SoftDetailItem Label="Costo Total Calculado"
+                                            Value="@_costValue.ToString("C0")"
+                                            HighlightVariant="SoftDetailItem.Variant.Danger" />
+                            <div class="calc-hint">Peso (@_formModel.Weight.ToString("F2") g) × Costo Gr.</div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <SoftDetailItem Label="Venta Total Sugerida"
+                                            Value="@_saleValue.ToString("C0")"
+                                            HighlightVariant="SoftDetailItem.Variant.Success" />
+                            <div class="calc-hint">Peso (@_formModel.Weight.ToString("F2") g) × Venta Gr.</div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <SoftDetailItem Label="Margen Bruto Proyectado"
+                                            Value="@((_saleValue - _costValue).ToString("C0"))"
+                                            HighlightVariant="SoftDetailItem.Variant.Primary" />
+                            <div class="calc-hint">Ganancia bruta estimada en vitrina</div>
+                        </div>
+                    </div>
+                </SoftDetailCard>
+            </div>
+
+            <!-- 4. Descripción -->
+            <SoftFormBox Title="3. Descripción del Artículo"
+                         Subtitle="Detalle material (oro 18k, 14k, plata), piedras preciosas, tallas, grabado...">
+                <TextArea Rows="3"
+                          @bind-Value="_formModel.Description"
+                          Placeholder="Describa el diseño de la joya, ley del metal, acabados, engastes o particularidades..."
+                          MaxLength="500"
+                          ShowCount="true" />
+            </SoftFormBox>
+
+            <!-- Acciones -->
+            <div class="d-flex justify-content-between align-items-center pt-3 pb-4">
+                <SoftButton Text="Cancelar y Volver"
+                            Icon="arrow-left"
+                            Type="ButtonType.Dashed"
+                            OnClick="@(() => Navigation.NavigateTo("/inventory"))" />
+
+                <div class="d-flex gap-2">
+                    <SoftButton Text="Limpiar"
+                                Icon="clear"
+                                Type="ButtonType.Default"
+                                Danger="true"
+                                OnClick="ClearForm" />
+                    <SoftButton Text="Guardar Joya en Stock"
+                                Icon="check"
+                                Type="ButtonType.Primary"
+                                Loading="@_isSubmitting"
+                                OnClick="HandleSubmitAsync" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int? ItemTypeId { get; set; }
+
+    private JewelFormModel _formModel = new();
+    private List<ItemTypeDto> _itemTypes = new();
+    private List<JewerlySystem.Modules.Customers.Application.DTOs.PersonDto> _providers = new();
+
+    private int _costValue = 0;
+    private int _saleValue = 0;
+    private bool _isSubmitting = false;
+
+    private bool NeedLengthField => _formModel.ItemTypeId is 3 or 4; // Cadenas (3) o Pulseras (4)
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMasterDataAsync();
+        ClearForm();
+
+        if (ItemTypeId.HasValue && ItemTypeId.Value > 0)
+        {
+            _formModel.ItemTypeId = ItemTypeId.Value;
+        }
+    }
+
+    private async Task LoadMasterDataAsync()
+    {
+        try
+        {
+            var typesResult = await Sender.Send(new GetItemTypesQuery());
+            if (typesResult.IsSuccess)
+            {
+                _itemTypes = typesResult.Value;
+            }
+
+            var provResult = await Sender.Send(new JewerlySystem.Modules.Customers.Application.Queries.GetCustomersListQuery(JewerlySystem.Modules.Customers.Domain.PersonType.Proveedor));
+            if (provResult.IsSuccess)
+            {
+                _providers = provResult.Value;
+            }
+        }
+        catch (Exception ex)
+        {
+            Message.Error($"Error al cargar datos maestros: {ex.Message}");
+        }
+    }
+
+    private void ClearForm()
+    {
+        _formModel = new JewelFormModel
+        {
+            ItemTypeId = ItemTypeId ?? 1,
+            GramValue = 200000,
+            GramSaleValue = 260000,
+            Weight = 0,
+            Description = string.Empty
+        };
+        RecalculateValues();
+    }
+
+    private void RecalculateValues()
+    {
+        _costValue = (int)Math.Round(_formModel.Weight * _formModel.GramValue);
+        _saleValue = (int)Math.Round(_formModel.Weight * _formModel.GramSaleValue);
+    }
+
+    private async Task HandleSubmitAsync()
+    {
+        if (_formModel.ItemTypeId <= 0)
+        {
+            Message.Warning("Debe seleccionar un tipo de joya válido.");
+            return;
+        }
+
+        if (_formModel.Weight <= 0)
+        {
+            Message.Warning("El peso de la joya debe ser mayor a 0 gramos.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_formModel.Description))
+        {
+            Message.Warning("La descripción de la joya es requerida.");
+            return;
+        }
+
+        RecalculateValues();
+        if (_costValue <= 0)
+        {
+            Message.Warning("El costo total calculado debe ser mayor a 0.");
+            return;
+        }
+
+        _isSubmitting = true;
+
+        try
+        {
+            var cmd = new CreateJewelItemCommand(
+                CostValue: _costValue,
+                DateOfEntry: DateTime.UtcNow,
+                Description: _formModel.Description,
+                ItemTypeId: _formModel.ItemTypeId,
+                Weight: _formModel.Weight,
+                GramValue: _formModel.GramValue,
+                Length: _formModel.Length,
+                ProviderId: _formModel.ProviderId
+            );
+
+            var result = await Sender.Send(cmd);
+            if (!result.IsSuccess)
+            {
+                Message.Error(result.Error.Message);
+                return;
+            }
+
+            Message.Success($"¡Joya registrada con éxito en inventario con ID #{result.Value}!");
+            Navigation.NavigateTo("/inventory");
+        }
+        catch (Exception ex)
+        {
+            Message.Error($"Ocurrió un error: {ex.Message}");
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    public class JewelFormModel
+    {
+        public int ItemTypeId { get; set; } = 1;
+        public int? ProviderId { get; set; }
+        public double Weight { get; set; }
+        public int GramValue { get; set; } = 200000;
+        public int GramSaleValue { get; set; } = 260000;
+        public int? Length { get; set; }
+        public string Description { get; set; } = string.Empty;
+    }
+}

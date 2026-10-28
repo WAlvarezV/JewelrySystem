@@ -1,0 +1,235 @@
+@page "/customers/new"
+@page "/customers/{Id:int}/edit"
+@attribute [Authorize]
+@inject ISender Sender
+@inject NavigationManager Navigation
+
+<div class="container-fluid mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-8">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/customers" class="text-decoration-none">Directorio</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">@(IsEditMode ? "Editar Registro" : "Nuevo Registro")</li>
+                </ol>
+            </nav>
+
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-0 fw-bold text-primary">
+                            <i class="bi @(IsEditMode ? "bi-pencil-square" : "bi-person-plus") me-2"></i>
+                            @(IsEditMode ? $"Editar {(_formModel.PersonType == PersonType.Proveedor ? "Proveedor" : "Cliente")}" : "Registrar Cliente / Proveedor")
+                        </h4>
+                        <small class="text-muted">Directorio unificado de clientes empeñantes, compradores y proveedores</small>
+                    </div>
+                    <span class="badge @(_formModel.PersonType == PersonType.Proveedor ? "bg-info-subtle text-info-emphasis border border-info-subtle" : "bg-primary-subtle text-primary border border-primary-subtle") px-3 py-2 fs-6">
+                        @_formModel.PersonType
+                    </span>
+                </div>
+
+                <div class="card-body p-4">
+                    @if (!string.IsNullOrEmpty(_errorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                            <div>@_errorMessage</div>
+                            <button type="button" class="btn-close" @onclick="() => _errorMessage = null"></button>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(_successMessage))
+                    {
+                        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
+                            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                            <div>@_successMessage</div>
+                            <button type="button" class="btn-close" @onclick="() => _successMessage = null"></button>
+                        </div>
+                    }
+
+                    <EditForm Model="@_formModel" OnValidSubmit="HandleSubmitAsync">
+                        <DataAnnotationsValidator />
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Tipo de Registro *</label>
+                                <InputSelect class="form-select" @bind-Value="_formModel.PersonType">
+                                    <option value="@PersonType.Cliente">Cliente (Empeñante / Comprador)</option>
+                                    <option value="@PersonType.Proveedor">Proveedor (Mayorista / Joyero)</option>
+                                </InputSelect>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Tipo de Identificación *</label>
+                                <InputSelect class="form-select" @bind-Value="_formModel.IdentificationTypeId">
+                                    <option value="1">CÉDULA DE CIUDADANÍA</option>
+                                    <option value="2">NIT</option>
+                                    <option value="3">PASAPORTE</option>
+                                    <option value="4">CÉDULA DE EXTRANJERÍA</option>
+                                </InputSelect>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Número de Documento / Cédula / NIT *</label>
+                                <InputText class="form-control" @bind-Value="_formModel.IdentificationNumber" placeholder="Ej. 10203040" />
+                                <ValidationMessage For="@(() => _formModel.IdentificationNumber)" class="text-danger small" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Nombre Completo / Razón Social *</label>
+                                <InputText class="form-control" @bind-Value="_formModel.FullName" placeholder="Nombres y Apellidos o Empresa" />
+                                <ValidationMessage For="@(() => _formModel.FullName)" class="text-danger small" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Celular / Teléfono</label>
+                                <InputText class="form-control" @bind-Value="_formModel.CellPhone" placeholder="Ej. 3001234567" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Correo Electrónico</label>
+                                <InputText class="form-control" @bind-Value="_formModel.Email" placeholder="correo@ejemplo.com" />
+                                <ValidationMessage For="@(() => _formModel.Email)" class="text-danger small" />
+                            </div>
+                        </div>
+
+                        <!-- Acciones -->
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                            <a href="/customers" class="btn btn-outline-secondary px-4">
+                                <i class="bi bi-arrow-left me-1"></i> Cancelar y Volver
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4 fw-semibold" disabled="@_isSubmitting">
+                                @if (_isSubmitting)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2"></span>
+                                    <span>Guardando...</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-check2-circle me-1"></i>
+                                    <span>@(IsEditMode ? "Actualizar Información" : "Guardar Registro")</span>
+                                }
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    private CustomerFormModel _formModel = new();
+    private bool IsEditMode => Id.HasValue && Id.Value > 0;
+    private bool _isSubmitting = false;
+    private string? _errorMessage;
+    private string? _successMessage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsEditMode)
+        {
+            var result = await Sender.Send(new GetCustomerByIdQuery(Id!.Value));
+            if (result.IsSuccess)
+            {
+                var c = result.Value;
+                _formModel = new CustomerFormModel
+                {
+                    IdentificationTypeId = c.IdentificationTypeId,
+                    IdentificationNumber = c.IdentificationNumber,
+                    FullName = c.FullName,
+                    CellPhone = c.CellPhone,
+                    Email = c.Email,
+                    PersonType = c.PersonType
+                };
+            }
+            else
+            {
+                _errorMessage = result.Error.Message;
+            }
+        }
+    }
+
+    private async Task HandleSubmitAsync()
+    {
+        _isSubmitting = true;
+        _errorMessage = null;
+        _successMessage = null;
+
+        try
+        {
+            if (IsEditMode)
+            {
+                var updateCmd = new UpdateCustomerCommand(
+                    Id: Id!.Value,
+                    IdentificationTypeId: _formModel.IdentificationTypeId,
+                    IdentificationNumber: _formModel.IdentificationNumber.Trim(),
+                    FullName: _formModel.FullName.Trim(),
+                    CellPhone: _formModel.CellPhone?.Trim() ?? string.Empty,
+                    Email: _formModel.Email?.Trim() ?? string.Empty,
+                    PersonType: _formModel.PersonType
+                );
+
+                var result = await Sender.Send(updateCmd);
+                if (!result.IsSuccess)
+                {
+                    _errorMessage = result.Error.Message;
+                    return;
+                }
+
+                _successMessage = "¡Información actualizada con éxito!";
+            }
+            else
+            {
+                var createCmd = new CreateCustomerCommand(
+                    IdentificationTypeId: _formModel.IdentificationTypeId,
+                    IdentificationNumber: _formModel.IdentificationNumber.Trim(),
+                    FullName: _formModel.FullName.Trim(),
+                    CellPhone: _formModel.CellPhone?.Trim() ?? string.Empty,
+                    Email: _formModel.Email?.Trim() ?? string.Empty,
+                    PersonType: _formModel.PersonType
+                );
+
+                var result = await Sender.Send(createCmd);
+                if (!result.IsSuccess)
+                {
+                    _errorMessage = result.Error.Message;
+                    return;
+                }
+
+                _successMessage = "¡Cliente registrado exitosamente!";
+            }
+
+            Navigation.NavigateTo("/customers");
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Ocurrió un error inesperado: {ex.Message}";
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    public class CustomerFormModel
+    {
+        public int IdentificationTypeId { get; set; } = 1;
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "El documento de identidad es requerido")]
+        public string IdentificationNumber { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "El nombre completo es requerido")]
+        public string FullName { get; set; } = string.Empty;
+
+        public string CellPhone { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.EmailAddress(ErrorMessage = "Correo electrónico inválido")]
+        public string Email { get; set; } = string.Empty;
+
+        public PersonType PersonType { get; set; } = PersonType.Cliente;
+    }
+}

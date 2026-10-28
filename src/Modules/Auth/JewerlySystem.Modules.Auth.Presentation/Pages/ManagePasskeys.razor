@@ -1,85 +1,285 @@
 @page "/auth/passkeys"
 @attribute [Authorize]
+@using System.Security.Claims
 @inject ISender Sender
 @inject IJSRuntime JS
 
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 fw-bold"><i class="bi bi-key me-2"></i>Gestión de Passkeys (Llaves de Acceso)</h5>
+<div class="container-fluid mt-3">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold mb-1"><i class="bi bi-fingerprint text-primary me-2"></i>Mis Passkeys (Llaves de Acceso)</h3>
+            <p class="text-muted small mb-0">Gestione sus credenciales biométricas WebAuthn / FIDO2 para iniciar sesión sin contraseñas usando Face ID, Touch ID, Windows Hello o Bitwarden/1Password.</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Register Passkey Column -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-plus-circle-fill text-primary me-2"></i>Vincular Nuevo Dispositivo</h5>
                 </div>
                 <div class="card-body p-4">
-                    <p class="text-muted">Las Passkeys te permiten iniciar sesión de manera rápida y segura utilizando el sensor biométrico de tu teléfono (Touch ID, Face ID), Windows Hello o una llave de seguridad física.</p>
+                    <p class="text-muted small">
+                        Al registrar una Passkey, su navegador le solicitará confirmar su identidad mediante la app de autenticación de su preferencia:
+                    </p>
+
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="badge bg-light text-dark border"><i class="bi bi-apple me-1"></i> Apple Face ID / iCloud</span>
+                        <span class="badge bg-light text-dark border"><i class="bi bi-windows me-1"></i> Windows Hello</span>
+                        <span class="badge bg-light text-dark border"><i class="bi bi-shield-lock me-1"></i> Bitwarden / 1Password</span>
+                        <span class="badge bg-light text-dark border"><i class="bi bi-usb-symbol me-1"></i> YubiKey FIDO2</span>
+                    </div>
 
                     @if (!string.IsNullOrEmpty(_message))
                     {
-                        <div class="alert alert-info py-2 small">@_message</div>
+                        <div class="alert @(_isSuccess ? "alert-success" : "alert-danger") alert-dismissible fade show py-2 small" role="alert">
+                            <i class="bi @(_isSuccess ? "bi-check-circle" : "bi-exclamation-triangle") me-2"></i>@_message
+                            <button type="button" class="btn-close" @onclick="() => _message = null"></button>
+                        </div>
                     }
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Nombre de la llave (opcional)</label>
-                        <input @bind="_keyName" class="form-control" placeholder="Ej: Mi iPhone 15, Laptop de trabajo" />
+                        <label class="form-label fw-semibold">Nombre descriptivo de la llave</label>
+                        <input @bind="_keyName" class="form-control" placeholder="Ej: Mi iPhone 15 Pro, Laptop Trabajo, Bitwarden" />
+                        <div class="form-text small">Un nombre para identificar en qué dispositivo o app se guardó la llave.</div>
                     </div>
 
-                    <button @onclick="RegisterNewPasskey" class="btn btn-primary fw-semibold" disabled="@_isLoading">
+                    <button @onclick="RegisterNewPasskey" class="btn btn-primary w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2" disabled="@_isLoading">
                         @if (_isLoading)
                         {
-                            <span class="spinner-border spinner-border-sm me-2"></span>
+                            <span class="spinner-border spinner-border-sm"></span>
                         }
-                        <i class="bi bi-plus-circle me-1"></i> Registrar Nueva Passkey
+                        else
+                        {
+                            <i class="bi bi-fingerprint fs-5"></i>
+                        }
+                        <span>Registrar Nueva Passkey</span>
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registered Passkeys Column -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-shield-check text-success me-2"></i>Passkeys Vinculadas (@_passkeys.Count)</h5>
+                    <button class="btn btn-sm btn-outline-secondary" @onclick="LoadUserPasskeysAsync">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Dispositivo / Llave</th>
+                                <th>Fecha Registro</th>
+                                <th>Último Uso</th>
+                                <th class="text-end pe-3">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (_loadingKeys)
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center p-4">
+                                        <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                                    </td>
+                                </tr>
+                            }
+                            else if (!_passkeys.Any())
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center p-4 text-muted small">
+                                        No tienes ninguna Passkey registrada aún. Registra una para iniciar sesión sin contraseñas.
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var key in _passkeys)
+                                {
+                                    <tr>
+                                        <td class="ps-3">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="passkey-icon rounded bg-primary-subtle text-primary p-2">
+                                                    <i class="bi bi-fingerprint fs-5"></i>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-semibold">@key.Name</div>
+                                                    <div class="text-muted small">FIDO2 / WebAuthn</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-muted small">
+                                            @key.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                                        </td>
+                                        <td class="small">
+                                            @if (key.LastUsedAt.HasValue)
+                                            {
+                                                <span class="text-success">@key.LastUsedAt.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Aún no utilizada</span>
+                                            }
+                                        </td>
+                                        <td class="text-end pe-3">
+                                            <button class="btn btn-outline-danger btn-sm" title="Eliminar Passkey" @onclick="() => DeletePasskeyAsync(key.Id)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<style>
+    .passkey-icon {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
 @code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
     private string _keyName = "";
     private bool _isLoading;
+    private bool _loadingKeys = true;
     private string? _message;
+    private bool _isSuccess;
+    private List<PasskeyItemDto> _passkeys = [];
+    private string _currentUserId = "walvarez@ingnova.team";
+    private string _currentDisplayName = "walvarez@ingnova.team";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ResolveCurrentUserInfoAsync();
+        await LoadUserPasskeysAsync();
+    }
+
+    private async Task ResolveCurrentUserInfoAsync()
+    {
+        if (AuthStateTask != null)
+        {
+            var authState = await AuthStateTask;
+            if (authState.User.Identity?.IsAuthenticated == true)
+            {
+                var idClaim = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var nameClaim = authState.User.Identity.Name;
+
+                if (!string.IsNullOrEmpty(idClaim))
+                {
+                    _currentUserId = idClaim;
+                }
+                if (!string.IsNullOrEmpty(nameClaim))
+                {
+                    _currentDisplayName = nameClaim;
+                }
+            }
+        }
+    }
+
+    private async Task LoadUserPasskeysAsync()
+    {
+        _loadingKeys = true;
+        try
+        {
+            await ResolveCurrentUserInfoAsync();
+            var res = await Sender.Send(new GetPasskeysByUserQuery(_currentUserId));
+            if (res.IsSuccess)
+            {
+                _passkeys = res.Value.ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            _message = "Error al listar Passkeys: " + ex.Message;
+            _isSuccess = false;
+        }
+        finally
+        {
+            _loadingKeys = false;
+        }
+    }
 
     private async Task RegisterNewPasskey()
     {
         _message = null;
         _isLoading = true;
+        _isSuccess = false;
+
         try
         {
-            // Simulated user id for presentation; in full app, obtained from AuthenticationStateProvider
-            var userId = "current-user-id";
-            var displayName = "Usuario Pomona";
+            await ResolveCurrentUserInfoAsync();
 
-            var optQuery = new GetPasskeyCreationOptionsQuery(userId, displayName);
+            var optQuery = new GetPasskeyCreationOptionsQuery(_currentUserId, _currentDisplayName);
             var optResult = await Sender.Send(optQuery);
 
             if (optResult.IsFailure)
             {
                 _message = optResult.Error.Message;
+                _isSuccess = false;
                 return;
             }
 
+            // Trigger browser WebAuthn API (Face ID, Windows Hello, Bitwarden/1Password)
             var attestationJson = await JS.InvokeAsync<string>("webauthn.createPasskey", optResult.Value);
-            var regCommand = new RegisterPasskeyCommand(userId, _keyName, attestationJson);
+            var regCommand = new RegisterPasskeyCommand(_currentUserId, _keyName, attestationJson);
             var regResult = await Sender.Send(regCommand);
 
             if (regResult.IsFailure)
             {
                 _message = regResult.Error.Message;
+                _isSuccess = false;
                 return;
             }
 
-            _message = "¡Passkey registrada exitosamente!";
+            _message = "¡Passkey registrada exitosamente en su dispositivo / app de autenticación!";
+            _isSuccess = true;
             _keyName = "";
+            await LoadUserPasskeysAsync();
         }
         catch (Exception ex)
         {
             _message = "Error registrando Passkey: " + ex.Message;
+            _isSuccess = false;
         }
         finally
         {
             _isLoading = false;
+        }
+    }
+
+    private async Task DeletePasskeyAsync(Guid id)
+    {
+        try
+        {
+            var res = await Sender.Send(new DeletePasskeyCommand(id, _currentUserId));
+            if (res.IsSuccess)
+            {
+                _message = "Passkey eliminada.";
+                _isSuccess = true;
+                await LoadUserPasskeysAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            _message = ex.Message;
+            _isSuccess = false;
         }
     }
 }

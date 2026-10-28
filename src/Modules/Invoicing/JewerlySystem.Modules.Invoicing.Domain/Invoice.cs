@@ -11,6 +11,7 @@ public class Invoice : AuditableEntity<int>
     public int CreditValue { get; set; }
     public int BalanceValue { get; set; }
     public int ProviderId { get; set; }
+    public string Description { get; set; } = string.Empty;
 
     public Invoice() { }
 
@@ -21,7 +22,8 @@ public class Invoice : AuditableEntity<int>
         int value,
         int creditValue,
         int balanceValue,
-        int providerId)
+        int providerId,
+        string? description = null)
     {
         Number = number ?? string.Empty;
         Date = date;
@@ -30,5 +32,6 @@ public class Invoice : AuditableEntity<int>
         CreditValue = creditValue;
         BalanceValue = balanceValue;
         ProviderId = providerId;
+        Description = description ?? string.Empty;
     }
 }

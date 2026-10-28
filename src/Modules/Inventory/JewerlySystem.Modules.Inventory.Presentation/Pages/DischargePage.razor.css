@@ -1,0 +1,22 @@
+.discharge-container {
+    padding: 0 0.5rem 2rem 0.5rem;
+}
+
+.detail-subtitle {
+    font-size: 0.85rem;
+    color: var(--soft-neutral-muted, #8c8c8c);
+}
+
+.detail-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--soft-neutral-muted, #8c8c8c);
+    text-transform: uppercase;
+}
+
+.detail-desc {
+    color: #434343;
+    font-style: italic;
+    font-size: 0.95rem;
+    margin-top: 0.25rem;
+}

@@ -1,0 +1,186 @@
+@page "/utilities/gold-calculator"
+@page "/gold-calculator"
+@attribute [Authorize]
+@inject NavigationManager Navigation
+@inject IMessageService Message
+
+<div class="calculator-container">
+    <SoftHeroHeader Title="Calculadora de Ley y Pureza de Oro"
+                    Subtitle="Determinación hidrostática de ley (densimetría de Arquímedes) y liquidación de compra"
+                    Icon="bi bi-calculator">
+        <SoftButton Text="Nuevo Contrato"
+                    Icon="file-add"
+                    Type="ButtonType.Primary"
+                    OnClick="@(() => Navigation.NavigateTo("/contracts/new"))" />
+    </SoftHeroHeader>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-9">
+            <!-- Nota Explicativa -->
+            <div class="mb-4">
+                <SoftInlineNotice Type="SoftInlineNotice.NoticeType.Info"
+                                  Title="Principio de Arquímedes (Densimetría Hidrostática)"
+                                  Message="El método hidrostático calcula la gravedad específica de la aleación sumergiendo la pieza en agua destilada, permitiendo determinar con precisión milimétrica la ley de oro sin desgastar la joya." />
+            </div>
+
+            <!-- Formulario de Pesaje -->
+            <SoftFormBox Title="Parámetros de Medición Hidrostática"
+                         Subtitle="Ingrese el precio base del día y las lecturas de peso seco y sumergido">
+                <div class="row g-4 align-items-end">
+                    <div class="col-12 col-md-4">
+                        <SoftTooltipLabel Label="Cotización Base Hoy ($)" Required="true" TooltipText="Precio comercial de referencia por gramo de oro fino" />
+                        <AntDesign.InputNumber TValue="double"
+                                               @bind-Value="_baseValue"
+                                               Min="1000"
+                                               Step="5000"
+                                               Style="width: 100%; font-size: 1.1rem; font-weight: bold;" />
+                        <span class="param-hint">Precio cotización gramo</span>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <SoftTooltipLabel Label="Peso Seco en Aire (g)" Required="true" TooltipText="Peso de la pieza seca colocada directamente sobre la balanza" />
+                        <AntDesign.InputNumber TValue="double"
+                                               @bind-Value="_dryWeight"
+                                               Min="0.01"
+                                               Step="0.01"
+                                               Style="width: 100%; font-size: 1.1rem; font-weight: bold; color: var(--soft-danger, #ff4d4f);" />
+                        <span class="param-hint">Peso normal en el aire</span>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <SoftTooltipLabel Label="Peso Húmedo en Agua (g)" Required="true" TooltipText="Peso registrado con la pieza suspendida y sumergida en el agua" />
+                        <AntDesign.InputNumber TValue="double"
+                                               @bind-Value="_wetWeight"
+                                               Min="0.01"
+                                               Step="0.01"
+                                               Style="width: 100%; font-size: 1.1rem; font-weight: bold; color: var(--brand-blue, #1677ff);" />
+                        <span class="param-hint">Peso suspendido en líquido</span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3 pt-4 border-top mt-4">
+                    <SoftButton Text="Limpiar Balanza"
+                                Icon="clear"
+                                Type="ButtonType.Default"
+                                Danger="true"
+                                OnClick="ClearForm" />
+                    <SoftButton Text="Calcular Ley y Liquidación"
+                                Icon="calculator"
+                                Type="ButtonType.Primary"
+                                OnClick="CalculateLaw" />
+                </div>
+            </SoftFormBox>
+
+            @if (_calculated)
+            {
+                <!-- Tarjeta de Resultados -->
+                <div class="result-box mt-4">
+                    <SoftDetailCard Title="Resultado de la Valorización Hidrostática">
+                        <div class="row g-4 text-center">
+                            <div class="col-12 col-md-4">
+                                <div class="metric-card-inner">
+                                    <span class="metric-label">Ley Estimada</span>
+                                    <h2 class="metric-big-val text-warning-emphasis mb-1">
+                                        @_lawResult <small class="text-muted fs-6">/1000</small>
+                                    </h2>
+                                    <SoftTag Color="gold">
+                                        @GetKaratEquivalent(_lawResult)
+                                    </SoftTag>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <div class="metric-card-inner">
+                                    <span class="metric-label">Gramo Sugerido de Compra</span>
+                                    <h2 class="metric-big-val text-primary mb-1">
+                                        @_suggestedGramValue.ToString("C0")
+                                    </h2>
+                                    <span class="metric-subhint">Tarifa neta recomendada</span>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <div class="metric-card-inner">
+                                    <span class="metric-label">Valor Total a Liquidar</span>
+                                    <h2 class="metric-big-val text-success mb-1">
+                                        @_totalPayout.ToString("C0")
+                                    </h2>
+                                    <span class="metric-subhint">Peso seco: @_dryWeight.ToString("F2") g</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end pt-4 border-top mt-4">
+                            <SoftButton Text="Proceder a Crear Contrato"
+                                        Icon="file-add"
+                                        Type="ButtonType.Primary"
+                                        OnClick="@(() => Navigation.NavigateTo("/contracts/new"))" />
+                        </div>
+                    </SoftDetailCard>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private double _baseValue = 290000;
+    private double _dryWeight = 0;
+    private double _wetWeight = 0;
+
+    private bool _calculated = false;
+    private string _lawResult = string.Empty;
+    private double _suggestedGramValue = 0;
+    private double _totalPayout = 0;
+
+    private void ClearForm()
+    {
+        _dryWeight = 0;
+        _wetWeight = 0;
+        _calculated = false;
+    }
+
+    private void CalculateLaw()
+    {
+        if (_dryWeight <= 0 || _wetWeight <= 0 || _dryWeight <= _wetWeight)
+        {
+            Message.Error("El peso seco debe ser mayor al peso húmedo y ambos deben ser mayores a 0.");
+            _calculated = false;
+            return;
+        }
+
+        try
+        {
+            var law = (((_dryWeight - _wetWeight) * 23.03) / _dryWeight) - 2.1912;
+            var rawResult = ((law * -1000) - 10).ToString();
+            _lawResult = rawResult.Length >= 3 ? rawResult.Substring(0, 3) : rawResult;
+
+            _suggestedGramValue = (Math.Round((_baseValue / 1000) * (law * -1), 0, MidpointRounding.ToZero) - 5) * 1000;
+            _totalPayout = Math.Round(_suggestedGramValue * _dryWeight, 0, MidpointRounding.ToEven);
+
+            _calculated = true;
+            Message.Success($"Cálculo exitoso: Ley de {_lawResult} milésimas ({GetKaratEquivalent(_lawResult)})");
+        }
+        catch (Exception ex)
+        {
+            Message.Error($"Error en el cálculo: {ex.Message}");
+            _calculated = false;
+        }
+    }
+
+    private string GetKaratEquivalent(string lawStr)
+    {
+        if (int.TryParse(lawStr, out var lawInt))
+        {
+            return lawInt switch
+            {
+                >= 900 => "22k - 24k (Puro)",
+                >= 750 => "18k (Alta Joyería)",
+                >= 585 => "14k (Estándar Comercial)",
+                >= 416 => "10k (Comercial)",
+                _ => "Baja Ley / Menos de 10k"
+            };
+        }
+        return "Ley Específica";
+    }
+}

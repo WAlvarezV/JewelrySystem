@@ -55,6 +55,8 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddAntDesign();
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())

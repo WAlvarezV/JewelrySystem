@@ -1,0 +1,74 @@
+.consolidated-container {
+    padding: 0 0.5rem 2rem 0.5rem;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 1rem;
+}
+
+.metric-card {
+    background: #ffffff;
+    border-radius: var(--soft-border-radius-md, 12px);
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--soft-box-shadow-sm, 0 2px 6px rgba(0, 0, 0, 0.04));
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.metric-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+}
+
+.bg-warning-subtle { background-color: #fffbe6; }
+.bg-gold-subtle { background-color: #fff0f6; }
+.bg-danger-subtle { background-color: #fff1f0; }
+.bg-success-subtle { background-color: #f6ffed; }
+
+.metric-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.metric-label {
+    font-size: 0.78rem;
+    color: var(--soft-neutral-muted, #8c8c8c);
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.metric-value {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--soft-neutral-dark, #1f1f1f);
+    line-height: 1.2;
+}
+
+.section-card {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.section-header {
+    padding: 1rem 1.25rem;
+    background: #fafafa;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.table-summary-bar {
+    padding: 0.85rem 1.25rem;
+    background: #f7f9fc;
+    border-top: 1px solid #e8e8e8;
+    font-size: 0.95rem;
+}

@@ -1,0 +1,18 @@
+@namespace JewerlySystem.Common.Presentation.Components.Molecules
+
+<div class="soft-detail-card">
+    @if (!string.IsNullOrWhiteSpace(Title))
+    {
+        <div class="soft-detail-card-header">
+            <h6 class="soft-detail-card-title">@Title</h6>
+        </div>
+    }
+    <div class="soft-detail-card-grid">
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

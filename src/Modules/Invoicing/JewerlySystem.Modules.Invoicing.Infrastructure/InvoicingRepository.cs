@@ -46,6 +46,20 @@ public class InvoicingRepository : IInvoicingRepository
         await _dbContext.Invoices.AddAsync(invoice, ct);
     }
 
+    public async Task<IReadOnlyList<InvoicePayment>> GetPaymentsByInvoiceIdAsync(int invoiceId, CancellationToken ct = default)
+    {
+        return await _dbContext.Payments
+            .AsNoTracking()
+            .Where(p => p.EntityId == invoiceId && p.PaymentType == "Factura")
+            .OrderBy(p => p.Date)
+            .ToListAsync(ct);
+    }
+
+    public async Task AddPaymentAsync(InvoicePayment payment, CancellationToken ct = default)
+    {
+        await _dbContext.Payments.AddAsync(payment, ct);
+    }
+
     public async Task SaveChangesAsync(CancellationToken ct = default)
     {
         await _dbContext.SaveChangesAsync(ct);

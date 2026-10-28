@@ -1,0 +1,18 @@
+@namespace JewerlySystem.Common.Presentation.Components.Organisms
+
+<div class="soft-result-view step-fade-in">
+    <Result Status="@Status"
+            Title="@Title"
+            SubTitle="@Subtitle">
+        <Extra>
+            @ChildContent
+        </Extra>
+    </Result>
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public string? Subtitle { get; set; }
+    [Parameter] public ResultStatus Status { get; set; } = ResultStatus.Success;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

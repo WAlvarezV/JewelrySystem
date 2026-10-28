@@ -47,3 +47,23 @@ public class GetContractsListQueryHandler : IQueryHandler<GetContractsListQuery,
         return Result.Success(dtos);
     }
 }
+
+public record GetContractPaymentsQuery(int ContractId) : IQuery<List<PaymentDto>>;
+
+public class GetContractPaymentsQueryHandler : IQueryHandler<GetContractPaymentsQuery, List<PaymentDto>>
+{
+    private readonly IContractRepository _repository;
+
+    public GetContractPaymentsQueryHandler(IContractRepository repository)
+    {
+        _repository = repository;
+    }
+
+    public async Task<Result<List<PaymentDto>>> Handle(GetContractPaymentsQuery request, CancellationToken cancellationToken)
+    {
+        var payments = await _repository.GetPaymentsByContractIdAsync(request.ContractId, cancellationToken);
+        var dtos = payments.Select(p => p.ToDto()).ToList();
+
+        return Result.Success(dtos);
+    }
+}

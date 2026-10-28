@@ -1,0 +1,9 @@
+.create-jewel-container {
+    padding: 0 0.5rem 2rem 0.5rem;
+}
+
+.calc-hint {
+    font-size: 0.75rem;
+    color: var(--soft-neutral-muted, #8c8c8c);
+    margin-top: 0.35rem;
+}

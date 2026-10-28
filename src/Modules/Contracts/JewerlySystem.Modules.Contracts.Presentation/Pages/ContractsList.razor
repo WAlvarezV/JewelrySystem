@@ -1,77 +1,180 @@
 @page "/contracts"
+@page "/contratos"
 @attribute [Authorize]
 @inject ISender Sender
 @inject NavigationManager Navigation
 
-<div class="container-fluid mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="fw-bold"><i class="bi bi-file-earmark-text me-2"></i>Contratos</h3>
-        <button class="btn btn-primary" @onclick="CreateNewContract">
-            <i class="bi bi-plus-lg me-1"></i> Nuevo Contrato
-        </button>
+<div class="contracts-list-view step-fade-in">
+    <!-- Hero Header -->
+    <SoftHeroHeader Title="Gestión de Contratos Prendarios"
+                    Subtitle="Control de empeños, avalúos de garantías, abonos y liquidaciones"
+                    Icon="bi bi-file-earmark-text">
+        <SoftButton Icon="reload" OnClick="LoadContracts">Actualizar</SoftButton>
+        <SoftButton Type="@ButtonType.Primary" Icon="plus" OnClick="@(() => Navigation.NavigateTo("/contracts/new"))">Nuevo Contrato</SoftButton>
+    </SoftHeroHeader>
+
+    <!-- Metrics Summary -->
+    <div class="row g-3 mb-3">
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="soft-card p-3">
+                <span class="text-muted small text-uppercase fw-semibold">Total Contratos</span>
+                <h4 class="fw-bold mt-1 mb-0 text-dark">@_contracts.Count</h4>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="soft-card p-3">
+                <span class="text-muted small text-uppercase fw-semibold">Cartera Colocada</span>
+                <h4 class="fw-bold mt-1 mb-0 text-primary">@_contracts.Sum(x => (long)x.Value).ToString("C0")</h4>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="soft-card p-3">
+                <span class="text-muted small text-uppercase fw-semibold">Saldo Pendiente</span>
+                <h4 class="fw-bold mt-1 mb-0 text-danger">@_contracts.Sum(x => (long)x.Balance).ToString("C0")</h4>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="soft-card p-3">
+                <span class="text-muted small text-uppercase fw-semibold">Contratos Vigentes</span>
+                <h4 class="fw-bold mt-1 mb-0 text-success">
+                    @_contracts.Count(x => x.DeliveryDate >= DateTime.Today && x.Balance > 0)
+                </h4>
+            </div>
+        </div>
     </div>
 
+    <!-- Filters Card -->
+    <SoftFilterCard>
+        <div class="row g-3 align-items-center">
+            <div class="col-12 col-md-5">
+                <Input Placeholder="Buscar por número o descripción..."
+                       @bind-Value="_searchTerm"
+                       AllowClear="true"
+                       PrefixIcon="search" />
+            </div>
+            <div class="col-12 col-md-5">
+                <RadioGroup @bind-Value="_stateFilter" ButtonStyle="@RadioButtonStyle.Solid">
+                    <Radio RadioButton="true" Value="@("ALL")">Todos</Radio>
+                    <Radio RadioButton="true" Value="@("Registrado")">Registrado</Radio>
+                    <Radio RadioButton="true" Value="@("Asignado")">Asignado</Radio>
+                    <Radio RadioButton="true" Value="@("Recibido")">Recibido</Radio>
+                    <Radio RadioButton="true" Value="@("Entregado")">Entregado</Radio>
+                </RadioGroup>
+            </div>
+            <div class="col-12 col-md-2 text-end">
+                <span class="text-muted small">Mostrando: <b>@FilteredContracts.Count</b> contratos</span>
+            </div>
+        </div>
+    </SoftFilterCard>
+
+    <!-- Data Table / Loading / Empty -->
     @if (_isLoading)
     {
-        <div class="d-flex justify-content-center p-5">
-            <div class="spinner-border text-primary" role="status"></div>
+        <div class="soft-card p-5 text-center">
+            <Spin Tip="Cargando contratos..." />
         </div>
     }
-    else if (_contracts == null || !_contracts.Any())
+    else if (!FilteredContracts.Any())
     {
-        <div class="card p-4 text-center text-muted">
-            <p class="mb-0">No se encontraron contratos registrados.</p>
-        </div>
+        <SoftResultView Status="@ResultStatus.Info"
+                        Title="No se encontraron contratos"
+                        Subtitle="No hay contratos que coincidan con los criterios de búsqueda.">
+            <SoftButton Type="@ButtonType.Primary" Icon="plus" OnClick="@(() => Navigation.NavigateTo("/contracts/new"))">
+                Registrar Primer Contrato
+            </SoftButton>
+        </SoftResultView>
     }
     else
     {
-        <div class="card shadow-sm border-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Número</th>
-                            <th>Fecha</th>
-                            <th>Entrega</th>
-                            <th>Valor</th>
-                            <th>Saldo</th>
-                            <th>Peso (g)</th>
-                            <th>Estado</th>
-                            <th>Descripción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var c in _contracts)
+        <div class="soft-card overflow-hidden">
+            <Table TItem="ContractDto"
+                   DataSource="@FilteredContracts"
+                   Responsive="true"
+                   Size="@TableSize.Middle">
+                <PropertyColumn Property="c => c.Number" Title="Nro. Contrato" Width="130px">
+                    <span class="fw-bold text-dark">#@context.Number</span>
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.PersonId" Title="Titular / Cliente" Width="180px">
+                    <span class="fw-semibold">@GetCustomerName(context.PersonId)</span>
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.Description" Title="Prenda / Garantía">
+                    <span class="text-muted">@context.Description</span>
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.Value" Title="Valor Contrato" Width="130px">
+                    <span class="fw-semibold">@context.Value.ToString("C0")</span>
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.Balance" Title="Saldo Pendiente" Width="130px">
+                    <span class="@(context.Balance > 0 ? "text-danger fw-bold" : "text-muted")">
+                        @context.Balance.ToString("C0")
+                    </span>
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.DeliveryDate" Title="Vencimiento" Width="110px">
+                    @context.DeliveryDate.ToString("dd/MM/yyyy")
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.State" Title="Estado" Width="120px">
+                    @{
+                        string color = context.State switch
                         {
-                            <tr>
-                                <td class="fw-semibold">#@c.Number</td>
-                                <td>@c.Date.ToShortDateString()</td>
-                                <td>@c.DeliveryDate.ToShortDateString()</td>
-                                <td>@c.Value.ToString("C0")</td>
-                                <td><span class="@(c.Balance > 0 ? "text-danger fw-semibold" : "text-success")">@c.Balance.ToString("C0")</span></td>
-                                <td>@c.Weight.ToString("F2")</td>
-                                <td>
-                                    <span class="badge @(c.State == ContractState.Recibido ? "bg-success" : "bg-primary")">
-                                        @c.State
-                                    </span>
-                                </td>
-                                <td class="text-truncate" style="max-width: 200px;">@c.Description</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+                            ContractState.Registrado => "blue",
+                            ContractState.Asignado => "cyan",
+                            ContractState.Recibido => "green",
+                            ContractState.Entregado => "purple",
+                            _ => "default"
+                        };
+                    }
+                    <SoftTag Color="@color">@context.State</SoftTag>
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.DeliveryDate" Title="Vigencia" Width="110px">
+                    @{
+                        bool isExpired = context.DeliveryDate < DateTime.Today && context.Balance > 0;
+                    }
+                    <SoftTag Color="@(isExpired ? "red" : "green")">
+                        @(isExpired ? "VENCIDO" : "AL DÍA")
+                    </SoftTag>
+                </PropertyColumn>
+                <ActionColumn Title="Acción" Width="80px">
+                    <SoftActionButton Icon="eye"
+                                      Tooltip="Ver Detalle del Contrato"
+                                      OnClick="@(() => Navigation.NavigateTo($"/contracts/{context.Id}"))" />
+                </ActionColumn>
+            </Table>
         </div>
     }
 </div>
 
 @code {
-    private List<ContractDto>? _contracts;
+    private List<ContractDto> _contracts = new();
+    private List<JewerlySystem.Modules.Customers.Application.DTOs.PersonDto> _customers = new();
     private bool _isLoading = true;
+    private string _searchTerm = string.Empty;
+    private string _stateFilter = "ALL";
+
+    private string GetCustomerName(int personId)
+    {
+        return _customers.FirstOrDefault(c => c.Id == personId)?.FullName ?? $"Cliente #{personId}";
+    }
+
+    private List<ContractDto> FilteredContracts => _contracts
+        .Where(c => _stateFilter == "ALL" || c.State.ToString() == _stateFilter)
+        .Where(c => string.IsNullOrWhiteSpace(_searchTerm)
+            || c.Number.ToString().Contains(_searchTerm, StringComparison.OrdinalIgnoreCase)
+            || c.Description.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase)
+            || GetCustomerName(c.PersonId).Contains(_searchTerm, StringComparison.OrdinalIgnoreCase))
+        .ToList();
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadCustomers();
         await LoadContracts();
+    }
+
+    private async Task LoadCustomers()
+    {
+        var res = await Sender.Send(new JewerlySystem.Modules.Customers.Application.Queries.GetCustomersListQuery());
+        if (res.IsSuccess)
+        {
+            _customers = res.Value;
+        }
     }
 
     private async Task LoadContracts()
@@ -79,20 +182,15 @@
         _isLoading = true;
         try
         {
-            var result = await Sender.Send(new GetContractsListQuery());
-            if (result.IsSuccess)
+            var res = await Sender.Send(new GetContractsListQuery());
+            if (res.IsSuccess)
             {
-                _contracts = result.Value;
+                _contracts = res.Value;
             }
         }
         finally
         {
             _isLoading = false;
         }
-    }
-
-    private void CreateNewContract()
-    {
-        // Navigation or modal
     }
 }

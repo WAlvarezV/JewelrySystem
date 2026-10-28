@@ -1,0 +1,28 @@
+@namespace JewerlySystem.Common.Presentation.Components.Atoms
+
+<Button Type="@Type"
+        Size="@Size"
+        Icon="@Icon"
+        Loading="@Loading"
+        Danger="@Danger"
+        Block="@Block"
+        Disabled="@Disabled"
+        HtmlType="@HtmlType"
+        Class="@($"soft-btn {CssClass}")"
+        OnClick="@OnClick">
+    @ChildContent
+</Button>
+
+@code {
+    [Parameter] public ButtonType Type { get; set; } = ButtonType.Default;
+    [Parameter] public ButtonSize Size { get; set; } = ButtonSize.Default;
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public bool Loading { get; set; }
+    [Parameter] public bool Danger { get; set; }
+    [Parameter] public bool Block { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public string HtmlType { get; set; } = "button";
+    [Parameter] public string? CssClass { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

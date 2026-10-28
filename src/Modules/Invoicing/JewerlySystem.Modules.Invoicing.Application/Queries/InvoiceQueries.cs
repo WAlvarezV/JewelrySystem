@@ -46,3 +46,30 @@ public class GetInvoicesListQueryHandler : IQueryHandler<GetInvoicesListQuery, L
         return Result.Success(dtos);
     }
 }
+
+public record GetInvoicePaymentsQuery(int InvoiceId) : IQuery<List<InvoicePaymentDto>>;
+
+public class GetInvoicePaymentsQueryHandler : IQueryHandler<GetInvoicePaymentsQuery, List<InvoicePaymentDto>>
+{
+    private readonly IInvoicingRepository _repository;
+
+    public GetInvoicePaymentsQueryHandler(IInvoicingRepository repository)
+    {
+        _repository = repository;
+    }
+
+    public async Task<Result<List<InvoicePaymentDto>>> Handle(GetInvoicePaymentsQuery request, CancellationToken cancellationToken)
+    {
+        var payments = await _repository.GetPaymentsByInvoiceIdAsync(request.InvoiceId, cancellationToken);
+        var dtos = payments.Select(p => new InvoicePaymentDto(
+            p.Id,
+            p.Number,
+            p.Date,
+            p.Value,
+            p.EntityId,
+            p.PaymentMethod
+        )).ToList();
+
+        return Result.Success(dtos);
+    }
+}

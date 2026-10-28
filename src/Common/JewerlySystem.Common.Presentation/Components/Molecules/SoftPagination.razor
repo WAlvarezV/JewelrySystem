@@ -1,0 +1,17 @@
+@namespace JewerlySystem.Common.Presentation.Components.Molecules
+
+<div class="soft-pagination-container">
+    <Pagination Current="@Current"
+                PageSize="@PageSize"
+                Total="@Total"
+                ShowSizeChanger="@ShowSizeChanger"
+                OnChange="@OnChange" />
+</div>
+
+@code {
+    [Parameter] public int Current { get; set; } = 1;
+    [Parameter] public int PageSize { get; set; } = 10;
+    [Parameter] public int Total { get; set; }
+    [Parameter] public bool ShowSizeChanger { get; set; }
+    [Parameter] public EventCallback<PaginationEventArgs> OnChange { get; set; }
+}

@@ -1,0 +1,283 @@
+@page "/inventory/watches/new"
+@page "/watch/{Reference:int?}"
+@attribute [Authorize]
+@inject ISender Sender
+@inject NavigationManager Navigation
+@inject IMessageService Message
+
+<div class="create-watch-container">
+    <SoftHeroHeader Title="Registrar Reloj en Inventario"
+                    Subtitle="Ingrese la información del fabricante, serial de caja, género y valor comercial"
+                    Icon="bi bi-watch">
+        <SoftButton Text="Volver al Catálogo"
+                    Icon="arrow-left"
+                    Type="ButtonType.Dashed"
+                    OnClick="@(() => Navigation.NavigateTo("/inventory"))" />
+    </SoftHeroHeader>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-10">
+            <!-- 1. Marca, Género y Proveedor -->
+            <SoftFormBox Title="1. Marca, Origen y Clasificación"
+                         Subtitle="Información del fabricante, género objetivo y procedencia">
+                <div class="row g-3">
+                    <div class="col-12 col-md-4">
+                        <SoftTooltipLabel Label="Marca del Reloj" Required="true" TooltipText="Fabricante o marca registrada del reloj" />
+                        <Select TItem="BrandDto"
+                                TItemValue="int"
+                                DataSource="@_brands"
+                                @bind-Value="_formModel.BrandId"
+                                ValueName="@nameof(BrandDto.Id)"
+                                LabelName="@nameof(BrandDto.Name)"
+                                Placeholder="Seleccione marca..." />
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <SoftTooltipLabel Label="Género / Segmento" Required="true" TooltipText="Público objetivo del reloj" />
+                        <Select TItem="GenderTypeOption"
+                                TItemValue="GenderType"
+                                DataSource="@_genderOptions"
+                                @bind-Value="_formModel.GenderType"
+                                ValueName="@nameof(GenderTypeOption.Value)"
+                                LabelName="@nameof(GenderTypeOption.Label)"
+                                Placeholder="Seleccione género..." />
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <SoftTooltipLabel Label="Proveedor / Origen" TooltipText="Origen o proveedor de la pieza" />
+                        <Select TItem="JewerlySystem.Modules.Customers.Application.DTOs.PersonDto"
+                                TItemValue="int?"
+                                DataSource="@_providers"
+                                @bind-Value="_formModel.ProviderId"
+                                ValueName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.Id)"
+                                LabelName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.FullName)"
+                                Placeholder="-- Stock Interno / Empeño --"
+                                AllowClear="true" />
+                    </div>
+                </div>
+            </SoftFormBox>
+
+            <!-- 2. Seriales y Valores -->
+            <SoftFormBox Title="2. Identificación y Precios"
+                         Subtitle="Serial de tapa o caja y valores de costo y venta">
+                <div class="row g-3 align-items-end">
+                    <div class="col-12 col-md-4">
+                        <SoftTooltipLabel Label="Nro. de Caja / Serial" Required="true" TooltipText="Identificador numérico grabado en la caja" />
+                        <Input Placeholder="Ej. W-984210"
+                               @bind-Value="_formModel.CaseNumber" />
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <SoftTooltipLabel Label="Valor Costo ($)" Required="true" TooltipText="Precio de adquisición o liquidación del reloj" />
+                        <AntDesign.InputNumber TValue="int"
+                                               @bind-Value="_formModel.CostValue"
+                                               Step="10000"
+                                               Min="1"
+                                               Style="width: 100%; font-weight: bold; color: var(--soft-danger, #ff4d4f);"
+                                               OnChange="@(_ => StateHasChanged())" />
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <SoftTooltipLabel Label="Valor Venta Sugerido ($)" TooltipText="Precio fijado para venta en vitrina" />
+                        <AntDesign.InputNumber TValue="int"
+                                               @bind-Value="_formModel.SaleValue"
+                                               Step="10000"
+                                               Min="1"
+                                               Style="width: 100%; font-weight: bold; color: var(--soft-success, #52c41a);"
+                                               OnChange="@(_ => StateHasChanged())" />
+                    </div>
+                </div>
+            </SoftFormBox>
+
+            <!-- Resumen Margen -->
+            <div class="mb-4">
+                <SoftDetailCard Title="Resumen Comercial Proyectado">
+                    <div class="row g-3 text-center">
+                        <div class="col-12 col-md-4">
+                            <SoftDetailItem Label="Inversión Costo"
+                                            Value="@_formModel.CostValue.ToString("C0")"
+                                            HighlightVariant="SoftDetailItem.Variant.Danger" />
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <SoftDetailItem Label="Precio Venta Sugerido"
+                                            Value="@_formModel.SaleValue.ToString("C0")"
+                                            HighlightVariant="SoftDetailItem.Variant.Success" />
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <SoftDetailItem Label="Margen Comercial"
+                                            Value="@((_formModel.SaleValue - _formModel.CostValue).ToString("C0"))"
+                                            HighlightVariant="SoftDetailItem.Variant.Primary" />
+                        </div>
+                    </div>
+                </SoftDetailCard>
+            </div>
+
+            <!-- 3. Descripción -->
+            <SoftFormBox Title="3. Descripción del Reloj"
+                         Subtitle="Modelo, movimiento (automático/cuarzo), pulso, cristal, estado estético...">
+                <TextArea Rows="3"
+                          @bind-Value="_formModel.Description"
+                          Placeholder="Detalle características: maquinaria, bisel, pulso en acero/cuero, resistencia al agua..."
+                          MaxLength="500"
+                          ShowCount="true" />
+            </SoftFormBox>
+
+            <!-- Acciones -->
+            <div class="d-flex justify-content-between align-items-center pt-3 pb-4">
+                <SoftButton Text="Cancelar y Volver"
+                            Icon="arrow-left"
+                            Type="ButtonType.Dashed"
+                            OnClick="@(() => Navigation.NavigateTo("/inventory"))" />
+
+                <div class="d-flex gap-2">
+                    <SoftButton Text="Limpiar"
+                                Icon="clear"
+                                Type="ButtonType.Default"
+                                Danger="true"
+                                OnClick="ClearForm" />
+                    <SoftButton Text="Guardar Reloj en Stock"
+                                Icon="check"
+                                Type="ButtonType.Primary"
+                                Loading="@_isSubmitting"
+                                OnClick="HandleSubmitAsync" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int? Reference { get; set; }
+
+    private WatchFormModel _formModel = new();
+    private List<BrandDto> _brands = new();
+    private List<JewerlySystem.Modules.Customers.Application.DTOs.PersonDto> _providers = new();
+
+    public class GenderTypeOption
+    {
+        public GenderType Value { get; set; }
+        public string Label { get; set; } = string.Empty;
+    }
+
+    private readonly List<GenderTypeOption> _genderOptions = new()
+    {
+        new() { Value = GenderType.Hombre, Label = "Caballero / Hombre" },
+        new() { Value = GenderType.Mujer, Label = "Dama / Mujer" },
+        new() { Value = GenderType.Unisex, Label = "Unisex" }
+    };
+
+    private bool _isSubmitting = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMasterDataAsync();
+        ClearForm();
+    }
+
+    private async Task LoadMasterDataAsync()
+    {
+        try
+        {
+            var brandsResult = await Sender.Send(new GetBrandsQuery());
+            if (brandsResult.IsSuccess)
+            {
+                _brands = brandsResult.Value;
+            }
+
+            var provResult = await Sender.Send(new JewerlySystem.Modules.Customers.Application.Queries.GetCustomersListQuery(JewerlySystem.Modules.Customers.Domain.PersonType.Proveedor));
+            if (provResult.IsSuccess)
+            {
+                _providers = provResult.Value;
+            }
+        }
+        catch (Exception ex)
+        {
+            Message.Error($"Error al cargar marcas y proveedores: {ex.Message}");
+        }
+    }
+
+    private void ClearForm()
+    {
+        _formModel = new WatchFormModel
+        {
+            BrandId = 0,
+            GenderType = GenderType.Hombre,
+            CostValue = 100000,
+            SaleValue = 150000,
+            CaseNumber = string.Empty,
+            Description = string.Empty
+        };
+    }
+
+    private async Task HandleSubmitAsync()
+    {
+        if (_formModel.BrandId <= 0)
+        {
+            Message.Warning("Debe seleccionar una marca de reloj válida.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_formModel.CaseNumber))
+        {
+            Message.Warning("El número de caja o serial es requerido.");
+            return;
+        }
+
+        if (_formModel.CostValue <= 0)
+        {
+            Message.Warning("El costo debe ser mayor a 0.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_formModel.Description))
+        {
+            Message.Warning("La descripción del reloj es requerida.");
+            return;
+        }
+
+        _isSubmitting = true;
+
+        try
+        {
+            var cmd = new CreateWatchItemCommand(
+                CostValue: _formModel.CostValue,
+                DateOfEntry: DateTime.UtcNow,
+                Description: _formModel.Description,
+                ItemTypeId: 5,
+                GenderType: _formModel.GenderType,
+                CaseNumber: _formModel.CaseNumber,
+                BrandId: _formModel.BrandId,
+                ProviderId: _formModel.ProviderId
+            );
+
+            var result = await Sender.Send(cmd);
+            if (!result.IsSuccess)
+            {
+                Message.Error(result.Error.Message);
+                return;
+            }
+
+            Message.Success($"¡Reloj registrado con éxito con referencia #{result.Value}!");
+            Navigation.NavigateTo("/inventory");
+        }
+        catch (Exception ex)
+        {
+            Message.Error($"Ocurrió un error: {ex.Message}");
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    public class WatchFormModel
+    {
+        public int BrandId { get; set; }
+        public GenderType GenderType { get; set; } = GenderType.Hombre;
+        public int? ProviderId { get; set; }
+        public string CaseNumber { get; set; } = string.Empty;
+        public int CostValue { get; set; } = 100000;
+        public int SaleValue { get; set; } = 150000;
+        public string Description { get; set; } = string.Empty;
+    }
+}

@@ -1,0 +1,22 @@
+.soft-tooltip-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    color: var(--soft-text-title, #0f172a);
+}
+
+.soft-tooltip-label-text {
+    font-size: 0.9rem;
+}
+
+::deep .soft-tooltip-label-icon {
+    font-size: 0.85rem;
+    color: var(--soft-text-muted, #64748b);
+    cursor: help;
+    transition: color 0.2s ease;
+}
+
+::deep .soft-tooltip-label-icon:hover {
+    color: var(--brand-blue, #1677ff);
+}

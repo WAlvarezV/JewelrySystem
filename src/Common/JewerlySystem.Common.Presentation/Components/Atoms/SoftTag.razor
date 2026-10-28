@@ -1,0 +1,11 @@
+@namespace JewerlySystem.Common.Presentation.Components.Atoms
+
+<Tag Color="@Color" Class="@($"soft-tag {CssClass}")">
+    @ChildContent
+</Tag>
+
+@code {
+    [Parameter] public string Color { get; set; } = "blue";
+    [Parameter] public string? CssClass { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

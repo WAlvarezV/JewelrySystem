@@ -1,0 +1,155 @@
+@page "/cash/consolidated"
+@page "/consolidated-records"
+@attribute [Authorize]
+@inject ISender Sender
+@inject NavigationManager Navigation
+
+<div class="cash-consolidated-view step-fade-in">
+    <!-- Hero Header -->
+    <SoftHeroHeader Title="Consolidado de Flujo de Caja"
+                    Subtitle="Resumen histórico de flujos, arqueos y saldos por rango de fechas"
+                    Icon="bi bi-calendar3-range">
+        <SoftButton Icon="arrow-left" OnClick="@(() => Navigation.NavigateTo("/cash"))">Arqueo Diario</SoftButton>
+    </SoftHeroHeader>
+
+    <!-- Date Range Filter Card -->
+    <SoftFilterCard>
+        <Row Gutter="16">
+            <Col Xs="24" Sm="12" Md="6">
+                <label class="form-label text-muted small fw-semibold">Fecha Inicial</label>
+                <DatePicker @bind-Value="_startDate" Format="dd/MM/yyyy" Class="w-100" />
+            </Col>
+            <Col Xs="24" Sm="12" Md="6">
+                <label class="form-label text-muted small fw-semibold">Fecha Final</label>
+                <DatePicker @bind-Value="_endDate" Format="dd/MM/yyyy" Class="w-100" />
+            </Col>
+            <Col Xs="24" Sm="24" Md="12" Class="d-flex align-items-end gap-2 mt-2 mt-md-0">
+                <SoftButton Type="@ButtonType.Primary"
+                            Icon="search"
+                            Loading="@_isLoading"
+                            OnClick="LoadConsolidatedAsync">
+                    Consultar Rango
+                </SoftButton>
+                <SoftButton OnClick="SetCurrentMonthAsync">Mes Actual</SoftButton>
+            </Col>
+        </Row>
+    </SoftFilterCard>
+
+    <!-- Metrics Summary -->
+    <Row Gutter="16" Class="mb-3">
+        <Col Xs="24" Sm="12" Md="6">
+            <div class="soft-card p-3">
+                <span class="text-muted small text-uppercase fw-semibold">Días Registrados</span>
+                <h4 class="fw-bold mt-1 mb-0 text-dark">@_items.Count</h4>
+            </div>
+        </Col>
+        <Col Xs="24" Sm="12" Md="6">
+            <div class="soft-card p-3">
+                <span class="text-muted small text-uppercase fw-semibold">Total Ingresos Periodo</span>
+                <h4 class="fw-bold mt-1 mb-0 text-success">@_items.Sum(x => (long)x.TotalInValue).ToString("C0")</h4>
+            </div>
+        </Col>
+        <Col Xs="24" Sm="12" Md="6">
+            <div class="soft-card p-3">
+                <span class="text-muted small text-uppercase fw-semibold">Total Salidas Periodo</span>
+                <h4 class="fw-bold mt-1 mb-0 text-danger">@_items.Sum(x => (long)x.CashOutValue).ToString("C0")</h4>
+            </div>
+        </Col>
+        <Col Xs="24" Sm="12" Md="6">
+            <div class="soft-card p-3">
+                <span class="text-muted small text-uppercase fw-semibold">Flujo Neto Consolidado</span>
+                @{
+                    var net = _items.Sum(x => (long)x.TotalNetValue);
+                }
+                <h4 class="fw-bold mt-1 mb-0 @(net >= 0 ? "text-primary" : "text-danger")">
+                    @(net >= 0 ? "+" : "")@net.ToString("C0")
+                </h4>
+            </div>
+        </Col>
+    </Row>
+
+    <!-- Table / Loading / Empty -->
+    @if (_isLoading)
+    {
+        <div class="soft-card p-5 text-center">
+            <Spin Tip="Cargando histórico consolidado..." />
+        </div>
+    }
+    else if (!_items.Any())
+    {
+        <SoftResultView Status="@ResultStatus.Info"
+                        Title="No se encontraron registros en el rango seleccionado"
+                        Subtitle="Ajuste las fechas de consulta para visualizar el flujo consolidado." />
+    }
+    else
+    {
+        <div class="soft-card overflow-hidden">
+            <Table TItem="CashRangeConsolidatedItemDto"
+                   DataSource="@_items"
+                   Responsive="true"
+                   Size="@TableSize.Middle">
+                <PropertyColumn Property="x => x.Date" Title="Fecha" Width="130px">
+                    <span class="fw-bold text-dark">@context.Date.ToString("dd/MM/yyyy")</span>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.CashInValue" Title="Ingresos Efectivo" Width="140px">
+                    <span class="text-success">@context.CashInValue.ToString("C0")</span>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.OthersInValue" Title="Otros Ingresos (Bancos)">
+                    <span class="text-muted">@context.OthersInValue.ToString("C0")</span>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.TotalInValue" Title="Total Entradas">
+                    <span class="text-success fw-semibold">+@context.TotalInValue.ToString("C0")</span>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.CashOutValue" Title="Total Salidas">
+                    <span class="text-danger fw-semibold">-@context.CashOutValue.ToString("C0")</span>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.TotalNetValue" Title="Movimiento Neto">
+                    <span class="fw-bold @(context.TotalNetValue >= 0 ? "text-primary" : "text-danger")">
+                        @(context.TotalNetValue >= 0 ? "+" : "")@context.TotalNetValue.ToString("C0")
+                    </span>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.CashBalanceValue" Title="Saldo Efectivo" Width="150px">
+                    <span class="fw-bold fs-6 @(context.CashBalanceValue >= 0 ? "text-dark" : "text-danger")">
+                        @context.CashBalanceValue.ToString("C0")
+                    </span>
+                </PropertyColumn>
+            </Table>
+        </div>
+    }
+</div>
+
+@code {
+    private DateTime _startDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+    private DateTime _endDate = DateTime.Today;
+    private List<CashRangeConsolidatedItemDto> _items = new();
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadConsolidatedAsync();
+    }
+
+    private async Task SetCurrentMonthAsync()
+    {
+        _startDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+        _endDate = DateTime.Today;
+        await LoadConsolidatedAsync();
+    }
+
+    private async Task LoadConsolidatedAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            var res = await Sender.Send(new GetCashConsolidatedRangeQuery(_startDate, _endDate));
+            if (res.IsSuccess)
+            {
+                _items = res.Value;
+            }
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}
