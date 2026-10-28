@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SI.SIOT SOFT UI DESIGN SYSTEM TOKENS & OVERRIDES
+   SI.SIOT SOFT UI DESIGN SYSTEM TOKENS & OVERRIDES (JEWERLYSYSTEM 2.0)
    ========================================================================== */
 
 :root {
@@ -18,16 +18,21 @@
     --soft-error: #ff4d4f;
     --soft-error-light: #fff2f0;
 
-    /* Soft UI Radii */
+    /* Soft UI Radii - Rounded Standards */
+    --soft-border-radius-xs: 4px;
     --soft-border-radius-sm: 6px;
     --soft-border-radius-md: 8px;
     --soft-border-radius-lg: 12px;
     --soft-border-radius-xl: 16px;
+    --soft-border-radius-2xl: 20px;
+    --soft-border-radius-pill: 9999px;
 
     /* Soft UI Shadows */
-    --soft-box-shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.04);
-    --soft-box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-    --soft-box-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.10);
+    --soft-box-shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.04);
+    --soft-box-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+    --soft-box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+    --soft-box-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.11);
+    --soft-box-shadow-dropdown: 0 10px 25px -4px rgba(0, 0, 0, 0.10), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
 
     /* Neutral Colors */
     --soft-bg-light: #f8fafc;
@@ -38,20 +43,308 @@
     --soft-text-muted: #64748b;
 }
 
-/* Base Soft UI Overrides */
-.soft-card {
-    background: var(--soft-bg-surface);
-    border-radius: var(--soft-border-radius-lg);
-    box-shadow: var(--soft-box-shadow);
-    border: 1px solid var(--soft-border-color);
-    transition: all 0.2s ease-in-out;
+/* ==========================================================================
+   1. CARDS & CONTAINERS (12px - 16px Rounded)
+   ========================================================================== */
+.soft-card,
+.card,
+.ant-card {
+    background: var(--soft-bg-surface) !important;
+    border-radius: var(--soft-border-radius-lg) !important; /* 12px */
+    box-shadow: var(--soft-box-shadow-sm) !important;
+    border: 1px solid var(--soft-border-color) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-.soft-card:hover {
-    box-shadow: var(--soft-box-shadow-hover);
+.soft-card:hover,
+.card:hover,
+.ant-card:hover {
+    box-shadow: var(--soft-box-shadow) !important;
 }
 
-/* Animations */
+.ant-card-head,
+.card-header {
+    border-bottom: 1px solid var(--soft-border-color) !important;
+    border-top-left-radius: var(--soft-border-radius-lg) !important;
+    border-top-right-radius: var(--soft-border-radius-lg) !important;
+    padding: 16px 20px !important;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   2. BUTTONS (8px Rounded - SI.SIOT Standards)
+   ========================================================================== */
+.ant-btn,
+.btn,
+.soft-btn {
+    border-radius: var(--soft-border-radius-md) !important; /* 8px */
+    font-weight: 500 !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+}
+
+.ant-btn-primary,
+.btn-primary {
+    background: var(--brand-blue-gradient) !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(22, 119, 255, 0.25) !important;
+    color: #ffffff !important;
+}
+
+.ant-btn-primary:hover,
+.btn-primary:hover {
+    box-shadow: 0 4px 14px rgba(22, 119, 255, 0.40) !important;
+    transform: translateY(-1px) !important;
+}
+
+.ant-btn-primary:active,
+.btn-primary:active {
+    transform: translateY(0) !important;
+}
+
+.ant-btn-round {
+    border-radius: var(--soft-border-radius-pill) !important;
+}
+
+.ant-btn-circle {
+    border-radius: 50% !important;
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+}
+
+/* ==========================================================================
+   3. FORM INPUTS & SELECTS (8px Rounded & Soft Focus)
+   ========================================================================== */
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-input-number,
+.ant-select:not(.ant-select-customize-input) .ant-select-selector,
+.ant-picker,
+.form-control,
+.form-select {
+    border-radius: var(--soft-border-radius-md) !important; /* 8px */
+    border: 1px solid var(--soft-border-color) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    background-color: #ffffff !important;
+}
+
+.ant-input:focus,
+.ant-input-affix-wrapper-focused,
+.ant-input-number-focused,
+.ant-select-focused:not(.ant-select-customize-input) .ant-select-selector,
+.ant-picker-focused,
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--brand-blue) !important;
+    box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.16) !important;
+    outline: none !important;
+}
+
+.ant-input-group > .ant-input:first-child,
+.ant-input-group-addon:first-child {
+    border-top-left-radius: var(--soft-border-radius-md) !important;
+    border-bottom-left-radius: var(--soft-border-radius-md) !important;
+}
+
+.ant-input-group > .ant-input:last-child,
+.ant-input-group-addon:last-child {
+    border-top-right-radius: var(--soft-border-radius-md) !important;
+    border-bottom-right-radius: var(--soft-border-radius-md) !important;
+}
+
+/* Radio Button Groups */
+.ant-radio-group-solid .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+    background: var(--brand-blue) !important;
+    border-color: var(--brand-blue) !important;
+    box-shadow: -1px 0 0 0 var(--brand-blue) !important;
+    border-radius: var(--soft-border-radius-md) !important;
+}
+
+.ant-radio-button-wrapper:first-child {
+    border-top-left-radius: var(--soft-border-radius-md) !important;
+    border-bottom-left-radius: var(--soft-border-radius-md) !important;
+}
+
+.ant-radio-button-wrapper:last-child {
+    border-top-right-radius: var(--soft-border-radius-md) !important;
+    border-bottom-right-radius: var(--soft-border-radius-md) !important;
+}
+
+/* ==========================================================================
+   4. DATA TABLES (12px Rounded Container & Soft Headers)
+   ========================================================================== */
+.ant-table-wrapper {
+    background: var(--soft-bg-surface) !important;
+    border-radius: var(--soft-border-radius-lg) !important; /* 12px */
+    box-shadow: var(--soft-box-shadow-sm) !important;
+    border: 1px solid var(--soft-border-color) !important;
+    overflow: hidden !important;
+}
+
+.ant-table {
+    border-radius: var(--soft-border-radius-lg) !important;
+    background: transparent !important;
+}
+
+.ant-table-container {
+    border-radius: var(--soft-border-radius-lg) !important;
+    overflow: hidden !important;
+}
+
+.ant-table-thead > tr > th {
+    background: #f8fafc !important;
+    color: #475569 !important;
+    font-weight: 600 !important;
+    font-size: 0.82rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    border-bottom: 1px solid var(--soft-border-color) !important;
+    padding: 13px 16px !important;
+}
+
+.ant-table-tbody > tr > td {
+    padding: 13px 16px !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    color: var(--soft-text-body) !important;
+    transition: background 0.15s ease-in-out !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+    background-color: #f8fafc !important;
+}
+
+.ant-table-tbody > tr:last-child > td {
+    border-bottom: none !important;
+}
+
+/* ==========================================================================
+   5. MODALS & DRAWERS (16px Rounded)
+   ========================================================================== */
+.ant-modal-content {
+    border-radius: var(--soft-border-radius-xl) !important; /* 16px */
+    overflow: hidden !important;
+    box-shadow: var(--soft-box-shadow-dropdown) !important;
+    border: 1px solid var(--soft-border-color) !important;
+}
+
+.ant-modal-header {
+    border-bottom: 1px solid var(--soft-border-color) !important;
+    padding: 18px 24px !important;
+    border-top-left-radius: var(--soft-border-radius-xl) !important;
+    border-top-right-radius: var(--soft-border-radius-xl) !important;
+}
+
+.ant-modal-footer {
+    border-top: 1px solid var(--soft-border-color) !important;
+    padding: 16px 24px !important;
+    border-bottom-left-radius: var(--soft-border-radius-xl) !important;
+    border-bottom-right-radius: var(--soft-border-radius-xl) !important;
+}
+
+.ant-drawer-content {
+    border-top-left-radius: var(--soft-border-radius-xl) !important; /* 16px */
+    border-bottom-left-radius: var(--soft-border-radius-xl) !important;
+    overflow: hidden !important;
+    box-shadow: -10px 0 25px rgba(0, 0, 0, 0.08) !important;
+}
+
+.ant-drawer-header {
+    border-bottom: 1px solid var(--soft-border-color) !important;
+    padding: 18px 24px !important;
+}
+
+/* ==========================================================================
+   6. TAGS & BADGES (Pill Rounded - 9999px)
+   ========================================================================== */
+.ant-tag,
+.soft-tag,
+.badge {
+    border-radius: var(--soft-border-radius-pill) !important; /* Pill style */
+    padding: 3px 12px !important;
+    font-weight: 500 !important;
+    font-size: 0.78rem !important;
+    line-height: 1.4 !important;
+    border: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+}
+
+/* ==========================================================================
+   7. DROPDOWNS, POPOVERS & PICKERS (12px Rounded)
+   ========================================================================== */
+.ant-select-dropdown,
+.ant-dropdown-menu,
+.ant-popover-inner,
+.ant-picker-dropdown .ant-picker-panel-container {
+    border-radius: var(--soft-border-radius-lg) !important; /* 12px */
+    box-shadow: var(--soft-box-shadow-dropdown) !important;
+    border: 1px solid var(--soft-border-color) !important;
+    overflow: hidden !important;
+    padding: 6px !important;
+}
+
+.ant-select-item {
+    border-radius: var(--soft-border-radius-sm) !important;
+    margin: 2px 0 !important;
+    transition: all 0.15s ease-in-out !important;
+}
+
+/* ==========================================================================
+   8. PAGINATION (8px Rounded Items)
+   ========================================================================== */
+.ant-pagination-item,
+.ant-pagination-prev .ant-pagination-item-link,
+.ant-pagination-next .ant-pagination-item-link {
+    border-radius: var(--soft-border-radius-md) !important; /* 8px */
+    border: 1px solid var(--soft-border-color) !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+.ant-pagination-item-active {
+    background: var(--brand-blue) !important;
+    border-color: var(--brand-blue) !important;
+}
+
+.ant-pagination-item-active a {
+    color: #ffffff !important;
+}
+
+/* ==========================================================================
+   9. ALERTS & NOTICES (10px Rounded)
+   ========================================================================== */
+.ant-alert,
+.soft-inline-notice {
+    border-radius: 10px !important;
+    border: 1px solid var(--soft-border-color) !important;
+    padding: 12px 16px !important;
+}
+
+/* ==========================================================================
+   10. TABS (8px Rounded)
+   ========================================================================== */
+.ant-tabs-card > .ant-tabs-nav .ant-tabs-tab {
+    border-radius: var(--soft-border-radius-md) var(--soft-border-radius-md) 0 0 !important;
+    border: 1px solid var(--soft-border-color) !important;
+    background: #f8fafc !important;
+    transition: all 0.2s ease !important;
+}
+
+.ant-tabs-card > .ant-tabs-nav .ant-tabs-tab-active {
+    background: #ffffff !important;
+    border-bottom-color: #ffffff !important;
+    font-weight: 600 !important;
+    color: var(--brand-blue) !important;
+}
+
+/* ==========================================================================
+   11. ANIMATIONS & TRANSITIONS
+   ========================================================================== */
 .step-fade-in {
     animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }

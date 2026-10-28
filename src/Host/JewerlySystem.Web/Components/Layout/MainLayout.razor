@@ -108,17 +108,20 @@
     .rail-module-btn {
         background-color: transparent;
         color: #9ca3af;
-        transition: all 0.2s ease-in-out;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         cursor: pointer;
+        border-radius: var(--soft-border-radius-lg, 12px) !important;
     }
     .rail-module-btn:hover {
         background-color: #1f2937;
         color: #ffffff;
+        border-radius: var(--soft-border-radius-lg, 12px) !important;
     }
     .rail-module-btn.active {
         background-color: #2563eb !important;
         color: #ffffff !important;
-        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.4);
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.45);
+        border-radius: var(--soft-border-radius-lg, 12px) !important;
     }
     .rail-module-btn.active i {
         color: #ffffff;
