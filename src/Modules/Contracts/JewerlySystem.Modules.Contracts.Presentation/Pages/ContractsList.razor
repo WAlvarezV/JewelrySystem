@@ -48,10 +48,16 @@
     <SoftFilterCard>
         <div class="row g-3 align-items-center">
             <div class="col-12 col-md-4">
-                <Input Placeholder="Buscar por número, cliente o descripción..."
-                       @bind-Value="_searchTerm"
-                       AllowClear="true"
-                       PrefixIcon="search" />
+                <div class="d-flex align-items-center gap-1">
+                    <Input Placeholder="Buscar por número, cliente o descripción..."
+                           @bind-Value="_searchTerm"
+                           AllowClear="true"
+                           PrefixIcon="search" />
+                    <SoftVoiceButton @bind-TargetText="_searchTerm"
+                                     Append="false"
+                                     TooltipText="Buscar contratos por voz"
+                                     ButtonClass="btn-outline-secondary" />
+                </div>
             </div>
             <div class="col-12 col-md-6">
                 <RadioGroup @bind-Value="_stateFilter" ButtonStyle="@RadioButtonStyle.Solid">
@@ -266,15 +272,14 @@
                         }
 
                         <div class="col-12">
-                            <FormItem Label="Descripción del Trabajo o Joya" Required="true">
-                                <TextArea @bind-Value="_formModel.Description"
-                                          Rows="2"
-                                          Placeholder="@(_formModel.ContractKind == "SEPARE"
-                                              ? "Detalle de la joya separada de vitrina..."
-                                              : (_formModel.ContractKind == "REPARACION"
-                                                  ? "Describa el daño y reparación a realizar (ej: soldar cadena de oro 18k, ajustar broche)..."
-                                                  : "Especifique el diseño a fabricar (ej: par de argollas matrimonio oro blanco 18k grabadas)..."))" />
-                            </FormItem>
+                            <SoftVoiceTextArea @bind-Value="_formModel.Description"
+                                               Label="Descripción del Trabajo o Joya"
+                                               Required="true"
+                                               Placeholder="@(_formModel.ContractKind == "SEPARE"
+                                                   ? "Detalle de la joya separada de vitrina o pulse 'Dictar por Voz'..."
+                                                   : (_formModel.ContractKind == "REPARACION"
+                                                       ? "Describa el daño y reparación a realizar o pulse 'Dictar por Voz'..."
+                                                       : "Especifique el diseño a fabricar o pulse 'Dictar por Voz'..."))" />
                         </div>
                     </div>
                 </SoftFormBox>

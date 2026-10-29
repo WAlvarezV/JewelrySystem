@@ -115,11 +115,11 @@
             <!-- 3. Descripción -->
             <SoftFormBox Title="3. Descripción del Reloj"
                          Subtitle="Modelo, movimiento (automático/cuarzo), pulso, cristal, estado estético...">
-                <TextArea Rows="3"
-                          @bind-Value="_formModel.Description"
-                          Placeholder="Detalle características: maquinaria, bisel, pulso en acero/cuero, resistencia al agua..."
-                          MaxLength="500"
-                          ShowCount="true" />
+                <SoftVoiceTextArea @bind-Value="_formModel.Description"
+                                   Label="Descripción del Reloj"
+                                   Required="true"
+                                   Placeholder="Detalle características: maquinaria, bisel, pulso o use 'Dictar por Voz'..."
+                                   MaxLength="500" />
             </SoftFormBox>
 
             <!-- Acciones -->

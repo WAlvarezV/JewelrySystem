@@ -19,10 +19,16 @@
     <SoftFilterCard>
         <Row Gutter="16">
             <Col Xs="24" Sm="12" Md="10">
-                <Input Placeholder="Buscar por documento, nombre o celular..."
-                       @bind-Value="_searchTerm"
-                       AllowClear="true"
-                       PrefixIcon="search" />
+                <div class="d-flex align-items-center gap-1">
+                    <Input Placeholder="Buscar por documento, nombre o celular..."
+                           @bind-Value="_searchTerm"
+                           AllowClear="true"
+                           PrefixIcon="search" />
+                    <SoftVoiceButton @bind-TargetText="_searchTerm"
+                                     Append="false"
+                                     TooltipText="Buscar clientes por voz"
+                                     ButtonClass="btn-outline-secondary" />
+                </div>
             </Col>
             <Col Xs="24" Sm="12" Md="10">
                 <RadioGroup @bind-Value="_filterTab" ButtonStyle="@RadioButtonStyle.Solid">

@@ -1,0 +1,58 @@
+@namespace JewerlySystem.Common.Presentation.Components.Molecules
+@using JewerlySystem.Common.Presentation.Components.Atoms
+
+<div class="soft-voice-textarea-box">
+    <div class="d-flex align-items-center justify-content-between mb-1">
+        @if (!string.IsNullOrEmpty(Label))
+        {
+            <label class="form-label mb-0 fw-semibold text-dark small">
+                @Label
+                @if (Required)
+                {
+                    <span class="text-danger ms-1">*</span>
+                }
+            </label>
+        }
+        else
+        {
+            <div></div>
+        }
+
+        @if (ShowVoiceButton)
+        {
+            <SoftVoiceButton TargetText="@Value"
+                             TargetTextChanged="OnInternalValueChanged"
+                             Language="@Language"
+                             Append="@Append"
+                             Label="Dictar por Voz" />
+        }
+    </div>
+
+    <TextArea Rows="@Rows"
+              Value="@Value"
+              ValueChanged="@OnInternalValueChanged"
+              Placeholder="@Placeholder"
+              MaxLength="@MaxLength"
+              ShowCount="@ShowCount" />
+</div>
+
+@code {
+    [Parameter] public string Value { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    [Parameter] public string Label { get; set; } = string.Empty;
+    [Parameter] public bool Required { get; set; }
+    [Parameter] public string Placeholder { get; set; } = "Describa aquí o pulse 'Dictar por Voz' para hablar...";
+    [Parameter] public uint Rows { get; set; } = 3;
+    [Parameter] public int MaxLength { get; set; } = 500;
+    [Parameter] public bool ShowCount { get; set; } = true;
+    [Parameter] public bool ShowVoiceButton { get; set; } = true;
+    [Parameter] public string Language { get; set; } = "es-CO";
+    [Parameter] public bool Append { get; set; } = true;
+
+    private async Task OnInternalValueChanged(string newVal)
+    {
+        Value = newVal;
+        await ValueChanged.InvokeAsync(Value);
+    }
+}

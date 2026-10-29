@@ -111,15 +111,14 @@
                     }
 
                     <div class="col-12">
-                        <FormItem Label="Descripción del Contrato" Required="true">
-                            <TextArea @bind-Value="_formModel.Description"
-                                      Rows="2"
-                                      Placeholder="@(_formModel.ContractKind == "SEPARE"
-                                          ? "Detalle de la joya o reloj apartado de vitrina..."
-                                          : (_formModel.ContractKind == "REPARACION"
-                                              ? "Describa la reparación solicitada (ej: cambio de broche, pulido y rodiado)..."
-                                              : "Especifique el diseño a fabricar (ej: cadena tejido fígaro 60cm oro 18k)..."))" />
-                        </FormItem>
+                        <SoftVoiceTextArea @bind-Value="_formModel.Description"
+                                           Label="Descripción del Contrato"
+                                           Required="true"
+                                           Placeholder="@(_formModel.ContractKind == "SEPARE"
+                                               ? "Detalle de la joya o reloj apartado o pulse 'Dictar por Voz'..."
+                                               : (_formModel.ContractKind == "REPARACION"
+                                                   ? "Describa la reparación solicitada o pulse 'Dictar por Voz'..."
+                                                   : "Especifique el diseño a fabricar o pulse 'Dictar por Voz'..."))" />
                     </div>
                 </div>
             </SoftFormBox>

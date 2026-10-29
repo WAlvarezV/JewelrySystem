@@ -107,10 +107,16 @@
         <SoftFilterCard>
             <div class="row g-3 align-items-center">
                 <div class="col-12 col-md-5">
-                    <Input Placeholder="Buscar joya por referencia o descripción..."
-                           PrefixIcon="search"
-                           @bind-Value="_searchJewelryTerm"
-                           AllowClear="true" />
+                    <div class="d-flex align-items-center gap-1">
+                        <Input Placeholder="Buscar joya por referencia o descripción..."
+                               PrefixIcon="search"
+                               @bind-Value="_searchJewelryTerm"
+                               AllowClear="true" />
+                        <SoftVoiceButton @bind-TargetText="_searchJewelryTerm"
+                                         Append="false"
+                                         TooltipText="Buscar por voz"
+                                         ButtonClass="btn-outline-secondary" />
+                    </div>
                 </div>
                 <div class="col-12 col-md-4">
                     <Select TItemValue="int"
@@ -265,10 +271,16 @@
         <SoftFilterCard>
             <div class="row g-3 align-items-center">
                 <div class="col-12 col-md-4">
-                    <Input Placeholder="Buscar por serial, marca o descripción..."
-                           PrefixIcon="search"
-                           @bind-Value="_searchWatchTerm"
-                           AllowClear="true" />
+                    <div class="d-flex align-items-center gap-1">
+                        <Input Placeholder="Buscar por serial, marca o descripción..."
+                               PrefixIcon="search"
+                               @bind-Value="_searchWatchTerm"
+                               AllowClear="true" />
+                        <SoftVoiceButton @bind-TargetText="_searchWatchTerm"
+                                         Append="false"
+                                         TooltipText="Buscar por voz"
+                                         ButtonClass="btn-outline-secondary" />
+                    </div>
                 </div>
                 <div class="col-12 col-md-3">
                     <Select TItemValue="int"
@@ -500,13 +512,11 @@
                 <!-- 3. Descripción -->
                 <SoftFormBox Title="3. Descripción del Artículo"
                              Subtitle="Detalle material (oro 18k, 14k, plata), piedras preciosas, tallas, grabado...">
-                    <FormItem Label="Descripción Detallada" Required="true">
-                        <TextArea Rows="3"
-                                  @bind-Value="_jewelFormModel.Description"
-                                  Placeholder="Describa el diseño de la joya, ley del metal, acabados, engastes o particularidades..."
-                                  MaxLength="500"
-                                  ShowCount="true" />
-                    </FormItem>
+                    <SoftVoiceTextArea @bind-Value="_jewelFormModel.Description"
+                                       Label="Descripción Detallada"
+                                       Required="true"
+                                       Placeholder="Describa el diseño de la joya, ley del metal o pulse 'Dictar por Voz'..."
+                                       MaxLength="500" />
                 </SoftFormBox>
             </Form>
         </ChildContent>
@@ -631,13 +641,11 @@
                 <!-- 3. Descripción -->
                 <SoftFormBox Title="3. Descripción del Reloj"
                              Subtitle="Modelo, movimiento (automático/cuarzo), pulso, cristal, estado estético...">
-                    <FormItem Label="Descripción Detallada" Required="true">
-                        <TextArea Rows="3"
-                                  @bind-Value="_watchFormModel.Description"
-                                  Placeholder="Detalle características: maquinaria, bisel, pulso en acero/cuero, resistencia al agua..."
-                                  MaxLength="500"
-                                  ShowCount="true" />
-                    </FormItem>
+                    <SoftVoiceTextArea @bind-Value="_watchFormModel.Description"
+                                       Label="Descripción Detallada"
+                                       Required="true"
+                                       Placeholder="Detalle características: maquinaria, bisel, pulso o pulse 'Dictar por Voz'..."
+                                       MaxLength="500" />
                 </SoftFormBox>
             </Form>
         </ChildContent>

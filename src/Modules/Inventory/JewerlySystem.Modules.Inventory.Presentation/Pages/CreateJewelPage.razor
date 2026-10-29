@@ -122,11 +122,11 @@
             <!-- 4. Descripción -->
             <SoftFormBox Title="3. Descripción del Artículo"
                          Subtitle="Detalle material (oro 18k, 14k, plata), piedras preciosas, tallas, grabado...">
-                <TextArea Rows="3"
-                          @bind-Value="_formModel.Description"
-                          Placeholder="Describa el diseño de la joya, ley del metal, acabados, engastes o particularidades..."
-                          MaxLength="500"
-                          ShowCount="true" />
+                <SoftVoiceTextArea @bind-Value="_formModel.Description"
+                                   Label="Descripción de la Joya"
+                                   Required="true"
+                                   Placeholder="Describa el diseño de la joya, ley del metal o use 'Dictar por Voz'..."
+                                   MaxLength="500" />
             </SoftFormBox>
 
             <!-- Acciones -->
