@@ -1,6 +1,8 @@
 using System.Security.Claims;
+using JewerlySystem.Common.Application.Emailing;
 using JewerlySystem.Common.Application.Voice;
 using JewerlySystem.Common.Infrastructure;
+using JewerlySystem.Common.Infrastructure.Emailing;
 using JewerlySystem.Modules.Auth.Application;
 using JewerlySystem.Modules.Auth.Infrastructure;
 using JewerlySystem.Modules.Cash.Infrastructure;
@@ -46,15 +48,28 @@ builder.Services.AddInvoicingModule(builder.Configuration);
 builder.Services.AddVoiceIntelligence();
 builder.Services.AddScoped<IVoiceCommandDispatcher, VoiceCommandDispatcher>();
 
+// Emailing & Templates (SI.SIOT Standard)
+builder.Services.AddSingleton<IEmailTemplateService, EmailTemplateService>();
+builder.Services.AddHttpClient<IEmailSender, ResendEmailSender>();
+
 // Authentication & Authorization
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/";
-        options.LogoutPath = "/logout";
-        options.ExpireTimeSpan = TimeSpan.FromHours(8);
-        options.SlidingExpiration = true;
-    });
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+})
+.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+{
+    options.LoginPath = "/";
+    options.LogoutPath = "/logout";
+    options.ExpireTimeSpan = TimeSpan.FromHours(8);
+    options.SlidingExpiration = true;
+})
+.AddCookie(IdentityConstants.TwoFactorUserIdScheme, options =>
+{
+    options.Cookie.Name = "JewerlySystem.2FA";
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+});
 
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
@@ -79,11 +94,14 @@ app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Standard HTTP POST Login Endpoint to issue authentication cookie
+// Standard HTTP POST Login Endpoint with Mandatory MFA (SI.SIOT Standard)
 app.MapPost("/api/auth/login", async (
     HttpContext httpContext,
     UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager) =>
+    SignInManager<ApplicationUser> signInManager,
+    IEmailTemplateService templateService,
+    IEmailSender emailSender,
+    ILoggerFactory loggerFactory) =>
 {
     var form = await httpContext.Request.ReadFormAsync();
     string username = form["username"].ToString().Trim();
@@ -111,12 +129,92 @@ app.MapPost("/api/auth/login", async (
         return Results.Redirect("/?error=" + Uri.EscapeDataString("Usuario o contraseña incorrectos."));
     }
 
+    // MANDATORY MFA: Direct login with only username and password is forbidden.
+    // Generate 6-digit OTP and send via Resend using SI.SIOT HTML template.
+    var otp = await userManager.GenerateTwoFactorTokenAsync(user, "Email");
+    var logger = loggerFactory.CreateLogger("Auth");
+
+    var templateValues = new Dictionary<string, string>
+    {
+        ["UserName"] = user.UserName ?? user.Email ?? "Usuario",
+        ["UserEmail"] = user.Email ?? "",
+        ["OtpCode"] = otp,
+        ["Timestamp"] = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
+    };
+
+    var htmlBody = templateService.GenerateHtml("otp-mfa-template.html", templateValues);
+    var sent = await emailSender.SendEmailAsync(user.Email ?? "", "Código de Seguridad MFA - JewerlySystem", htmlBody);
+
+    // Issue 2FA temporary cookie
+    var twoFactorClaims = new List<Claim>
+    {
+        new(ClaimTypes.NameIdentifier, user.Id),
+        new(ClaimTypes.Email, user.Email ?? ""),
+        new("returnUrl", string.IsNullOrWhiteSpace(returnUrl) ? "/dashboard" : returnUrl)
+    };
+    var twoFactorIdentity = new ClaimsIdentity(twoFactorClaims, IdentityConstants.TwoFactorUserIdScheme);
+    await httpContext.SignInAsync(IdentityConstants.TwoFactorUserIdScheme, new ClaimsPrincipal(twoFactorIdentity), new AuthenticationProperties
+    {
+        IsPersistent = false,
+        ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(10)
+    });
+
+    logger.LogInformation("MFA OTP generado para {Email}: [{Otp}]. Enviado: {Sent}", user.Email, otp, sent);
+
+    var masked = MaskEmail(user.Email);
+    return Results.Redirect($"/?mfa=true&email={Uri.EscapeDataString(masked)}");
+}).DisableAntiforgery();
+
+app.MapPost("/api/auth/verify-otp", async (
+    HttpContext httpContext,
+    UserManager<ApplicationUser> userManager) =>
+{
+    var authResult = await httpContext.AuthenticateAsync(IdentityConstants.TwoFactorUserIdScheme);
+    if (!authResult.Succeeded || authResult.Principal == null)
+    {
+        return Results.Redirect("/?error=" + Uri.EscapeDataString("La sesión de verificación ha expirado. Por favor ingresa nuevamente."));
+    }
+
+    var userId = authResult.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
+    var email = authResult.Principal.FindFirstValue(ClaimTypes.Email);
+    var returnUrl = authResult.Principal.FindFirstValue("returnUrl") ?? "/dashboard";
+
+    if (string.IsNullOrEmpty(userId))
+    {
+        return Results.Redirect("/?error=" + Uri.EscapeDataString("Error identificando la sesión temporal."));
+    }
+
+    var user = await userManager.FindByIdAsync(userId);
+    if (user == null)
+    {
+        return Results.Redirect("/?error=" + Uri.EscapeDataString("Usuario no encontrado."));
+    }
+
+    var form = await httpContext.Request.ReadFormAsync();
+    string otpCode = form["otpCode"].ToString().Trim();
+
+    if (string.IsNullOrWhiteSpace(otpCode))
+    {
+        return Results.Redirect($"/?mfa=true&email={Uri.EscapeDataString(MaskEmail(email))}&error={Uri.EscapeDataString("Por favor ingresa el código de 6 dígitos.")}");
+    }
+
+    var isValid = await userManager.VerifyTwoFactorTokenAsync(user, "Email", otpCode);
+    if (!isValid)
+    {
+        return Results.Redirect($"/?mfa=true&email={Uri.EscapeDataString(MaskEmail(email))}&error={Uri.EscapeDataString("Código de seguridad incorrecto o expirado.")}");
+    }
+
+    // Clear 2FA temporary cookie
+    await httpContext.SignOutAsync(IdentityConstants.TwoFactorUserIdScheme);
+
+    // Issue production authentication cookie
     var roles = await userManager.GetRolesAsync(user);
     var claims = new List<Claim>
     {
         new(ClaimTypes.NameIdentifier, user.Id),
         new(ClaimTypes.Name, user.UserName ?? user.Email ?? "Usuario"),
-        new(ClaimTypes.Email, user.Email ?? "")
+        new(ClaimTypes.Email, user.Email ?? ""),
+        new(ClaimTypes.AuthenticationMethod, "Password+EmailOTP")
     };
     foreach (var role in roles)
     {
@@ -133,8 +231,53 @@ app.MapPost("/api/auth/login", async (
     user.LastLoginAt = DateTime.UtcNow;
     await userManager.UpdateAsync(user);
 
-    var destination = string.IsNullOrWhiteSpace(returnUrl) ? "/dashboard" : returnUrl;
-    return Results.Redirect(destination);
+    return Results.Redirect(returnUrl);
+}).DisableAntiforgery();
+
+app.MapPost("/api/auth/resend-otp", async (
+    HttpContext httpContext,
+    UserManager<ApplicationUser> userManager,
+    IEmailTemplateService templateService,
+    IEmailSender emailSender,
+    ILoggerFactory loggerFactory) =>
+{
+    var authResult = await httpContext.AuthenticateAsync(IdentityConstants.TwoFactorUserIdScheme);
+    if (!authResult.Succeeded || authResult.Principal == null)
+    {
+        return Results.Redirect("/?error=" + Uri.EscapeDataString("La sesión de verificación ha expirado. Por favor ingresa nuevamente."));
+    }
+
+    var userId = authResult.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
+    var email = authResult.Principal.FindFirstValue(ClaimTypes.Email);
+
+    if (string.IsNullOrEmpty(userId))
+    {
+        return Results.Redirect("/?error=" + Uri.EscapeDataString("Error identificando la sesión temporal."));
+    }
+
+    var user = await userManager.FindByIdAsync(userId);
+    if (user == null)
+    {
+        return Results.Redirect("/?error=" + Uri.EscapeDataString("Usuario no encontrado."));
+    }
+
+    var otp = await userManager.GenerateTwoFactorTokenAsync(user, "Email");
+    var logger = loggerFactory.CreateLogger("Auth");
+
+    var templateValues = new Dictionary<string, string>
+    {
+        ["UserName"] = user.UserName ?? user.Email ?? "Usuario",
+        ["UserEmail"] = user.Email ?? "",
+        ["OtpCode"] = otp,
+        ["Timestamp"] = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
+    };
+
+    var htmlBody = templateService.GenerateHtml("otp-mfa-template.html", templateValues);
+    var sent = await emailSender.SendEmailAsync(user.Email ?? "", "Nuevo Código de Seguridad MFA - JewerlySystem", htmlBody);
+
+    logger.LogInformation("Reenvío MFA OTP para {Email}: [{Otp}]. Enviado: {Sent}", user.Email, otp, sent);
+
+    return Results.Redirect($"/?mfa=true&email={Uri.EscapeDataString(MaskEmail(email))}&message={Uri.EscapeDataString("Se ha enviado un nuevo código a tu correo.")}");
 }).DisableAntiforgery();
 
 // Passkeys WebAuthn Endpoints
@@ -223,3 +366,15 @@ catch (Exception ex)
 }
 
 app.Run();
+
+static string MaskEmail(string? email)
+{
+    if (string.IsNullOrWhiteSpace(email) || !email.Contains('@'))
+        return "tu correo registrado";
+    var parts = email.Split('@');
+    var name = parts[0];
+    var domain = parts[1];
+    if (name.Length <= 2)
+        return $"{name[0]}*@{domain}";
+    return $"{name[0]}{new string('*', Math.Max(1, name.Length - 2))}{name[^1]}@{domain}";
+}

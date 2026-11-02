@@ -60,6 +60,15 @@ public class GenerateMfaQrCodeQueryHandler : IQueryHandler<GenerateMfaQrCodeQuer
         await _mfaService.GenerateMfaQrCodeAsync(request.UserId);
 }
 
+public class GetMfaStatusQueryHandler : IQueryHandler<GetMfaStatusQuery, MfaStatusDto>
+{
+    private readonly IMfaService _mfaService;
+    public GetMfaStatusQueryHandler(IMfaService mfaService) => _mfaService = mfaService;
+
+    public async Task<Result<MfaStatusDto>> Handle(GetMfaStatusQuery request, CancellationToken cancellationToken) =>
+        await _mfaService.GetMfaStatusAsync(request.UserId);
+}
+
 public class EnableMfaCommandHandler : ICommandHandler<EnableMfaCommand, IReadOnlyList<string>>
 {
     private readonly IMfaService _mfaService;
@@ -67,6 +76,48 @@ public class EnableMfaCommandHandler : ICommandHandler<EnableMfaCommand, IReadOn
 
     public async Task<Result<IReadOnlyList<string>>> Handle(EnableMfaCommand request, CancellationToken cancellationToken) =>
         await _mfaService.VerifyAndEnableMfaAsync(request.UserId, request.Code);
+}
+
+public class DisableMfaCommandHandler : ICommandHandler<DisableMfaCommand, bool>
+{
+    private readonly IMfaService _mfaService;
+    public DisableMfaCommandHandler(IMfaService mfaService) => _mfaService = mfaService;
+
+    public async Task<Result<bool>> Handle(DisableMfaCommand request, CancellationToken cancellationToken) =>
+        await _mfaService.DisableMfaAsync(request.UserId);
+}
+
+public class GenerateNewRecoveryCodesCommandHandler : ICommandHandler<GenerateNewRecoveryCodesCommand, IReadOnlyList<string>>
+{
+    private readonly IMfaService _mfaService;
+    public GenerateNewRecoveryCodesCommandHandler(IMfaService mfaService) => _mfaService = mfaService;
+
+    public async Task<Result<IReadOnlyList<string>>> Handle(GenerateNewRecoveryCodesCommand request, CancellationToken cancellationToken) =>
+        await _mfaService.GenerateNewRecoveryCodesAsync(request.UserId);
+}
+
+public class LoginWithMfaCommandHandler : ICommandHandler<LoginWithMfaCommand, bool>
+{
+    private readonly SignInManager<ApplicationUser> _signInManager;
+    public LoginWithMfaCommandHandler(SignInManager<ApplicationUser> signInManager) => _signInManager = signInManager;
+
+    public async Task<Result<bool>> Handle(LoginWithMfaCommand request, CancellationToken cancellationToken)
+    {
+        var cleanCode = request.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty).Trim();
+        var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(cleanCode, isPersistent: false, rememberClient: request.RememberMachine);
+        if (result.Succeeded)
+        {
+            return Result.Success(true);
+        }
+
+        var recoveryResult = await _signInManager.TwoFactorRecoveryCodeSignInAsync(cleanCode);
+        if (recoveryResult.Succeeded)
+        {
+            return Result.Success(true);
+        }
+
+        return Result.Failure<bool>(Error.Validation("Mfa.InvalidCode", "Código de autenticación o recuperación inválido."));
+    }
 }
 
 public class PasskeyHandlers :

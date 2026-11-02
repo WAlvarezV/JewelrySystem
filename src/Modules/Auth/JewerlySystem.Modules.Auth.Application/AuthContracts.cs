@@ -14,6 +14,11 @@ public record MfaSetupDto(
     string AuthenticatorUri,
     string QrCodeBase64);
 
+public record MfaStatusDto(
+    bool IsEnabled,
+    bool HasAuthenticatorKey,
+    int RecoveryCodesLeft);
+
 public record LoginWithPasswordCommand(string EmailOrUserName, string Password, bool RememberMe = false)
     : ICommand<LoginResponseDto>;
 
@@ -23,7 +28,16 @@ public record LoginWithMfaCommand(string TwoFactorCode, bool RememberMachine = f
 public record GenerateMfaQrCodeQuery(string UserId)
     : IQuery<MfaSetupDto>;
 
+public record GetMfaStatusQuery(string UserId)
+    : IQuery<MfaStatusDto>;
+
 public record EnableMfaCommand(string UserId, string Code)
+    : ICommand<IReadOnlyList<string>>;
+
+public record DisableMfaCommand(string UserId)
+    : ICommand<bool>;
+
+public record GenerateNewRecoveryCodesCommand(string UserId)
     : ICommand<IReadOnlyList<string>>;
 
 public record GetPasskeyAssertionOptionsQuery(string? Username)

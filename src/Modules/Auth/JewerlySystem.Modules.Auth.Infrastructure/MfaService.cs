@@ -11,6 +11,9 @@ public interface IMfaService
     Task<Result<MfaSetupDto>> GenerateMfaQrCodeAsync(string userId);
     Task<Result<IReadOnlyList<string>>> VerifyAndEnableMfaAsync(string userId, string code);
     Task<Result<bool>> VerifyMfaCodeAsync(string userId, string code);
+    Task<Result<MfaStatusDto>> GetMfaStatusAsync(string userId);
+    Task<Result<bool>> DisableMfaAsync(string userId);
+    Task<Result<IReadOnlyList<string>>> GenerateNewRecoveryCodesAsync(string userId);
 }
 
 public class MfaService : IMfaService
@@ -59,13 +62,15 @@ public class MfaService : IMfaService
         if (user == null)
             return Result.Failure<IReadOnlyList<string>>(Error.NotFound("Users.NotFound", "Usuario no encontrado."));
 
+        var cleanCode = code.Replace(" ", string.Empty).Replace("-", string.Empty).Trim();
+
         var isValid = await _userManager.VerifyTwoFactorTokenAsync(
             user,
             _userManager.Options.Tokens.AuthenticatorTokenProvider,
-            code);
+            cleanCode);
 
         if (!isValid)
-            return Result.Failure<IReadOnlyList<string>>(Error.Validation("Mfa.InvalidCode", "Código de verificación incorrecto."));
+            return Result.Failure<IReadOnlyList<string>>(Error.Validation("Mfa.InvalidCode", "Código de verificación incorrecto. Asegúrate de ingresar el código actual de 6 dígitos que muestra tu app Google o Microsoft Authenticator."));
 
         await _userManager.SetTwoFactorEnabledAsync(user, true);
         var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
@@ -79,13 +84,60 @@ public class MfaService : IMfaService
         if (user == null)
             return Result.Failure<bool>(Error.NotFound("Users.NotFound", "Usuario no encontrado."));
 
+        var cleanCode = code.Replace(" ", string.Empty).Replace("-", string.Empty).Trim();
+
         var isValid = await _userManager.VerifyTwoFactorTokenAsync(
             user,
             _userManager.Options.Tokens.AuthenticatorTokenProvider,
-            code);
+            cleanCode);
+
+        if (!isValid)
+        {
+            var recoveryResult = await _userManager.RedeemTwoFactorRecoveryCodeAsync(user, cleanCode);
+            if (recoveryResult.Succeeded)
+            {
+                return Result.Success(true);
+            }
+        }
 
         return isValid
             ? Result.Success(true)
-            : Result.Failure<bool>(Error.Validation("Mfa.InvalidCode", "Código de autenticación inválido."));
+            : Result.Failure<bool>(Error.Validation("Mfa.InvalidCode", "Código de autenticación inválido o expirado."));
+    }
+
+    public async Task<Result<MfaStatusDto>> GetMfaStatusAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+            return Result.Failure<MfaStatusDto>(Error.NotFound("Users.NotFound", "Usuario no encontrado."));
+
+        var isEnabled = await _userManager.GetTwoFactorEnabledAsync(user);
+        var key = await _userManager.GetAuthenticatorKeyAsync(user);
+        var hasKey = !string.IsNullOrEmpty(key);
+        var recoveryCodesLeft = isEnabled ? await _userManager.CountRecoveryCodesAsync(user) : 0;
+
+        return Result.Success(new MfaStatusDto(isEnabled, hasKey, recoveryCodesLeft));
+    }
+
+    public async Task<Result<bool>> DisableMfaAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+            return Result.Failure<bool>(Error.NotFound("Users.NotFound", "Usuario no encontrado."));
+
+        await _userManager.SetTwoFactorEnabledAsync(user, false);
+        await _userManager.ResetAuthenticatorKeyAsync(user);
+
+        return Result.Success(true);
+    }
+
+    public async Task<Result<IReadOnlyList<string>>> GenerateNewRecoveryCodesAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+            return Result.Failure<IReadOnlyList<string>>(Error.NotFound("Users.NotFound", "Usuario no encontrado."));
+
+        var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
+        return Result.Success<IReadOnlyList<string>>(recoveryCodes?.ToList() ?? new List<string>());
     }
 }

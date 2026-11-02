@@ -20,27 +20,66 @@
 
                     @if (!string.IsNullOrEmpty(ErrorFromQuery) || !string.IsNullOrEmpty(_errorMessage))
                     {
-                        <div class="alert alert-danger py-2 small d-flex align-items-center gap-2" role="alert">
+                        <div class="alert alert-danger py-2 small d-flex align-items-center gap-2 mb-3" role="alert">
                             <i class="bi bi-exclamation-triangle-fill"></i>
                             <span>@(ErrorFromQuery ?? _errorMessage)</span>
                         </div>
                     }
 
-                    @if (_requiresMfa)
+                    @if (MfaFromQuery == true)
                     {
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Código de Verificación MFA (TOTP)</label>
-                            <input @bind="_mfaCode" type="text" class="form-control form-control-lg text-center letter-spacing" placeholder="000000" maxlength="6" autofocus />
-                            <div class="form-text small">Ingresa el código temporal de tu app de autenticación.</div>
+                        <div class="text-center mb-4">
+                            <div class="d-inline-flex p-3 rounded-circle bg-warning bg-opacity-10 text-warning mb-2">
+                                <i class="bi bi-shield-lock-fill fs-2"></i>
+                            </div>
+                            <h4 class="fw-bold text-dark mt-2">Segundo Factor (MFA)</h4>
+                            <p class="text-muted small mb-0">
+                                Hemos enviado un código de 6 dígitos a:
+                                <br />
+                                <strong class="text-dark">@(EmailFromQuery ?? "tu correo registrado")</strong>
+                            </p>
                         </div>
 
-                        <button @onclick="HandleMfaSubmit" class="btn btn-primary btn-lg w-100 fw-semibold" disabled="@_isLoading">
-                            @if (_isLoading)
-                            {
-                                <span class="spinner-border spinner-border-sm me-2"></span>
-                            }
-                            Verificar y Entrar
+                        @if (!string.IsNullOrEmpty(MessageFromQuery))
+                        {
+                            <div class="alert alert-success py-2 small d-flex align-items-center gap-2 mb-3" role="alert">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>@MessageFromQuery</span>
+                            </div>
+                        }
+
+                        <form method="post" action="/api/auth/verify-otp">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Código de Verificación</label>
+                                <input name="otpCode" type="text" class="form-control form-control-lg text-center fw-bold fs-3 letter-spacing" placeholder="000000" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="one-time-code" autofocus required />
+                                <div class="form-text text-center small">Válido durante 10 minutos. Revisa tu bandeja de entrada o spam.</div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-lg w-100 fw-semibold mb-3 shadow-sm">
+                                Verificar y Acceder
+                            </button>
+                        </form>
+
+                        <div class="position-relative text-center my-3">
+                            <hr class="text-muted" />
+                            <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">o verifica con</span>
+                        </div>
+
+                        <button @onclick="HandlePasskeyLogin" type="button" class="btn btn-outline-dark btn-lg w-100 fw-semibold d-flex align-items-center justify-content-center gap-2 mb-3" disabled="@_isLoading">
+                            <i class="bi bi-fingerprint fs-4 text-primary"></i>
+                            <span>Passkey / Biometría</span>
                         </button>
+
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                            <form method="post" action="/api/auth/resend-otp">
+                                <button type="submit" class="btn btn-link text-decoration-none p-0 small fw-semibold">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>Reenviar código
+                                </button>
+                            </form>
+                            <a href="/" class="btn btn-link text-secondary text-decoration-none p-0 small">
+                                <i class="bi bi-arrow-left me-1"></i>Volver
+                            </a>
+                        </div>
                     }
                     else
                     {
@@ -62,7 +101,7 @@
                             </div>
 
                             <button type="submit" class="btn btn-primary btn-lg w-100 fw-semibold mb-3 shadow-sm">
-                                Iniciar Sesión
+                                Continuar
                             </button>
                         </form>
 
@@ -89,11 +128,18 @@
     [SupplyParameterFromQuery(Name = "error")]
     public string? ErrorFromQuery { get; set; }
 
+    [SupplyParameterFromQuery(Name = "message")]
+    public string? MessageFromQuery { get; set; }
+
+    [SupplyParameterFromQuery(Name = "mfa")]
+    public bool? MfaFromQuery { get; set; }
+
+    [SupplyParameterFromQuery(Name = "email")]
+    public string? EmailFromQuery { get; set; }
+
     [CascadingParameter]
     private Task<AuthenticationState>? AuthStateTask { get; set; }
 
-    private string _mfaCode = "";
-    private bool _requiresMfa;
     private bool _isLoading;
     private string? _errorMessage;
 
@@ -106,45 +152,6 @@
             {
                 Navigation.NavigateTo("/dashboard");
             }
-        }
-    }
-
-    private async Task HandleMfaSubmit()
-    {
-        if (string.IsNullOrWhiteSpace(_mfaCode))
-        {
-            _errorMessage = "Por favor ingresa el código MFA.";
-            return;
-        }
-
-        _isLoading = true;
-        try
-        {
-            var command = new LoginWithMfaCommand(_mfaCode);
-            var result = await Sender.Send(command);
-
-            if (result.IsFailure)
-            {
-                _errorMessage = result.Error.Message;
-                return;
-            }
-
-            if (result.Value)
-            {
-                Navigation.NavigateTo("/dashboard", forceLoad: true);
-            }
-            else
-            {
-                _errorMessage = "Código MFA incorrecto o expirado.";
-            }
-        }
-        catch (Exception ex)
-        {
-            _errorMessage = ex.Message;
-        }
-        finally
-        {
-            _isLoading = false;
         }
     }
 
