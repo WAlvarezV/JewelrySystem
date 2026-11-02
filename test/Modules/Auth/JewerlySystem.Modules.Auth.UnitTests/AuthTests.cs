@@ -49,4 +49,35 @@ public class AuthTests
         Assert.Equal("iPhone 15 FaceID", command.KeyName);
         Assert.Equal("{}", command.AttestationResponseJson);
     }
+
+    [Fact]
+    public void MfaStatusDto_ShouldHoldCorrectState()
+    {
+        // Arrange & Act
+        var status = new MfaStatusDto(IsEnabled: true, HasAuthenticatorKey: true, RecoveryCodesLeft: 8);
+
+        // Assert
+        Assert.True(status.IsEnabled);
+        Assert.True(status.HasAuthenticatorKey);
+        Assert.Equal(8, status.RecoveryCodesLeft);
+    }
+
+    [Fact]
+    public void MfaQueriesAndCommands_ShouldInitializeProperly()
+    {
+        // Arrange & Act
+        var getQuery = new GetMfaStatusQuery("user-123");
+        var genQuery = new GenerateMfaQrCodeQuery("user-123");
+        var enableCmd = new EnableMfaCommand("user-123", "654321");
+        var disableCmd = new DisableMfaCommand("user-123");
+        var recoveryCmd = new GenerateNewRecoveryCodesCommand("user-123");
+
+        // Assert
+        Assert.Equal("user-123", getQuery.UserId);
+        Assert.Equal("user-123", genQuery.UserId);
+        Assert.Equal("user-123", enableCmd.UserId);
+        Assert.Equal("654321", enableCmd.Code);
+        Assert.Equal("user-123", disableCmd.UserId);
+        Assert.Equal("user-123", recoveryCmd.UserId);
+    }
 }

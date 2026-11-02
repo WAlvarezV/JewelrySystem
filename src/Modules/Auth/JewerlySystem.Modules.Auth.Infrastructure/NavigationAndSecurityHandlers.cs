@@ -115,12 +115,30 @@ public class NavigationAndSecurityHandlers :
                 new() { Id = Guid.Parse("66666666-6666-6666-6666-666666666663"), ModuleKey = "ADMIN", Name = "Configuración de Menús", Route = "/admin/menus", Icon = "bi-list-ul", Order = 3, IsActive = true },
                 new() { Id = Guid.Parse("66666666-6666-6666-6666-666666666664"), ModuleKey = "ADMIN", Name = "Roles de Seguridad", Route = "/admin/roles", Icon = "bi-person-badge", Order = 4, IsActive = true },
                 new() { Id = Guid.Parse("66666666-6666-6666-6666-666666666665"), ModuleKey = "ADMIN", Name = "Matriz de Permisos", Route = "/admin/permissions", Icon = "bi-shield-check", Order = 5, IsActive = true },
-                new() { Id = Guid.Parse("66666666-6666-6666-6666-666666666666"), ModuleKey = "ADMIN", Name = "Mis Passkeys", Route = "/auth/passkeys", Icon = "bi-fingerprint", Order = 6, IsActive = true }
+                new() { Id = Guid.Parse("66666666-6666-6666-6666-666666666666"), ModuleKey = "ADMIN", Name = "Mis Passkeys", Route = "/auth/passkeys", Icon = "bi-fingerprint", Order = 6, IsActive = true },
+                new() { Id = Guid.Parse("66666666-6666-6666-6666-666666666667"), ModuleKey = "ADMIN", Name = "Autenticador Móvil (MFA)", Route = "/auth/mfa", Icon = "bi-shield-lock-fill", Order = 7, IsActive = true }
             };
 
             _dbContext.AppModules.AddRange(defaultModules);
             _dbContext.MenuItems.AddRange(defaultMenus);
             await _dbContext.SaveChangesAsync(ct);
+        }
+        else
+        {
+            if (!await _dbContext.MenuItems.AnyAsync(m => m.Route == "/auth/mfa", ct))
+            {
+                _dbContext.MenuItems.Add(new()
+                {
+                    Id = Guid.Parse("66666666-6666-6666-6666-666666666667"),
+                    ModuleKey = "ADMIN",
+                    Name = "Autenticador Móvil (MFA)",
+                    Route = "/auth/mfa",
+                    Icon = "bi-shield-lock-fill",
+                    Order = 7,
+                    IsActive = true
+                });
+                await _dbContext.SaveChangesAsync(ct);
+            }
         }
 
         // 2. Ensure default roles exist including 'Admin'

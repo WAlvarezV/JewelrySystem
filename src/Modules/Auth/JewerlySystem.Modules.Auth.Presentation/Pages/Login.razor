@@ -28,17 +28,37 @@
 
                     @if (MfaFromQuery == true)
                     {
-                        <div class="text-center mb-4">
-                            <div class="d-inline-flex p-3 rounded-circle bg-warning bg-opacity-10 text-warning mb-2">
-                                <i class="bi bi-shield-lock-fill fs-2"></i>
+                        @if (MethodFromQuery == "authenticator")
+                        {
+                            <div class="text-center mb-4">
+                                <div class="d-inline-flex p-3 rounded-circle bg-primary bg-opacity-10 text-primary mb-2">
+                                    <i class="bi bi-phone-vibrate-fill fs-2"></i>
+                                </div>
+                                <h4 class="fw-bold text-dark mt-2">Código de Aplicación Móvil</h4>
+                                <p class="text-muted small mb-0">
+                                    Abre <strong>Google Authenticator</strong> o <strong>Microsoft Authenticator</strong> en tu celular e ingresa el código temporal de 6 dígitos.
+                                </p>
+                                <div class="mt-2">
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle small">
+                                        <i class="bi bi-shield-check me-1"></i>Acceso directo sin correos
+                                    </span>
+                                </div>
                             </div>
-                            <h4 class="fw-bold text-dark mt-2">Segundo Factor (MFA)</h4>
-                            <p class="text-muted small mb-0">
-                                Hemos enviado un código de 6 dígitos a:
-                                <br />
-                                <strong class="text-dark">@(EmailFromQuery ?? "tu correo registrado")</strong>
-                            </p>
-                        </div>
+                        }
+                        else
+                        {
+                            <div class="text-center mb-4">
+                                <div class="d-inline-flex p-3 rounded-circle bg-warning bg-opacity-10 text-warning mb-2">
+                                    <i class="bi bi-shield-lock-fill fs-2"></i>
+                                </div>
+                                <h4 class="fw-bold text-dark mt-2">Segundo Factor (MFA)</h4>
+                                <p class="text-muted small mb-0">
+                                    Hemos enviado un código de 6 dígitos a:
+                                    <br />
+                                    <strong class="text-dark">@(EmailFromQuery ?? "tu correo registrado")</strong>
+                                </p>
+                            </div>
+                        }
 
                         @if (!string.IsNullOrEmpty(MessageFromQuery))
                         {
@@ -51,8 +71,10 @@
                         <form method="post" action="/api/auth/verify-otp">
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Código de Verificación</label>
-                                <input name="otpCode" type="text" class="form-control form-control-lg text-center fw-bold fs-3 letter-spacing" placeholder="000000" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="one-time-code" autofocus required />
-                                <div class="form-text text-center small">Válido durante 10 minutos. Revisa tu bandeja de entrada o spam.</div>
+                                <input name="otpCode" type="text" class="form-control form-control-lg text-center fw-bold fs-3 letter-spacing" placeholder="000000" maxlength="10" inputmode="numeric" autocomplete="one-time-code" autofocus required />
+                                <div class="form-text text-center small">
+                                    @(MethodFromQuery == "authenticator" ? "Código de 6 dígitos de tu app (o código de recuperación)." : "Válido durante 10 minutos. Revisa tu bandeja de entrada o spam.")
+                                </div>
                             </div>
 
                             <button type="submit" class="btn btn-primary btn-lg w-100 fw-semibold mb-3 shadow-sm">
@@ -71,11 +93,18 @@
                         </button>
 
                         <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                            <form method="post" action="/api/auth/resend-otp">
-                                <button type="submit" class="btn btn-link text-decoration-none p-0 small fw-semibold">
-                                    <i class="bi bi-arrow-clockwise me-1"></i>Reenviar código
-                                </button>
-                            </form>
+                            @if (MethodFromQuery != "authenticator")
+                            {
+                                <form method="post" action="/api/auth/resend-otp">
+                                    <button type="submit" class="btn btn-link text-decoration-none p-0 small fw-semibold">
+                                        <i class="bi bi-arrow-clockwise me-1"></i>Reenviar código
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="text-muted small"><i class="bi bi-info-circle me-1"></i>Código rotativo (30s)</span>
+                            }
                             <a href="/" class="btn btn-link text-secondary text-decoration-none p-0 small">
                                 <i class="bi bi-arrow-left me-1"></i>Volver
                             </a>
@@ -136,6 +165,12 @@
 
     [SupplyParameterFromQuery(Name = "email")]
     public string? EmailFromQuery { get; set; }
+
+    [SupplyParameterFromQuery(Name = "method")]
+    public string? MethodFromQuery { get; set; }
+
+    [SupplyParameterFromQuery(Name = "user")]
+    public string? UserFromQuery { get; set; }
 
     [CascadingParameter]
     private Task<AuthenticationState>? AuthStateTask { get; set; }

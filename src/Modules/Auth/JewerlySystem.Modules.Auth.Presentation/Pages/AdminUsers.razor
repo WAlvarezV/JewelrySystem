@@ -213,6 +213,12 @@
                                         <button class="btn btn-outline-primary" title="Asignar Rol" @onclick="() => OpenAssignRoleModal(user)">
                                             <i class="bi bi-shield-gear"></i>
                                         </button>
+                                        @if (user.TwoFactorEnabled)
+                                        {
+                                            <button class="btn btn-outline-danger" title="Resetear / Desvincular MFA" @onclick="() => ResetUserMfaAsync(user)">
+                                                <i class="bi bi-shield-slash"></i>
+                                            </button>
+                                        }
                                         <button class="btn @(user.IsActive ? "btn-outline-warning" : "btn-outline-success")"
                                                 title="@(user.IsActive ? "Desactivar" : "Activar")"
                                                 @onclick="() => ToggleUserStatusAsync(user.Id)">
@@ -448,6 +454,27 @@
         catch (Exception ex)
         {
             _errorMessage = ex.Message;
+        }
+    }
+
+    private async Task ResetUserMfaAsync(UserItemDto user)
+    {
+        try
+        {
+            var res = await Sender.Send(new DisableMfaCommand(user.Id));
+            if (res.IsSuccess)
+            {
+                _message = $"Segundo Factor (MFA) desactivado y reseteado para el usuario {user.UserName}.";
+                await LoadDataAsync();
+            }
+            else
+            {
+                _errorMessage = res.Error.Message;
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = "Error al resetear MFA: " + ex.Message;
         }
     }
 

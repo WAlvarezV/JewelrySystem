@@ -120,7 +120,7 @@ app.MapPost("/api/auth/login", async (
     }
 
     var result = await signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: true);
-    if (!result.Succeeded)
+    if (!result.Succeeded && !result.RequiresTwoFactor)
     {
         if (result.IsLockedOut)
         {
@@ -129,28 +129,18 @@ app.MapPost("/api/auth/login", async (
         return Results.Redirect("/?error=" + Uri.EscapeDataString("Usuario o contraseña incorrectos."));
     }
 
-    // MANDATORY MFA: Direct login with only username and password is forbidden.
-    // Generate 6-digit OTP and send via Resend using SI.SIOT HTML template.
-    var otp = await userManager.GenerateTwoFactorTokenAsync(user, "Email");
-    var logger = loggerFactory.CreateLogger("Auth");
-
-    var templateValues = new Dictionary<string, string>
-    {
-        ["UserName"] = user.UserName ?? user.Email ?? "Usuario",
-        ["UserEmail"] = user.Email ?? "",
-        ["OtpCode"] = otp,
-        ["Timestamp"] = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
-    };
-
-    var htmlBody = templateService.GenerateHtml("otp-mfa-template.html", templateValues);
-    var sent = await emailSender.SendEmailAsync(user.Email ?? "", "Código de Seguridad MFA - JewerlySystem", htmlBody);
+    // Check if user has Google / Microsoft Authenticator (TOTP) enabled
+    var isTwoFactorEnabled = await userManager.GetTwoFactorEnabledAsync(user);
+    var authenticatorKey = await userManager.GetAuthenticatorKeyAsync(user);
+    var hasAuthenticator = isTwoFactorEnabled && !string.IsNullOrEmpty(authenticatorKey);
 
     // Issue 2FA temporary cookie
     var twoFactorClaims = new List<Claim>
     {
         new(ClaimTypes.NameIdentifier, user.Id),
         new(ClaimTypes.Email, user.Email ?? ""),
-        new("returnUrl", string.IsNullOrWhiteSpace(returnUrl) ? "/dashboard" : returnUrl)
+        new("returnUrl", string.IsNullOrWhiteSpace(returnUrl) ? "/dashboard" : returnUrl),
+        new("mfaMethod", hasAuthenticator ? "authenticator" : "email")
     };
     var twoFactorIdentity = new ClaimsIdentity(twoFactorClaims, IdentityConstants.TwoFactorUserIdScheme);
     await httpContext.SignInAsync(IdentityConstants.TwoFactorUserIdScheme, new ClaimsPrincipal(twoFactorIdentity), new AuthenticationProperties
@@ -159,10 +149,35 @@ app.MapPost("/api/auth/login", async (
         ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(10)
     });
 
-    logger.LogInformation("MFA OTP generado para {Email}: [{Otp}]. Enviado: {Sent}", user.Email, otp, sent);
+    if (hasAuthenticator)
+    {
+        // TOTP Mobile App (Google / Microsoft Authenticator): No email sent!
+        var logger = loggerFactory.CreateLogger("Auth");
+        logger.LogInformation("Usuario {UserName} requiere código TOTP móvil (sin correo).", user.UserName);
+        return Results.Redirect($"/?mfa=true&method=authenticator&user={Uri.EscapeDataString(user.UserName ?? user.Email ?? "")}");
+    }
+    else
+    {
+        // Fallback for users without Google/Microsoft Authenticator app yet: Email OTP
+        var otp = await userManager.GenerateTwoFactorTokenAsync(user, "Email");
+        var logger = loggerFactory.CreateLogger("Auth");
 
-    var masked = MaskEmail(user.Email);
-    return Results.Redirect($"/?mfa=true&email={Uri.EscapeDataString(masked)}");
+        var templateValues = new Dictionary<string, string>
+        {
+            ["UserName"] = user.UserName ?? user.Email ?? "Usuario",
+            ["UserEmail"] = user.Email ?? "",
+            ["OtpCode"] = otp,
+            ["Timestamp"] = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
+        };
+
+        var htmlBody = templateService.GenerateHtml("otp-mfa-template.html", templateValues);
+        var sent = await emailSender.SendEmailAsync(user.Email ?? "", "Código de Seguridad MFA - JewerlySystem", htmlBody);
+
+        logger.LogInformation("MFA OTP generado para {Email}: [{Otp}]. Enviado: {Sent}", user.Email, otp, sent);
+
+        var masked = MaskEmail(user.Email);
+        return Results.Redirect($"/?mfa=true&method=email&email={Uri.EscapeDataString(masked)}");
+    }
 }).DisableAntiforgery();
 
 app.MapPost("/api/auth/verify-otp", async (
@@ -178,6 +193,7 @@ app.MapPost("/api/auth/verify-otp", async (
     var userId = authResult.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
     var email = authResult.Principal.FindFirstValue(ClaimTypes.Email);
     var returnUrl = authResult.Principal.FindFirstValue("returnUrl") ?? "/dashboard";
+    var mfaMethod = authResult.Principal.FindFirstValue("mfaMethod") ?? "authenticator";
 
     if (string.IsNullOrEmpty(userId))
     {
@@ -195,13 +211,52 @@ app.MapPost("/api/auth/verify-otp", async (
 
     if (string.IsNullOrWhiteSpace(otpCode))
     {
-        return Results.Redirect($"/?mfa=true&email={Uri.EscapeDataString(MaskEmail(email))}&error={Uri.EscapeDataString("Por favor ingresa el código de 6 dígitos.")}");
+        var redirectUrl = mfaMethod == "authenticator"
+            ? $"/?mfa=true&method=authenticator&user={Uri.EscapeDataString(user.UserName ?? "")}&error={Uri.EscapeDataString("Por favor ingresa el código de 6 dígitos.")}"
+            : $"/?mfa=true&method=email&email={Uri.EscapeDataString(MaskEmail(email))}&error={Uri.EscapeDataString("Por favor ingresa el código de 6 dígitos.")}";
+        return Results.Redirect(redirectUrl);
     }
 
-    var isValid = await userManager.VerifyTwoFactorTokenAsync(user, "Email", otpCode);
+    var cleanCode = otpCode.Replace(" ", string.Empty).Replace("-", string.Empty).Trim();
+    bool isValid = false;
+    string authMethodUsed = "Password+Authenticator";
+
+    // 1. Try TOTP Authenticator Token Provider (Google Authenticator / Microsoft Authenticator)
+    if (await userManager.GetTwoFactorEnabledAsync(user))
+    {
+        isValid = await userManager.VerifyTwoFactorTokenAsync(
+            user,
+            userManager.Options.Tokens.AuthenticatorTokenProvider,
+            cleanCode);
+
+        // 2. Try Emergency Recovery Code
+        if (!isValid)
+        {
+            var recoveryResult = await userManager.RedeemTwoFactorRecoveryCodeAsync(user, cleanCode);
+            if (recoveryResult.Succeeded)
+            {
+                isValid = true;
+                authMethodUsed = "Password+RecoveryCode";
+            }
+        }
+    }
+
+    // 3. Fallback to Email provider if not verified yet
     if (!isValid)
     {
-        return Results.Redirect($"/?mfa=true&email={Uri.EscapeDataString(MaskEmail(email))}&error={Uri.EscapeDataString("Código de seguridad incorrecto o expirado.")}");
+        isValid = await userManager.VerifyTwoFactorTokenAsync(user, "Email", cleanCode);
+        if (isValid)
+        {
+            authMethodUsed = "Password+EmailOTP";
+        }
+    }
+
+    if (!isValid)
+    {
+        var redirectUrl = mfaMethod == "authenticator"
+            ? $"/?mfa=true&method=authenticator&user={Uri.EscapeDataString(user.UserName ?? "")}&error={Uri.EscapeDataString("Código de autenticación incorrecto o expirado. Verifica tu app Google o Microsoft Authenticator.")}"
+            : $"/?mfa=true&method=email&email={Uri.EscapeDataString(MaskEmail(email))}&error={Uri.EscapeDataString("Código de seguridad incorrecto o expirado.")}";
+        return Results.Redirect(redirectUrl);
     }
 
     // Clear 2FA temporary cookie
@@ -214,7 +269,7 @@ app.MapPost("/api/auth/verify-otp", async (
         new(ClaimTypes.NameIdentifier, user.Id),
         new(ClaimTypes.Name, user.UserName ?? user.Email ?? "Usuario"),
         new(ClaimTypes.Email, user.Email ?? ""),
-        new(ClaimTypes.AuthenticationMethod, "Password+EmailOTP")
+        new(ClaimTypes.AuthenticationMethod, authMethodUsed)
     };
     foreach (var role in roles)
     {

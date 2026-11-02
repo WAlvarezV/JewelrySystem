@@ -1,0 +1,512 @@
+@page "/auth/mfa"
+@attribute [Authorize]
+@using System.Security.Claims
+@inject ISender Sender
+@inject IJSRuntime JS
+
+<div class="container-fluid mt-3">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold mb-1"><i class="bi bi-shield-lock-fill text-primary me-2"></i>Autenticador Móvil (Google / Microsoft Authenticator)</h3>
+            <p class="text-muted small mb-0">Proteja su acceso generando códigos temporales TOTP de 6 dígitos en su teléfono móvil sin depender de correos electrónicos ni señal telefónica.</p>
+        </div>
+        <div>
+            <button class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" @onclick="LoadMfaStatusAsync" disabled="@_isLoading">
+                <i class="bi bi-arrow-clockwise"></i>
+                <span>Refrescar</span>
+            </button>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(_message))
+    {
+        <div class="alert @(_isSuccess ? "alert-success" : "alert-danger") alert-dismissible fade show py-2 small" role="alert">
+            <i class="bi @(_isSuccess ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill") me-2"></i>@_message
+            <button type="button" class="btn-close" @onclick="() => _message = null"></button>
+        </div>
+    }
+
+    @if (_loadingStatus)
+    {
+        <div class="text-center p-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <div class="text-muted small mt-2">Cargando estado de seguridad...</div>
+        </div>
+    }
+    else if (_status != null && _status.IsEnabled && !_showSetupWizard)
+    {
+        <!-- Estado Activo -->
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="rounded-circle bg-success bg-opacity-10 text-success p-3">
+                                <i class="bi bi-shield-check fs-1"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-1 text-success">Segundo Factor de Autenticación Activo</h5>
+                                <p class="text-muted small mb-0">Su cuenta está protegida. Al iniciar sesión, se le solicitará el código de 6 dígitos generado por su aplicación autenticadora.</p>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 my-2">
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-3 bg-light border">
+                                    <div class="text-muted small fw-semibold">Método principal</div>
+                                    <div class="fw-bold text-dark mt-1"><i class="bi bi-phone me-1 text-primary"></i>Google / Microsoft Authenticator (TOTP)</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-3 bg-light border">
+                                    <div class="text-muted small fw-semibold">Códigos de Respaldo Restantes</div>
+                                    <div class="fw-bold text-dark mt-1"><i class="bi bi-key me-1 text-warning"></i>@_status.RecoveryCodesLeft códigos disponibles</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2 mt-4 pt-3 border-top">
+                            <button class="btn btn-outline-primary d-flex align-items-center gap-2" @onclick="StartSetupAsync" disabled="@_isLoading">
+                                <i class="bi bi-qr-code"></i>
+                                <span>Reconfigurar / Cambiar Dispositivo</span>
+                            </button>
+
+                            <button class="btn btn-outline-secondary d-flex align-items-center gap-2" @onclick="RegenerateRecoveryCodesAsync" disabled="@_isLoading">
+                                <i class="bi bi-arrow-repeat"></i>
+                                <span>Generar Nuevos Códigos de Respaldo</span>
+                            </button>
+
+                            <button class="btn btn-outline-danger d-flex align-items-center gap-2 ms-auto" @onclick="DisableMfaAsync" disabled="@_isLoading">
+                                <i class="bi bi-shield-slash"></i>
+                                <span>Desactivar Authenticator</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                @if (_recoveryCodes.Any())
+                {
+                    <div class="card border-0 shadow-sm border-start border-warning border-4 mb-4">
+                        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-key-fill text-warning me-2"></i>Códigos de Respaldo de Emergencia</h5>
+                            <button class="btn btn-sm btn-outline-secondary" @onclick="CopyAllCodesAsync">
+                                <i class="bi bi-clipboard me-1"></i>Copiar Códigos
+                            </button>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="alert alert-warning py-2 small mb-3">
+                                <strong>Importante:</strong> Guarde estos códigos en un lugar seguro. Si pierde acceso a su app autenticadora, cada uno puede ser usado una única vez para acceder al sistema.
+                            </div>
+                            <div class="row g-2">
+                                @foreach (var recoveryCode in _recoveryCodes)
+                                {
+                                    <div class="col-6 col-sm-4">
+                                        <div class="p-2 bg-light border rounded text-center font-monospace fw-bold">
+                                            @recoveryCode
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3 border-bottom">
+                        <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-info-circle me-2 text-primary"></i>¿Cómo funciona?</h6>
+                    </div>
+                    <div class="card-body p-3">
+                        <ul class="list-unstyled small text-muted mb-0 d-flex flex-column gap-2">
+                            <li><i class="bi bi-check2 text-success me-1"></i> <strong>Sin esperas:</strong> El código se genera instantáneamente en su celular.</li>
+                            <li><i class="bi bi-check2 text-success me-1"></i> <strong>Sin correo ni SMS:</strong> No depende de servidores de email ni de cobertura telefónica.</li>
+                            <li><i class="bi bi-check2 text-success me-1"></i> <strong>Funciona sin Internet:</strong> El teléfono puede estar en modo avión y aun así genera códigos válidos.</li>
+                            <li><i class="bi bi-check2 text-success me-1"></i> <strong>Rotación continua:</strong> Cada código dura exactamente 30 segundos.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Asistente de Vinculación / Configuración -->
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3 border-bottom">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-qr-code-scan text-primary me-2"></i>Vincular Aplicación Móvil</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Paso 1 -->
+                        <div class="d-flex align-items-start gap-3 mb-4">
+                            <span class="badge rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.9rem;">1</span>
+                            <div>
+                                <h6 class="fw-bold mb-1">Instala una aplicación autenticadora en tu celular</h6>
+                                <p class="text-muted small mb-2">Puedes usar cualquiera de las siguientes aplicaciones gratuitas disponibles en Google Play y App Store:</p>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <span class="badge bg-light text-dark border"><i class="bi bi-google me-1 text-danger"></i> Google Authenticator</span>
+                                    <span class="badge bg-light text-dark border"><i class="bi bi-microsoft me-1 text-primary"></i> Microsoft Authenticator</span>
+                                    <span class="badge bg-light text-dark border"><i class="bi bi-shield-lock me-1 text-info"></i> Bitwarden / 1Password</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Paso 2 -->
+                        <div class="d-flex align-items-start gap-3 mb-4">
+                            <span class="badge rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.9rem;">2</span>
+                            <div class="w-100">
+                                <h6 class="fw-bold mb-1">Escanea el código QR con tu aplicación</h6>
+                                <p class="text-muted small mb-3">Abre la app en tu teléfono, pulsa el botón <strong>"+"</strong> o <strong>"Agregar cuenta"</strong> y elige <strong>"Escanear código QR"</strong>.</p>
+
+                                @if (_qrData != null)
+                                {
+                                    <div class="text-center p-3 bg-light rounded-3 border mb-3">
+                                        <img src="data:image/png;base64,@_qrData.QrCodeBase64" alt="QR Code MFA" class="img-fluid border rounded shadow-sm bg-white p-2" style="max-width: 220px;" />
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-semibold text-muted">¿No puedes escanear el código? Ingresa esta clave secreta manualmente en tu app:</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control font-monospace text-center fw-bold bg-white" value="@_qrData.SharedKey" readonly />
+                                            <button class="btn btn-outline-secondary" type="button" @onclick="CopySecretKeyAsync">
+                                                <i class="bi bi-clipboard me-1"></i>Copiar
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-center p-4">
+                                        <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                                        <div class="text-muted small mt-1">Generando código QR...</div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Paso 3 -->
+                        <div class="d-flex align-items-start gap-3 mb-3">
+                            <span class="badge rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.9rem;">3</span>
+                            <div class="w-100">
+                                <h6 class="fw-bold mb-1">Ingresa el código generado en la app para confirmar</h6>
+                                <p class="text-muted small mb-2">Escribe el código temporal de 6 dígitos que muestra tu app para completar la vinculación:</p>
+
+                                <div class="input-group input-group-lg mb-3" style="max-width: 320px;">
+                                    <input @bind="_verificationCode" @bind:event="oninput" @onkeydown="HandleKeyDown" type="text" maxlength="6" inputmode="numeric" placeholder="000000" class="form-control text-center font-monospace fw-bold fs-3 letter-spacing" autofocus />
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-primary px-4 py-2 fw-semibold d-flex align-items-center gap-2" @onclick="ConfirmAndEnableMfaAsync" disabled="@(_isLoading || string.IsNullOrWhiteSpace(_verificationCode) || _verificationCode.Length < 6)">
+                                        @if (_isLoading)
+                                        {
+                                            <span class="spinner-border spinner-border-sm"></span>
+                                        }
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        <span>Confirmar y Activar</span>
+                                    </button>
+
+                                    @if (_status != null && _status.IsEnabled)
+                                    {
+                                        <button class="btn btn-outline-secondary" @onclick="() => _showSetupWizard = false">
+                                            Cancelar
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna lateral informativa -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3 border-bottom">
+                        <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-shield-check text-success me-2"></i>Beneficios de usar Authenticator</h6>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="d-flex gap-3 mb-3">
+                            <i class="bi bi-envelope-x text-danger fs-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Cero dependencia de correos</h6>
+                                <p class="text-muted small mb-0">No más esperar correos que tardan o caen en la carpeta de Spam. El código está en tu mano inmediatamente.</p>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3 mb-3">
+                            <i class="bi bi-wifi-off text-primary fs-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Funciona sin conexión a internet</h6>
+                                <p class="text-muted small mb-0">La app móvil calcula el código de forma matemática usando la hora del reloj. Puedes autenticarte incluso sin cobertura de red.</p>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3">
+                            <i class="bi bi-lock-fill text-warning fs-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Máxima Seguridad SI.SIOT</h6>
+                                <p class="text-muted small mb-0">Previene accesos no autorizados aun si su contraseña llega a verse comprometida.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .letter-spacing {
+        letter-spacing: 0.35rem;
+    }
+</style>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    private string _currentUserId = "walvarez@ingnova.team";
+    private string _currentDisplayName = "walvarez@ingnova.team";
+
+    private bool _loadingStatus = true;
+    private bool _isLoading = false;
+    private bool _showSetupWizard = false;
+    private string? _message;
+    private bool _isSuccess;
+
+    private MfaStatusDto? _status;
+    private MfaSetupDto? _qrData;
+    private string _verificationCode = "";
+    private List<string> _recoveryCodes = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ResolveCurrentUserInfoAsync();
+        await LoadMfaStatusAsync();
+    }
+
+    private async Task ResolveCurrentUserInfoAsync()
+    {
+        if (AuthStateTask != null)
+        {
+            var authState = await AuthStateTask;
+            if (authState.User.Identity?.IsAuthenticated == true)
+            {
+                var idClaim = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var nameClaim = authState.User.Identity.Name;
+
+                if (!string.IsNullOrEmpty(idClaim))
+                {
+                    _currentUserId = idClaim;
+                }
+                if (!string.IsNullOrEmpty(nameClaim))
+                {
+                    _currentDisplayName = nameClaim;
+                }
+            }
+        }
+    }
+
+    private async Task LoadMfaStatusAsync()
+    {
+        _loadingStatus = true;
+        try
+        {
+            await ResolveCurrentUserInfoAsync();
+            var res = await Sender.Send(new GetMfaStatusQuery(_currentUserId));
+            if (res.IsSuccess)
+            {
+                _status = res.Value;
+                if (!_status.IsEnabled)
+                {
+                    await StartSetupAsync();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _message = "Error al verificar estado de MFA: " + ex.Message;
+            _isSuccess = false;
+        }
+        finally
+        {
+            _loadingStatus = false;
+        }
+    }
+
+    private async Task StartSetupAsync()
+    {
+        _showSetupWizard = true;
+        _verificationCode = "";
+        _message = null;
+        try
+        {
+            var qrRes = await Sender.Send(new GenerateMfaQrCodeQuery(_currentUserId));
+            if (qrRes.IsSuccess)
+            {
+                _qrData = qrRes.Value;
+            }
+            else
+            {
+                _message = qrRes.Error.Message;
+                _isSuccess = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            _message = "Error al generar código QR: " + ex.Message;
+            _isSuccess = false;
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(_verificationCode) && _verificationCode.Length >= 6)
+        {
+            await ConfirmAndEnableMfaAsync();
+        }
+    }
+
+    private async Task ConfirmAndEnableMfaAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_verificationCode))
+        {
+            _message = "Por favor ingresa el código de 6 dígitos.";
+            _isSuccess = false;
+            return;
+        }
+
+        _isLoading = true;
+        _message = null;
+        try
+        {
+            var cmd = new EnableMfaCommand(_currentUserId, _verificationCode);
+            var result = await Sender.Send(cmd);
+
+            if (result.IsFailure)
+            {
+                _message = result.Error.Message;
+                _isSuccess = false;
+                return;
+            }
+
+            _recoveryCodes = result.Value.ToList();
+            _isSuccess = true;
+            _message = "¡Autenticación con Google/Microsoft Authenticator activada con éxito!";
+            _showSetupWizard = false;
+            _verificationCode = "";
+            await LoadMfaStatusAsync();
+        }
+        catch (Exception ex)
+        {
+            _message = "Error al confirmar vinculación: " + ex.Message;
+            _isSuccess = false;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task DisableMfaAsync()
+    {
+        _isLoading = true;
+        _message = null;
+        try
+        {
+            var cmd = new DisableMfaCommand(_currentUserId);
+            var result = await Sender.Send(cmd);
+            if (result.IsSuccess)
+            {
+                _isSuccess = true;
+                _message = "El segundo factor de autenticación ha sido desactivado.";
+                _recoveryCodes.Clear();
+                await LoadMfaStatusAsync();
+            }
+            else
+            {
+                _message = result.Error.Message;
+                _isSuccess = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            _message = "Error al desactivar MFA: " + ex.Message;
+            _isSuccess = false;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task RegenerateRecoveryCodesAsync()
+    {
+        _isLoading = true;
+        _message = null;
+        try
+        {
+            var cmd = new GenerateNewRecoveryCodesCommand(_currentUserId);
+            var result = await Sender.Send(cmd);
+            if (result.IsSuccess)
+            {
+                _recoveryCodes = result.Value.ToList();
+                _isSuccess = true;
+                _message = "Nuevos códigos de respaldo generados.";
+                await LoadMfaStatusAsync();
+            }
+            else
+            {
+                _message = result.Error.Message;
+                _isSuccess = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            _message = "Error al regenerar códigos: " + ex.Message;
+            _isSuccess = false;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task CopySecretKeyAsync()
+    {
+        if (_qrData != null)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("navigator.clipboard.writeText", _qrData.SharedKey);
+                _message = "Clave secreta copiada al portapapeles.";
+                _isSuccess = true;
+            }
+            catch
+            {
+                // Fallback
+            }
+        }
+    }
+
+    private async Task CopyAllCodesAsync()
+    {
+        if (_recoveryCodes.Any())
+        {
+            try
+            {
+                var text = string.Join("\n", _recoveryCodes);
+                await JS.InvokeVoidAsync("navigator.clipboard.writeText", text);
+                _message = "Códigos de respaldo copiados al portapapeles.";
+                _isSuccess = true;
+            }
+            catch
+            {
+                // Fallback
+            }
+        }
+    }
+}
