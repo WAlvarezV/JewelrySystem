@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using JewerlySystem.Common.Application.Voice;
 using JewerlySystem.Common.Infrastructure;
 using JewerlySystem.Modules.Auth.Application;
 using JewerlySystem.Modules.Auth.Infrastructure;
@@ -9,23 +10,26 @@ using JewerlySystem.Modules.Inventory.Infrastructure;
 using JewerlySystem.Modules.Invoicing.Infrastructure;
 using JewerlySystem.Web.Components;
 using JewerlySystem.Web.Data;
+using JewerlySystem.Web.Services.Voice;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("PomonaCs")
     ?? builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? "Server=localhost;Database=PomonaDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
+    ?? "Host=localhost;Port=5432;Database=IntZaioNJewerly;Username=postgres;Password=IntZaioN";
 
 // Shared DB context for host
 builder.Services.AddScoped<AuditInterceptor>();
 builder.Services.AddDbContext<JewerlyDbContext>((sp, options) =>
 {
-    options.UseSqlServer(connectionString);
+    options.UseNpgsql(connectionString);
     var auditInterceptor = sp.GetRequiredService<AuditInterceptor>();
     options.AddInterceptors(auditInterceptor);
 });
@@ -37,6 +41,10 @@ builder.Services.AddCustomersModule(builder.Configuration);
 builder.Services.AddInventoryModule(builder.Configuration);
 builder.Services.AddCashModule(builder.Configuration);
 builder.Services.AddInvoicingModule(builder.Configuration);
+
+// Voice AI Intelligence & Operations
+builder.Services.AddVoiceIntelligence();
+builder.Services.AddScoped<IVoiceCommandDispatcher, VoiceCommandDispatcher>();
 
 // Authentication & Authorization
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -63,9 +71,8 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
+    app.UseHttpsRedirection();
 }
-
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 

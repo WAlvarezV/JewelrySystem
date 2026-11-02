@@ -15,10 +15,10 @@ public static class CashModuleExtensions
     {
         var connectionString = configuration.GetConnectionString("PomonaCs")
             ?? configuration.GetConnectionString("DefaultConnection")
-            ?? "Server=localhost;Database=PomonaDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
+            ?? "Host=localhost;Port=5432;Database=IntZaioNJewerly;Username=postgres;Password=IntZaioN";
 
         services.AddDbContext<CashDbContext>(options =>
-            options.UseSqlServer(connectionString));
+            options.UseNpgsql(connectionString));
 
         services.AddScoped<ICashRepository, CashRepository>();
 

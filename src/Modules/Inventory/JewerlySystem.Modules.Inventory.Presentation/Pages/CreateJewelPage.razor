@@ -19,16 +19,33 @@
         <div class="col-12 col-xl-10">
             <!-- 1. Clasificación y Proveedor -->
             <SoftFormBox Title="1. Tipo de Joya y Origen"
-                         Subtitle="Seleccione la categoría de joyería y el origen o proveedor">
+                         InfoTooltip="Categoría de joyería y procedencia de la pieza">
+                <div class="mb-3">
+                    <span class="small text-muted fw-bold d-block mb-2 text-uppercase">Categorías Frecuentes:</span>
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var type in _itemTypes.Where(t => t.Id != 5))
+                        {
+                            bool isSelected = _formModel.ItemTypeId == type.Id;
+                            <button type="button"
+                                    class="btn btn-sm @(isSelected ? "btn-primary shadow-sm" : "btn-outline-secondary") d-inline-flex align-items-center gap-1 rounded-pill px-3 py-1"
+                                    @onclick="() => SelectItemType(type.Id)">
+                                <i class="bi @GetItemTypeIcon(type.Id)"></i>
+                                <span>@type.Name</span>
+                            </button>
+                        }
+                    </div>
+                </div>
+
                 <div class="row g-3">
                     <div class="col-12 col-md-6">
-                        <SoftTooltipLabel Label="Tipo de Joya" Required="true" TooltipText="Categoría física del artículo a ingresar" />
+                        <SoftTooltipLabel Label="Tipo de Joya (Catálogo)" Required="true" TooltipText="Categoría física del artículo a ingresar" />
                         <Select TItem="ItemTypeDto"
                                 TItemValue="int"
                                 DataSource="@_itemTypes.Where(t => t.Id != 5).ToList()"
                                 @bind-Value="_formModel.ItemTypeId"
                                 ValueName="@nameof(ItemTypeDto.Id)"
                                 LabelName="@nameof(ItemTypeDto.Name)"
+                                EnableSearch="true"
                                 Placeholder="Seleccione tipo de joya..." />
                     </div>
 
@@ -40,6 +57,7 @@
                                 @bind-Value="_formModel.ProviderId"
                                 ValueName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.Id)"
                                 LabelName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.FullName)"
+                                EnableSearch="true"
                                 Placeholder="-- Proveedor General / Stock Interno --"
                                 AllowClear="true" />
                     </div>
@@ -48,8 +66,8 @@
 
             <!-- 2. Pesaje y Tarifas -->
             <SoftFormBox Title="2. Pesaje y Tarifas por Gramo"
-                         Subtitle="Defina el peso exacto en gramos y las tarifas de costo y venta proyectada">
-                <div class="row g-3 align-items-end">
+                         InfoTooltip="Peso neto verificado en balanza y tarifas pactadas por gramo">
+                <div class="row g-3 align-items-end mb-2">
                     <div class="col-12 col-md-3">
                         <SoftTooltipLabel Label="Peso en Gramos (g)" Required="true" TooltipText="Peso neto verificado en balanza de precisión" />
                         <AntDesign.InputNumber TValue="double"
@@ -71,7 +89,9 @@
                     </div>
 
                     <div class="col-12 col-md-3">
-                        <SoftTooltipLabel Label="Valor Gr. Venta ($)" TooltipText="Tarifa sugerida por gramo para venta al público" />
+                        <div class="d-flex align-items-center justify-content-between">
+                            <SoftTooltipLabel Label="Valor Gr. Venta ($)" TooltipText="Tarifa sugerida por gramo para venta al público" />
+                        </div>
                         <AntDesign.InputNumber TValue="int"
                                                @bind-Value="_formModel.GramSaleValue"
                                                Step="1000"
@@ -83,45 +103,30 @@
                     @if (NeedLengthField)
                     {
                         <div class="col-12 col-md-3">
-                            <SoftTooltipLabel Label="Largo (cm)" TooltipText="Longitud en centímetros para cadenas o pulseras" />
+                            <SoftTooltipLabel Label="Largo de la Pieza (cm)" TooltipText="Longitud en centímetros para cadenas o pulseras" />
                             <AntDesign.InputNumber TValue="int?"
                                                    @bind-Value="_formModel.Length"
                                                    Min="1"
+                                                   Placeholder="Ej: 50 cm"
                                                    Style="width: 100%;" />
                         </div>
                     }
                 </div>
+
+                <!-- Botones de margen sugerido -->
+                <div class="p-2 rounded bg-light border d-flex flex-wrap align-items-center gap-2">
+                    <span class="small text-muted fw-bold"><i class="bi bi-magic me-1 text-primary"></i>Fijar Margen Rápido:</span>
+                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" @onclick="() => ApplyMarkupPercent(20)">+20%</button>
+                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" @onclick="() => ApplyMarkupPercent(25)">+25%</button>
+                    <button type="button" class="btn btn-xs btn-outline-primary rounded-pill px-2 py-0" @onclick="() => ApplyMarkupPercent(30)">+30% (Estándar)</button>
+                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" @onclick="() => ApplyMarkupPercent(40)">+40%</button>
+                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" @onclick="() => ApplyMarkupPercent(50)">+50%</button>
+                </div>
             </SoftFormBox>
 
-            <!-- 3. Resumen Económico -->
-            <div class="mb-4">
-                <SoftDetailCard Title="Resumen Económico Proyectado">
-                    <div class="row g-3 text-center">
-                        <div class="col-12 col-md-4">
-                            <SoftDetailItem Label="Costo Total Calculado"
-                                            Value="@_costValue.ToString("C0")"
-                                            HighlightVariant="SoftDetailItem.Variant.Danger" />
-                            <div class="calc-hint">Peso (@_formModel.Weight.ToString("F2") g) × Costo Gr.</div>
-                        </div>
-                        <div class="col-12 col-md-4">
-                            <SoftDetailItem Label="Venta Total Sugerida"
-                                            Value="@_saleValue.ToString("C0")"
-                                            HighlightVariant="SoftDetailItem.Variant.Success" />
-                            <div class="calc-hint">Peso (@_formModel.Weight.ToString("F2") g) × Venta Gr.</div>
-                        </div>
-                        <div class="col-12 col-md-4">
-                            <SoftDetailItem Label="Margen Bruto Proyectado"
-                                            Value="@((_saleValue - _costValue).ToString("C0"))"
-                                            HighlightVariant="SoftDetailItem.Variant.Primary" />
-                            <div class="calc-hint">Ganancia bruta estimada en vitrina</div>
-                        </div>
-                    </div>
-                </SoftDetailCard>
-            </div>
-
-            <!-- 4. Descripción -->
+            <!-- 3. Descripción -->
             <SoftFormBox Title="3. Descripción del Artículo"
-                         Subtitle="Detalle material (oro 18k, 14k, plata), piedras preciosas, tallas, grabado...">
+                         InfoTooltip="Detalle de metal (oro 18k, 14k, plata), piedras preciosas, tallas, grabado...">
                 <SoftVoiceTextArea @bind-Value="_formModel.Description"
                                    Label="Descripción de la Joya"
                                    Required="true"
@@ -217,6 +222,27 @@
         _costValue = (int)Math.Round(_formModel.Weight * _formModel.GramValue);
         _saleValue = (int)Math.Round(_formModel.Weight * _formModel.GramSaleValue);
     }
+
+    private void SelectItemType(int typeId)
+    {
+        _formModel.ItemTypeId = typeId;
+    }
+
+    private void ApplyMarkupPercent(double percent)
+    {
+        if (_formModel.GramValue <= 0) _formModel.GramValue = 200000;
+        _formModel.GramSaleValue = (int)Math.Round(_formModel.GramValue * (1.0 + (percent / 100.0)));
+        RecalculateValues();
+    }
+
+    private static string GetItemTypeIcon(int typeId) => typeId switch
+    {
+        1 => "bi-gem",               // Anillo
+        2 => "bi-circle",            // Aretes
+        3 => "bi-link-45deg",        // Cadena
+        4 => "bi-infinity",          // Pulsera
+        _ => "bi-star"               // Dije u otro
+    };
 
     private async Task HandleSubmitAsync()
     {

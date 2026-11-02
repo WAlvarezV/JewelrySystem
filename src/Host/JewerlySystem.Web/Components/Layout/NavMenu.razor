@@ -1,42 +1,76 @@
+@using AntDesign
 @inject ISender Sender
 @inject NavigationManager Navigation
 
-<div class="nav-menu-container d-flex flex-column h-100 bg-white border-end">
+<div class="nav-menu-container d-flex flex-column h-100 bg-white border-end @(IsCollapsed ? "is-collapsed" : "")">
     <!-- Active Module Title & Action -->
-    <div class="nav-menu-header p-3 border-bottom d-flex align-items-center justify-content-between">
-        <div class="d-flex align-items-center gap-2 overflow-hidden">
-            <span class="badge bg-primary-subtle text-primary p-2 rounded-3">
-                <i class="bi @ActiveModuleIcon fs-6"></i>
-            </span>
-            <div class="fw-bold text-truncate text-dark" style="font-size: 0.95rem;">
-                @ActiveModuleTitle
+    <div class="nav-menu-header p-3 border-bottom d-flex align-items-center @(IsCollapsed ? "justify-content-center px-1 py-3" : "justify-content-between")">
+        @if (IsCollapsed)
+        {
+            <Tooltip Title="@ActiveModuleTitle" Placement="@Placement.Right">
+                <span class="badge bg-primary-subtle text-primary p-2 rounded-3" style="cursor: pointer;" @onclick="OnToggleCollapse">
+                    <i class="bi @ActiveModuleIcon fs-5"></i>
+                </span>
+            </Tooltip>
+        }
+        else
+        {
+            <div class="d-flex align-items-center gap-2 overflow-hidden">
+                <span class="badge bg-primary-subtle text-primary p-2 rounded-3">
+                    <i class="bi @ActiveModuleIcon fs-6"></i>
+                </span>
+                <div class="fw-bold text-truncate text-dark" style="font-size: 0.95rem;">
+                    @ActiveModuleTitle
+                </div>
             </div>
-        </div>
-        <button type="button" class="btn btn-sm btn-outline-warning border-0 p-1" title="Gestionar Favoritos" @onclick="() => _showFavDrawer = true">
-            <i class="bi bi-star-fill text-warning fs-5"></i>
-        </button>
+            <div class="d-flex align-items-center gap-1">
+                <button type="button" class="btn btn-sm btn-outline-warning border-0 p-1" title="Gestionar Favoritos" @onclick="() => _showFavDrawer = true">
+                    <i class="bi bi-star-fill text-warning fs-5"></i>
+                </button>
+                @if (OnToggleCollapse.HasDelegate)
+                {
+                    <button type="button" class="btn btn-sm btn-outline-secondary border-0 p-1 text-muted" title="Colapsar menú lateral" @onclick="OnToggleCollapse">
+                        <i class="bi bi-chevron-left fs-5"></i>
+                    </button>
+                }
+            </div>
+        }
     </div>
 
     <!-- Scrollable Menu Content -->
-    <div class="nav-menu-body flex-grow-1 overflow-auto p-2">
+    <div class="nav-menu-body flex-grow-1 overflow-auto @(IsCollapsed ? "px-1 py-2" : "p-2")">
         <!-- Favoritos Section (SI.SIOT Style) -->
         @if (_favorites.Any())
         {
             <div class="nav-favorites-section mb-3">
-                <div class="d-flex align-items-center justify-content-between px-2 py-1 text-muted small fw-semibold">
-                    <span><i class="bi bi-star-fill text-warning me-1"></i>FAVORITOS</span>
-                    <button type="button" class="btn btn-link p-0 text-decoration-none small text-muted" style="font-size: 0.75rem;" @onclick="() => _showFavDrawer = true">
-                        Editar
-                    </button>
-                </div>
-                <ul class="nav flex-column gap-1 mt-1">
+                @if (!IsCollapsed)
+                {
+                    <div class="d-flex align-items-center justify-content-between px-2 py-1 text-muted small fw-semibold">
+                        <span><i class="bi bi-star-fill text-warning me-1"></i>FAVORITOS</span>
+                        <button type="button" class="btn btn-link p-0 text-decoration-none small text-muted" style="font-size: 0.75rem;" @onclick="() => _showFavDrawer = true">
+                            Editar
+                        </button>
+                    </div>
+                }
+                <ul class="nav flex-column gap-1 @(IsCollapsed ? "align-items-center" : "") mt-1">
                     @foreach (var fav in _favorites)
                     {
-                        <li class="nav-item">
-                            <NavLink class="nav-link nav-favorite-link d-flex align-items-center gap-2 px-2 py-1 rounded-2 text-dark small" href="@fav.Route" Match="NavLinkMatch.All">
-                                <i class="bi @(string.IsNullOrEmpty(fav.Icon) ? "bi-arrow-right-short" : fav.Icon) text-warning"></i>
-                                <span class="text-truncate">@fav.Name</span>
-                            </NavLink>
+                        <li class="nav-item w-100">
+                            @if (IsCollapsed)
+                            {
+                                <Tooltip Title="@fav.Name" Placement="@Placement.Right">
+                                    <NavLink class="@GetFavoriteItemClass()" href="@fav.Route" Match="NavLinkMatch.All">
+                                        <i class="bi @(string.IsNullOrEmpty(fav.Icon) ? "bi-arrow-right-short" : fav.Icon) text-warning fs-5"></i>
+                                    </NavLink>
+                                </Tooltip>
+                            }
+                            else
+                            {
+                                <NavLink class="@GetFavoriteItemClass()" href="@fav.Route" Match="NavLinkMatch.All">
+                                    <i class="bi @(string.IsNullOrEmpty(fav.Icon) ? "bi-arrow-right-short" : fav.Icon) text-warning"></i>
+                                    <span class="text-truncate">@fav.Name</span>
+                                </NavLink>
+                            }
                         </li>
                     }
                 </ul>
@@ -46,32 +80,49 @@
 
         <!-- Module Menus Section -->
         <div class="nav-module-menus">
-            <div class="px-2 py-1 text-muted small fw-semibold text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">
-                OPCIONES DE @ActiveModuleKey
-            </div>
+            @if (!IsCollapsed)
+            {
+                <div class="px-2 py-1 text-muted small fw-semibold text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                    OPCIONES DE @ActiveModuleKey
+                </div>
+            }
 
             @if (_isLoading)
             {
-                <div class="text-center p-4">
+                <div class="text-center p-3">
                     <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
                 </div>
             }
             else if (!_moduleMenus.Any())
             {
-                <div class="text-muted small p-3 text-center">
-                    No hay menús registrados para este módulo.
-                </div>
+                @if (!IsCollapsed)
+                {
+                    <div class="text-muted small p-3 text-center">
+                        No hay menús registrados para este módulo.
+                    </div>
+                }
             }
             else
             {
-                <ul class="nav flex-column gap-1 mt-1">
+                <ul class="nav flex-column gap-1 @(IsCollapsed ? "align-items-center" : "") mt-1">
                     @foreach (var item in _moduleMenus)
                     {
-                        <li class="nav-item">
-                            <NavLink class="nav-link nav-item-link d-flex align-items-center gap-2 px-3 py-2 rounded-2 text-dark" href="@item.Route" Match="NavLinkMatch.Prefix">
-                                <i class="bi @item.Icon text-secondary fs-6"></i>
-                                <span class="fw-medium">@item.Name</span>
-                            </NavLink>
+                        <li class="nav-item w-100">
+                            @if (IsCollapsed)
+                            {
+                                <Tooltip Title="@item.Name" Placement="@Placement.Right">
+                                    <NavLink class="@GetMenuItemClass()" href="@item.Route" Match="NavLinkMatch.Prefix">
+                                        <i class="bi @item.Icon text-secondary fs-5"></i>
+                                    </NavLink>
+                                </Tooltip>
+                            }
+                            else
+                            {
+                                <NavLink class="@GetMenuItemClass()" href="@item.Route" Match="NavLinkMatch.Prefix">
+                                    <i class="bi @item.Icon text-secondary fs-6"></i>
+                                    <span class="fw-medium text-truncate">@item.Name</span>
+                                </NavLink>
+                            }
                         </li>
                     }
                 </ul>
@@ -155,9 +206,36 @@
         font-weight: 600;
         border-radius: var(--soft-border-radius-md, 8px) !important;
     }
+    .nav-menu-body {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+    .nav-menu-body::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
 </style>
 
 @code {
+    [Parameter]
+    public bool IsCollapsed { get; set; }
+
+    [Parameter]
+    public EventCallback OnToggleCollapse { get; set; }
+
+    private string GetFavoriteItemClass() =>
+        IsCollapsed 
+            ? "nav-link nav-favorite-link d-flex align-items-center justify-content-center px-1 py-2 rounded-2 text-dark small"
+            : "nav-link nav-favorite-link d-flex align-items-center gap-2 px-2 py-1 rounded-2 text-dark small";
+
+    private string GetMenuItemClass() =>
+        IsCollapsed 
+            ? "nav-link nav-item-link d-flex align-items-center justify-content-center px-1 py-2 rounded-2 text-dark"
+            : "nav-link nav-item-link d-flex align-items-center gap-2 px-3 py-2 rounded-2 text-dark";
+
     [Parameter]
     public string ActiveModuleKey { get; set; } = "CONTRACTS";
 

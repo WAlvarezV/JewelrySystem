@@ -19,9 +19,27 @@
         <div class="col-12 col-xl-10">
             <!-- 1. Marca, Género y Proveedor -->
             <SoftFormBox Title="1. Marca, Origen y Clasificación"
-                         Subtitle="Información del fabricante, género objetivo y procedencia">
+                         InfoTooltip="Información del fabricante, género objetivo y procedencia de la pieza">
+                <div class="mb-3">
+                    <span class="small text-muted fw-bold d-block mb-2 text-uppercase">Género / Segmento Objetivo:</span>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button"
+                                class="btn btn-sm @(_formModel.GenderType == GenderType.Hombre ? "btn-primary shadow-sm" : "btn-outline-secondary") d-inline-flex align-items-center gap-1 rounded-pill px-3 py-1"
+                                @onclick="() => _formModel.GenderType = GenderType.Hombre">
+                            <i class="bi bi-person-standing"></i>
+                            <span>Caballero / Hombre</span>
+                        </button>
+                        <button type="button"
+                                class="btn btn-sm @(_formModel.GenderType == GenderType.Mujer ? "btn-primary shadow-sm" : "btn-outline-secondary") d-inline-flex align-items-center gap-1 rounded-pill px-3 py-1"
+                                @onclick="() => _formModel.GenderType = GenderType.Mujer">
+                            <i class="bi bi-person-standing-dress"></i>
+                            <span>Dama / Mujer</span>
+                        </button>
+                    </div>
+                </div>
+
                 <div class="row g-3">
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-6">
                         <SoftTooltipLabel Label="Marca del Reloj" Required="true" TooltipText="Fabricante o marca registrada del reloj" />
                         <Select TItem="BrandDto"
                                 TItemValue="int"
@@ -29,21 +47,11 @@
                                 @bind-Value="_formModel.BrandId"
                                 ValueName="@nameof(BrandDto.Id)"
                                 LabelName="@nameof(BrandDto.Name)"
+                                EnableSearch="true"
                                 Placeholder="Seleccione marca..." />
                     </div>
 
-                    <div class="col-12 col-md-4">
-                        <SoftTooltipLabel Label="Género / Segmento" Required="true" TooltipText="Público objetivo del reloj" />
-                        <Select TItem="GenderTypeOption"
-                                TItemValue="GenderType"
-                                DataSource="@_genderOptions"
-                                @bind-Value="_formModel.GenderType"
-                                ValueName="@nameof(GenderTypeOption.Value)"
-                                LabelName="@nameof(GenderTypeOption.Label)"
-                                Placeholder="Seleccione género..." />
-                    </div>
-
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-6">
                         <SoftTooltipLabel Label="Proveedor / Origen" TooltipText="Origen o proveedor de la pieza" />
                         <Select TItem="JewerlySystem.Modules.Customers.Application.DTOs.PersonDto"
                                 TItemValue="int?"
@@ -51,6 +59,7 @@
                                 @bind-Value="_formModel.ProviderId"
                                 ValueName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.Id)"
                                 LabelName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.FullName)"
+                                EnableSearch="true"
                                 Placeholder="-- Stock Interno / Empeño --"
                                 AllowClear="true" />
                     </div>
@@ -59,8 +68,8 @@
 
             <!-- 2. Seriales y Valores -->
             <SoftFormBox Title="2. Identificación y Precios"
-                         Subtitle="Serial de tapa o caja y valores de costo y venta">
-                <div class="row g-3 align-items-end">
+                         InfoTooltip="Serial de tapa o caja y valores de costo y venta de vitrina">
+                <div class="row g-3 align-items-end mb-2">
                     <div class="col-12 col-md-4">
                         <SoftTooltipLabel Label="Nro. de Caja / Serial" Required="true" TooltipText="Identificador numérico grabado en la caja" />
                         <Input Placeholder="Ej. W-984210"
@@ -87,34 +96,21 @@
                                                OnChange="@(_ => StateHasChanged())" />
                     </div>
                 </div>
-            </SoftFormBox>
 
-            <!-- Resumen Margen -->
-            <div class="mb-4">
-                <SoftDetailCard Title="Resumen Comercial Proyectado">
-                    <div class="row g-3 text-center">
-                        <div class="col-12 col-md-4">
-                            <SoftDetailItem Label="Inversión Costo"
-                                            Value="@_formModel.CostValue.ToString("C0")"
-                                            HighlightVariant="SoftDetailItem.Variant.Danger" />
-                        </div>
-                        <div class="col-12 col-md-4">
-                            <SoftDetailItem Label="Precio Venta Sugerido"
-                                            Value="@_formModel.SaleValue.ToString("C0")"
-                                            HighlightVariant="SoftDetailItem.Variant.Success" />
-                        </div>
-                        <div class="col-12 col-md-4">
-                            <SoftDetailItem Label="Margen Comercial"
-                                            Value="@((_formModel.SaleValue - _formModel.CostValue).ToString("C0"))"
-                                            HighlightVariant="SoftDetailItem.Variant.Primary" />
-                        </div>
-                    </div>
-                </SoftDetailCard>
-            </div>
+                <!-- Botones de margen sugerido reloj -->
+                <div class="p-2 rounded bg-light border d-flex flex-wrap align-items-center gap-2">
+                    <span class="small text-muted fw-bold"><i class="bi bi-calculator me-1 text-primary"></i>Margen Sugerido Relojería:</span>
+                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" @onclick="() => ApplyWatchMarkup(30)">+30%</button>
+                    <button type="button" class="btn btn-xs btn-outline-primary rounded-pill px-2 py-0" @onclick="() => ApplyWatchMarkup(40)">+40% (Recomendado)</button>
+                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" @onclick="() => ApplyWatchMarkup(50)">+50%</button>
+                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" @onclick="() => ApplyWatchMarkup(75)">+75%</button>
+                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" @onclick="() => ApplyWatchMarkup(100)">+100% (2x)</button>
+                </div>
+            </SoftFormBox>
 
             <!-- 3. Descripción -->
             <SoftFormBox Title="3. Descripción del Reloj"
-                         Subtitle="Modelo, movimiento (automático/cuarzo), pulso, cristal, estado estético...">
+                         InfoTooltip="Modelo, movimiento automático, cuarzo, pulso, cristal, estado estético...">
                 <SoftVoiceTextArea @bind-Value="_formModel.Description"
                                    Label="Descripción del Reloj"
                                    Required="true"
@@ -162,8 +158,7 @@
     private readonly List<GenderTypeOption> _genderOptions = new()
     {
         new() { Value = GenderType.Hombre, Label = "Caballero / Hombre" },
-        new() { Value = GenderType.Mujer, Label = "Dama / Mujer" },
-        new() { Value = GenderType.Unisex, Label = "Unisex" }
+        new() { Value = GenderType.Mujer, Label = "Dama / Mujer" }
     };
 
     private bool _isSubmitting = false;
@@ -207,6 +202,13 @@
             CaseNumber = string.Empty,
             Description = string.Empty
         };
+    }
+
+    private void ApplyWatchMarkup(double percent)
+    {
+        if (_formModel.CostValue <= 0) _formModel.CostValue = 100000;
+        _formModel.SaleValue = (int)Math.Round(_formModel.CostValue * (1.0 + (percent / 100.0)));
+        StateHasChanged();
     }
 
     private async Task HandleSubmitAsync()

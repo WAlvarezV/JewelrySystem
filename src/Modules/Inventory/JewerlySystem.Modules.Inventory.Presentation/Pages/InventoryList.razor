@@ -40,7 +40,7 @@
     </SoftHeroHeader>
 
     <!-- Group Selector (Joyería vs Relojes) -->
-    <div class="group-switcher-bar d-flex align-items-center justify-content-between mb-4 p-2 bg-white rounded-3 shadow-sm border">
+    <div class="group-switcher-bar d-flex align-items-center justify-content-between my-4 p-3 bg-white rounded-3 shadow-sm border">
         <div class="d-flex align-items-center gap-3">
             <RadioGroup @bind-Value="_activeGroup" ButtonStyle="@RadioButtonStyle.Solid">
                 <Radio RadioButton="true" Value="@("JEWELRY")">
@@ -105,9 +105,9 @@
 
         <!-- Barra de Búsqueda y Filtros Joyería -->
         <SoftFilterCard>
-            <div class="row g-3 align-items-center">
+            <div class="row g-3 g-md-4 align-items-center py-1">
                 <div class="col-12 col-md-5">
-                    <div class="d-flex align-items-center gap-1">
+                    <div class="d-flex align-items-center gap-2">
                         <Input Placeholder="Buscar joya por referencia o descripción..."
                                PrefixIcon="search"
                                @bind-Value="_searchJewelryTerm"
@@ -125,6 +125,7 @@
                             @bind-Value="_selectedJewelryTypeFilter"
                             ValueName="@nameof(ItemTypeDto.Id)"
                             LabelName="@nameof(ItemTypeDto.Name)"
+                            EnableSearch="true"
                             Placeholder="Tipo de joya..." />
                 </div>
                 <div class="col-12 col-md-3">
@@ -134,6 +135,7 @@
                             @bind-Value="_selectedJewelryStatusFilter"
                             ValueName="@nameof(StatusFilterOption.Value)"
                             LabelName="@nameof(StatusFilterOption.Label)"
+                            EnableSearch="true"
                             Placeholder="Estado..." />
                 </div>
             </div>
@@ -211,7 +213,7 @@
                         {
                             <SoftActionButton Icon="export"
                                               TooltipText="Descargar / Vender"
-                                              OnClick="@(() => Navigation.NavigateTo("/inventory/discharge"))" />
+                                              OnClick="@(() => Navigation.NavigateTo($"/inventory/discharge?ref={context.Reference}"))" />
                         }
                         else
                         {
@@ -269,9 +271,9 @@
 
         <!-- Barra de Búsqueda y Filtros Relojes -->
         <SoftFilterCard>
-            <div class="row g-3 align-items-center">
+            <div class="row g-3 g-md-4 align-items-center py-1">
                 <div class="col-12 col-md-4">
-                    <div class="d-flex align-items-center gap-1">
+                    <div class="d-flex align-items-center gap-2">
                         <Input Placeholder="Buscar por serial, marca o descripción..."
                                PrefixIcon="search"
                                @bind-Value="_searchWatchTerm"
@@ -289,6 +291,7 @@
                             @bind-Value="_selectedWatchBrandFilter"
                             ValueName="@nameof(BrandFilterOption.Id)"
                             LabelName="@nameof(BrandFilterOption.Name)"
+                            EnableSearch="true"
                             Placeholder="Filtrar por marca..." />
                 </div>
                 <div class="col-12 col-md-3">
@@ -298,6 +301,7 @@
                             @bind-Value="_selectedWatchGenderFilter"
                             ValueName="@nameof(GenderFilterOption.Value)"
                             LabelName="@nameof(GenderFilterOption.Label)"
+                            EnableSearch="true"
                             Placeholder="Género..." />
                 </div>
                 <div class="col-12 col-md-2">
@@ -307,6 +311,7 @@
                             @bind-Value="_selectedWatchStatusFilter"
                             ValueName="@nameof(StatusFilterOption.Value)"
                             LabelName="@nameof(StatusFilterOption.Label)"
+                            EnableSearch="true"
                             Placeholder="Estado..." />
                 </div>
             </div>
@@ -383,7 +388,7 @@
                         {
                             <SoftActionButton Icon="export"
                                               TooltipText="Descargar / Vender"
-                                              OnClick="@(() => Navigation.NavigateTo("/inventory/discharge"))" />
+                                              OnClick="@(() => Navigation.NavigateTo($"/inventory/discharge?ref={context.Reference}"))" />
                         }
                         else
                         {
@@ -405,7 +410,7 @@
             <Form Model="@_jewelFormModel" Layout="@FormLayout.Vertical">
                 <!-- 1. Clasificación y Proveedor -->
                 <SoftFormBox Title="1. Tipo de Joya y Origen"
-                             Subtitle="Seleccione la categoría de joyería y el origen o proveedor">
+                             InfoTooltip="Categoría de joyería y procedencia de la pieza">
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
                             <FormItem Label="Tipo de Joya" Required="true">
@@ -415,6 +420,7 @@
                                         @bind-Value="_jewelFormModel.ItemTypeId"
                                         ValueName="@nameof(ItemTypeDto.Id)"
                                         LabelName="@nameof(ItemTypeDto.Name)"
+                                        EnableSearch="true"
                                         Placeholder="Seleccione tipo de joya..." />
                             </FormItem>
                         </div>
@@ -426,6 +432,7 @@
                                         @bind-Value="_jewelFormModel.ProviderId"
                                         ValueName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.Id)"
                                         LabelName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.FullName)"
+                                        EnableSearch="true"
                                         Placeholder="-- Proveedor General / Stock Interno --"
                                         AllowClear="true" />
                             </FormItem>
@@ -435,7 +442,7 @@
 
                 <!-- 2. Pesaje y Tarifas -->
                 <SoftFormBox Title="2. Pesaje y Tarifas por Gramo"
-                             Subtitle="Defina el peso exacto en gramos y las tarifas de costo y venta proyectada">
+                             InfoTooltip="Peso neto verificado en balanza y tarifas pactadas por gramo">
                     <div class="row g-3 align-items-end">
                         <div class="col-12 col-md-4">
                             <FormItem Label="Peso en Gramos (g)" Required="true">
@@ -483,35 +490,20 @@
                         }
                     </div>
 
-                    <div class="mt-3">
-                        <SoftDetailCard Title="Resumen Económico Proyectado">
-                            <div class="row g-3 text-center">
-                                <div class="col-12 col-md-4">
-                                    <SoftDetailItem Label="Costo Total Calculado"
-                                                    Value="@_calculatedJewelCost.ToString("C0")"
-                                                    HighlightVariant="SoftDetailItem.Variant.Danger" />
-                                    <div class="text-muted small">Peso (@_jewelFormModel.Weight.ToString("F2") g) × Costo Gr.</div>
-                                </div>
-                                <div class="col-12 col-md-4">
-                                    <SoftDetailItem Label="Venta Total Sugerida"
-                                                    Value="@_calculatedJewelSale.ToString("C0")"
-                                                    HighlightVariant="SoftDetailItem.Variant.Success" />
-                                    <div class="text-muted small">Peso (@_jewelFormModel.Weight.ToString("F2") g) × Venta Gr.</div>
-                                </div>
-                                <div class="col-12 col-md-4">
-                                    <SoftDetailItem Label="Margen Proyectado"
-                                                    Value="@((_calculatedJewelSale - _calculatedJewelCost).ToString("C0"))"
-                                                    HighlightVariant="SoftDetailItem.Variant.Primary" />
-                                    <div class="text-muted small">Ganancia bruta estimada</div>
-                                </div>
-                            </div>
-                        </SoftDetailCard>
+                    <!-- Botones de margen sugerido joya drawer -->
+                    <div class="p-2 mb-3 rounded bg-light border d-flex flex-wrap align-items-center gap-2">
+                        <span class="small text-muted fw-bold"><i class="bi bi-magic me-1 text-primary"></i>Fijar Margen Rápido:</span>
+                        <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" @onclick="() => ApplyDrawerJewelMarkup(20)">+20%</button>
+                        <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" @onclick="() => ApplyDrawerJewelMarkup(25)">+25%</button>
+                        <button type="button" class="btn btn-xs btn-outline-primary rounded-pill px-2 py-0" @onclick="() => ApplyDrawerJewelMarkup(30)">+30% (Estándar)</button>
+                        <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" @onclick="() => ApplyDrawerJewelMarkup(40)">+40%</button>
+                        <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" @onclick="() => ApplyDrawerJewelMarkup(50)">+50%</button>
                     </div>
                 </SoftFormBox>
 
                 <!-- 3. Descripción -->
                 <SoftFormBox Title="3. Descripción del Artículo"
-                             Subtitle="Detalle material (oro 18k, 14k, plata), piedras preciosas, tallas, grabado...">
+                             InfoTooltip="Detalle de metal (oro 18k, 14k, plata), piedras preciosas, tallas, grabado...">
                     <SoftVoiceTextArea @bind-Value="_jewelFormModel.Description"
                                        Label="Descripción Detallada"
                                        Required="true"
@@ -540,7 +532,7 @@
             <Form Model="@_watchFormModel" Layout="@FormLayout.Vertical">
                 <!-- 1. Marca, Origen y Clasificación -->
                 <SoftFormBox Title="1. Marca, Origen y Clasificación"
-                             Subtitle="Información del fabricante, género objetivo y procedencia">
+                             InfoTooltip="Información del fabricante, género objetivo y procedencia">
                     <div class="row g-3">
                         <div class="col-12 col-md-4">
                             <FormItem Label="Marca del Reloj" Required="true">
@@ -550,6 +542,7 @@
                                         @bind-Value="_watchFormModel.BrandId"
                                         ValueName="@nameof(BrandDto.Id)"
                                         LabelName="@nameof(BrandDto.Name)"
+                                        EnableSearch="true"
                                         Placeholder="Seleccione marca..." />
                             </FormItem>
                         </div>
@@ -562,6 +555,7 @@
                                         @bind-Value="_watchFormModel.GenderType"
                                         ValueName="@nameof(GenderTypeOption.Value)"
                                         LabelName="@nameof(GenderTypeOption.Label)"
+                                        EnableSearch="true"
                                         Placeholder="Seleccione género..." />
                             </FormItem>
                         </div>
@@ -574,6 +568,7 @@
                                         @bind-Value="_watchFormModel.ProviderId"
                                         ValueName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.Id)"
                                         LabelName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.FullName)"
+                                        EnableSearch="true"
                                         Placeholder="-- Stock Interno / Empeño --"
                                         AllowClear="true" />
                             </FormItem>
@@ -583,7 +578,7 @@
 
                 <!-- 2. Seriales y Valores -->
                 <SoftFormBox Title="2. Identificación y Precios"
-                             Subtitle="Serial de tapa o caja y valores de costo y venta">
+                             InfoTooltip="Serial de tapa o caja y valores de costo y venta de vitrina">
                     <div class="row g-3 align-items-end">
                         <div class="col-12 col-md-4">
                             <FormItem Label="Nro. de Caja / Serial" Required="true">
@@ -615,32 +610,20 @@
                         </div>
                     </div>
 
-                    <div class="mt-3">
-                        <SoftDetailCard Title="Resumen Comercial Proyectado">
-                            <div class="row g-3 text-center">
-                                <div class="col-12 col-md-4">
-                                    <SoftDetailItem Label="Inversión Costo"
-                                                    Value="@_watchFormModel.CostValue.ToString("C0")"
-                                                    HighlightVariant="SoftDetailItem.Variant.Danger" />
-                                </div>
-                                <div class="col-12 col-md-4">
-                                    <SoftDetailItem Label="Precio Venta Sugerido"
-                                                    Value="@_watchFormModel.SaleValue.ToString("C0")"
-                                                    HighlightVariant="SoftDetailItem.Variant.Success" />
-                                </div>
-                                <div class="col-12 col-md-4">
-                                    <SoftDetailItem Label="Margen Comercial"
-                                                    Value="@((_watchFormModel.SaleValue - _watchFormModel.CostValue).ToString("C0"))"
-                                                    HighlightVariant="SoftDetailItem.Variant.Primary" />
-                                </div>
-                            </div>
-                        </SoftDetailCard>
+                    <!-- Botones de margen sugerido reloj drawer -->
+                    <div class="p-2 mb-3 rounded bg-light border d-flex flex-wrap align-items-center gap-2">
+                        <span class="small text-muted fw-bold"><i class="bi bi-calculator me-1 text-primary"></i>Margen Sugerido:</span>
+                        <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" @onclick="() => ApplyDrawerWatchMarkup(30)">+30%</button>
+                        <button type="button" class="btn btn-xs btn-outline-primary rounded-pill px-2 py-0" @onclick="() => ApplyDrawerWatchMarkup(40)">+40% (Recomendado)</button>
+                        <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" @onclick="() => ApplyDrawerWatchMarkup(50)">+50%</button>
+                        <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" @onclick="() => ApplyDrawerWatchMarkup(75)">+75%</button>
+                        <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" @onclick="() => ApplyDrawerWatchMarkup(100)">+100% (2x)</button>
                     </div>
                 </SoftFormBox>
 
                 <!-- 3. Descripción -->
                 <SoftFormBox Title="3. Descripción del Reloj"
-                             Subtitle="Modelo, movimiento (automático/cuarzo), pulso, cristal, estado estético...">
+                             InfoTooltip="Modelo, movimiento automático, cuarzo, pulso, cristal, estado estético...">
                     <SoftVoiceTextArea @bind-Value="_watchFormModel.Description"
                                        Label="Descripción Detallada"
                                        Required="true"
@@ -723,15 +706,13 @@
     {
         new() { Value = "", Label = "Todos los Géneros" },
         new() { Value = "Hombre", Label = "Hombre / Caballero" },
-        new() { Value = "Mujer", Label = "Mujer / Dama" },
-        new() { Value = "Unisex", Label = "Unisex" }
+        new() { Value = "Mujer", Label = "Mujer / Dama" }
     };
 
     private readonly List<GenderTypeOption> _genderOptions = new()
     {
         new() { Value = GenderType.Hombre, Label = "Caballero / Hombre" },
-        new() { Value = GenderType.Mujer, Label = "Dama / Mujer" },
-        new() { Value = GenderType.Unisex, Label = "Unisex" }
+        new() { Value = GenderType.Mujer, Label = "Dama / Mujer" }
     };
 
     // Drawers State
@@ -928,6 +909,20 @@
     {
         _calculatedJewelCost = (int)Math.Round(_jewelFormModel.Weight * _jewelFormModel.GramValue);
         _calculatedJewelSale = (int)Math.Round(_jewelFormModel.Weight * _jewelFormModel.GramSaleValue);
+    }
+
+    private void ApplyDrawerJewelMarkup(double percent)
+    {
+        if (_jewelFormModel.GramValue <= 0) _jewelFormModel.GramValue = 200000;
+        _jewelFormModel.GramSaleValue = (int)Math.Round(_jewelFormModel.GramValue * (1.0 + (percent / 100.0)));
+        RecalculateJewelValues();
+    }
+
+    private void ApplyDrawerWatchMarkup(double percent)
+    {
+        if (_watchFormModel.CostValue <= 0) _watchFormModel.CostValue = 100000;
+        _watchFormModel.SaleValue = (int)Math.Round(_watchFormModel.CostValue * (1.0 + (percent / 100.0)));
+        StateHasChanged();
     }
 
     private async Task SaveJewelAsync()

@@ -1,0 +1,679 @@
+@namespace JewerlySystem.Common.Presentation.Components.Organisms
+@using JewerlySystem.Common.Application.Voice
+@using JewerlySystem.Common.Presentation.Components.Atoms
+@implements IAsyncDisposable
+@inject IVoiceInterpreterService VoiceInterpreter
+@inject IVoiceCommandDispatcher VoiceDispatcher
+@inject IMessageService MessageService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<Modal Visible="@Visible"
+       Title="✨ Asistente de Voz con IA"
+       Width="680"
+       Footer="@null"
+       OnCancel="@HandleClose"
+       MaskClosable="false"
+       Class="soft-voice-modal">
+
+    <div class="voice-assistant-simple-container p-2">
+        <!-- 1. Header amigable y claro -->
+        <div class="text-center mb-3">
+            <h5 class="fw-bold text-dark mb-1 d-flex align-items-center justify-content-center gap-2">
+                <i class="bi bi-stars text-warning fs-4"></i>
+                <span>¿Qué deseas registrar hoy?</span>
+            </h5>
+            <p class="text-muted small mb-0">
+                Dicta una venta, contrato, nuevo cliente o gasto de caja con tus propias palabras. La IA lo estructurará automáticamente.
+            </p>
+        </div>
+
+        @if (!_executionSuccess)
+        {
+            <!-- 2. Hero Micrófono Central (Un solo toque para empezar) -->
+            @if (_operationResult == null && !_isInterpreting)
+            {
+                <div class="mic-hero-card text-center p-4 rounded-4 mb-3 border @(_isListening ? "bg-danger-subtle border-danger border-opacity-50" : "bg-light border-light-subtle shadow-xs")">
+                    @if (!_isListening)
+                    {
+                        <!-- Botón Enorme de Inicio -->
+                        <div class="d-flex flex-column align-items-center justify-content-center gap-2">
+                            <button type="button"
+                                    class="ai-mic-hero-circle shadow-lg d-flex align-items-center justify-content-center border-0 text-white"
+                                    @onclick="StartListeningAsync"
+                                    title="Toca para comenzar a hablar">
+                                <i class="bi bi-mic-fill"></i>
+                            </button>
+                            <div class="mt-2">
+                                <div class="fw-bold text-dark fs-6">Toca el micrófono para hablar</div>
+                                <div class="text-muted small">o escribe directamente en el recuadro inferior</div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Estado de Grabación Activa -->
+                        <div class="d-flex flex-column align-items-center justify-content-center gap-3">
+                            <div class="ai-mic-hero-circle listening shadow-lg d-flex align-items-center justify-content-center border-0 text-white"
+                                 @onclick="StopListeningAndProcessAsync">
+                                <i class="bi bi-mic-fill"></i>
+                            </div>
+
+                            <!-- Animación de Onda de Voz -->
+                            <div class="sound-wave-container d-flex align-items-center gap-1">
+                                <span class="sound-bar bar-1"></span>
+                                <span class="sound-bar bar-2"></span>
+                                <span class="sound-bar bar-3"></span>
+                                <span class="sound-bar bar-4"></span>
+                                <span class="sound-bar bar-5"></span>
+                            </div>
+
+                            <div class="badge bg-danger text-white px-3 py-2 fs-6 rounded-pill d-inline-flex align-items-center gap-2">
+                                <span class="pulse-dot"></span>
+                                <span>Escuchando... Di lo que necesitas registrar</span>
+                            </div>
+
+                            <button type="button"
+                                    class="btn btn-danger btn-lg px-4 py-2 rounded-pill fw-bold shadow-sm d-inline-flex align-items-center gap-2"
+                                    @onclick="StopListeningAndProcessAsync">
+                                <i class="bi bi-stop-circle-fill fs-5"></i>
+                                <span>¡Listo, Procesar con IA!</span>
+                            </button>
+                        </div>
+                    }
+
+                    <!-- Vista previa en tiempo real de lo que habla -->
+                    @if (!string.IsNullOrWhiteSpace(_transcript) || !string.IsNullOrWhiteSpace(_interimTranscript))
+                    {
+                        <div class="mt-3 p-3 bg-white rounded-3 border text-start shadow-2xs font-monospace small">
+                            <div class="text-muted fw-bold mb-1" style="font-size: 0.72rem;">TRANSCRIPCIÓN EN VIVO:</div>
+                            <span class="text-dark">@_transcript</span>
+                            @if (!string.IsNullOrWhiteSpace(_interimTranscript))
+                            {
+                                <span class="text-muted opacity-75 fst-italic"> @_interimTranscript</span>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- 3. Campo de Texto / Ajuste Rápido -->
+                <div class="mb-3">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <label class="form-label small fw-semibold text-secondary mb-0">Texto a Interpretar:</label>
+                        @if (!string.IsNullOrWhiteSpace(_transcript))
+                        {
+                            <button type="button" class="btn btn-link btn-sm text-muted p-0 text-decoration-none small" @onclick="ClearTranscript">
+                                <i class="bi bi-trash me-1"></i>Limpiar
+                            </button>
+                        }
+                    </div>
+                    <textarea class="form-control form-control-sm rounded-3"
+                              rows="2"
+                              placeholder="Ej: 'Vender cadena referencia 1042 por 450.000 pesos en efectivo a Carlos Ruiz'..."
+                              @bind="_transcript"
+                              @bind:event="oninput"></textarea>
+                </div>
+
+                <!-- Botón de Análisis Manual (si ya hay texto y no está grabando) -->
+                @if (!string.IsNullOrWhiteSpace(_transcript) && !_isListening)
+                {
+                    <div class="d-grid mb-3">
+                        <button type="button"
+                                class="btn btn-primary py-2 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
+                                style="background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border: none;"
+                                @onclick="InterpretVoiceCommand">
+                            <i class="bi bi-stars text-warning fs-5"></i>
+                            <span>Interpretar con Inteligencia Artificial</span>
+                        </button>
+                    </div>
+                }
+
+                <!-- 4. Píldoras de Ejemplo Rápidas (1 Clic) -->
+                <div class="pt-2 border-top">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted small fw-semibold">💡 Ejemplos listos para probar (1 clic):</span>
+                    </div>
+
+                    <div class="d-flex flex-column gap-2">
+                        <!-- Ejemplo Venta Completa -->
+                        <div class="p-2 rounded-3 bg-light border border-primary-subtle d-flex align-items-center justify-content-between gap-2 shadow-2xs">
+                            <div class="d-flex align-items-center gap-2 overflow-hidden">
+                                <span class="badge bg-success-subtle text-success py-1 px-2 border border-success-subtle text-nowrap">
+                                    <i class="bi bi-cart-check-fill me-1"></i>Venta Completa
+                                </span>
+                                <span class="small text-dark text-truncate fw-medium">
+                                    "Venta de cadena de oro ref 1042 por 450000 pesos en efectivo a Carlos Ruiz CC 1020304050"
+                                </span>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary text-nowrap py-1 px-2"
+                                    @onclick='() => UseExample("Venta de cadena de oro referencia 1042 por valor de 450000 pesos en efectivo al cliente Carlos Ruiz con cédula 1020304050", true)'>
+                                <i class="bi bi-play-fill me-1"></i>Probar
+                            </button>
+                        </div>
+
+                        <!-- Otros ejemplos en píldoras -->
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill py-1 px-3 small"
+                                    @onclick='() => UseExample("Crear contrato para Juan Carlos Pérez por 1800000 con abono de 500000 para hechura de cadena de oro 18k", true)'>
+                                💎 Contrato Hechura
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill py-1 px-3 small"
+                                    @onclick='() => UseExample("Nuevo cliente María Fernanda Gómez con cédula 10203040 y celular 3105551234", true)'>
+                                👤 Nuevo Cliente
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill py-1 px-3 small"
+                                    @onclick='() => UseExample("Egreso de caja por 85000 para compra de suministros de taller", true)'>
+                                💵 Gasto de Taller
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- 5. Estado de Interpretación en Curso -->
+            @if (_isInterpreting)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-grow text-primary mb-3" style="width: 3.5rem; height: 3.5rem;" role="status"></div>
+                    <h6 class="fw-bold text-dark mb-1">
+                        <i class="bi bi-stars text-warning me-1"></i> La IA de Gemini está analizando tu solicitud...
+                    </h6>
+                    <p class="text-muted small">Estructurando referencia, valores y datos para el registro...</p>
+                </div>
+            }
+
+            <!-- 6. Resultado Interpretado Amigable (Confirmación Visual Limpia) -->
+            @if (_operationResult != null && !_isInterpreting)
+            {
+                <div class="card border rounded-4 shadow-sm mb-3 @(_operationResult.IsSuccess ? "border-success-subtle bg-success-subtle bg-opacity-10" : "border-warning-subtle bg-warning-subtle bg-opacity-10")">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge @GetIntentBadgeClass(_operationResult.Intent) px-3 py-2 rounded-pill fs-6 fw-bold">
+                                    <i class="bi @GetIntentIcon(_operationResult.Intent) me-1"></i> @GetIntentFriendlyName(_operationResult.Intent)
+                                </span>
+                            </div>
+                            <span class="badge bg-light text-secondary border">Confianza: @((_operationResult.Confidence * 100).ToString("N0"))%</span>
+                        </div>
+
+                        <h6 class="fw-bold text-dark mb-3">
+                            @_operationResult.Summary
+                        </h6>
+
+                        <!-- Resumen amigable para el usuario -->
+                        @if (_operationResult.Sale != null)
+                        {
+                            <div class="p-3 rounded-3 bg-white border mb-3 shadow-2xs">
+                                <div class="row g-2">
+                                    <div class="col-sm-6">
+                                        <div class="text-muted small">Referencia a Descargar:</div>
+                                        <div class="fw-bold fs-6 text-primary">
+                                            @if (_operationResult.Sale.Reference > 0)
+                                            {
+                                                <span>#@_operationResult.Sale.Reference</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">Falta Referencia</span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="text-muted small">Valor de Venta:</div>
+                                        <div class="fw-bold fs-6 text-success">$@(_operationResult.Sale.SaleValue.ToString("N0"))</div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="text-muted small">Método de Pago:</div>
+                                        <div class="fw-semibold text-dark">@_operationResult.Sale.PaymentMethod</div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="text-muted small">Cliente:</div>
+                                        <div class="fw-semibold text-dark">
+                                            @(_operationResult.Sale.CustomerName ?? "Cliente Mostrador")
+                                            @if (!string.IsNullOrEmpty(_operationResult.Sale.CustomerIdentification))
+                                            {
+                                                <span class="text-muted small">(C.C. @_operationResult.Sale.CustomerIdentification)</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else if (_operationResult.Contract != null)
+                        {
+                            <div class="p-3 rounded-3 bg-white border mb-3 shadow-2xs">
+                                <div class="row g-2">
+                                    <div class="col-sm-6">
+                                        <div class="text-muted small">Cliente:</div>
+                                        <div class="fw-bold fs-6 text-dark">@(_operationResult.Contract.CustomerName ?? "Cliente mostrador")</div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="text-muted small">Valor Total:</div>
+                                        <div class="fw-bold fs-6 text-primary">$@(_operationResult.Contract.Value.ToString("N0"))</div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="text-muted small">Abono Inicial:</div>
+                                        <div class="fw-semibold text-success">$@((_operationResult.Contract.InitialPayment ?? 0).ToString("N0"))</div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="text-muted small">Detalle / Hechura:</div>
+                                        <div class="fw-semibold text-dark">@_operationResult.Contract.Description (@_operationResult.Contract.Weight gr)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else if (_operationResult.Customer != null)
+                        {
+                            <div class="p-3 rounded-3 bg-white border mb-3 shadow-2xs">
+                                <div class="row g-2">
+                                    <div class="col-sm-6">
+                                        <div class="text-muted small">Nombre Completo:</div>
+                                        <div class="fw-bold fs-6 text-dark">@_operationResult.Customer.FullName</div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="text-muted small">Documento / Cédula:</div>
+                                        <div class="fw-bold fs-6 text-primary">@(_operationResult.Customer.IdentificationNumber ?? "Pendiente")</div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="text-muted small">Teléfono / Celular:</div>
+                                        <div class="fw-semibold text-dark">@(_operationResult.Customer.CellPhone ?? "Pendiente")</div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else if (_operationResult.Cash != null)
+                        {
+                            <div class="p-3 rounded-3 bg-white border mb-3 shadow-2xs">
+                                <div class="row g-2">
+                                    <div class="col-sm-6">
+                                        <div class="text-muted small">Tipo de Movimiento:</div>
+                                        <div class="fw-bold fs-6 text-dark">@_operationResult.Cash.RecordType</div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="text-muted small">Monto:</div>
+                                        <div class="fw-bold fs-6 text-primary">$@(_operationResult.Cash.Value.ToString("N0"))</div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="text-muted small">Concepto:</div>
+                                        <div class="fw-semibold text-dark">@_operationResult.Cash.Description</div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        @if (_operationResult.MissingFields.Any())
+                        {
+                            <div class="alert alert-warning py-2 px-3 small rounded-3 mb-3">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i> Faltan campos requeridos: <b>@string.Join(", ", _operationResult.MissingFields)</b>
+                            </div>
+                        }
+
+                        <!-- Botones de Acción de Confirmación -->
+                        <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+                            <button type="button" class="btn btn-light btn-sm text-secondary px-3" @onclick="ClearTranscript">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i>Volver a Dictar
+                            </button>
+
+                            @if (_operationResult.IsSuccess)
+                            {
+                                <button type="button"
+                                        class="btn btn-success btn-lg px-4 py-2 rounded-3 fw-bold d-inline-flex align-items-center gap-2 shadow-sm"
+                                        disabled="@_isExecuting"
+                                        @onclick="ExecuteVoiceOperation">
+                                    @if (_isExecuting)
+                                    {
+                                        <span class="spinner-border spinner-border-sm" role="status"></span>
+                                        <span>Guardando en el Sistema...</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-check2-circle fs-5"></i>
+                                        <span>Confirmar y Guardar</span>
+                                    }
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else if (_lastExecutionResult != null)
+        {
+            <!-- 7. Confirmación de Éxito Final -->
+            <div class="text-center py-4 p-3 bg-success-subtle rounded-4 border border-success-subtle shadow-xs">
+                <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm mb-3" style="width: 60px; height: 60px;">
+                    <i class="bi bi-check-lg fs-1"></i>
+                </div>
+                <h5 class="fw-bold text-success mb-2">¡Operación Registrada Exitosamente!</h5>
+                <p class="text-dark small mb-4">@_lastExecutionResult.Message</p>
+
+                <div class="d-flex align-items-center justify-content-center gap-2">
+                    @if (!string.IsNullOrEmpty(_lastExecutionResult.RedirectUrl))
+                    {
+                        <button type="button" class="btn btn-outline-success fw-semibold px-3" @onclick="NavigateToEntity">
+                            <i class="bi bi-eye me-1"></i>Ver Registro
+                        </button>
+                    }
+                    <button type="button" class="btn btn-success fw-semibold px-4" @onclick="ResetForm">
+                        <i class="bi bi-plus-circle me-1"></i>Nueva Operación
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</Modal>
+
+<style>
+    /* Micrófono Hero Central */
+    .ai-mic-hero-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+        font-size: 2rem;
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .ai-mic-hero-circle:hover {
+        transform: scale(1.08);
+        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.5) !important;
+    }
+    .ai-mic-hero-circle.listening {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+        animation: heroPulse 1.4s infinite;
+    }
+
+    @@keyframes heroPulse {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+        70% { transform: scale(1.06); box-shadow: 0 0 0 16px rgba(239, 68, 68, 0); }
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    /* Onda de Sonido Animada */
+    .sound-wave-container {
+        height: 24px;
+    }
+    .sound-bar {
+        display: inline-block;
+        width: 4px;
+        background-color: #dc3545;
+        border-radius: 2px;
+        animation: waveAnim 1s ease-in-out infinite alternate;
+    }
+    .bar-1 { height: 10px; animation-delay: 0.1s; }
+    .bar-2 { height: 22px; animation-delay: 0.3s; }
+    .bar-3 { height: 16px; animation-delay: 0.2s; }
+    .bar-4 { height: 24px; animation-delay: 0.4s; }
+    .bar-5 { height: 12px; animation-delay: 0.15s; }
+
+    @@keyframes waveAnim {
+        0% { transform: scaleY(0.4); }
+        100% { transform: scaleY(1.2); }
+    }
+
+    .pulse-dot {
+        width: 8px;
+        height: 8px;
+        background-color: #ffffff;
+        border-radius: 50%;
+        display: inline-block;
+        animation: blinkDot 0.8s infinite alternate;
+    }
+    @@keyframes blinkDot {
+        from { opacity: 0.3; }
+        to { opacity: 1; }
+    }
+</style>
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
+
+    private string _transcript = string.Empty;
+    private string _interimTranscript = string.Empty;
+    private bool _isListening = false;
+    private bool _isInterpreting = false;
+    private bool _isExecuting = false;
+    private bool _executionSuccess = false;
+    private VoiceOperationResult? _operationResult;
+    private VoiceExecutionResult? _lastExecutionResult;
+    private DotNetObjectReference<SoftVoiceAssistantModal>? _dotNetHelper;
+
+    protected override void OnInitialized()
+    {
+        _dotNetHelper = DotNetObjectReference.Create(this);
+    }
+
+    [JSInvokable]
+    public async Task OnSpeechStateChanged(bool isListening)
+    {
+        _isListening = isListening;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public async Task OnSpeechResult(string finalTranscript, string interimTranscript)
+    {
+        _interimTranscript = interimTranscript;
+        if (!string.IsNullOrWhiteSpace(finalTranscript))
+        {
+            _transcript = string.IsNullOrWhiteSpace(_transcript)
+                ? finalTranscript.Trim()
+                : $"{_transcript.Trim()} {finalTranscript.Trim()}";
+            _interimTranscript = string.Empty;
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public async Task OnSpeechError(string error)
+    {
+        _isListening = false;
+        MessageService.Warning(error);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task StartListeningAsync()
+    {
+        _transcript = string.Empty;
+        _interimTranscript = string.Empty;
+        _operationResult = null;
+        _executionSuccess = false;
+        _lastExecutionResult = null;
+
+        if (_dotNetHelper == null)
+        {
+            _dotNetHelper = DotNetObjectReference.Create(this);
+        }
+
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("jewelrySpeech.start", _dotNetHelper, "es-CO");
+        }
+        catch (Exception ex)
+        {
+            MessageService.Warning("No se pudo iniciar el micrófono: " + ex.Message);
+        }
+    }
+
+    private async Task StopListeningAndProcessAsync()
+    {
+        if (_isListening)
+        {
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("jewelrySpeech.stop");
+            }
+            catch { }
+            _isListening = false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_interimTranscript))
+        {
+            _transcript = string.IsNullOrWhiteSpace(_transcript)
+                ? _interimTranscript.Trim()
+                : $"{_transcript.Trim()} {_interimTranscript.Trim()}";
+            _interimTranscript = string.Empty;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_transcript))
+        {
+            await InterpretVoiceCommand();
+        }
+    }
+
+    private void ClearTranscript()
+    {
+        _transcript = string.Empty;
+        _interimTranscript = string.Empty;
+        _operationResult = null;
+        _executionSuccess = false;
+        _lastExecutionResult = null;
+    }
+
+    private async Task UseExample(string example, bool autoInterpret = false)
+    {
+        _transcript = example;
+        _interimTranscript = string.Empty;
+        _operationResult = null;
+        _executionSuccess = false;
+        _lastExecutionResult = null;
+
+        if (autoInterpret)
+        {
+            await InterpretVoiceCommand();
+        }
+    }
+
+    private async Task InterpretVoiceCommand()
+    {
+        if (string.IsNullOrWhiteSpace(_transcript)) return;
+
+        _isInterpreting = true;
+        _operationResult = null;
+        _executionSuccess = false;
+        _lastExecutionResult = null;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            _operationResult = await VoiceInterpreter.InterpretAsync(_transcript);
+        }
+        catch (Exception ex)
+        {
+            MessageService.Error("Error al interpretar con IA: " + ex.Message);
+        }
+        finally
+        {
+            _isInterpreting = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task ExecuteVoiceOperation()
+    {
+        if (_operationResult == null) return;
+
+        _isExecuting = true;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            _lastExecutionResult = await VoiceDispatcher.ExecuteAsync(_operationResult);
+            if (_lastExecutionResult.Success)
+            {
+                _executionSuccess = true;
+                MessageService.Success(_lastExecutionResult.Message);
+            }
+            else
+            {
+                MessageService.Error(_lastExecutionResult.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageService.Error("Error al guardar: " + ex.Message);
+        }
+        finally
+        {
+            _isExecuting = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task NavigateToEntity()
+    {
+        if (!string.IsNullOrEmpty(_lastExecutionResult?.RedirectUrl))
+        {
+            await HandleClose();
+            Navigation.NavigateTo(_lastExecutionResult.RedirectUrl);
+        }
+    }
+
+    private void ResetForm()
+    {
+        ClearTranscript();
+    }
+
+    private async Task HandleClose()
+    {
+        if (_isListening)
+        {
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("jewelrySpeech.stop");
+            }
+            catch { }
+            _isListening = false;
+        }
+
+        Visible = false;
+        await VisibleChanged.InvokeAsync(false);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_isListening)
+            {
+                await JSRuntime.InvokeVoidAsync("jewelrySpeech.stop");
+            }
+            _dotNetHelper?.Dispose();
+        }
+        catch
+        {
+            // Silent cleanup
+        }
+    }
+
+    private static string GetIntentFriendlyName(string intent) => intent switch
+    {
+        VoiceIntents.CrearVenta => "Venta en Mostrador",
+        VoiceIntents.CrearContrato => "Nuevo Contrato",
+        VoiceIntents.CrearCliente => "Registro de Cliente",
+        VoiceIntents.CrearMovimientoCaja => "Movimiento de Caja",
+        VoiceIntents.CrearFactura => "Facturación",
+        _ => intent
+    };
+
+    private static string GetIntentBadgeClass(string intent) => intent switch
+    {
+        VoiceIntents.CrearVenta => "bg-success text-white",
+        VoiceIntents.CrearContrato => "bg-primary text-white",
+        VoiceIntents.CrearCliente => "bg-info text-dark",
+        VoiceIntents.CrearMovimientoCaja => "bg-secondary text-white",
+        VoiceIntents.CrearFactura => "bg-warning text-dark",
+        _ => "bg-secondary text-white"
+    };
+
+    private static string GetIntentIcon(string intent) => intent switch
+    {
+        VoiceIntents.CrearVenta => "bi-cart-check-fill",
+        VoiceIntents.CrearContrato => "bi-file-earmark-text-fill",
+        VoiceIntents.CrearCliente => "bi-person-fill",
+        VoiceIntents.CrearMovimientoCaja => "bi-cash-coin",
+        VoiceIntents.CrearFactura => "bi-receipt-cutoff",
+        _ => "bi-question-circle"
+    };
+}

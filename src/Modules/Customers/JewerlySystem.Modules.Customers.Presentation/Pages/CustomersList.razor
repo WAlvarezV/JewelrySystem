@@ -15,10 +15,54 @@
         <SoftButton Type="@ButtonType.Primary" Icon="user-add" OnClick="OpenCreateDrawer">Nuevo Registro</SoftButton>
     </SoftHeroHeader>
 
+    <!-- Metrics Summary -->
+    <div class="metrics-grid my-4">
+        <div class="metric-card">
+            <div class="metric-icon bg-blue-subtle">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-label">Total Directorio</span>
+                <span class="metric-value">@_allCustomers.Count</span>
+                <span class="metric-subtext">Contactos registrados</span>
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-icon bg-emerald-subtle">
+                <i class="bi bi-person-badge"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-label">Clientes</span>
+                <span class="metric-value">@_allCustomers.Count(x => x.PersonType == PersonType.Cliente)</span>
+                <span class="metric-subtext">Compradores y empeñantes</span>
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-icon bg-purple-subtle">
+                <i class="bi bi-truck"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-label">Proveedores y Talleres</span>
+                <span class="metric-value">@_allCustomers.Count(x => x.PersonType == PersonType.Proveedor)</span>
+                <span class="metric-subtext">Orfebres y mayoristas</span>
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-icon bg-amber-subtle">
+                <i class="bi bi-telephone"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-label">Con Celular Activo</span>
+                <span class="metric-value">@_allCustomers.Count(x => !string.IsNullOrWhiteSpace(x.CellPhone))</span>
+                <span class="metric-subtext">Contactabilidad directa</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Filters Card -->
     <SoftFilterCard>
-        <Row Gutter="16">
-            <Col Xs="24" Sm="12" Md="10">
+        <div class="row g-3 align-items-center">
+            <div class="col-12 col-lg-5">
                 <div class="d-flex align-items-center gap-1">
                     <Input Placeholder="Buscar por documento, nombre o celular..."
                            @bind-Value="_searchTerm"
@@ -29,18 +73,20 @@
                                      TooltipText="Buscar clientes por voz"
                                      ButtonClass="btn-outline-secondary" />
                 </div>
-            </Col>
-            <Col Xs="24" Sm="12" Md="10">
+            </div>
+            <div class="col-12 col-lg-5">
                 <RadioGroup @bind-Value="_filterTab" ButtonStyle="@RadioButtonStyle.Solid">
                     <Radio RadioButton="true" Value="@("ALL")">Todos</Radio>
                     <Radio RadioButton="true" Value="@("CLIENT")">Clientes</Radio>
                     <Radio RadioButton="true" Value="@("PROVIDER")">Proveedores</Radio>
                 </RadioGroup>
-            </Col>
-            <Col Xs="24" Sm="24" Md="4" Class="text-end">
-                <span class="text-muted small">Total: <b>@FilteredCustomers.Count</b> registros</span>
-            </Col>
-        </Row>
+            </div>
+            <div class="col-12 col-lg-2 text-lg-end">
+                <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill small">
+                    <i class="bi bi-funnel me-1"></i> <b>@FilteredCustomers.Count</b> registros
+                </span>
+            </div>
+        </div>
     </SoftFilterCard>
 
     <!-- Data Table / Empty / Loading -->
@@ -65,27 +111,57 @@
                    DataSource="@FilteredCustomers"
                    Responsive="true"
                    Size="@TableSize.Middle">
-                <PropertyColumn Property="c => c.PersonType" Title="Tipo" Width="130px">
+                <PropertyColumn Property="c => c.PersonType" Title="Rol" Width="140px">
                     @{
                         bool isCustomer = context.PersonType == PersonType.Cliente;
                     }
-                    <SoftTag Color="@(isCustomer ? "blue" : "purple")">
-                        @(isCustomer ? "Cliente" : "Proveedor")
-                    </SoftTag>
+                    @if (isCustomer)
+                    {
+                        <span class="pill-badge badge-soft-primary">
+                            <i class="bi bi-person"></i> Cliente
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="pill-badge badge-soft-purple">
+                            <i class="bi bi-truck"></i> Proveedor
+                        </span>
+                    }
                 </PropertyColumn>
                 <PropertyColumn Property="c => c.IdentificationNumber" Title="Nro. Documento" Width="160px">
-                    <span class="fw-semibold">@context.IdentificationNumber</span>
+                    <span class="fw-semibold text-dark">
+                        <i class="bi bi-card-heading text-muted me-1"></i>@context.IdentificationNumber
+                    </span>
                 </PropertyColumn>
                 <PropertyColumn Property="c => c.FullName" Title="Nombre Completo / Razón Social">
-                    <span class="fw-bold text-dark">@context.FullName</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="avatar-circle @(context.PersonType == PersonType.Cliente ? "avatar-blue" : "avatar-purple")">
+                            @GetInitials(context.FullName)
+                        </div>
+                        <div class="d-flex flex-column" style="min-width: 0;">
+                            <span class="fw-bold text-dark text-truncate">@context.FullName</span>
+                            @if (!string.IsNullOrEmpty(context.Email))
+                            {
+                                <span class="small text-muted text-truncate">
+                                    <i class="bi bi-envelope me-1"></i>@context.Email
+                                </span>
+                            }
+                        </div>
+                    </div>
                 </PropertyColumn>
-                <PropertyColumn Property="c => c.CellPhone" Title="Teléfono / Celular" Width="150px">
-                    @(string.IsNullOrEmpty(context.CellPhone) ? "-" : context.CellPhone)
+                <PropertyColumn Property="c => c.CellPhone" Title="Teléfono / Celular" Width="160px">
+                    @if (!string.IsNullOrEmpty(context.CellPhone))
+                    {
+                        <span class="tabular-nums fw-medium text-dark">
+                            <i class="bi bi-telephone text-primary me-1"></i>@context.CellPhone
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="text-muted small">Sin registrar</span>
+                    }
                 </PropertyColumn>
-                <PropertyColumn Property="c => c.Email" Title="Correo Electrónico">
-                    @(string.IsNullOrEmpty(context.Email) ? "-" : context.Email)
-                </PropertyColumn>
-                <ActionColumn Title="Acciones" Width="90px">
+                <ActionColumn Title="Acción" Width="80px" Align="ColumnAlign.Center">
                     <SoftActionButton Icon="edit"
                                       Tooltip="Editar registro"
                                       OnClick="() => OpenEditDrawer(context)" />
@@ -103,12 +179,28 @@
         <ChildContent>
             <Form Model="@_formModel" Layout="@FormLayout.Vertical">
                 <SoftFormBox Title="Tipo de Registro">
-                    <FormItem Label="Rol del Contacto">
-                        <RadioGroup @bind-Value="_formModel.PersonType" ButtonStyle="@RadioButtonStyle.Solid">
-                            <Radio RadioButton="true" Value="@PersonType.Cliente">Cliente Empeñante / Comprador</Radio>
-                            <Radio RadioButton="true" Value="@PersonType.Proveedor">Proveedor de Mercancía</Radio>
-                        </RadioGroup>
-                    </FormItem>
+                    <div class="row g-2 mb-2">
+                        <div class="col-12 col-md-6">
+                            <div class="quick-choice-card text-center @(_formModel.PersonType == PersonType.Cliente ? "active" : "")"
+                                 @onclick='() => _formModel.PersonType = PersonType.Cliente'>
+                                <div class="choice-icon bg-blue-subtle">
+                                    <i class="bi bi-person-badge"></i>
+                                </div>
+                                <div class="choice-title">Cliente</div>
+                                <div class="choice-desc">Empeñante prendario, comprador o mandante</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="quick-choice-card text-center @(_formModel.PersonType == PersonType.Proveedor ? "active" : "")"
+                                 @onclick='() => _formModel.PersonType = PersonType.Proveedor'>
+                                <div class="choice-icon bg-purple-subtle">
+                                    <i class="bi bi-truck"></i>
+                                </div>
+                                <div class="choice-title">Proveedor / Taller</div>
+                                <div class="choice-desc">Mayorista de mercancía u orfebre de taller</div>
+                            </div>
+                        </div>
+                    </div>
                 </SoftFormBox>
 
                 <SoftFormBox Title="Identificación y Datos Básicos">
@@ -121,6 +213,7 @@
                                         DataSource="@_idTypes"
                                         LabelName="@nameof(IdentificationTypeDto.Name)"
                                         ValueName="@nameof(IdentificationTypeDto.Id)"
+                                        EnableSearch="true"
                                         Placeholder="Seleccione tipo..." />
                             </FormItem>
                         </Col>
@@ -176,6 +269,14 @@
     private bool _isSaving;
     private int _editingId;
     private CustomerFormModel _formModel = new();
+
+    private static string GetInitials(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName)) return "?";
+        var parts = fullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1) return parts[0].Length >= 2 ? parts[0][..2].ToUpperInvariant() : parts[0][..1].ToUpperInvariant();
+        return $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
+    }
 
     private List<PersonDto> FilteredCustomers => _allCustomers
         .Where(c => _filterTab == "ALL"

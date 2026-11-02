@@ -5,9 +5,10 @@
 @inject NavigationManager Navigation
 @inject IMessageService Message
 
-<div class="discharge-container">
-    <SoftHeroHeader Title="Descargar / Salida de Artículo"
-                    Subtitle="Registre la venta, liquidación o salida de un artículo en inventario activo"
+<div class="discharge-container step-fade-in">
+    <!-- Hero Header -->
+    <SoftHeroHeader Title="Descargar / Salida de Artículo de Inventario"
+                    Subtitle="Formalice la venta o liquidación comercial de una joya o reloj en stock activo"
                     Icon="bi bi-box-arrow-right">
         <SoftButton Text="Volver al Catálogo"
                     Icon="arrow-left"
@@ -19,139 +20,241 @@
         <div class="col-12 col-xl-10">
             <!-- Barra de Búsqueda de Referencia -->
             <SoftFilterCard>
-                <div class="row g-3 align-items-center">
-                    <div class="col-12 col-md-8">
+                <div class="d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between gap-3">
+                    <div class="d-flex align-items-center gap-2 flex-grow-1">
                         <AntDesign.InputNumber TValue="int?"
                                                @bind-Value="_searchReference"
-                                               Placeholder="Ingrese número de referencia (ej. 1001)..."
-                                               Style="width: 100%; font-size: 1.1rem; font-weight: bold;" />
-                    </div>
-                    <div class="col-12 col-md-4 d-flex gap-2">
+                                               Placeholder="Ingrese número de referencia (ej. 1001, 1042)..."
+                                               Class="flex-grow-1 fs-5 fw-bold" />
+                        <SoftVoiceButton @bind-TargetText="_searchVoiceText"
+                                         Append="false"
+                                         TooltipText="Dictar número de referencia por voz"
+                                         ButtonClass="btn-outline-secondary" />
                         <SoftButton Text="Buscar Artículo"
                                     Icon="search"
                                     Type="ButtonType.Primary"
                                     Loading="@_isSearching"
                                     OnClick="SearchItemAsync" />
-                        @if (_searchedItem != null)
-                        {
-                            <SoftButton Text="Limpiar"
+                    </div>
+                    @if (_searchedItem != null)
+                    {
+                        <div class="d-flex justify-content-end">
+                            <SoftButton Text="Nueva Búsqueda"
                                         Icon="clear"
                                         Type="ButtonType.Default"
                                         OnClick="ClearSearch" />
-                        }
-                    </div>
+                        </div>
+                    }
                 </div>
             </SoftFilterCard>
 
             @if (_searchedItem != null)
             {
                 <!-- Detalle del Artículo Encontrado -->
-                <div class="mb-4">
-                    <SoftDetailCard Title="@($"Referencia #{_searchedItem.Reference} — {_searchedItem.ItemTypeName}")">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="detail-subtitle">Especificaciones registradas en el catálogo</span>
-                            @if (_searchedItem.Active)
+                <div class="soft-card p-4 mb-4 shadow-sm border rounded-3">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3 pb-3 border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="fs-4 fw-bold text-dark">
+                                Ref #@_searchedItem.Reference
+                            </span>
+                            @if (_searchedItem.Jewel != null)
                             {
-                                <SoftTag Color="green">Activo en Stock</SoftTag>
+                                <span class="pill-badge badge-soft-warning">
+                                    <i class="bi bi-gem"></i> @_searchedItem.ItemTypeName
+                                </span>
                             }
                             else
                             {
-                                <SoftTag Color="default">Ya Descargado</SoftTag>
+                                <span class="pill-badge badge-soft-primary">
+                                    <i class="bi bi-watch"></i> Alta Relojería
+                                </span>
                             }
                         </div>
+                        <div>
+                            @if (_searchedItem.Active)
+                            {
+                                <span class="pill-badge badge-soft-success">
+                                    <i class="bi bi-check-circle-fill"></i> Disponible en Stock
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="pill-badge badge-soft-danger">
+                                    <i class="bi bi-x-circle-fill"></i> Ya Descargado / Vendido
+                                </span>
+                            }
+                        </div>
+                    </div>
 
-                        <div class="row g-3 text-center mb-3">
-                            <div class="col-12 col-md-4">
-                                <SoftDetailItem Label="Fecha de Ingreso"
-                                                Value="@_searchedItem.DateOfEntry.ToString("dd/MM/yyyy")" />
-                            </div>
-                            <div class="col-12 col-md-4">
-                                <SoftDetailItem Label="Costo Registrado"
-                                                Value="@_searchedItem.CostValue.ToString("C0")"
-                                                HighlightVariant="SoftDetailItem.Variant.Danger" />
-                            </div>
-                            <div class="col-12 col-md-4">
-                                <SoftDetailItem Label="Venta Base Sugerida"
-                                                Value="@((_searchedItem.SaleValue ?? (int)(_searchedItem.CostValue * 1.3)).ToString("C0"))"
-                                                HighlightVariant="SoftDetailItem.Variant.Success" />
+                    <!-- 3 Métricas Financieras Registradas -->
+                    <div class="row g-3 text-center mb-4">
+                        <div class="col-12 col-md-4">
+                            <div class="p-3 rounded bg-light border">
+                                <span class="small text-muted text-uppercase fw-bold d-block mb-1">Costo Registrado</span>
+                                <span class="fs-4 fw-bold text-danger tabular-nums">@_searchedItem.CostValue.ToString("C0")</span>
+                                <span class="small text-muted d-block mt-1">Capital en inventario</span>
                             </div>
                         </div>
-
-                        @if (_searchedItem.Jewel != null)
-                        {
-                            <div class="row g-3 text-center border-top pt-3 mb-3">
-                                <div class="col-12 col-md-4">
-                                    <SoftDetailItem Label="Peso Joya"
-                                                    Value="@($"{_searchedItem.Jewel.Weight:F2} g")"
-                                                    HighlightVariant="SoftDetailItem.Variant.Warning" />
-                                </div>
-                                <div class="col-12 col-md-4">
-                                    <SoftDetailItem Label="Tarifa por Gramo"
-                                                    Value="@_searchedItem.Jewel.GramValue.ToString("C0")" />
-                                </div>
-                                @if (_searchedItem.Jewel.Length.HasValue)
-                                {
-                                    <div class="col-12 col-md-4">
-                                        <SoftDetailItem Label="Longitud"
-                                                        Value="@($"{_searchedItem.Jewel.Length} cm")" />
-                                    </div>
+                        <div class="col-12 col-md-4">
+                            <div class="p-3 rounded bg-light border">
+                                <span class="small text-muted text-uppercase fw-bold d-block mb-1">Venta Base Sugerida</span>
+                                <span class="fs-4 fw-bold text-success tabular-nums">@((_searchedItem.SaleValue ?? (int)(_searchedItem.CostValue * 1.3)).ToString("C0"))</span>
+                                <span class="small text-muted d-block mt-1">Precio etiqueta en vitrina</span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="p-3 rounded bg-light border">
+                                <span class="small text-muted text-uppercase fw-bold d-block mb-1">Margen Base</span>
+                                @{
+                                    int baseSale = _searchedItem.SaleValue ?? (int)(_searchedItem.CostValue * 1.3);
+                                    int baseMargin = baseSale - _searchedItem.CostValue;
                                 }
+                                <span class="fs-4 fw-bold text-primary tabular-nums">@baseMargin.ToString("C0")</span>
+                                <span class="small text-muted d-block mt-1">
+                                    @(_searchedItem.CostValue > 0 ? $"+{((double)baseMargin / _searchedItem.CostValue * 100):N1}% de ganancia" : "Sin costo base")
+                                </span>
                             </div>
-                        }
-
-                        @if (_searchedItem.Watch != null)
-                        {
-                            <div class="row g-3 text-center border-top pt-3 mb-3">
-                                <div class="col-12 col-md-6">
-                                    <SoftDetailItem Label="Serial / Nro. Caja"
-                                                    Value="@_searchedItem.Watch.CaseNumber" />
-                                </div>
-                                <div class="col-12 col-md-6">
-                                    <SoftDetailItem Label="Género"
-                                                    Value="@_searchedItem.Watch.GenderType.ToString()" />
-                                </div>
-                            </div>
-                        }
-
-                        <div class="border-top pt-2">
-                            <span class="detail-label">Descripción:</span>
-                            <p class="detail-desc mb-0">@_searchedItem.Description</p>
                         </div>
-                    </SoftDetailCard>
+                    </div>
+
+                    <!-- Especificaciones de Joya o Reloj -->
+                    @if (_searchedItem.Jewel != null)
+                    {
+                        <div class="p-3 mb-3 rounded bg-light border d-flex flex-wrap gap-4 align-items-center">
+                            <div>
+                                <span class="small text-muted d-block">Peso Verificado:</span>
+                                <span class="fw-bold fs-5 text-dark"><i class="bi bi-speedometer2 text-warning me-1"></i>@_searchedItem.Jewel.Weight.ToString("F2") g</span>
+                            </div>
+                            <div>
+                                <span class="small text-muted d-block">Tarifa Gr. Costo:</span>
+                                <span class="fw-semibold text-dark tabular-nums">@_searchedItem.Jewel.GramValue.ToString("C0")</span>
+                            </div>
+                            @if (_searchedItem.Jewel.Length.HasValue && _searchedItem.Jewel.Length > 0)
+                            {
+                                <div>
+                                    <span class="small text-muted d-block">Longitud:</span>
+                                    <span class="fw-semibold text-dark"><i class="bi bi-rulers me-1"></i>@_searchedItem.Jewel.Length cm</span>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    @if (_searchedItem.Watch != null)
+                    {
+                        <div class="p-3 mb-3 rounded bg-light border d-flex flex-wrap gap-4 align-items-center">
+                            <div>
+                                <span class="small text-muted d-block">Nro. de Caja / Serial:</span>
+                                <span class="fw-bold fs-5 text-dark font-monospace"><i class="bi bi-hash text-primary me-1"></i>@_searchedItem.Watch.CaseNumber</span>
+                            </div>
+                            <div>
+                                <span class="small text-muted d-block">Género / Segmento:</span>
+                                <span class="fw-semibold text-dark">@_searchedItem.Watch.GenderType</span>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Descripción de la Pieza -->
+                    <div class="pt-2">
+                        <span class="small text-muted fw-bold text-uppercase d-block mb-1">Descripción de la Pieza:</span>
+                        <p class="mb-0 text-dark fst-italic p-2 rounded bg-light border-start border-3 border-primary">
+                            @_searchedItem.Description
+                        </p>
+                    </div>
                 </div>
 
                 @if (_searchedItem.Active)
                 {
-                    <!-- Formulario de Descarga -->
-                    <SoftFormBox Title="Completar Descarga por Venta"
-                                 Subtitle="Ingrese la fecha real de venta y el valor definitivo acordado con el cliente">
-                        <div class="row g-3 align-items-end">
-                            <div class="col-12 col-md-6">
-                                <SoftTooltipLabel Label="Fecha de Venta / Descarga" Required="true" TooltipText="Fecha en que se formaliza la salida" />
+                    <!-- Formulario de Descarga y Salida -->
+                    <SoftFormBox Title="Liquidación y Salida por Venta"
+                                 Subtitle="Ingrese la fecha real de venta, el valor acordado y verifique el margen neto antes de confirmar">
+                        <div class="row g-3 align-items-end mb-3">
+                            <div class="col-12 col-md-5">
+                                <SoftTooltipLabel Label="Fecha de Venta / Descarga" Required="true" TooltipText="Fecha en que se formaliza la entrega" />
                                 <DatePicker TValue="DateTime"
                                             @bind-Value="_saleDate"
                                             Format="dd/MM/yyyy"
-                                            Style="width: 100%;" />
+                                            Class="w-100" />
                             </div>
 
-                            <div class="col-12 col-md-6">
-                                <SoftTooltipLabel Label="Valor Definitivo de Venta ($)" Required="true" TooltipText="Monto pactado total recibido por el artículo" />
+                            <div class="col-12 col-md-7">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <SoftTooltipLabel Label="Valor Definitivo de Venta ($)" Required="true" TooltipText="Monto pactado total recibido por el artículo" />
+                                    <span class="small text-muted">Costo: <b class="tabular-nums">@_searchedItem.CostValue.ToString("C0")</b></span>
+                                </div>
                                 <AntDesign.InputNumber TValue="int"
                                                        @bind-Value="_saleValue"
                                                        Min="1"
-                                                       Step="5000"
-                                                       Style="width: 100%; font-weight: bold; font-size: 1.1rem; color: var(--soft-success, #52c41a);" />
+                                                       Step="10000"
+                                                       Class="w-100 fs-5 fw-bold"
+                                                       Style="color: var(--soft-success, #52c41a);" />
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-end gap-2 pt-4 border-top mt-4">
+                        <!-- Botones de Ajuste Rápido de Precio de Mostrador -->
+                        <div class="p-2 mb-3 rounded bg-light border d-flex flex-wrap align-items-center gap-2">
+                            <span class="small text-muted fw-bold"><i class="bi bi-tag me-1 text-primary"></i>Ajuste de Precio:</span>
+                            <button type="button" class="btn btn-xs btn-outline-primary rounded-pill px-2 py-1" @onclick="SetSuggestedPrice">
+                                Venta Sugerida (100%)
+                            </button>
+                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1" @onclick="() => ApplyDiscount(5)">
+                                -5% Descuento
+                            </button>
+                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1" @onclick="() => ApplyDiscount(10)">
+                                -10% Descuento
+                            </button>
+                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1" @onclick="() => ApplyMarkupOverCost(20)">
+                                Costo + 20%
+                            </button>
+                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1" @onclick="() => ApplyMarkupOverCost(30)">
+                                Costo + 30%
+                            </button>
+                        </div>
+
+                        <!-- Análisis Financiero en Vivo -->
+                        @{
+                            int netProfit = _saleValue - _searchedItem.CostValue;
+                            double netRoi = _searchedItem.CostValue > 0 ? ((double)netProfit / _searchedItem.CostValue * 100) : 0;
+                        }
+                        <div class="p-3 mb-4 rounded-3 border @(netProfit > 0 ? "bg-success-subtle border-success-subtle" : (netProfit == 0 ? "bg-light" : "bg-danger-subtle border-danger-subtle"))">
+                            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                                <div>
+                                    @if (netProfit > 0)
+                                    {
+                                        <span class="fw-bold text-success d-block">
+                                            <i class="bi bi-graph-up-arrow me-1"></i>Ganancia Neta Proyectada: +@netProfit.ToString("C0")
+                                        </span>
+                                        <span class="small text-muted">Rentabilidad de la operación: <b>+@netRoi.ToString("N1")% ROI</b></span>
+                                    }
+                                    else if (netProfit == 0)
+                                    {
+                                        <span class="fw-bold text-secondary d-block">
+                                            <i class="bi bi-dash-circle me-1"></i>Venta al Costo Exacto ($0 de margen)
+                                        </span>
+                                        <span class="small text-muted">Se recupera exactamente el capital invertido sin utilidad.</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="fw-bold text-danger d-block">
+                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>¡Atención: Venta por debajo del costo! (Pérdida de @Math.Abs(netProfit).ToString("C0"))
+                                        </span>
+                                        <span class="small text-danger">El precio fijado no cubre la inversión inicial del artículo.</span>
+                                    }
+                                </div>
+                                <span class="fs-5 fw-bold tabular-nums @(netProfit >= 0 ? "text-success" : "text-danger")">
+                                    @(netProfit >= 0 ? "+" : "")@netProfit.ToString("C0")
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Acciones -->
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
                             <SoftButton Text="Cancelar"
                                         Icon="close"
                                         Type="ButtonType.Dashed"
                                         OnClick="ClearSearch" />
-                            <SoftButton Text="Confirmar Descarga"
+                            <SoftButton Text="Confirmar Venta y Descargar de Stock"
                                         Icon="check"
-                                        Type="ButtonType.Primary"
+                                        Type="@ButtonType.Primary"
                                         Danger="true"
                                         Loading="@_isDischarging"
                                         OnClick="HandleDischargeAsync" />
@@ -160,16 +263,36 @@
                 }
                 else
                 {
-                    <SoftInlineNotice Type="SoftInlineNotice.NoticeType.Info"
-                                      Title="Artículo Ya Descargado"
-                                      Message="@($"Este artículo ya fue descargado previamente el {_searchedItem.DateOfSale:dd/MM/yyyy} por valor de {_searchedItem.SaleValue:C0}.")" />
+                    <div class="soft-card p-4 text-center border-danger-subtle bg-danger-subtle bg-opacity-10 rounded-3">
+                        <i class="bi bi-archive-fill fs-2 text-danger mb-2 d-block"></i>
+                        <h5 class="fw-bold text-danger">Artículo ya descargado del inventario</h5>
+                        <p class="text-muted mb-0">
+                            Esta pieza fue dada de baja por venta el <b>@_searchedItem.DateOfSale?.ToString("dd/MM/yyyy")</b> por un valor final de <b class="tabular-nums">@_searchedItem.SaleValue?.ToString("C0")</b>.
+                        </p>
+                    </div>
                 }
+            }
+            else if (!_isSearching)
+            {
+                <div class="soft-card p-5 text-center text-muted">
+                    <i class="bi bi-upc-scan fs-1 text-primary mb-3 d-block opacity-75"></i>
+                    <h5 class="fw-bold text-dark">Búsqueda de Artículo para Salida</h5>
+                    <p class="small text-muted mb-0">
+                        Ingrese el número de referencia impreso en la etiqueta o presione el botón de micrófono para dictarlo.
+                    </p>
+                </div>
             }
         </div>
     </div>
 </div>
 
 @code {
+    [SupplyParameterFromQuery(Name = "ref")]
+    public int? QueryRef { get; set; }
+
+    [SupplyParameterFromQuery(Name = "reference")]
+    public int? QueryReference { get; set; }
+
     private int? _searchReference;
     private ItemDetailDto? _searchedItem;
     private bool _isSearching = false;
@@ -178,10 +301,59 @@
     private DateTime _saleDate = DateTime.Today;
     private int _saleValue = 0;
 
+    private string _searchVoiceText
+    {
+        get => _searchReference?.ToString() ?? string.Empty;
+        set
+        {
+            if (int.TryParse(value, out var parsed))
+            {
+                _searchReference = parsed;
+            }
+            else
+            {
+                var match = System.Text.RegularExpressions.Regex.Match(value ?? string.Empty, @"\d+");
+                if (match.Success && int.TryParse(match.Value, out var extracted))
+                {
+                    _searchReference = extracted;
+                }
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var targetRef = QueryRef ?? QueryReference;
+        if (targetRef.HasValue && targetRef.Value > 0)
+        {
+            _searchReference = targetRef.Value;
+            await SearchItemAsync();
+        }
+    }
+
     private void ClearSearch()
     {
         _searchedItem = null;
         _searchReference = null;
+    }
+
+    private void SetSuggestedPrice()
+    {
+        if (_searchedItem == null) return;
+        _saleValue = _searchedItem.SaleValue ?? (int)(_searchedItem.CostValue * 1.3);
+    }
+
+    private void ApplyDiscount(double discountPct)
+    {
+        if (_searchedItem == null) return;
+        int basePrice = _searchedItem.SaleValue ?? (int)(_searchedItem.CostValue * 1.3);
+        _saleValue = (int)Math.Round(basePrice * (1.0 - (discountPct / 100.0)));
+    }
+
+    private void ApplyMarkupOverCost(double markupPct)
+    {
+        if (_searchedItem == null) return;
+        _saleValue = (int)Math.Round(_searchedItem.CostValue * (1.0 + (markupPct / 100.0)));
     }
 
     private async Task SearchItemAsync()

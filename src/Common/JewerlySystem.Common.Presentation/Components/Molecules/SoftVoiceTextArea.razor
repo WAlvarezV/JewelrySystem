@@ -2,7 +2,7 @@
 @using JewerlySystem.Common.Presentation.Components.Atoms
 
 <div class="soft-voice-textarea-box">
-    <div class="d-flex align-items-center justify-content-between mb-1">
+    <div class="d-flex align-items-center gap-2 mb-1">
         @if (!string.IsNullOrEmpty(Label))
         {
             <label class="form-label mb-0 fw-semibold text-dark small">
@@ -12,10 +12,6 @@
                     <span class="text-danger ms-1">*</span>
                 }
             </label>
-        }
-        else
-        {
-            <div></div>
         }
 
         @if (ShowVoiceButton)

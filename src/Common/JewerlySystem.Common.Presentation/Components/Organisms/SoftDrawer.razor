@@ -5,7 +5,7 @@
         Width="@EffectiveWidth"
         Placement="@Placement"
         Closable="true"
-        MaskClosable="false"
+        MaskClosable="@MaskClosable"
         Class="soft-drawer"
         OnClose="@OnClose">
     <div class="soft-drawer-body">
@@ -31,6 +31,7 @@
     [Parameter] public string? Description { get; set; }
     [Parameter] public object? Width { get; set; } = "720";
     [Parameter] public DrawerPlacement Placement { get; set; } = DrawerPlacement.Right;
+    [Parameter] public bool MaskClosable { get; set; } = true;
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter] public RenderFragment? FooterContent { get; set; }

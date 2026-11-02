@@ -4,7 +4,15 @@
     @if (!string.IsNullOrWhiteSpace(Title))
     {
         <div class="soft-form-box-header">
-            <h5 class="soft-form-box-title">@Title</h5>
+            <div class="d-flex align-items-center gap-2">
+                <h5 class="soft-form-box-title mb-0">@Title</h5>
+                @if (!string.IsNullOrWhiteSpace(InfoTooltip))
+                {
+                    <Tooltip Title="@InfoTooltip">
+                        <i class="bi bi-info-circle text-muted" style="cursor: pointer; font-size: 0.95rem;"></i>
+                    </Tooltip>
+                }
+            </div>
             @if (!string.IsNullOrWhiteSpace(Subtitle))
             {
                 <span class="soft-form-box-subtitle">@Subtitle</span>
@@ -19,5 +27,6 @@
 @code {
     [Parameter] public string? Title { get; set; }
     [Parameter] public string? Subtitle { get; set; }
+    [Parameter] public string? InfoTooltip { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
 }

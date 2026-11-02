@@ -27,6 +27,7 @@
                                     DataSource="@_providers"
                                     LabelName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.FullName)"
                                     ValueName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.Id)"
+                                    EnableSearch="true"
                                     Placeholder="Seleccione proveedor..." />
                         </FormItem>
                     </Col>
@@ -86,6 +87,7 @@
                             <Select TItem="string"
                                     TItemValue="string"
                                     @bind-Value="_formModel.InitialPaymentMethod"
+                                    EnableSearch="true"
                                     DataSource="@_paymentMethods" />
                         </FormItem>
                     </Col>

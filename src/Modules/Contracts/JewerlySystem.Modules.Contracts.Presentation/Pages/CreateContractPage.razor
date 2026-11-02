@@ -16,25 +16,60 @@
     <div class="soft-card p-4">
         <Form Model="@_formModel" Layout="@FormLayout.Vertical">
             <!-- Modalidad del Contrato -->
-            <SoftFormBox Title="Modalidad del Contrato">
-                <FormItem Label="Seleccione el tipo de contrato">
-                    <RadioGroup @bind-Value="_formModel.ContractKind" ButtonStyle="@RadioButtonStyle.Solid">
-                        <Radio RadioButton="true" Value="@("SEPARE")">
-                            <i class="bi bi-box-seam me-1"></i> Separación de Mercancía (Plan Separe)
-                        </Radio>
-                        <Radio RadioButton="true" Value="@("REPARACION")">
-                            <i class="bi bi-tools me-1"></i> Reparación de Joya / Reloj
-                        </Radio>
-                        <Radio RadioButton="true" Value="@("FABRICACION")">
-                            <i class="bi bi-gem me-1"></i> Fabricación de Joya (Hechura)
-                        </Radio>
-                    </RadioGroup>
-                </FormItem>
+            <SoftFormBox Title="Modalidad del Pedido o Contrato">
+                <div class="row g-3 mb-2">
+                    <div class="col-12 col-md-4">
+                        <div class="quick-choice-card text-center @(_formModel.ContractKind == "SEPARE" ? "active" : "")"
+                             @onclick='() => _formModel.ContractKind = "SEPARE"'>
+                            <div class="choice-icon bg-blue-subtle">
+                                <i class="bi bi-box-seam"></i>
+                            </div>
+                            <div class="choice-title">Plan Separe</div>
+                            <div class="choice-desc">Apartar una joya o reloj existente en inventario</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="quick-choice-card text-center @(_formModel.ContractKind == "REPARACION" ? "active" : "")"
+                             @onclick='() => _formModel.ContractKind = "REPARACION"'>
+                            <div class="choice-icon bg-purple-subtle">
+                                <i class="bi bi-tools"></i>
+                            </div>
+                            <div class="choice-title">Reparación</div>
+                            <div class="choice-desc">Ajuste, compostura o mantenimiento en taller</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="quick-choice-card text-center @(_formModel.ContractKind == "FABRICACION" ? "active" : "")"
+                             @onclick='() => _formModel.ContractKind = "FABRICACION"'>
+                            <div class="choice-icon bg-amber-subtle">
+                                <i class="bi bi-gem"></i>
+                            </div>
+                            <div class="choice-title">Fabricación</div>
+                            <div class="choice-desc">Hechura nueva en oro/plata sobre medida</div>
+                        </div>
+                    </div>
+                </div>
             </SoftFormBox>
 
             <!-- Step 1: Cliente -->
             <StepLabel Number="1" Text="Información del Cliente / Titular" IsActive="true" />
             <SoftFormBox Title="Identificación del Titular">
+                @if (_formModel.CustomerId > 0)
+                {
+                    <div class="p-2 mb-3 rounded-3 bg-success-subtle border border-success-subtle d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="avatar-circle avatar-emerald">@GetInitials(_formModel.CustomerFullName)</div>
+                            <div>
+                                <span class="fw-bold text-success d-block"><i class="bi bi-patch-check-fill me-1"></i>Cliente Existente en Directorio</span>
+                                <span class="small text-dark">@_formModel.CustomerFullName &bull; C.C. @_formModel.IdentificationNumber</span>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-link text-decoration-none text-muted" @onclick="ResetCustomerSearch">
+                            <i class="bi bi-x-circle me-1"></i>Cambiar
+                        </button>
+                    </div>
+                }
+
                 <div class="row g-3">
                     <div class="col-12 col-md-3">
                         <FormItem Label="Tipo Documento" Required="true">
@@ -43,7 +78,8 @@
                                     @bind-Value="_formModel.IdentificationTypeId"
                                     DataSource="@_idTypes"
                                     LabelName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.IdentificationTypeDto.Name)"
-                                    ValueName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.IdentificationTypeDto.Id)" />
+                                    ValueName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.IdentificationTypeDto.Id)"
+                                    EnableSearch="true" />
                         </FormItem>
                     </div>
                     <div class="col-12 col-md-5">
@@ -104,6 +140,7 @@
                                         @bind-Value="_formModel.ProviderId"
                                         ValueName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.Id)"
                                         LabelName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.FullName)"
+                                        EnableSearch="true"
                                         Placeholder="-- Seleccione Taller / Orfebre --"
                                         AllowClear="true" />
                             </FormItem>
@@ -150,21 +187,30 @@
                                     DataSource="@_paymentMethodOptions"
                                     @bind-Value="_formModel.PaymentMethod"
                                     ValueName="@nameof(PaymentMethodOption.Value)"
+                                    EnableSearch="true"
                                     LabelName="@nameof(PaymentMethodOption.Label)" />
                         </FormItem>
                     </div>
                 </div>
 
-                <div class="row g-3">
+                <div class="row g-3 align-items-end">
                     <div class="col-12 col-md-6">
                         <FormItem Label="Fecha de Entrega Prometida">
                             <DatePicker @bind-Value="_formModel.DeliveryDate" Format="dd/MM/yyyy" Class="w-100" />
                         </FormItem>
                     </div>
+                    <div class="col-12 col-md-6 mb-4">
+                        <span class="small text-muted fw-bold d-block mb-1">Plazo Rápido:</span>
+                        <div class="d-flex gap-1 flex-wrap">
+                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1" @onclick="() => SetDeliveryDays(15)">+15 días (Estándar)</button>
+                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1" @onclick="() => SetDeliveryDays(30)">+30 días</button>
+                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1" @onclick="() => SetDeliveryDays(45)">+45 días</button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="mt-3">
-                    <SoftDetailCard Title="Resumen Económico">
+                    <SoftDetailCard Title="Resumen de Liquidación del Contrato">
                         <div class="row g-2 text-center">
                             <div class="col-4">
                                 <SoftDetailItem Label="Valor Total" Value="@_formModel.Value.ToString("C0")" />
@@ -176,6 +222,19 @@
                                 <SoftDetailItem Label="Saldo Pendiente"
                                                 Value="@Math.Max(0, _formModel.Value - _formModel.InitialPayment).ToString("C0")"
                                                 HighlightVariant="@(_formModel.Value - _formModel.InitialPayment > 0 ? SoftDetailItem.Variant.Danger : SoftDetailItem.Variant.Success)" />
+                            </div>
+                        </div>
+
+                        @{
+                            int percentPaid = _formModel.Value > 0 ? Math.Min(100, (int)((double)_formModel.InitialPayment / _formModel.Value * 100)) : 0;
+                        }
+                        <div class="mt-3 pt-2 border-top">
+                            <div class="d-flex justify-content-between small text-muted mb-1">
+                                <span>Porcentaje abonado: <b class="text-success">@percentPaid%</b></span>
+                                <span>Porcentaje pendiente: <b class="text-danger">@((100 - percentPaid))%</b></span>
+                            </div>
+                            <div class="progress" style="height: 6px; border-radius: 4px; background: #e2e8f0;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: @percentPaid%; border-radius: 4px;" aria-valuenow="@percentPaid" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
                         </div>
                     </SoftDetailCard>
@@ -234,6 +293,27 @@
         {
             _workshops = workRes.Value;
         }
+    }
+
+    private void ResetCustomerSearch()
+    {
+        _formModel.CustomerId = 0;
+        _formModel.CustomerFullName = string.Empty;
+        _formModel.CustomerCellPhone = string.Empty;
+        _formModel.IdentificationNumber = string.Empty;
+    }
+
+    private void SetDeliveryDays(int days)
+    {
+        _formModel.DeliveryDate = DateTime.Today.AddDays(days);
+    }
+
+    private static string GetInitials(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName)) return "?";
+        var parts = fullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1) return parts[0].Length >= 2 ? parts[0][..2].ToUpperInvariant() : parts[0][..1].ToUpperInvariant();
+        return $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
     }
 
     private async Task SearchCustomerByIdentificationAsync()

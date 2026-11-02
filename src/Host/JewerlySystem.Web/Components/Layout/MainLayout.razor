@@ -47,11 +47,13 @@
             </aside>
 
             <!-- 2. SIDER WITH NAVMENU (Filtered by Active Module + Favorites) -->
-            <aside class="soft-sider h-100 bg-white" style="width: 250px; min-width: 250px;">
+            <aside class="soft-sider h-100 bg-white @(_isSiderCollapsed ? "collapsed" : "")">
                 <NavMenu ActiveModuleKey="@_activeModuleKey"
                          ActiveModuleTitle="@_activeModuleTitle"
                          ActiveModuleIcon="@_activeModuleIcon"
-                         UserId="@(context.User.Identity?.Name ?? "system-user")" />
+                         UserId="@(context.User.Identity?.Name ?? "system-user")"
+                         IsCollapsed="@_isSiderCollapsed"
+                         OnToggleCollapse="ToggleSider" />
             </aside>
 
             <!-- 3. MAIN CONTENT WORKSPACE -->
@@ -59,13 +61,31 @@
                 <!-- Header Topbar -->
                 <header class="navbar navbar-white bg-white border-bottom px-4 py-2 d-flex justify-content-between align-items-center sticky-top shadow-sm">
                     <div class="d-flex align-items-center gap-2">
-                        <span class="text-muted small">Módulo actual:</span>
-                        <span class="badge bg-primary text-white px-2 py-1 fw-semibold">
-                            <i class="bi @_activeModuleIcon me-1"></i> @_activeModuleTitle
+                        <!-- Botón para Colapsar/Expandir Menú Lateral (SI.SIOT Style) -->
+                        <button type="button"
+                                class="btn btn-sm btn-light border rounded-2 d-flex align-items-center justify-content-center p-2 text-secondary sider-toggle-btn"
+                                @onclick="ToggleSider"
+                                title="@(_isSiderCollapsed ? "Expandir menú de navegación" : "Ocultar menú lateral")">
+                            <i class="bi @(_isSiderCollapsed ? "bi-layout-sidebar text-primary" : "bi-layout-sidebar-inset text-secondary") fs-5"></i>
+                        </button>
+
+                        <span class="text-muted small d-none d-sm-inline">Módulo actual:</span>
+                        <span class="badge bg-primary text-white px-2 py-1 fw-semibold d-flex align-items-center gap-1">
+                            <i class="bi @_activeModuleIcon"></i> @_activeModuleTitle
                         </span>
                     </div>
 
                     <div class="d-flex align-items-center gap-3">
+                        <!-- Botón Asistente de Operaciones por Voz con IA -->
+                        <button type="button"
+                                class="btn btn-sm d-flex align-items-center gap-2 px-3 py-1 shadow-sm rounded-pill fw-semibold text-white border-0 voice-header-btn"
+                                @onclick="() => _showVoiceModal = true"
+                                title="Dictar cualquier operación (Ventas, Contratos, Clientes, Gastos) de la forma más simple">
+                            <i class="bi bi-stars text-warning fs-6"></i>
+                            <i class="bi bi-mic-fill fs-6"></i>
+                            <span class="small">Dictar con IA</span>
+                        </button>
+
                         <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
                             <i class="bi bi-shield-check me-1"></i> MFA & Passkeys Activo
                         </span>
@@ -93,6 +113,16 @@
                 </main>
             </div>
             <AntContainer />
+            <SoftVoiceAssistantModal @bind-Visible="_showVoiceModal" />
+
+            <!-- Floating Action Button: Acceso Inmediato al Asistente de Voz IA -->
+            <button type="button"
+                    class="soft-voice-fab shadow-lg"
+                    @onclick="() => _showVoiceModal = true"
+                    title="Dictado Rápido con IA">
+                <i class="bi bi-mic-fill text-white fs-4"></i>
+                <span class="soft-voice-fab-badge">IA</span>
+            </button>
         </div>
     </Authorized>
     <NotAuthorized>
@@ -105,6 +135,40 @@
 </AuthorizeView>
 
 <style>
+    /* SI.SIOT Collapsible Sider Animation & Specs */
+    .soft-sider {
+        width: 250px;
+        min-width: 250px;
+        max-width: 250px;
+        transition: width 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                    min-width 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                    max-width 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                    opacity 0.18s ease-in-out;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .soft-sider.collapsed {
+        width: 68px !important;
+        min-width: 68px !important;
+        max-width: 68px !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+
+    /* Ocultar barras de desplazamiento laterales en el menú de módulos */
+    .rail-modules-nav {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+    .rail-modules-nav::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+
     .rail-module-btn {
         background-color: transparent;
         color: #9ca3af;
@@ -126,9 +190,65 @@
     .rail-module-btn.active i {
         color: #ffffff;
     }
+
+    /* Sider Toggle Button */
+    .sider-toggle-btn {
+        transition: all 0.15s ease-in-out;
+    }
+    .sider-toggle-btn:hover {
+        background-color: #f3f4f6;
+        color: #111827;
+    }
+
+    /* Voice Header Button */
+    .voice-header-btn {
+        background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%) !important;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .voice-header-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35) !important;
+    }
+
+    /* Floating Action Button for Voice Assistant */
+    .soft-voice-fab {
+        position: fixed;
+        bottom: 24px;
+        right: 28px;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 1040;
+        box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .soft-voice-fab:hover {
+        transform: translateY(-3px) scale(1.06);
+        box-shadow: 0 12px 28px rgba(124, 58, 237, 0.5);
+    }
+    .soft-voice-fab-badge {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        background: #f59e0b;
+        color: #111827;
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 1px 5px;
+        border-radius: 9999px;
+        border: 2px solid #ffffff;
+    }
 </style>
 
 @code {
+    private bool _showVoiceModal;
+    private bool _isSiderCollapsed;
     private List<AppModuleDto> _modules = [];
     private string _activeModuleKey = "CONTRACTS";
     private string _activeModuleTitle = "Contratos";
@@ -154,10 +274,24 @@
         }
     }
 
+    private void ToggleSider()
+    {
+        _isSiderCollapsed = !_isSiderCollapsed;
+    }
+
     private void SelectModule(AppModuleDto module)
     {
-        _activeModuleKey = module.Key;
-        _activeModuleTitle = module.Name;
-        _activeModuleIcon = module.Icon;
+        if (string.Equals(_activeModuleKey, module.Key, StringComparison.OrdinalIgnoreCase) && !_isSiderCollapsed)
+        {
+            // Si hace clic en el mismo módulo ya abierto, colapsa el menú
+            _isSiderCollapsed = true;
+        }
+        else
+        {
+            _activeModuleKey = module.Key;
+            _activeModuleTitle = module.Name;
+            _activeModuleIcon = module.Icon;
+            _isSiderCollapsed = false; // Despliega siempre al cambiar de módulo
+        }
     }
 }

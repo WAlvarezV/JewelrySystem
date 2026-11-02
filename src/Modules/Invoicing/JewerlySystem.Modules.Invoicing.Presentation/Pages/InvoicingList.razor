@@ -15,53 +15,71 @@
     </SoftHeroHeader>
 
     <!-- Metrics Summary -->
-    <Row Gutter="16" Class="mb-3">
-        <Col Xs="24" Sm="12" Md="6">
-            <div class="soft-card p-3">
-                <span class="text-muted small text-uppercase fw-semibold">Facturas Registradas</span>
-                <h4 class="fw-bold mt-1 mb-0 text-dark">@_allInvoices.Count</h4>
+    <div class="metrics-grid my-4">
+        <div class="metric-card">
+            <div class="metric-icon bg-blue-subtle">
+                <i class="bi bi-receipt"></i>
             </div>
-        </Col>
-        <Col Xs="24" Sm="12" Md="6">
-            <div class="soft-card p-3">
-                <span class="text-muted small text-uppercase fw-semibold">Total Compras</span>
-                <h4 class="fw-bold mt-1 mb-0 text-primary">@_allInvoices.Sum(x => (long)x.Value).ToString("C0")</h4>
+            <div class="metric-content">
+                <span class="metric-label">Facturas de Compra</span>
+                <span class="metric-value">@_allInvoices.Count</span>
+                <span class="metric-subtext">Cuentas por pagar registradas</span>
             </div>
-        </Col>
-        <Col Xs="24" Sm="12" Md="6">
-            <div class="soft-card p-3">
-                <span class="text-muted small text-uppercase fw-semibold">Total Abonado</span>
-                <h4 class="fw-bold mt-1 mb-0 text-success">@_allInvoices.Sum(x => (long)x.CreditValue).ToString("C0")</h4>
+        </div>
+        <div class="metric-card">
+            <div class="metric-icon bg-purple-subtle">
+                <i class="bi bi-bag-check"></i>
             </div>
-        </Col>
-        <Col Xs="24" Sm="12" Md="6">
-            <div class="soft-card p-3">
-                <span class="text-muted small text-uppercase fw-semibold">Saldo Pendiente de Pago</span>
-                <h4 class="fw-bold mt-1 mb-0 text-danger">@_allInvoices.Sum(x => (long)x.BalanceValue).ToString("C0")</h4>
+            <div class="metric-content">
+                <span class="metric-label">Total Compras</span>
+                <span class="metric-value tabular-nums">@_allInvoices.Sum(x => (long)x.Value).ToString("C0")</span>
+                <span class="metric-subtext">Monto facturado</span>
             </div>
-        </Col>
-    </Row>
+        </div>
+        <div class="metric-card">
+            <div class="metric-icon bg-emerald-subtle">
+                <i class="bi bi-check2-circle"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-label">Total Abonado</span>
+                <span class="metric-value tabular-nums text-success">@_allInvoices.Sum(x => (long)x.CreditValue).ToString("C0")</span>
+                <span class="metric-subtext">Pagado a proveedores</span>
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-icon bg-rose-subtle">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-label">Saldo Pendiente</span>
+                <span class="metric-value tabular-nums text-danger">@_allInvoices.Sum(x => (long)x.BalanceValue).ToString("C0")</span>
+                <span class="metric-subtext">Por liquidar</span>
+            </div>
+        </div>
+    </div>
 
     <!-- Filters Card -->
     <SoftFilterCard>
-        <Row Gutter="16">
-            <Col Xs="24" Sm="12" Md="10">
-                <Input Placeholder="Buscar por factura o qué se compró..."
+        <div class="row g-3 align-items-center">
+            <div class="col-12 col-lg-5">
+                <Input Placeholder="Buscar por factura, proveedor o qué se compró..."
                        @bind-Value="_searchTerm"
                        AllowClear="true"
                        PrefixIcon="search" />
-            </Col>
-            <Col Xs="24" Sm="12" Md="10">
+            </div>
+            <div class="col-12 col-lg-5">
                 <RadioGroup @bind-Value="_statusFilter" ButtonStyle="@RadioButtonStyle.Solid">
                     <Radio RadioButton="true" Value="@("ALL")">Todas</Radio>
                     <Radio RadioButton="true" Value="@("PENDING")">Con Saldo</Radio>
                     <Radio RadioButton="true" Value="@("PAID")">Pagadas</Radio>
                 </RadioGroup>
-            </Col>
-            <Col Xs="24" Sm="24" Md="4" Class="text-end">
-                <span class="text-muted small">Mostrando: <b>@FilteredInvoices.Count</b> facturas</span>
-            </Col>
-        </Row>
+            </div>
+            <div class="col-12 col-lg-2 text-lg-end">
+                <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill small">
+                    <i class="bi bi-funnel me-1"></i> <b>@FilteredInvoices.Count</b> facturas
+                </span>
+            </div>
+        </div>
     </SoftFilterCard>
 
     <!-- Data Table / Empty / Loading -->
@@ -86,41 +104,64 @@
                    DataSource="@FilteredInvoices"
                    Responsive="true"
                    Size="@TableSize.Middle">
-                <PropertyColumn Property="i => i.Number" Title="Nro. Factura" Width="140px">
-                    <span class="fw-bold text-dark">@context.Number</span>
+                <PropertyColumn Property="i => i.Number" Title="Nro. Factura" Width="130px">
+                    <span class="fw-bold text-dark">#@context.Number</span>
                 </PropertyColumn>
-                <PropertyColumn Property="i => i.ProviderId" Title="Proveedor" Width="180px">
-                    <span class="fw-semibold">@GetProviderName(context.ProviderId)</span>
+                <PropertyColumn Property="i => i.ProviderId" Title="Proveedor" Width="200px">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="avatar-circle-sm avatar-purple">@GetInitials(GetProviderName(context.ProviderId))</div>
+                        <span class="fw-semibold text-truncate text-dark" title="@GetProviderName(context.ProviderId)">
+                            @GetProviderName(context.ProviderId)
+                        </span>
+                    </div>
                 </PropertyColumn>
-                <PropertyColumn Property="i => i.Description" Title="¿Qué se compró?">
-                    <span class="text-muted">@(string.IsNullOrEmpty(context.Description) ? "Sin descripción" : context.Description)</span>
+                <PropertyColumn Property="i => i.Description" Title="¿Qué se compró?" Ellipsis="true">
+                    <span class="text-secondary">@(string.IsNullOrEmpty(context.Description) ? "Sin descripción" : context.Description)</span>
                 </PropertyColumn>
-                <PropertyColumn Property="i => i.Date" Title="Fecha" Width="110px">
-                    @context.Date.ToString("dd/MM/yyyy")
+                <PropertyColumn Property="i => i.Date" Title="Fecha" Width="110px" Align="ColumnAlign.Center">
+                    <span class="tabular-nums small text-muted">@context.Date.ToString("dd/MM/yyyy")</span>
                 </PropertyColumn>
-                <PropertyColumn Property="i => i.PaymentLimitDate" Title="Límite Pago" Width="110px">
-                    @context.PaymentLimitDate.ToString("dd/MM/yyyy")
-                </PropertyColumn>
-                <PropertyColumn Property="i => i.Value" Title="Valor Compra" Width="120px">
-                    <span class="fw-semibold">@context.Value.ToString("C0")</span>
-                </PropertyColumn>
-                <PropertyColumn Property="i => i.CreditValue" Title="Abonado" Width="120px">
-                    <span class="text-success fw-semibold">@context.CreditValue.ToString("C0")</span>
-                </PropertyColumn>
-                <PropertyColumn Property="i => i.BalanceValue" Title="Saldo Pendiente" Width="130px">
-                    <span class="@(context.BalanceValue > 0 ? "text-danger fw-bold" : "text-muted")">
-                        @context.BalanceValue.ToString("C0")
+                <PropertyColumn Property="i => i.PaymentLimitDate" Title="Límite Pago" Width="110px" Align="ColumnAlign.Center">
+                    <span class="tabular-nums small @(context.PaymentLimitDate < DateTime.Today && context.BalanceValue > 0 ? "text-danger fw-bold" : "text-muted")">
+                        @context.PaymentLimitDate.ToString("dd/MM/yyyy")
                     </span>
                 </PropertyColumn>
-                <PropertyColumn Property="i => i.BalanceValue" Title="Estado" Width="110px">
+                <PropertyColumn Property="i => i.Value" Title="Valor Compra" Width="130px" Align="ColumnAlign.Right">
+                    <span class="fw-bold tabular-nums text-dark">@context.Value.ToString("C0")</span>
+                </PropertyColumn>
+                <PropertyColumn Property="i => i.CreditValue" Title="Abonado" Width="125px" Align="ColumnAlign.Right">
+                    <span class="tabular-nums text-success fw-semibold">@context.CreditValue.ToString("C0")</span>
+                </PropertyColumn>
+                <PropertyColumn Property="i => i.BalanceValue" Title="Saldo Pendiente" Width="135px" Align="ColumnAlign.Right">
+                    @if (context.BalanceValue > 0)
+                    {
+                        <span class="tabular-nums text-danger fw-bold">@context.BalanceValue.ToString("C0")</span>
+                    }
+                    else
+                    {
+                        <span class="pill-badge badge-soft-success">
+                            <i class="bi bi-check2"></i> Al Día
+                        </span>
+                    }
+                </PropertyColumn>
+                <PropertyColumn Property="i => i.BalanceValue" Title="Estado" Width="115px" Align="ColumnAlign.Center">
                     @{
                         bool isPaid = context.BalanceValue <= 0;
                     }
-                    <SoftTag Color="@(isPaid ? "green" : "red")">
-                        @(isPaid ? "PAGADA" : "PENDIENTE")
-                    </SoftTag>
+                    @if (isPaid)
+                    {
+                        <span class="pill-badge badge-soft-success">
+                            <i class="bi bi-check2-circle"></i> Pagada
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="pill-badge badge-soft-danger">
+                            <i class="bi bi-hourglass-split"></i> Pendiente
+                        </span>
+                    }
                 </PropertyColumn>
-                <ActionColumn Title="Acciones" Width="100px">
+                <ActionColumn Title="Acciones" Width="95px" Align="ColumnAlign.Center">
                     <div class="d-flex gap-1 justify-content-center">
                         <SoftActionButton Icon="history"
                                           Tooltip="Historial de Abonos"
@@ -156,6 +197,7 @@
                                         DataSource="@_providers"
                                         LabelName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.FullName)"
                                         ValueName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.Id)"
+                                        EnableSearch="true"
                                         Placeholder="Seleccione proveedor..." />
                             </FormItem>
                         </Col>
@@ -215,6 +257,7 @@
                                     TItemValue="string"
                                     @bind-Value="_createModel.InitialPaymentMethod"
                                     DataSource="@_paymentMethods"
+                                    EnableSearch="true"
                                     Placeholder="Seleccione medio de pago..." />
                         </FormItem>
                     }
@@ -321,6 +364,7 @@
                 <Select TItem="string"
                         TItemValue="string"
                         @bind-Value="_paymentFormModel.PaymentMethod"
+                        EnableSearch="true"
                         DataSource="@_paymentMethods" />
             </FormItem>
         </Form>
@@ -355,6 +399,14 @@
     private string GetProviderName(int providerId)
     {
         return _providers.FirstOrDefault(p => p.Id == providerId)?.FullName ?? $"Proveedor #{providerId}";
+    }
+
+    private static string GetInitials(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName)) return "?";
+        var parts = fullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1) return parts[0].Length >= 2 ? parts[0][..2].ToUpperInvariant() : parts[0][..1].ToUpperInvariant();
+        return $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
     }
 
     private List<InvoiceDto> FilteredInvoices => _allInvoices

@@ -16,7 +16,7 @@ public class DatabaseIntegrationTests
     private JewerlyDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<JewerlyDbContext>()
-            .UseSqlServer("Server=localhost;Database=PomonaDb_Test;Trusted_Connection=True;TrustServerCertificate=True;")
+            .UseNpgsql("Host=localhost;Port=5432;Database=IntZaioNJewerly_Test;Username=postgres;Password=IntZaioN;")
             .Options;
 
         return new JewerlyDbContext(options);

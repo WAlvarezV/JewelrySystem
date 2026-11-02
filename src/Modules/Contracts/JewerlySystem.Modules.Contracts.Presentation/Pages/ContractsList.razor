@@ -15,31 +15,45 @@
     </SoftHeroHeader>
 
     <!-- Metrics Summary -->
-    <div class="row g-3 mb-3">
-        <div class="col-12 col-sm-6 col-md-3">
-            <div class="soft-card p-3">
-                <span class="text-muted small text-uppercase fw-semibold">Total Contratos</span>
-                <h4 class="fw-bold mt-1 mb-0 text-dark">@_contracts.Count</h4>
+    <div class="metrics-grid mb-3">
+        <div class="metric-card">
+            <div class="metric-icon bg-blue-subtle">
+                <i class="bi bi-file-earmark-text"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-label">Total Contratos</span>
+                <span class="metric-value">@_contracts.Count</span>
+                <span class="metric-subtext">Histórico registrado</span>
             </div>
         </div>
-        <div class="col-12 col-sm-6 col-md-3">
-            <div class="soft-card p-3">
-                <span class="text-muted small text-uppercase fw-semibold">Valor Total Contratado</span>
-                <h4 class="fw-bold mt-1 mb-0 text-primary">@_contracts.Sum(x => (long)x.Value).ToString("C0")</h4>
+        <div class="metric-card">
+            <div class="metric-icon bg-purple-subtle">
+                <i class="bi bi-currency-dollar"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-label">Total Contratado</span>
+                <span class="metric-value tabular-nums">@_contracts.Sum(x => (long)x.Value).ToString("C0")</span>
+                <span class="metric-subtext">Valor acumulado</span>
             </div>
         </div>
-        <div class="col-12 col-sm-6 col-md-3">
-            <div class="soft-card p-3">
-                <span class="text-muted small text-uppercase fw-semibold">Saldo Pendiente de Cobro</span>
-                <h4 class="fw-bold mt-1 mb-0 text-danger">@_contracts.Sum(x => (long)x.Balance).ToString("C0")</h4>
+        <div class="metric-card">
+            <div class="metric-icon bg-rose-subtle">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-label">Saldo Pendiente</span>
+                <span class="metric-value tabular-nums text-danger">@_contracts.Sum(x => (long)x.Balance).ToString("C0")</span>
+                <span class="metric-subtext">Por recaudar</span>
             </div>
         </div>
-        <div class="col-12 col-sm-6 col-md-3">
-            <div class="soft-card p-3">
-                <span class="text-muted small text-uppercase fw-semibold">Pendientes de Entrega</span>
-                <h4 class="fw-bold mt-1 mb-0 text-success">
-                    @_contracts.Count(x => x.State != ContractState.Entregado)
-                </h4>
+        <div class="metric-card">
+            <div class="metric-icon bg-amber-subtle">
+                <i class="bi bi-hourglass-split"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-label">Por Entregar</span>
+                <span class="metric-value">@_contracts.Count(x => x.State != ContractState.Entregado)</span>
+                <span class="metric-subtext">En taller o por reclamar</span>
             </div>
         </div>
     </div>
@@ -47,9 +61,9 @@
     <!-- Filters Card -->
     <SoftFilterCard>
         <div class="row g-3 align-items-center">
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-lg-5">
                 <div class="d-flex align-items-center gap-1">
-                    <Input Placeholder="Buscar por número, cliente o descripción..."
+                    <Input Placeholder="Buscar por número, titular, tipo o descripción..."
                            @bind-Value="_searchTerm"
                            AllowClear="true"
                            PrefixIcon="search" />
@@ -59,17 +73,19 @@
                                      ButtonClass="btn-outline-secondary" />
                 </div>
             </div>
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-lg-5">
                 <RadioGroup @bind-Value="_stateFilter" ButtonStyle="@RadioButtonStyle.Solid">
                     <Radio RadioButton="true" Value="@("ALL")">Todos</Radio>
                     <Radio RadioButton="true" Value="@("Registrado")">Registrado</Radio>
                     <Radio RadioButton="true" Value="@("Asignado")">En Taller</Radio>
-                    <Radio RadioButton="true" Value="@("Recibido")">Listo / Recibido</Radio>
+                    <Radio RadioButton="true" Value="@("Recibido")">Listo</Radio>
                     <Radio RadioButton="true" Value="@("Entregado")">Entregado</Radio>
                 </RadioGroup>
             </div>
-            <div class="col-12 col-md-2 text-end">
-                <span class="text-muted small">Mostrando: <b>@FilteredContracts.Count</b> registros</span>
+            <div class="col-12 col-lg-2 text-lg-end">
+                <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill small">
+                    <i class="bi bi-funnel me-1"></i> <b>@FilteredContracts.Count</b> contratos
+                </span>
             </div>
         </div>
     </SoftFilterCard>
@@ -101,65 +117,80 @@
                 <PropertyColumn Property="c => c.Number" Title="Nro. Contrato" Width="120px">
                     <span class="fw-bold text-dark">#@context.Number</span>
                 </PropertyColumn>
-                <PropertyColumn Property="c => c.Reference" Title="Tipo / Ref." Width="140px">
+                <PropertyColumn Property="c => c.Reference" Title="Modalidad / Ref." Width="160px">
                     @if (context.Reference.HasValue && context.Reference.Value > 0)
                     {
-                        <SoftTag Color="blue">
-                            <i class="bi bi-box-seam me-1"></i>Separe #@context.Reference
-                        </SoftTag>
+                        <span class="pill-badge badge-soft-primary">
+                            <i class="bi bi-box-seam"></i> Separe #@context.Reference
+                        </span>
                     }
                     else if (context.Weight > 0)
                     {
-                        <SoftTag Color="gold">
-                            <i class="bi bi-gem me-1"></i>Fabricación (@context.Weight g)
-                        </SoftTag>
+                        <span class="pill-badge badge-soft-warning">
+                            <i class="bi bi-gem"></i> Hechura (@context.Weight g)
+                        </span>
                     }
                     else
                     {
-                        <SoftTag Color="cyan">
-                            <i class="bi bi-tools me-1"></i>Reparación
-                        </SoftTag>
+                        <span class="pill-badge badge-soft-purple">
+                            <i class="bi bi-tools"></i> Reparación
+                        </span>
                     }
                 </PropertyColumn>
-                <PropertyColumn Property="c => c.PersonId" Title="Titular / Cliente" Width="180px">
-                    <span class="fw-semibold">@GetCustomerName(context.PersonId)</span>
+                <PropertyColumn Property="c => c.PersonId" Title="Titular / Cliente" Width="210px">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="avatar-circle avatar-blue">@GetInitials(GetCustomerName(context.PersonId))</div>
+                        <div class="d-flex flex-column" style="min-width: 0;">
+                            <span class="fw-semibold text-truncate text-dark" title="@GetCustomerName(context.PersonId)">
+                                @GetCustomerName(context.PersonId)
+                            </span>
+                        </div>
+                    </div>
                 </PropertyColumn>
-                <PropertyColumn Property="c => c.Description" Title="Descripción del Trabajo / Joya" Ellipsis="true">
-                    <span class="text-muted">@context.Description</span>
+                <PropertyColumn Property="c => c.Description" Title="Descripción del Trabajo / Mercancía" Ellipsis="true">
+                    <span class="text-secondary">@context.Description</span>
                 </PropertyColumn>
-                <PropertyColumn Property="c => c.Value" Title="Valor Total" Width="130px">
-                    <span class="fw-semibold">@context.Value.ToString("C0")</span>
+                <PropertyColumn Property="c => c.Value" Title="Valor Total" Width="135px" Align="ColumnAlign.Right">
+                    <span class="fw-bold tabular-nums text-dark">@context.Value.ToString("C0")</span>
                 </PropertyColumn>
-                <PropertyColumn Property="c => c.Balance" Title="Saldo Pendiente" Width="130px">
-                    <span class="@(context.Balance > 0 ? "text-danger fw-bold" : "text-success fw-semibold")">
-                        @context.Balance.ToString("C0")
+                <PropertyColumn Property="c => c.Balance" Title="Saldo Pendiente" Width="140px" Align="ColumnAlign.Right">
+                    @if (context.Balance > 0)
+                    {
+                        <span class="tabular-nums text-danger fw-bold">@context.Balance.ToString("C0")</span>
+                    }
+                    else
+                    {
+                        <span class="pill-badge badge-soft-success">
+                            <i class="bi bi-check2"></i> Al Día
+                        </span>
+                    }
+                </PropertyColumn>
+                <PropertyColumn Property="c => c.DeliveryDate" Title="Fecha Entrega" Width="120px" Align="ColumnAlign.Center">
+                    <span class="tabular-nums small text-muted">
+                        <i class="bi bi-calendar3 me-1"></i>@context.DeliveryDate.ToString("dd/MM/yyyy")
                     </span>
                 </PropertyColumn>
-                <PropertyColumn Property="c => c.DeliveryDate" Title="Fecha Entrega" Width="110px">
-                    @context.DeliveryDate.ToString("dd/MM/yyyy")
-                </PropertyColumn>
-                <PropertyColumn Property="c => c.State" Title="Estado" Width="130px">
-                    @{
-                        string color = context.State switch
-                        {
-                            ContractState.Registrado => "blue",
-                            ContractState.Asignado => "cyan",
-                            ContractState.Recibido => "green",
-                            ContractState.Entregado => "purple",
-                            _ => "default"
-                        };
-                        string label = context.State switch
-                        {
-                            ContractState.Registrado => "Registrado",
-                            ContractState.Asignado => "En Taller",
-                            ContractState.Recibido => "Listo",
-                            ContractState.Entregado => "Entregado",
-                            _ => context.State.ToString()
-                        };
+                <PropertyColumn Property="c => c.State" Title="Estado" Width="130px" Align="ColumnAlign.Center">
+                    @switch (context.State)
+                    {
+                        case ContractState.Registrado:
+                            <span class="pill-badge badge-soft-primary"><i class="bi bi-clock"></i> Registrado</span>
+                            break;
+                        case ContractState.Asignado:
+                            <span class="pill-badge badge-soft-warning"><i class="bi bi-gear"></i> En Taller</span>
+                            break;
+                        case ContractState.Recibido:
+                            <span class="pill-badge badge-soft-success"><i class="bi bi-check2-circle"></i> Listo</span>
+                            break;
+                        case ContractState.Entregado:
+                            <span class="pill-badge badge-soft-purple"><i class="bi bi-box2-fill"></i> Entregado</span>
+                            break;
+                        default:
+                            <span class="pill-badge badge-soft-primary">@context.State</span>
+                            break;
                     }
-                    <SoftTag Color="@color">@label</SoftTag>
                 </PropertyColumn>
-                <ActionColumn Title="Acción" Width="80px">
+                <ActionColumn Title="Acción" Width="80px" Align="ColumnAlign.Center">
                     <SoftActionButton Icon="eye"
                                       TooltipText="Ver Detalle y Abonos"
                                       OnClick="@(() => Navigation.NavigateTo($"/contracts/{context.Id}"))" />
@@ -177,25 +208,60 @@
         <ChildContent>
             <Form Model="@_formModel" Layout="@FormLayout.Vertical">
                 <!-- Selector de Propósito del Contrato -->
-                <SoftFormBox Title="Tipo de Contrato o Pedido">
-                    <FormItem Label="Seleccione la modalidad">
-                        <RadioGroup @bind-Value="_formModel.ContractKind" ButtonStyle="@RadioButtonStyle.Solid">
-                            <Radio RadioButton="true" Value="@("SEPARE")">
-                                <i class="bi bi-box-seam me-1"></i> Separación de Mercancía (Plan Separe)
-                            </Radio>
-                            <Radio RadioButton="true" Value="@("REPARACION")">
-                                <i class="bi bi-tools me-1"></i> Reparación / Mantenimiento
-                            </Radio>
-                            <Radio RadioButton="true" Value="@("FABRICACION")">
-                                <i class="bi bi-gem me-1"></i> Fabricación de Joya (Hechura)
-                            </Radio>
-                        </RadioGroup>
-                    </FormItem>
+                <SoftFormBox Title="Modalidad del Pedido o Contrato">
+                    <div class="row g-2 mb-2">
+                        <div class="col-12 col-md-4">
+                            <div class="quick-choice-card text-center @(_formModel.ContractKind == "SEPARE" ? "active" : "")"
+                                 @onclick='() => _formModel.ContractKind = "SEPARE"'>
+                                <div class="choice-icon bg-blue-subtle">
+                                    <i class="bi bi-box-seam"></i>
+                                </div>
+                                <div class="choice-title">Plan Separe</div>
+                                <div class="choice-desc">Apartar una joya o reloj existente en inventario</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="quick-choice-card text-center @(_formModel.ContractKind == "REPARACION" ? "active" : "")"
+                                 @onclick='() => _formModel.ContractKind = "REPARACION"'>
+                                <div class="choice-icon bg-purple-subtle">
+                                    <i class="bi bi-tools"></i>
+                                </div>
+                                <div class="choice-title">Reparación</div>
+                                <div class="choice-desc">Ajuste, compostura o mantenimiento en taller</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="quick-choice-card text-center @(_formModel.ContractKind == "FABRICACION" ? "active" : "")"
+                                 @onclick='() => _formModel.ContractKind = "FABRICACION"'>
+                                <div class="choice-icon bg-amber-subtle">
+                                    <i class="bi bi-gem"></i>
+                                </div>
+                                <div class="choice-title">Fabricación</div>
+                                <div class="choice-desc">Hechura nueva en oro/plata sobre medida</div>
+                            </div>
+                        </div>
+                    </div>
                 </SoftFormBox>
 
                 <!-- Step 1: Titular -->
                 <StepLabel Number="1" Text="Información del Cliente / Titular" IsActive="true" />
                 <SoftFormBox Title="Identificación del Titular">
+                    @if (_formModel.CustomerId > 0)
+                    {
+                        <div class="p-2 mb-3 rounded-3 bg-success-subtle border border-success-subtle d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="avatar-circle avatar-emerald">@GetInitials(_formModel.CustomerFullName)</div>
+                                <div>
+                                    <span class="fw-bold text-success d-block"><i class="bi bi-patch-check-fill me-1"></i>Cliente en Directorio</span>
+                                    <span class="small text-dark">@_formModel.CustomerFullName &bull; C.C. @_formModel.IdentificationNumber</span>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-link text-decoration-none text-muted" @onclick="ResetCustomerSearch">
+                                <i class="bi bi-x-circle me-1"></i>Cambiar
+                            </button>
+                        </div>
+                    }
+
                     <div class="row g-3">
                         <div class="col-12 col-md-4">
                             <FormItem Label="Tipo Documento" Required="true">
@@ -204,7 +270,8 @@
                                         @bind-Value="_formModel.IdentificationTypeId"
                                         DataSource="@_idTypes"
                                         LabelName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.IdentificationTypeDto.Name)"
-                                        ValueName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.IdentificationTypeDto.Id)" />
+                                        ValueName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.IdentificationTypeDto.Id)"
+                                        EnableSearch="true" />
                             </FormItem>
                         </div>
                         <div class="col-12 col-md-5">
@@ -265,6 +332,7 @@
                                             @bind-Value="_formModel.ProviderId"
                                             ValueName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.Id)"
                                             LabelName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.FullName)"
+                                            EnableSearch="true"
                                             Placeholder="-- Seleccione Taller / Joyero --"
                                             AllowClear="true" />
                                 </FormItem>
@@ -311,16 +379,25 @@
                                         DataSource="@_paymentMethodOptions"
                                         @bind-Value="_formModel.PaymentMethod"
                                         ValueName="@nameof(PaymentMethodOption.Value)"
+                                        EnableSearch="true"
                                         LabelName="@nameof(PaymentMethodOption.Label)" />
                             </FormItem>
                         </div>
                     </div>
 
-                    <div class="row g-3">
+                    <div class="row g-3 align-items-end">
                         <div class="col-12 col-md-6">
                             <FormItem Label="Fecha Prometida de Entrega">
                                 <DatePicker @bind-Value="_formModel.DeliveryDate" Format="dd/MM/yyyy" Class="w-100" />
                             </FormItem>
+                        </div>
+                        <div class="col-12 col-md-6 mb-4">
+                            <span class="small text-muted fw-bold d-block mb-1">Plazo Rápido:</span>
+                            <div class="d-flex gap-1 flex-wrap">
+                                <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1" @onclick="() => SetDeliveryDays(15)">+15 días (Estándar)</button>
+                                <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1" @onclick="() => SetDeliveryDays(30)">+30 días</button>
+                                <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1" @onclick="() => SetDeliveryDays(45)">+45 días</button>
+                            </div>
                         </div>
                     </div>
 
@@ -337,6 +414,19 @@
                                     <SoftDetailItem Label="Saldo Pendiente"
                                                     Value="@Math.Max(0, _formModel.Value - _formModel.InitialPayment).ToString("C0")"
                                                     HighlightVariant="@(_formModel.Value - _formModel.InitialPayment > 0 ? SoftDetailItem.Variant.Danger : SoftDetailItem.Variant.Success)" />
+                                </div>
+                            </div>
+
+                            @{
+                                int percentPaid = _formModel.Value > 0 ? Math.Min(100, (int)((double)_formModel.InitialPayment / _formModel.Value * 100)) : 0;
+                            }
+                            <div class="mt-3 pt-2 border-top">
+                                <div class="d-flex justify-content-between small text-muted mb-1">
+                                    <span>Porcentaje abonado: <b class="text-success">@percentPaid%</b></span>
+                                    <span>Porcentaje pendiente: <b class="text-danger">@((100 - percentPaid))%</b></span>
+                                </div>
+                                <div class="progress" style="height: 6px; border-radius: 4px; background: #e2e8f0;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: @percentPaid%; border-radius: 4px;" aria-valuenow="@percentPaid" aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
                             </div>
                         </SoftDetailCard>
@@ -387,6 +477,27 @@
     private string GetCustomerName(int personId)
     {
         return _customers.FirstOrDefault(c => c.Id == personId)?.FullName ?? $"Cliente #{personId}";
+    }
+
+    private static string GetInitials(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName)) return "?";
+        var parts = fullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1) return parts[0].Length >= 2 ? parts[0][..2].ToUpperInvariant() : parts[0][..1].ToUpperInvariant();
+        return $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
+    }
+
+    private void ResetCustomerSearch()
+    {
+        _formModel.CustomerId = 0;
+        _formModel.CustomerFullName = string.Empty;
+        _formModel.CustomerCellPhone = string.Empty;
+        _formModel.IdentificationNumber = string.Empty;
+    }
+
+    private void SetDeliveryDays(int days)
+    {
+        _formModel.DeliveryDate = DateTime.Today.AddDays(days);
     }
 
     private List<ContractDto> FilteredContracts => _contracts

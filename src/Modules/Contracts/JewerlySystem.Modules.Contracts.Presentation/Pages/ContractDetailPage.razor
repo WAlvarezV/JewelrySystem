@@ -146,6 +146,7 @@
                                     <Select TItem="ContractState"
                                             TItemValue="ContractState"
                                             @bind-Value="_editModel.State"
+                                            EnableSearch="true"
                                             DataSource="@_stateOptions" />
                                 </FormItem>
                             </div>
@@ -187,6 +188,7 @@
                     <Select TItem="PaymentMethod"
                             TItemValue="PaymentMethod"
                             @bind-Value="_paymentModel.PaymentMethod"
+                            EnableSearch="true"
                             DataSource="@_paymentMethodOptions" />
                 </FormItem>
             </Form>

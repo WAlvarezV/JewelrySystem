@@ -15,69 +15,97 @@
     </SoftHeroHeader>
 
     <!-- Date selector & Arqueo Overview -->
-    <Row Gutter="16" Class="mb-3">
-        <Col Xs="24" Md="6">
+    <div class="row g-3 my-4">
+        <div class="col-12 col-md-3">
             <div class="soft-card p-3 h-100 d-flex flex-column justify-content-center">
-                <span class="text-muted small text-uppercase fw-semibold mb-1">Fecha de Arqueo</span>
+                <span class="text-muted small text-uppercase fw-bold mb-2">
+                    <i class="bi bi-calendar3 me-1 text-primary"></i>Fecha de Arqueo
+                </span>
                 <DatePicker @bind-Value="_selectedDate"
                             @bind-Value:after="LoadDayRecordsAsync"
                             Format="dd/MM/yyyy"
                             Class="w-100" />
             </div>
-        </Col>
-        <Col Xs="24" Sm="12" Md="6">
-            <div class="soft-card p-3">
-                <span class="text-muted small text-uppercase fw-semibold">Total Ingresos</span>
-                <h4 class="fw-bold mt-1 mb-0 text-success">+@TotalIncome.ToString("C0")</h4>
+        </div>
+        <div class="col-12 col-md-3">
+            <div class="metric-card h-100">
+                <div class="metric-icon bg-emerald-subtle">
+                    <i class="bi bi-arrow-down-left-circle"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Total Ingresos</span>
+                    <span class="metric-value tabular-nums text-success">+@TotalIncome.ToString("C0")</span>
+                    <span class="metric-subtext">Entradas registradas</span>
+                </div>
             </div>
-        </Col>
-        <Col Xs="24" Sm="12" Md="6">
-            <div class="soft-card p-3">
-                <span class="text-muted small text-uppercase fw-semibold">Total Egresos</span>
-                <h4 class="fw-bold mt-1 mb-0 text-danger">-@TotalExpense.ToString("C0")</h4>
+        </div>
+        <div class="col-12 col-md-3">
+            <div class="metric-card h-100">
+                <div class="metric-icon bg-rose-subtle">
+                    <i class="bi bi-arrow-up-right-circle"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Total Egresos</span>
+                    <span class="metric-value tabular-nums text-danger">-@TotalExpense.ToString("C0")</span>
+                    <span class="metric-subtext">Salidas y gastos</span>
+                </div>
             </div>
-        </Col>
-        <Col Xs="24" Sm="12" Md="6">
-            <div class="soft-card p-3">
-                <span class="text-muted small text-uppercase fw-semibold">Cuadre Efectivo en Caja</span>
-                <h4 class="fw-bold mt-1 mb-0 @(CashBalance >= 0 ? "text-primary" : "text-danger")">
-                    @CashBalance.ToString("C0")
-                </h4>
+        </div>
+        <div class="col-12 col-md-3">
+            <div class="metric-card h-100">
+                <div class="metric-icon @(CashBalance >= 0 ? "bg-blue-subtle" : "bg-rose-subtle")">
+                    <i class="bi bi-safe2"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Cuadre Efectivo en Caja</span>
+                    <span class="metric-value tabular-nums @(CashBalance >= 0 ? "text-primary" : "text-danger")">
+                        @CashBalance.ToString("C0")
+                    </span>
+                    <span class="metric-subtext">Disponible físico</span>
+                </div>
             </div>
-        </Col>
-    </Row>
+        </div>
+    </div>
 
     <!-- Detail Card: Arqueo Breakdown -->
     <SoftDetailCard Title="Desglose por Medios de Pago (Arqueo)">
-        <SoftDetailItem Label="Efectivo (Ingresos)">@IncomeCash.ToString("C0")</SoftDetailItem>
-        <SoftDetailItem Label="Efectivo (Salidas)">@ExpenseCash.ToString("C0")</SoftDetailItem>
-        <SoftDetailItem Label="Bancos / Transferencias">@TotalTransfers.ToString("C0")</SoftDetailItem>
-        <SoftDetailItem Label="Tarjetas Débito / Crédito">@TotalCards.ToString("C0")</SoftDetailItem>
+        <SoftDetailItem Label="Efectivo (Ingresos)"><span class="tabular-nums">@IncomeCash.ToString("C0")</span></SoftDetailItem>
+        <SoftDetailItem Label="Efectivo (Salidas)"><span class="tabular-nums">@ExpenseCash.ToString("C0")</span></SoftDetailItem>
+        <SoftDetailItem Label="Bancos / Transferencias"><span class="tabular-nums">@TotalTransfers.ToString("C0")</span></SoftDetailItem>
+        <SoftDetailItem Label="Tarjetas Débito / Crédito"><span class="tabular-nums">@TotalCards.ToString("C0")</span></SoftDetailItem>
         <SoftDetailItem Label="Flujo Neto del Día" Highlight="true">
-            @((TotalIncome - TotalExpense).ToString("C0"))
+            <span class="tabular-nums fw-bold">@((TotalIncome - TotalExpense).ToString("C0"))</span>
         </SoftDetailItem>
     </SoftDetailCard>
 
     <!-- Filters Card -->
     <SoftFilterCard>
-        <Row Gutter="16">
-            <Col Xs="24" Sm="12" Md="10">
-                <Input Placeholder="Buscar por concepto o comprobante..."
-                       @bind-Value="_searchTerm"
-                       AllowClear="true"
-                       PrefixIcon="search" />
-            </Col>
-            <Col Xs="24" Sm="12" Md="10">
+        <div class="row g-3 align-items-center">
+            <div class="col-12 col-lg-5">
+                <div class="d-flex align-items-center gap-1">
+                    <Input Placeholder="Buscar por concepto o comprobante..."
+                           @bind-Value="_searchTerm"
+                           AllowClear="true"
+                           PrefixIcon="search" />
+                    <SoftVoiceButton @bind-TargetText="_searchTerm"
+                                     Append="false"
+                                     TooltipText="Buscar movimientos por voz"
+                                     ButtonClass="btn-outline-secondary" />
+                </div>
+            </div>
+            <div class="col-12 col-lg-5">
                 <RadioGroup @bind-Value="_typeFilter" ButtonStyle="@RadioButtonStyle.Solid">
                     <Radio RadioButton="true" Value="@("ALL")">Todos</Radio>
                     <Radio RadioButton="true" Value="@("INGRESO")">Ingresos</Radio>
                     <Radio RadioButton="true" Value="@("EGRESO")">Egresos</Radio>
                 </RadioGroup>
-            </Col>
-            <Col Xs="24" Sm="24" Md="4" Class="text-end">
-                <span class="text-muted small">Mostrando: <b>@FilteredRecords.Count</b> movimientos</span>
-            </Col>
-        </Row>
+            </div>
+            <div class="col-12 col-lg-2 text-lg-end">
+                <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill small">
+                    <i class="bi bi-funnel me-1"></i> <b>@FilteredRecords.Count</b> movimientos
+                </span>
+            </div>
+        </div>
     </SoftFilterCard>
 
     <!-- Data Table / Loading / Empty -->
@@ -102,19 +130,32 @@
                    DataSource="@FilteredRecords"
                    Responsive="true"
                    Size="@TableSize.Middle">
-                <PropertyColumn Property="r => r.Date" Title="Hora" Width="90px">
-                    @context.Date.ToString("HH:mm")
+                <PropertyColumn Property="r => r.Date" Title="Hora" Width="95px" Align="ColumnAlign.Center">
+                    <span class="tabular-nums small text-muted">
+                        <i class="bi bi-clock me-1"></i>@context.Date.ToString("HH:mm")
+                    </span>
                 </PropertyColumn>
-                <PropertyColumn Property="r => r.RecordType" Title="Tipo" Width="110px">
+                <PropertyColumn Property="r => r.RecordType" Title="Tipo" Width="130px" Align="ColumnAlign.Center">
                     @{
                         bool isIngreso = context.RecordType == RecordType.INGRESO;
                     }
-                    <SoftTag Color="@(isIngreso ? "green" : "red")">
-                        @(isIngreso ? "INGRESO" : "EGRESO")
-                    </SoftTag>
+                    @if (isIngreso)
+                    {
+                        <span class="pill-badge badge-soft-success">
+                            <i class="bi bi-arrow-down-left"></i> Ingreso
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="pill-badge badge-soft-danger">
+                            <i class="bi bi-arrow-up-right"></i> Egreso
+                        </span>
+                    }
                 </PropertyColumn>
-                <PropertyColumn Property="r => r.PaymentMethod" Title="Medio Pago" Width="140px">
-                    <SoftTag Color="blue">@context.PaymentMethod</SoftTag>
+                <PropertyColumn Property="r => r.PaymentMethod" Title="Medio Pago" Width="160px">
+                    <span class="pill-badge badge-soft-primary">
+                        <i class="bi bi-credit-card me-1"></i>@context.PaymentMethod
+                    </span>
                 </PropertyColumn>
                 <PropertyColumn Property="r => r.Description" Title="Concepto / Descripción">
                     <span class="fw-semibold text-dark">@context.Description</span>
@@ -123,8 +164,8 @@
                         <span class="badge bg-light text-secondary border ms-1 small">Ref: @context.Number</span>
                     }
                 </PropertyColumn>
-                <PropertyColumn Property="r => r.Value" Title="Valor" Width="140px">
-                    <span class="fw-bold @(context.RecordType == RecordType.INGRESO ? "text-success" : "text-danger")">
+                <PropertyColumn Property="r => r.Value" Title="Valor" Width="145px" Align="ColumnAlign.Right">
+                    <span class="fw-bold tabular-nums @(context.RecordType == RecordType.INGRESO ? "text-success" : "text-danger")">
                         @(context.RecordType == RecordType.INGRESO ? "+" : "-")@context.Value.ToString("C0")
                     </span>
                 </PropertyColumn>
@@ -141,24 +182,36 @@
         <ChildContent>
             <Form Model="@_formModel" Layout="@FormLayout.Vertical">
                 <SoftFormBox Title="Tipo y Medio de Pago">
-                    <Row Gutter="16">
-                        <Col Span="12">
-                            <FormItem Label="Tipo de Movimiento" Required="true">
-                                <RadioGroup @bind-Value="_formModel.RecordType" ButtonStyle="@RadioButtonStyle.Solid">
-                                    <Radio RadioButton="true" Value="@RecordType.INGRESO">Ingreso (Entrada)</Radio>
-                                    <Radio RadioButton="true" Value="@RecordType.EGRESO">Egreso (Salida)</Radio>
-                                </RadioGroup>
-                            </FormItem>
-                        </Col>
-                        <Col Span="12">
-                            <FormItem Label="Medio de Pago" Required="true">
-                                <Select TItem="PaymentMethod"
-                                        TItemValue="PaymentMethod"
-                                        @bind-Value="_formModel.PaymentMethod"
-                                        DataSource="@_paymentMethodOptions" />
-                            </FormItem>
-                        </Col>
-                    </Row>
+                    <div class="row g-2 mb-3">
+                        <div class="col-12 col-md-6">
+                            <div class="quick-choice-card text-center @(_formModel.RecordType == RecordType.INGRESO ? "active" : "")"
+                                 @onclick='() => _formModel.RecordType = RecordType.INGRESO'>
+                                <div class="choice-icon bg-emerald-subtle">
+                                    <i class="bi bi-arrow-down-left-circle"></i>
+                                </div>
+                                <div class="choice-title">Ingreso (Entrada)</div>
+                                <div class="choice-desc">Ventas, abonos de clientes, cobro de intereses</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="quick-choice-card text-center @(_formModel.RecordType == RecordType.EGRESO ? "active" : "")"
+                                 @onclick='() => _formModel.RecordType = RecordType.EGRESO'>
+                                <div class="choice-icon bg-rose-subtle">
+                                    <i class="bi bi-arrow-up-right-circle"></i>
+                                </div>
+                                <div class="choice-title">Egreso (Salida)</div>
+                                <div class="choice-desc">Pago a proveedores, gastos o desembolsos</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <FormItem Label="Medio de Pago" Required="true">
+                        <Select TItem="PaymentMethod"
+                                TItemValue="PaymentMethod"
+                                @bind-Value="_formModel.PaymentMethod"
+                                EnableSearch="true"
+                                DataSource="@_paymentMethodOptions" />
+                    </FormItem>
                 </SoftFormBox>
 
                 <SoftFormBox Title="Concepto y Valor del Movimiento">
