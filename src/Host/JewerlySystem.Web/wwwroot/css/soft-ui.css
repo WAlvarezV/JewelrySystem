@@ -16,6 +16,10 @@ body[data-theme="pomona-imperial"],
     --brand-primary-gradient: linear-gradient(135deg, #701C2C 0%, #4D0E1A 100%);
     --brand-primary-shadow: 0 4px 14px rgba(112, 28, 44, 0.35);
 
+    /* Button Text & Icon Contrast Tokens */
+    --brand-btn-text: #FFFFFF;
+    --brand-btn-icon: #FFFFFF;
+
     /* Luxury Accent: Champagne & Gold */
     --brand-gold: #D4AF37;
     --brand-gold-hover: #E5C358;
@@ -24,10 +28,16 @@ body[data-theme="pomona-imperial"],
 
     /* Warm Ivory & Deep Wine Navigation Rail */
     --brand-ivory: #FEFEF6;
-    --brand-rail-bg: #1B050A;
-    --brand-rail-border: #380C16;
+    --brand-rail-bg: #22040B;
+    --brand-rail-border: #420A16;
     --brand-rail-active: linear-gradient(135deg, #701C2C 0%, #8B293C 100%);
+    --brand-rail-active-text: #FFFFFF;
+    --brand-rail-active-icon: #D4AF37;
+    --brand-rail-active-border: rgba(212, 175, 55, 0.45);
     --brand-rail-glow: 0 4px 14px rgba(112, 28, 44, 0.5);
+
+    /* Header Accent Line */
+    --brand-header-accent: #701C2C;
 
     /* Ant Design Blazor Native Theme Tokens */
     --ant-primary-color: #701C2C;
@@ -50,7 +60,7 @@ body[data-theme="pomona-imperial"],
     --brand-blue-hover: var(--brand-primary-hover);
     --brand-blue-light: var(--brand-primary-light);
     --brand-blue-gradient: var(--brand-primary-gradient);
-    --brand-navy: #1B050A;
+    --brand-navy: #22040B;
 
     /* Status Colors */
     --soft-success: #15803d;
@@ -77,16 +87,19 @@ body[data-theme="pomona-imperial"],
     --soft-box-shadow-dropdown: 0 10px 25px -4px rgba(0, 0, 0, 0.10), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
 
     /* Neutral Colors - Surface & Typography */
-    --soft-bg-light: #F8F9FA;
+    --soft-bg-light: #F8F5F5;
     --soft-bg-surface: #FFFFFF;
-    --soft-border-color: #E6E8EC;
+    --soft-border-color: #E8DDE0;
     --soft-text-title: #1B050A;
     --soft-text-body: #374151;
     --soft-text-muted: #6B7280;
+
+    --nav-hover-bg: #F5EDEF;
+    --nav-active-text: #701C2C;
 }
 
 /* ==========================================================================
-   THEME 2: POMONA DARK LUXURY (Noche de Diamantes & Obsidian Wine)
+   THEME 2: POMONA DARK LUXURY (Noche de Diamantes & Alta Joyería)
    ========================================================================== */
 html[data-theme="pomona-dark"],
 body[data-theme="pomona-dark"],
@@ -96,7 +109,11 @@ body[data-theme="pomona-dark"],
     --brand-primary-active: #BF2845;
     --brand-primary-light: rgba(224, 62, 92, 0.22);
     --brand-primary-gradient: linear-gradient(135deg, #E03E5C 0%, #9E1F36 100%);
-    --brand-primary-shadow: 0 4px 14px rgba(224, 62, 92, 0.55);
+    --brand-primary-shadow: 0 4px 16px rgba(224, 62, 92, 0.55);
+
+    /* Button Text & Icon Contrast Tokens */
+    --brand-btn-text: #FFFFFF;
+    --brand-btn-icon: #FFFFFF;
 
     --brand-gold: #F2D26D;
     --brand-gold-hover: #FFE285;
@@ -104,10 +121,15 @@ body[data-theme="pomona-dark"],
     --brand-gold-gradient: linear-gradient(135deg, #F2D26D 0%, #C49B28 100%);
 
     --brand-ivory: #FEFEF6;
-    --brand-rail-bg: #0D0204;
-    --brand-rail-border: #2E0B14;
+    --brand-rail-bg: #0A0205;
+    --brand-rail-border: #22060D;
     --brand-rail-active: linear-gradient(135deg, #E03E5C 0%, #9E1F36 100%);
+    --brand-rail-active-text: #FFFFFF;
+    --brand-rail-active-icon: #F2D26D;
+    --brand-rail-active-border: rgba(242, 210, 109, 0.5);
     --brand-rail-glow: 0 4px 16px rgba(224, 62, 92, 0.65);
+
+    --brand-header-accent: #E03E5C;
 
     /* Ant Design Blazor Native Theme Tokens */
     --ant-primary-color: #E03E5C;
@@ -115,32 +137,39 @@ body[data-theme="pomona-dark"],
     --ant-primary-color-active: #BF2845;
     --ant-primary-color-outline: rgba(224, 62, 92, 0.35);
 
-    --soft-bg-light: #100407;
-    --soft-bg-surface: #1B090E;
-    --soft-border-color: #38141F;
+    --soft-bg-light: #0D0205;
+    --soft-bg-surface: #16060B;
+    --soft-border-color: #2F0E17;
     --soft-text-title: #FEFEF6;
-    --soft-text-body: #DCD3D6;
-    --soft-text-muted: #9E8C91;
+    --soft-text-body: #D6CCD0;
+    --soft-text-muted: #9E8A90;
+
+    --nav-hover-bg: #240C15;
+    --nav-active-text: #FF6B85;
 
     --brand-blue: var(--brand-primary);
     --brand-blue-hover: var(--brand-primary-hover);
     --brand-blue-light: var(--brand-primary-light);
     --brand-blue-gradient: var(--brand-primary-gradient);
-    --brand-navy: #0D0204;
+    --brand-navy: #0A0205;
 }
 
 /* ==========================================================================
-   THEME 3: POMONA ROYAL GOLD (Alta Joyería & Relojería Áurea)
+   THEME 3: POMONA ROYAL GOLD (Alta Joyería Áurea)
    ========================================================================== */
 html[data-theme="pomona-gold"],
 body[data-theme="pomona-gold"],
 [data-theme="pomona-gold"] {
-    --brand-primary: #C5A059;
-    --brand-primary-hover: #DBB66E;
-    --brand-primary-active: #A8833E;
-    --brand-primary-light: #FBF6EB;
-    --brand-primary-gradient: linear-gradient(135deg, #D4AF37 0%, #996515 100%);
-    --brand-primary-shadow: 0 4px 14px rgba(197, 160, 89, 0.45);
+    --brand-primary: #9E7412;
+    --brand-primary-hover: #B88918;
+    --brand-primary-active: #7A590A;
+    --brand-primary-light: #FBF2D8;
+    --brand-primary-gradient: linear-gradient(135deg, #D4AF37 0%, #AA820A 100%);
+    --brand-primary-shadow: 0 4px 14px rgba(212, 175, 55, 0.50);
+
+    /* CRITICAL: Button Text & Icons for Gold are Deep Dark Espresso */
+    --brand-btn-text: #160D03;
+    --brand-btn-icon: #160D03;
 
     --brand-gold: #D4AF37;
     --brand-gold-hover: #E5C358;
@@ -148,28 +177,36 @@ body[data-theme="pomona-gold"],
     --brand-gold-gradient: linear-gradient(135deg, #D4AF37 0%, #AA820A 100%);
 
     --brand-ivory: #FEFEF6;
-    --brand-rail-bg: #1C1306;
-    --brand-rail-border: #3D2D12;
+    --brand-rail-bg: #1E1405;
+    --brand-rail-border: #4D3812;
     --brand-rail-active: linear-gradient(135deg, #D4AF37 0%, #AA820A 100%);
-    --brand-rail-glow: 0 4px 14px rgba(212, 175, 55, 0.55);
+    --brand-rail-active-text: #160D03;
+    --brand-rail-active-icon: #160D03;
+    --brand-rail-active-border: #FFEC99;
+    --brand-rail-glow: 0 4px 14px rgba(212, 175, 55, 0.6);
 
-    --ant-primary-color: #C5A059;
-    --ant-primary-color-hover: #DBB66E;
-    --ant-primary-color-active: #A8833E;
-    --ant-primary-color-outline: rgba(197, 160, 89, 0.3);
+    --brand-header-accent: #D4AF37;
 
-    --soft-bg-light: #FAF7F0;
-    --soft-bg-surface: #FFFCF7;
-    --soft-border-color: #EBDDC2;
-    --soft-text-title: #261904;
-    --soft-text-body: #423522;
-    --soft-text-muted: #7E7058;
+    --ant-primary-color: #9E7412;
+    --ant-primary-color-hover: #B88918;
+    --ant-primary-color-active: #7A590A;
+    --ant-primary-color-outline: rgba(212, 175, 55, 0.35);
+
+    --soft-bg-light: #F4EEDF;
+    --soft-bg-surface: #FFFDF7;
+    --soft-border-color: #E2D2B0;
+    --soft-text-title: #261A05;
+    --soft-text-body: #47371A;
+    --soft-text-muted: #826E4B;
+
+    --nav-hover-bg: #F8ECC9;
+    --nav-active-text: #7A4E02;
 
     --brand-blue: var(--brand-primary);
     --brand-blue-hover: var(--brand-primary-hover);
     --brand-blue-light: var(--brand-primary-light);
     --brand-blue-gradient: var(--brand-primary-gradient);
-    --brand-navy: #1C1306;
+    --brand-navy: #1E1405;
 }
 
 /* ==========================================================================
@@ -182,8 +219,12 @@ body[data-theme="pomona-rose"],
     --brand-primary-hover: #CE848F;
     --brand-primary-active: #9B5560;
     --brand-primary-light: #FDF1F3;
-    --brand-primary-gradient: linear-gradient(135deg, #C88A78 0%, #8E4452 100%);
-    --brand-primary-shadow: 0 4px 14px rgba(183, 110, 121, 0.4);
+    --brand-primary-gradient: linear-gradient(135deg, #C26B7B 0%, #8A2B3D 100%);
+    --brand-primary-shadow: 0 4px 14px rgba(183, 110, 121, 0.45);
+
+    /* Button Text & Icon Contrast Tokens */
+    --brand-btn-text: #FFFFFF;
+    --brand-btn-icon: #FFFFFF;
 
     --brand-gold: #C88A78;
     --brand-gold-hover: #DC9D8B;
@@ -191,28 +232,36 @@ body[data-theme="pomona-rose"],
     --brand-gold-gradient: linear-gradient(135deg, #C88A78 0%, #A56553 100%);
 
     --brand-ivory: #FEFEF6;
-    --brand-rail-bg: #220B11;
-    --brand-rail-border: #421822;
-    --brand-rail-active: linear-gradient(135deg, #B76E79 0%, #8E4452 100%);
+    --brand-rail-bg: #240B13;
+    --brand-rail-border: #481826;
+    --brand-rail-active: linear-gradient(135deg, #C26B7B 0%, #8A2B3D 100%);
+    --brand-rail-active-text: #FFFFFF;
+    --brand-rail-active-icon: #FFE5EB;
+    --brand-rail-active-border: rgba(242, 216, 222, 0.5);
     --brand-rail-glow: 0 4px 14px rgba(183, 110, 121, 0.55);
+
+    --brand-header-accent: #B76E79;
 
     --ant-primary-color: #B76E79;
     --ant-primary-color-hover: #CE848F;
     --ant-primary-color-active: #9B5560;
     --ant-primary-color-outline: rgba(183, 110, 121, 0.3);
 
-    --soft-bg-light: #FAF2F4;
+    --soft-bg-light: #F7EDF1;
     --soft-bg-surface: #FFF9FA;
-    --soft-border-color: #F0D5D9;
+    --soft-border-color: #F2D8DE;
     --soft-text-title: #2E0B15;
     --soft-text-body: #47262E;
     --soft-text-muted: #82636B;
+
+    --nav-hover-bg: #F9E2E7;
+    --nav-active-text: #8E3246;
 
     --brand-blue: var(--brand-primary);
     --brand-blue-hover: var(--brand-primary-hover);
     --brand-blue-light: var(--brand-primary-light);
     --brand-blue-gradient: var(--brand-primary-gradient);
-    --brand-navy: #220B11;
+    --brand-navy: #240B13;
 }
 
 /* ==========================================================================
@@ -220,6 +269,11 @@ body[data-theme="pomona-rose"],
    ========================================================================== */
 .bg-primary {
     background-color: var(--brand-primary) !important;
+    color: var(--brand-btn-text, #ffffff) !important;
+}
+
+.bg-primary * {
+    color: var(--brand-btn-text, #ffffff) !important;
 }
 
 .text-primary {
@@ -234,7 +288,42 @@ body[data-theme="pomona-rose"],
 .ant-btn-primary {
     background: var(--brand-primary-gradient) !important;
     border-color: var(--brand-primary) !important;
-    color: #ffffff !important;
+    border: none !important;
+    color: var(--brand-btn-text, #ffffff) !important;
+    box-shadow: var(--brand-primary-shadow, 0 2px 8px rgba(112, 28, 44, 0.25)) !important;
+}
+
+.btn-primary *,
+.ant-btn-primary * {
+    color: var(--brand-btn-text, #ffffff) !important;
+}
+
+.btn-primary:hover,
+.ant-btn-primary:hover {
+    background: var(--brand-primary-gradient) !important;
+    color: var(--brand-btn-text, #ffffff) !important;
+    box-shadow: var(--brand-primary-shadow, 0 4px 14px rgba(112, 28, 44, 0.40)) !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-primary:hover *,
+.ant-btn-primary:hover * {
+    color: var(--brand-btn-text, #ffffff) !important;
+}
+
+.btn-primary:active,
+.ant-btn-primary:active {
+    transform: translateY(0) !important;
+    color: var(--brand-btn-text, #ffffff) !important;
+}
+
+.badge.bg-primary {
+    background-color: var(--brand-primary) !important;
+    color: var(--brand-btn-text, #ffffff) !important;
+}
+
+.badge.bg-primary * {
+    color: var(--brand-btn-text, #ffffff) !important;
 }
 
 .btn-outline-primary {
@@ -245,7 +334,7 @@ body[data-theme="pomona-rose"],
 .btn-outline-primary:hover {
     background-color: var(--brand-primary) !important;
     border-color: var(--brand-primary) !important;
-    color: #ffffff !important;
+    color: var(--brand-btn-text, #ffffff) !important;
 }
 
 /* ==========================================================================
@@ -296,18 +385,30 @@ body[data-theme="pomona-rose"],
     background: var(--brand-primary-gradient) !important;
     border: none !important;
     box-shadow: var(--brand-primary-shadow, 0 2px 8px rgba(112, 28, 44, 0.25)) !important;
-    color: #ffffff !important;
+    color: var(--brand-btn-text, #ffffff) !important;
+}
+
+.ant-btn-primary *,
+.btn-primary * {
+    color: var(--brand-btn-text, #ffffff) !important;
 }
 
 .ant-btn-primary:hover,
 .btn-primary:hover {
-    box-shadow: 0 4px 14px rgba(112, 28, 44, 0.40) !important;
+    box-shadow: var(--brand-primary-shadow, 0 4px 14px rgba(112, 28, 44, 0.40)) !important;
+    color: var(--brand-btn-text, #ffffff) !important;
     transform: translateY(-1px) !important;
+}
+
+.ant-btn-primary:hover *,
+.btn-primary:hover * {
+    color: var(--brand-btn-text, #ffffff) !important;
 }
 
 .ant-btn-primary:active,
 .btn-primary:active {
     transform: translateY(0) !important;
+    color: var(--brand-btn-text, #ffffff) !important;
 }
 
 .ant-btn-round {
@@ -517,7 +618,7 @@ body[data-theme="pomona-rose"],
 }
 
 .ant-pagination-item-active a {
-    color: #ffffff !important;
+    color: var(--brand-btn-text, #ffffff) !important;
 }
 
 /* ==========================================================================
@@ -778,119 +879,328 @@ body[data-theme="pomona-rose"],
 }
 
 /* ==========================================================================
-   THEME SURFACE OVERRIDES: DARK LUXURY, ROYAL GOLD & ROSE GOLD
+   THEME-SPECIFIC SURFACE & COMPONENT OVERRIDES (FULL SUITE)
    ========================================================================== */
 
-/* 1. DARK LUXURY (Modo Noche de Diamantes) */
+/* Universal Dynamic Workspace & Navigation Transition */
+.app-main-workspace {
+    background-color: var(--soft-bg-light) !important;
+    transition: background-color 0.25s ease;
+}
+
+.navbar,
+.app-header {
+    background-color: var(--soft-bg-surface) !important;
+    border-color: var(--soft-border-color) !important;
+    border-bottom: 2px solid var(--brand-header-accent, #701C2C) !important;
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+.soft-sider,
+.nav-menu-container {
+    background-color: var(--soft-bg-surface) !important;
+    border-color: var(--soft-border-color) !important;
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+/* --------------------------------------------------------------------------
+   1. POMONA DARK LUXURY (Modo Noche de Diamantes & Obsidian Wine)
+   -------------------------------------------------------------------------- */
 html[data-theme="pomona-dark"] body,
 html[data-theme="pomona-dark"] .app-main-workspace,
 body[data-theme="pomona-dark"] .app-main-workspace,
-[data-theme="pomona-dark"] .app-main-workspace {
-    background-color: #100407 !important;
-    color: #DCD3D6 !important;
-}
-
-html[data-theme="pomona-dark"] .navbar,
-html[data-theme="pomona-dark"] .soft-sider,
-html[data-theme="pomona-dark"] .nav-menu-container,
-html[data-theme="pomona-dark"] .nav-menu-header,
-html[data-theme="pomona-dark"] .card,
-html[data-theme="pomona-dark"] .ant-card,
-html[data-theme="pomona-dark"] .soft-card,
-html[data-theme="pomona-dark"] .ant-table-wrapper,
-html[data-theme="pomona-dark"] .metric-card,
-html[data-theme="pomona-dark"] .bg-white,
-[data-theme="pomona-dark"] .bg-white {
-    background-color: #1B090E !important;
-    border-color: #38141F !important;
-    color: #FEFEF6 !important;
-}
-
-html[data-theme="pomona-dark"] .ant-table-thead > tr > th {
-    background-color: #15060A !important;
+[data-theme="pomona-dark"] .app-main-workspace,
+[data-theme="pomona-dark"] .bg-light {
+    background-color: #0D0205 !important;
     color: #D6CCD0 !important;
-    border-bottom-color: #38141F !important;
 }
 
-html[data-theme="pomona-dark"] .ant-table-tbody > tr > td {
-    color: #DCD3D6 !important;
-    border-bottom-color: #2E0F18 !important;
+[data-theme="pomona-dark"] .navbar,
+[data-theme="pomona-dark"] .soft-sider,
+[data-theme="pomona-dark"] .nav-menu-container,
+[data-theme="pomona-dark"] .nav-menu-header,
+[data-theme="pomona-dark"] .card,
+[data-theme="pomona-dark"] .ant-card,
+[data-theme="pomona-dark"] .soft-card,
+[data-theme="pomona-dark"] .ant-table-wrapper,
+[data-theme="pomona-dark"] .metric-card,
+[data-theme="pomona-dark"] .bg-white {
+    background-color: #16060B !important;
+    border-color: #2F0E17 !important;
+    color: #FEFEF6 !important;
 }
 
-html[data-theme="pomona-dark"] .ant-table-tbody > tr:hover > td {
-    background-color: #270F17 !important;
+[data-theme="pomona-dark"] .navbar {
+    border-bottom: 2px solid #E03E5C !important;
 }
 
-html[data-theme="pomona-dark"] .ant-input,
-html[data-theme="pomona-dark"] .form-control,
-html[data-theme="pomona-dark"] .form-select,
-html[data-theme="pomona-dark"] .ant-select:not(.ant-select-customize-input) .ant-select-selector {
-    background-color: #15060A !important;
+[data-theme="pomona-dark"] .dropdown-menu {
+    background-color: #1A080F !important;
     border-color: #38141F !important;
     color: #FEFEF6 !important;
 }
 
-html[data-theme="pomona-dark"] .text-dark,
-html[data-theme="pomona-dark"] h1,
-html[data-theme="pomona-dark"] h2,
-html[data-theme="pomona-dark"] h3,
-html[data-theme="pomona-dark"] h4,
-html[data-theme="pomona-dark"] h5,
-html[data-theme="pomona-dark"] h6 {
+[data-theme="pomona-dark"] .dropdown-item {
+    color: #D6CCD0 !important;
+}
+
+[data-theme="pomona-dark"] .dropdown-item:hover {
+    background-color: #2A0C16 !important;
     color: #FEFEF6 !important;
 }
 
-html[data-theme="pomona-dark"] .bg-light {
-    background-color: #100407 !important;
+[data-theme="pomona-dark"] .card-header,
+[data-theme="pomona-dark"] .ant-card-head {
+    background-color: #1C0810 !important;
+    border-bottom: 1.5px solid #2F0E17 !important;
+    color: #FEFEF6 !important;
 }
 
-html[data-theme="pomona-dark"] .text-muted {
-    color: #A39196 !important;
+[data-theme="pomona-dark"] .ant-table-thead > tr > th {
+    background-color: #1C0810 !important;
+    color: #E0D5D8 !important;
+    border-bottom-color: #2F0E17 !important;
 }
 
-html[data-theme="pomona-dark"] .border-bottom,
-html[data-theme="pomona-dark"] .border-end,
-html[data-theme="pomona-dark"] .border-top,
-html[data-theme="pomona-dark"] .border {
+[data-theme="pomona-dark"] .ant-table-tbody > tr > td {
+    color: #D6CCD0 !important;
+    border-bottom-color: #260C14 !important;
+}
+
+[data-theme="pomona-dark"] .ant-table-tbody > tr:hover > td {
+    background-color: #240C15 !important;
+}
+
+[data-theme="pomona-dark"] .ant-input,
+[data-theme="pomona-dark"] .form-control,
+[data-theme="pomona-dark"] .form-select,
+[data-theme="pomona-dark"] .input-group-text,
+[data-theme="pomona-dark"] .ant-select:not(.ant-select-customize-input) .ant-select-selector {
+    background-color: #120408 !important;
     border-color: #38141F !important;
+    color: #FEFEF6 !important;
 }
 
-/* 2. ROYAL GOLD (Alta Joyería Áurea) */
-html[data-theme="pomona-gold"] .soft-sider,
-html[data-theme="pomona-gold"] .nav-menu-container,
-html[data-theme="pomona-gold"] .navbar,
-html[data-theme="pomona-gold"] .card,
-html[data-theme="pomona-gold"] .metric-card {
-    background-color: #FFFCF7 !important;
-    border-color: #EBDDC2 !important;
+[data-theme="pomona-dark"] .text-dark,
+[data-theme="pomona-dark"] h1,
+[data-theme="pomona-dark"] h2,
+[data-theme="pomona-dark"] h3,
+[data-theme="pomona-dark"] h4,
+[data-theme="pomona-dark"] h5,
+[data-theme="pomona-dark"] h6 {
+    color: #FEFEF6 !important;
 }
 
+[data-theme="pomona-dark"] .text-muted {
+    color: #9E8A90 !important;
+}
+
+[data-theme="pomona-dark"] .border,
+[data-theme="pomona-dark"] .border-bottom,
+[data-theme="pomona-dark"] .border-top,
+[data-theme="pomona-dark"] .border-end {
+    border-color: #2F0E17 !important;
+}
+
+[data-theme="pomona-dark"] .nav-item-link.active {
+    background-color: #380E18 !important;
+    color: #FF6B85 !important;
+    border-left: 3px solid #E03E5C !important;
+}
+
+[data-theme="pomona-dark"] .nav-item-link.active i {
+    color: #FF6B85 !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. POMONA ROYAL GOLD (Alta Joyería & Relojería Áurea)
+   -------------------------------------------------------------------------- */
+html[data-theme="pomona-gold"] body,
 html[data-theme="pomona-gold"] .app-main-workspace,
-html[data-theme="pomona-gold"] .bg-light {
-    background-color: #FAF7F0 !important;
+body[data-theme="pomona-gold"] .app-main-workspace,
+[data-theme="pomona-gold"] .app-main-workspace,
+[data-theme="pomona-gold"] .bg-light {
+    background-color: #F4EEDF !important;
+    color: #3A2E1C !important;
 }
 
-html[data-theme="pomona-gold"] .nav-item-link.active {
-    background-color: #FDF4DF !important;
-    color: #996515 !important;
+[data-theme="pomona-gold"] .navbar,
+[data-theme="pomona-gold"] .soft-sider,
+[data-theme="pomona-gold"] .nav-menu-container,
+[data-theme="pomona-gold"] .nav-menu-header {
+    background-color: #FFFDF7 !important;
+    border-color: #EDE1CA !important;
 }
 
-/* 3. ROSE GOLD (Oro Rosa Elegante) */
-html[data-theme="pomona-rose"] .soft-sider,
-html[data-theme="pomona-rose"] .nav-menu-container,
-html[data-theme="pomona-rose"] .navbar,
-html[data-theme="pomona-rose"] .card,
-html[data-theme="pomona-rose"] .metric-card {
-    background-color: #FFF9FA !important;
-    border-color: #F0D5D9 !important;
+[data-theme="pomona-gold"] .navbar {
+    border-bottom: 2px solid #D4AF37 !important;
 }
 
+[data-theme="pomona-gold"] .card,
+[data-theme="pomona-gold"] .ant-card,
+[data-theme="pomona-gold"] .soft-card,
+[data-theme="pomona-gold"] .ant-table-wrapper,
+[data-theme="pomona-gold"] .metric-card,
+[data-theme="pomona-gold"] .bg-white {
+    background-color: #FFFFFF !important;
+    border-color: #E2D2B0 !important;
+}
+
+[data-theme="pomona-gold"] .card-header,
+[data-theme="pomona-gold"] .ant-card-head {
+    background-color: #FAF3E3 !important;
+    border-bottom: 1.5px solid #E2D2B0 !important;
+    color: #261A05 !important;
+}
+
+[data-theme="pomona-gold"] .ant-table-thead > tr > th {
+    background-color: #F6EED8 !important;
+    color: #382A0C !important;
+    border-bottom-color: #E2D2B0 !important;
+}
+
+[data-theme="pomona-gold"] .ant-table-tbody > tr:hover > td {
+    background-color: #FAF4E6 !important;
+}
+
+[data-theme="pomona-gold"] .dropdown-menu {
+    background-color: #FFFDF7 !important;
+    border-color: #E2D2B0 !important;
+}
+
+/* CRITICAL CONTRAST FIX: Buttons & Icons on Gold */
+[data-theme="pomona-gold"] .voice-header-btn,
+[data-theme="pomona-gold"] .voice-header-btn * {
+    color: #160D03 !important;
+}
+
+[data-theme="pomona-gold"] .soft-voice-fab i {
+    color: #160D03 !important;
+}
+
+[data-theme="pomona-gold"] .rail-module-btn.active,
+[data-theme="pomona-gold"] .rail-module-btn.active span,
+[data-theme="pomona-gold"] .rail-module-btn.active i {
+    color: #160D03 !important;
+}
+
+[data-theme="pomona-gold"] .badge.bg-primary,
+[data-theme="pomona-gold"] .badge.bg-primary * {
+    color: #160D03 !important;
+}
+
+[data-theme="pomona-gold"] .nav-item-link.active {
+    background-color: #F8ECC9 !important;
+    color: #7A4E02 !important;
+    border-left: 3px solid #D4AF37 !important;
+}
+
+[data-theme="pomona-gold"] .nav-item-link.active i {
+    color: #7A4E02 !important;
+}
+
+[data-theme="pomona-gold"] .ant-pagination-item-active,
+[data-theme="pomona-gold"] .ant-pagination-item-active a {
+    color: #160D03 !important;
+}
+
+[data-theme="pomona-gold"] .ant-radio-button-wrapper-checked {
+    color: #160D03 !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. POMONA ROSE GOLD (Oro Rosa Elegante & Contemporáneo)
+   -------------------------------------------------------------------------- */
+html[data-theme="pomona-rose"] body,
 html[data-theme="pomona-rose"] .app-main-workspace,
-html[data-theme="pomona-rose"] .bg-light {
-    background-color: #FAF2F4 !important;
+body[data-theme="pomona-rose"] .app-main-workspace,
+[data-theme="pomona-rose"] .app-main-workspace,
+[data-theme="pomona-rose"] .bg-light {
+    background-color: #F7EDF1 !important;
+    color: #381C24 !important;
 }
 
-html[data-theme="pomona-rose"] .nav-item-link.active {
-    background-color: #FCE8EC !important;
-    color: #8E4452 !important;
+[data-theme="pomona-rose"] .navbar,
+[data-theme="pomona-rose"] .soft-sider,
+[data-theme="pomona-rose"] .nav-menu-container,
+[data-theme="pomona-rose"] .nav-menu-header {
+    background-color: #FFF9FA !important;
+    border-color: #F2D8DE !important;
+}
+
+[data-theme="pomona-rose"] .navbar {
+    border-bottom: 2px solid #B76E79 !important;
+}
+
+[data-theme="pomona-rose"] .card,
+[data-theme="pomona-rose"] .ant-card,
+[data-theme="pomona-rose"] .soft-card,
+[data-theme="pomona-rose"] .ant-table-wrapper,
+[data-theme="pomona-rose"] .metric-card,
+[data-theme="pomona-rose"] .bg-white {
+    background-color: #FFFFFF !important;
+    border-color: #EED4DC !important;
+}
+
+[data-theme="pomona-rose"] .card-header,
+[data-theme="pomona-rose"] .ant-card-head {
+    background-color: #FAF0F4 !important;
+    border-bottom: 1.5px solid #EED4DC !important;
+    color: #3A121E !important;
+}
+
+[data-theme="pomona-rose"] .ant-table-thead > tr > th {
+    background-color: #F8E7ED !important;
+    color: #4D1C28 !important;
+    border-bottom-color: #EED4DC !important;
+}
+
+[data-theme="pomona-rose"] .ant-table-tbody > tr:hover > td {
+    background-color: #FCF1F5 !important;
+}
+
+[data-theme="pomona-rose"] .dropdown-menu {
+    background-color: #FFF9FA !important;
+    border-color: #F2D8DE !important;
+}
+
+[data-theme="pomona-rose"] .nav-item-link.active {
+    background-color: #F9E2E7 !important;
+    color: #8E3246 !important;
+    border-left: 3px solid #B76E79 !important;
+}
+
+[data-theme="pomona-rose"] .nav-item-link.active i {
+    color: #8E3246 !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. POMONA IMPERIAL (Vino & Oro - Base Clásica)
+   -------------------------------------------------------------------------- */
+html[data-theme="pomona-imperial"] body,
+html[data-theme="pomona-imperial"] .app-main-workspace,
+body[data-theme="pomona-imperial"] .app-main-workspace,
+[data-theme="pomona-imperial"] .app-main-workspace,
+[data-theme="pomona-imperial"] .bg-light {
+    background-color: #F8F5F5 !important;
+    color: #374151 !important;
+}
+
+[data-theme="pomona-imperial"] .navbar {
+    border-bottom: 2px solid #701C2C !important;
+}
+
+[data-theme="pomona-imperial"] .card-header,
+[data-theme="pomona-imperial"] .ant-card-head {
+    border-bottom: 1.5px solid #E8DDE0 !important;
+}
+
+[data-theme="pomona-imperial"] .nav-item-link.active {
+    background-color: #FBF0F2 !important;
+    color: #701C2C !important;
+    border-left: 3px solid #701C2C !important;
+}
+
+[data-theme="pomona-imperial"] .nav-item-link.active i {
+    color: #701C2C !important;
 }

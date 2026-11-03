@@ -32,6 +32,7 @@
             if (document.body) {
                 document.body.setAttribute('data-theme', themeName);
             }
+            window.dispatchEvent(new CustomEvent('pomona-theme-changed', { detail: { theme: themeName } }));
         };
 
         window.setPomonaTheme = function(themeName) {
@@ -43,6 +44,11 @@
             try {
                 var theme = localStorage.getItem('pomona_theme') || 'pomona-imperial';
                 document.documentElement.setAttribute('data-theme', theme);
+                document.addEventListener('DOMContentLoaded', function() {
+                    if (document.body) {
+                        document.body.setAttribute('data-theme', theme);
+                    }
+                });
             } catch(e) {}
         })();
     </script>

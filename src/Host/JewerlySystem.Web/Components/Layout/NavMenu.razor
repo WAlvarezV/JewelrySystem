@@ -2,7 +2,7 @@
 @inject ISender Sender
 @inject NavigationManager Navigation
 
-<div class="nav-menu-container d-flex flex-column h-100 bg-white border-end @(IsCollapsed ? "is-collapsed" : "")">
+<div class="nav-menu-container d-flex flex-column h-100 border-end @(IsCollapsed ? "is-collapsed" : "")">
     <!-- Active Module Title & Action -->
     <div class="nav-menu-header p-3 border-bottom d-flex align-items-center @(IsCollapsed ? "justify-content-center px-1 py-3" : "justify-content-between")">
         @if (IsCollapsed)
@@ -174,23 +174,23 @@
 
 <style>
     .nav-item-link {
-        color: #374151;
+        color: var(--soft-text-body, #374151);
         transition: all 0.15s ease-in-out;
         border-radius: var(--soft-border-radius-md, 8px) !important;
     }
     .nav-item-link:hover {
-        background-color: #f3f4f6;
-        color: #111827;
+        background-color: var(--nav-hover-bg, #f3f4f6);
+        color: var(--soft-text-title, #111827);
         border-radius: var(--soft-border-radius-md, 8px) !important;
     }
     .nav-item-link.active {
-        background-color: var(--brand-primary-light, #FBF0F2);
-        color: var(--brand-primary, #701C2C) !important;
+        background-color: var(--brand-primary-light, #FBF0F2) !important;
+        color: var(--nav-active-text, var(--brand-primary, #701C2C)) !important;
         font-weight: 600;
         border-radius: var(--soft-border-radius-md, 8px) !important;
     }
     .nav-item-link.active i {
-        color: var(--brand-primary, #701C2C) !important;
+        color: var(--nav-active-text, var(--brand-primary, #701C2C)) !important;
     }
     .nav-favorite-link {
         transition: background-color 0.15s;

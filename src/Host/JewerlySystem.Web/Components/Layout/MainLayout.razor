@@ -49,7 +49,7 @@
             </aside>
 
             <!-- 2. SIDER WITH NAVMENU (Filtered by Active Module + Favorites) -->
-            <aside class="soft-sider h-100 bg-white @(_isSiderCollapsed ? "collapsed" : "")">
+            <aside class="soft-sider h-100 @(_isSiderCollapsed ? "collapsed" : "")">
                 <NavMenu ActiveModuleKey="@_activeModuleKey"
                          ActiveModuleTitle="@_activeModuleTitle"
                          ActiveModuleIcon="@_activeModuleIcon"
@@ -59,9 +59,9 @@
             </aside>
 
             <!-- 3. MAIN CONTENT WORKSPACE -->
-            <div class="app-main-workspace flex-grow-1 d-flex flex-column h-100 bg-light" style="overflow-y: auto;">
+            <div class="app-main-workspace flex-grow-1 d-flex flex-column h-100" style="overflow-y: auto;">
                 <!-- Header Topbar -->
-                <header class="navbar navbar-white bg-white border-bottom px-4 py-2 d-flex justify-content-between align-items-center sticky-top shadow-sm">
+                <header class="navbar app-header px-4 py-2 d-flex justify-content-between align-items-center sticky-top shadow-sm">
                     <div class="d-flex align-items-center gap-2">
                         <!-- Botón para Colapsar/Expandir Menú Lateral (SI.SIOT Style) -->
                         <button type="button"
@@ -72,7 +72,7 @@
                         </button>
 
                         <span class="text-muted small d-none d-sm-inline">Módulo actual:</span>
-                        <span class="badge bg-primary text-white px-2 py-1 fw-semibold d-flex align-items-center gap-1">
+                        <span class="badge bg-primary px-2 py-1 fw-semibold d-flex align-items-center gap-1">
                             <i class="bi @_activeModuleIcon"></i> @_activeModuleTitle
                         </span>
                     </div>
@@ -80,7 +80,7 @@
                     <div class="d-flex align-items-center gap-3">
                         <!-- Botón Asistente de Operaciones por Voz con IA -->
                         <button type="button"
-                                class="btn btn-sm d-flex align-items-center gap-2 px-3 py-1 shadow-sm rounded-pill fw-semibold text-white border-0 voice-header-btn"
+                                class="btn btn-sm d-flex align-items-center gap-2 px-3 py-1 shadow-sm rounded-pill fw-semibold border-0 voice-header-btn"
                                 @onclick="() => _showVoiceModal = true"
                                 title="Dictar cualquier operación (Ventas, Contratos, Clientes, Gastos) de la forma más simple">
                             <i class="bi bi-stars text-warning fs-6"></i>
@@ -131,7 +131,7 @@
                     class="soft-voice-fab shadow-lg"
                     @onclick="() => _showVoiceModal = true"
                     title="Dictado Rápido con IA">
-                <i class="bi bi-mic-fill text-white fs-4"></i>
+                <i class="bi bi-mic-fill fs-4 voice-fab-icon"></i>
                 <span class="soft-voice-fab-badge">IA</span>
             </button>
         </div>
@@ -194,13 +194,16 @@
     }
     .rail-module-btn.active {
         background: var(--brand-rail-active, linear-gradient(135deg, #701C2C 0%, #8B293C 100%)) !important;
-        color: #ffffff !important;
+        color: var(--brand-rail-active-text, #ffffff) !important;
         box-shadow: var(--brand-rail-glow, 0 4px 14px rgba(112, 28, 44, 0.5));
-        border: 1px solid rgba(212, 175, 55, 0.4) !important;
+        border: 1px solid var(--brand-rail-active-border, rgba(212, 175, 55, 0.4)) !important;
         border-radius: var(--soft-border-radius-lg, 12px) !important;
     }
     .rail-module-btn.active i {
-        color: var(--brand-gold, #D4AF37) !important;
+        color: var(--brand-rail-active-icon, #D4AF37) !important;
+    }
+    .rail-module-btn.active span {
+        color: var(--brand-rail-active-text, #ffffff) !important;
     }
 
     /* Sider Toggle Button */
@@ -216,7 +219,11 @@
     .voice-header-btn {
         background: var(--brand-primary-gradient) !important;
         border: 1px solid rgba(212, 175, 55, 0.35) !important;
+        color: var(--brand-btn-text, #ffffff) !important;
         transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .voice-header-btn * {
+        color: var(--brand-btn-text, #ffffff) !important;
     }
     .voice-header-btn:hover {
         transform: translateY(-1px);
@@ -244,6 +251,9 @@
     .soft-voice-fab:hover {
         transform: translateY(-3px) scale(1.06);
         box-shadow: var(--brand-primary-shadow, 0 12px 28px rgba(112, 28, 44, 0.6));
+    }
+    .soft-voice-fab i.voice-fab-icon {
+        color: var(--brand-btn-text, #ffffff) !important;
     }
     .soft-voice-fab-badge {
         position: absolute;

@@ -19,17 +19,17 @@
              @onclick="CloseDropdown"></div>
 
         <div class="dropdown-menu show dropdown-menu-end shadow-lg border p-1 rounded-3"
-             style="position: absolute; right: 0; top: 100%; margin-top: 6px; z-index: 1050; min-width: 250px; background: #ffffff;">
+             style="position: absolute; right: 0; top: 100%; margin-top: 6px; z-index: 1050; min-width: 250px;">
             <div class="fw-bold text-muted small px-3 py-2 border-bottom d-flex align-items-center justify-content-between mb-1">
                 <span><i class="bi bi-palette2 me-2 text-warning"></i>TEMAS DEL SISTEMA</span>
-                <span class="badge bg-light text-dark border small" style="font-size: 0.65rem;">Ant Design</span>
+                <span class="badge bg-light text-dark border small" style="font-size: 0.65rem;">Pomona Look</span>
             </div>
 
             @foreach (var theme in _themes)
             {
                 bool isSelected = string.Equals(_currentTheme, theme.Key, StringComparison.OrdinalIgnoreCase);
                 <button type="button"
-                        class="dropdown-item d-flex align-items-center justify-content-between px-3 py-2 rounded-2 border-0 @(isSelected ? "bg-light fw-bold text-dark" : "text-secondary")"
+                        class="dropdown-item d-flex align-items-center justify-content-between px-3 py-2 rounded-2 border-0 @(isSelected ? "fw-bold" : "")"
                         style="cursor: pointer; transition: all 0.15s ease;"
                         @onclick="() => SelectTheme(theme.Key)">
                     <div class="d-flex align-items-center gap-2">
@@ -53,9 +53,9 @@
     private readonly List<ThemeOption> _themes = new()
     {
         new("pomona-imperial", "Pomona Imperial (Vino & Oro)", "linear-gradient(135deg, #701C2C 50%, #D4AF37 50%)", "#701C2C"),
-        new("pomona-dark", "Pomona Dark Luxury (Noche)", "#120508", "#9E2D41"),
-        new("pomona-gold", "Pomona Royal Gold (Oro)", "#D4AF37", "#AA820A"),
-        new("pomona-rose", "Pomona Rose Gold (Rosa)", "#B76E79", "#863644")
+        new("pomona-dark", "Pomona Dark Luxury (Noche)", "#0D0205", "#E03E5C"),
+        new("pomona-gold", "Pomona Royal Gold (Oro)", "#D4AF37", "#9E7412"),
+        new("pomona-rose", "Pomona Rose Gold (Rosa)", "#B76E79", "#8A2B3D")
     };
 
     private string _currentTheme = "pomona-imperial";
