@@ -36,7 +36,16 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>
         !(a == b);
 }
 
-public abstract class AuditableEntity<TId> : Entity<TId>
+public interface IAuditableEntity
+{
+    DateTime CreatedAt { get; set; }
+    string? CreatedBy { get; set; }
+    DateTime? LastModifiedAt { get; set; }
+    string? LastModifiedBy { get; set; }
+    bool IsDeleted { get; set; }
+}
+
+public abstract class AuditableEntity<TId> : Entity<TId>, IAuditableEntity
     where TId : notnull
 {
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

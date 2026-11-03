@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using JewerlySystem.Common.Application;
 using JewerlySystem.Common.Application.Emailing;
 using JewerlySystem.Common.Application.Voice;
 using JewerlySystem.Common.Infrastructure;
@@ -12,6 +13,7 @@ using JewerlySystem.Modules.Inventory.Infrastructure;
 using JewerlySystem.Modules.Invoicing.Infrastructure;
 using JewerlySystem.Web.Components;
 using JewerlySystem.Web.Data;
+using JewerlySystem.Web.Services;
 using JewerlySystem.Web.Services.Voice;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
@@ -28,6 +30,7 @@ var connectionString = builder.Configuration.GetConnectionString("PomonaCs")
     ?? "Host=localhost;Port=5432;Database=IntZaioNJewerly;Username=postgres;Password=IntZaioN";
 
 // Shared DB context for host
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<AuditInterceptor>();
 builder.Services.AddDbContext<JewerlyDbContext>((sp, options) =>
 {
