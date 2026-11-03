@@ -229,7 +229,7 @@
                        DataSource="@FilteredJewelry"
                        Responsive="true"
                        Size="TableSize.Middle"
-                       RowKey="@(x => x.Reference.ToString())">
+                       RowKey="@(x => x.Id.ToString())">
                     <PropertyColumn Property="c => c.Reference" Title="Referencia" Width="110px">
                         <span class="ref-badge">#@context.Reference</span>
                     </PropertyColumn>
@@ -448,7 +448,7 @@
                        DataSource="@FilteredWatches"
                        Responsive="true"
                        Size="TableSize.Middle"
-                       RowKey="@(x => x.Reference.ToString())">
+                       RowKey="@(x => x.Id.ToString())">
                     <PropertyColumn Property="c => c.Reference" Title="Referencia" Width="110px">
                         <span class="ref-badge">#@context.Reference</span>
                     </PropertyColumn>
@@ -862,16 +862,23 @@
     private static string NormalizeSearchText(string? text)
     {
         if (string.IsNullOrWhiteSpace(text)) return string.Empty;
-        var normalized = text.Trim().Normalize(System.Text.NormalizationForm.FormD);
-        var sb = new System.Text.StringBuilder(normalized.Length);
-        foreach (var c in normalized)
+        try
         {
-            if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark)
+            var normalized = text.Trim().Normalize(System.Text.NormalizationForm.FormD);
+            var sb = new System.Text.StringBuilder(normalized.Length);
+            foreach (var c in normalized)
             {
-                sb.Append(c);
+                if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark)
+                {
+                    sb.Append(c);
+                }
             }
+            return sb.ToString().Normalize(System.Text.NormalizationForm.FormC).ToLowerInvariant();
         }
-        return sb.ToString().Normalize(System.Text.NormalizationForm.FormC).ToLowerInvariant();
+        catch
+        {
+            return (text ?? string.Empty).Trim().ToLowerInvariant();
+        }
     }
 
     private void OnJewelrySearchInput(ChangeEventArgs e)
@@ -925,45 +932,58 @@
     {
         get
         {
-            var list = _jewelryItems.AsEnumerable();
-
-            if (!string.IsNullOrWhiteSpace(_searchJewelryTerm))
+            try
             {
-                var rawTerm = _searchJewelryTerm.Trim();
-                var normTerm = NormalizeSearchText(rawTerm);
-                var digitsOnly = new string(rawTerm.Where(char.IsDigit).ToArray());
-                var words = normTerm.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                var list = _jewelryItems.AsEnumerable();
 
-                list = list.Where(i =>
+                if (!string.IsNullOrWhiteSpace(_searchJewelryTerm))
                 {
-                    var refStr = i.Reference.ToString();
-                    // 1. Direct match on reference number: "#9493", "9493", "ref 9493", "ref. 9493", "493"
-                    if (!string.IsNullOrEmpty(digitsOnly) && refStr.Contains(digitsOnly))
+                    var rawTerm = _searchJewelryTerm.Trim();
+                    var normTerm = NormalizeSearchText(rawTerm);
+                    var digitsOnly = new string(rawTerm.Where(char.IsDigit).ToArray());
+                    var words = normTerm.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                    list = list.Where(i =>
                     {
-                        return true;
-                    }
+                        var refStr = i.Reference.ToString();
+                        // 1. Coincidencia directa con referencia numérica (#9493, 9493, etc.)
+                        if (!string.IsNullOrEmpty(digitsOnly) && refStr.Contains(digitsOnly))
+                        {
+                            return true;
+                        }
 
-                    // 2. Comprehensive text search across Reference, ItemType (Anillo, Cadena, etc.) and Description
-                    var searchable = NormalizeSearchText($"{refStr} {i.ItemTypeName} {i.Description}");
-                    return words.All(w => searchable.Contains(w));
-                });
+                        if (words.Length == 0) return true;
+
+                        // 2. Búsqueda de texto en índice precalculado ultra-rápido
+                        var searchable = !string.IsNullOrEmpty(i.SearchIndex)
+                            ? i.SearchIndex
+                            : NormalizeSearchText($"{refStr} {i.ItemTypeName} {i.Description}");
+
+                        return words.All(w => searchable.Contains(w, StringComparison.OrdinalIgnoreCase));
+                    });
+                }
+
+                if (_selectedJewelryTypeFilter > 0)
+                {
+                    list = list.Where(i => i.ItemTypeId == _selectedJewelryTypeFilter);
+                }
+
+                if (_selectedJewelryStatusFilter == "active")
+                {
+                    list = list.Where(i => i.Active);
+                }
+                else if (_selectedJewelryStatusFilter == "inactive" || _selectedJewelryStatusFilter == "sold")
+                {
+                    list = list.Where(i => !i.Active);
+                }
+
+                return list.ToList();
             }
-
-            if (_selectedJewelryTypeFilter > 0)
+            catch (Exception ex)
             {
-                list = list.Where(i => i.ItemTypeId == _selectedJewelryTypeFilter);
+                Console.WriteLine($"[InventoryList] FilteredJewelry error: {ex.Message}");
+                return _jewelryItems;
             }
-
-            if (_selectedJewelryStatusFilter == "active")
-            {
-                list = list.Where(i => i.Active);
-            }
-            else if (_selectedJewelryStatusFilter == "inactive" || _selectedJewelryStatusFilter == "sold")
-            {
-                list = list.Where(i => !i.Active);
-            }
-
-            return list.ToList();
         }
     }
 
@@ -971,50 +991,63 @@
     {
         get
         {
-            var list = _watchItems.AsEnumerable();
-
-            if (!string.IsNullOrWhiteSpace(_searchWatchTerm))
+            try
             {
-                var rawTerm = _searchWatchTerm.Trim();
-                var normTerm = NormalizeSearchText(rawTerm);
-                var digitsOnly = new string(rawTerm.Where(char.IsDigit).ToArray());
-                var words = normTerm.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                var list = _watchItems.AsEnumerable();
 
-                list = list.Where(i =>
+                if (!string.IsNullOrWhiteSpace(_searchWatchTerm))
                 {
-                    var refStr = i.Reference.ToString();
-                    // 1. Direct match on numeric reference (e.g. "#3363", "3363", "ref 3363")
-                    if (!string.IsNullOrEmpty(digitsOnly) && refStr.Contains(digitsOnly))
+                    var rawTerm = _searchWatchTerm.Trim();
+                    var normTerm = NormalizeSearchText(rawTerm);
+                    var digitsOnly = new string(rawTerm.Where(char.IsDigit).ToArray());
+                    var words = normTerm.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                    list = list.Where(i =>
                     {
-                        return true;
-                    }
+                        var refStr = i.Reference.ToString();
+                        // 1. Coincidencia directa con referencia numérica (#3363, 3363, etc.)
+                        if (!string.IsNullOrEmpty(digitsOnly) && refStr.Contains(digitsOnly))
+                        {
+                            return true;
+                        }
 
-                    // 2. Searchable across Reference, Brand (Casio, Rolex), Case/Serial (LTP-1094E, etc.), Gender, and Description
-                    var searchable = NormalizeSearchText($"{refStr} {i.BrandName} {i.CaseNumber} {i.GenderType} {i.Description}");
-                    return words.All(w => searchable.Contains(w));
-                });
+                        if (words.Length == 0) return true;
+
+                        // 2. Búsqueda de texto en índice precalculado ultra-rápido
+                        var searchable = !string.IsNullOrEmpty(i.SearchIndex)
+                            ? i.SearchIndex
+                            : NormalizeSearchText($"{refStr} {i.BrandName} {i.CaseNumber} {i.GenderType} {i.Description}");
+
+                        return words.All(w => searchable.Contains(w, StringComparison.OrdinalIgnoreCase));
+                    });
+                }
+
+                if (_selectedWatchBrandFilter > 0)
+                {
+                    list = list.Where(i => i.BrandId == _selectedWatchBrandFilter);
+                }
+
+                if (!string.IsNullOrWhiteSpace(_selectedWatchGenderFilter))
+                {
+                    list = list.Where(i => i.GenderType.ToString().Equals(_selectedWatchGenderFilter, StringComparison.OrdinalIgnoreCase));
+                }
+
+                if (_selectedWatchStatusFilter == "active")
+                {
+                    list = list.Where(i => i.Active);
+                }
+                else if (_selectedWatchStatusFilter == "inactive" || _selectedWatchStatusFilter == "sold")
+                {
+                    list = list.Where(i => !i.Active);
+                }
+
+                return list.ToList();
             }
-
-            if (_selectedWatchBrandFilter > 0)
+            catch (Exception ex)
             {
-                list = list.Where(i => i.BrandId == _selectedWatchBrandFilter);
+                Console.WriteLine($"[InventoryList] FilteredWatches error: {ex.Message}");
+                return _watchItems;
             }
-
-            if (!string.IsNullOrWhiteSpace(_selectedWatchGenderFilter))
-            {
-                list = list.Where(i => i.GenderType.ToString().Equals(_selectedWatchGenderFilter, StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (_selectedWatchStatusFilter == "active")
-            {
-                list = list.Where(i => i.Active);
-            }
-            else if (_selectedWatchStatusFilter == "inactive" || _selectedWatchStatusFilter == "sold")
-            {
-                list = list.Where(i => !i.Active);
-            }
-
-            return list.ToList();
         }
     }
 
@@ -1124,8 +1157,14 @@
             var result = await Sender.Send(new GetInventoryCatalogQuery());
             if (result.IsSuccess)
             {
-                _jewelryItems = result.Value.Jewelry;
-                _watchItems = result.Value.Watches;
+                _jewelryItems = result.Value.Jewelry
+                    .Select(j => j with { SearchIndex = NormalizeSearchText($"{j.Reference} {j.ItemTypeName} {j.Description}") })
+                    .ToList();
+
+                _watchItems = result.Value.Watches
+                    .Select(w => w with { SearchIndex = NormalizeSearchText($"{w.Reference} {w.BrandName} {w.CaseNumber} {w.GenderType} {w.Description}") })
+                    .ToList();
+
                 _itemTypes = result.Value.ItemTypes;
                 _brands = result.Value.Brands;
 

@@ -83,7 +83,10 @@ public record JewelListItemDto(
     int? ProviderId,
     double Weight,
     int GramValue,
-    int? Length);
+    int? Length)
+{
+    public string SearchIndex { get; init; } = string.Empty;
+}
 
 public record WatchListItemDto(
     int Id,
@@ -99,7 +102,10 @@ public record WatchListItemDto(
     int BrandId,
     string BrandName,
     GenderType GenderType,
-    string CaseNumber);
+    string CaseNumber)
+{
+    public string SearchIndex { get; init; } = string.Empty;
+}
 
 public record InventoryCatalogDto(
     List<JewelListItemDto> Jewelry,

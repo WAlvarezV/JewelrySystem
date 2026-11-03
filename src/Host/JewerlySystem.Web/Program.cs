@@ -22,7 +22,10 @@ builder.Services.AddAppSecurity();
 
 // 4. Presentation & Culture (Blazor Server, AntDesign & Colombia Localization COP)
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+    .AddInteractiveServerComponents(options =>
+    {
+        options.DetailedErrors = true;
+    });
 builder.Services.AddAntDesign();
 builder.Services.AddColombiaLocalization();
 
