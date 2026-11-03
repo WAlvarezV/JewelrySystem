@@ -73,7 +73,9 @@ public class VoiceOperationResult
     public VoiceSalePayload? Sale { get; set; }
     
     public string? RawJson { get; set; }
-    public bool IsSuccess => Intent != VoiceIntents.Desconocido && MissingFields.Count == 0;
+    public bool IsFromExample { get; set; }
+    public string? EngineNotice { get; set; }
+    public bool IsSuccess => Intent != VoiceIntents.Desconocido && MissingFields.Count == 0 && !IsFromExample;
 }
 
 public class VoiceExecutionResult

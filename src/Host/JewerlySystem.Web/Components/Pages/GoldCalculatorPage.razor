@@ -31,8 +31,9 @@
                         <SoftTooltipLabel Label="Cotización Base Hoy ($)" Required="true" TooltipText="Precio comercial de referencia por gramo de oro fino" />
                         <AntDesign.InputNumber TValue="double"
                                                @bind-Value="_baseValue"
-                                               Min="1000"
+                                               Min="0"
                                                Step="5000"
+                                               Placeholder="0"
                                                Style="width: 100%; font-size: 1.1rem; font-weight: bold;" />
                         <span class="param-hint">Precio cotización gramo</span>
                     </div>
@@ -124,7 +125,7 @@
 </div>
 
 @code {
-    private double _baseValue = 290000;
+    private double _baseValue = 0;
     private double _dryWeight = 0;
     private double _wetWeight = 0;
 

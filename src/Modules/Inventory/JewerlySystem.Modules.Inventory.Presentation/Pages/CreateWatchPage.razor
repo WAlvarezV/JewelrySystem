@@ -81,7 +81,8 @@
                         <AntDesign.InputNumber TValue="int"
                                                @bind-Value="_formModel.CostValue"
                                                Step="10000"
-                                               Min="1"
+                                               Min="0"
+                                               Placeholder="0"
                                                Style="width: 100%; font-weight: bold; color: var(--soft-danger, #ff4d4f);"
                                                OnChange="@(_ => StateHasChanged())" />
                     </div>
@@ -91,7 +92,8 @@
                         <AntDesign.InputNumber TValue="int"
                                                @bind-Value="_formModel.SaleValue"
                                                Step="10000"
-                                               Min="1"
+                                               Min="0"
+                                               Placeholder="0"
                                                Style="width: 100%; font-weight: bold; color: var(--soft-success, #52c41a);"
                                                OnChange="@(_ => StateHasChanged())" />
                     </div>
@@ -197,8 +199,8 @@
         {
             BrandId = 0,
             GenderType = GenderType.Hombre,
-            CostValue = 100000,
-            SaleValue = 150000,
+            CostValue = 0,
+            SaleValue = 0,
             CaseNumber = string.Empty,
             Description = string.Empty
         };
@@ -206,7 +208,7 @@
 
     private void ApplyWatchMarkup(double percent)
     {
-        if (_formModel.CostValue <= 0) _formModel.CostValue = 100000;
+        if (_formModel.CostValue <= 0) return;
         _formModel.SaleValue = (int)Math.Round(_formModel.CostValue * (1.0 + (percent / 100.0)));
         StateHasChanged();
     }
@@ -278,8 +280,8 @@
         public GenderType GenderType { get; set; } = GenderType.Hombre;
         public int? ProviderId { get; set; }
         public string CaseNumber { get; set; } = string.Empty;
-        public int CostValue { get; set; } = 100000;
-        public int SaleValue { get; set; } = 150000;
+        public int CostValue { get; set; } = 0;
+        public int SaleValue { get; set; } = 0;
         public string Description { get; set; } = string.Empty;
     }
 }

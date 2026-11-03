@@ -42,6 +42,11 @@ public class VoiceCommandDispatcher : IVoiceCommandDispatcher
             return VoiceExecutionResult.Fail("Operación de voz vacía o no reconocida.");
         }
 
+        if (operation.IsFromExample)
+        {
+            return VoiceExecutionResult.Fail("Los ejemplos de demostración son sólo ilustrativos y no se pueden guardar en la base de datos.");
+        }
+
         try
         {
             return operation.Intent switch

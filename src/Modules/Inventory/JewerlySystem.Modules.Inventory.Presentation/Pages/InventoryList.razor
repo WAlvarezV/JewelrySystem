@@ -460,7 +460,8 @@
                                 <AntDesign.InputNumber TValue="int"
                                                        @bind-Value="_jewelFormModel.GramValue"
                                                        Step="1000"
-                                                       Min="1"
+                                                       Min="0"
+                                                       Placeholder="0"
                                                        Style="width: 100%;"
                                                        OnChange="@(_ => RecalculateJewelValues())" />
                             </FormItem>
@@ -471,7 +472,8 @@
                                 <AntDesign.InputNumber TValue="int"
                                                        @bind-Value="_jewelFormModel.GramSaleValue"
                                                        Step="1000"
-                                                       Min="1"
+                                                       Min="0"
+                                                       Placeholder="0"
                                                        Style="width: 100%; font-weight: bold; color: var(--soft-success, #52c41a);"
                                                        OnChange="@(_ => RecalculateJewelValues())" />
                             </FormItem>
@@ -592,7 +594,8 @@
                                 <AntDesign.InputNumber TValue="int"
                                                        @bind-Value="_watchFormModel.CostValue"
                                                        Step="10000"
-                                                       Min="1"
+                                                       Min="0"
+                                                       Placeholder="0"
                                                        Style="width: 100%; font-weight: bold; color: var(--soft-danger, #ff4d4f);"
                                                        OnChange="@(_ => StateHasChanged())" />
                             </FormItem>
@@ -603,7 +606,8 @@
                                 <AntDesign.InputNumber TValue="int"
                                                        @bind-Value="_watchFormModel.SaleValue"
                                                        Step="10000"
-                                                       Min="1"
+                                                       Min="0"
+                                                       Placeholder="0"
                                                        Style="width: 100%; font-weight: bold; color: var(--soft-success, #52c41a);"
                                                        OnChange="@(_ => StateHasChanged())" />
                             </FormItem>
@@ -891,8 +895,8 @@
         _jewelFormModel = new JewelFormModel
         {
             ItemTypeId = _itemTypes.FirstOrDefault(t => t.Id != 5)?.Id ?? 1,
-            GramValue = 200000,
-            GramSaleValue = 260000,
+            GramValue = 0,
+            GramSaleValue = 0,
             Weight = 0,
             Description = string.Empty
         };
@@ -913,14 +917,14 @@
 
     private void ApplyDrawerJewelMarkup(double percent)
     {
-        if (_jewelFormModel.GramValue <= 0) _jewelFormModel.GramValue = 200000;
+        if (_jewelFormModel.GramValue <= 0) return;
         _jewelFormModel.GramSaleValue = (int)Math.Round(_jewelFormModel.GramValue * (1.0 + (percent / 100.0)));
         RecalculateJewelValues();
     }
 
     private void ApplyDrawerWatchMarkup(double percent)
     {
-        if (_watchFormModel.CostValue <= 0) _watchFormModel.CostValue = 100000;
+        if (_watchFormModel.CostValue <= 0) return;
         _watchFormModel.SaleValue = (int)Math.Round(_watchFormModel.CostValue * (1.0 + (percent / 100.0)));
         StateHasChanged();
     }
@@ -995,8 +999,8 @@
         {
             BrandId = _brands.FirstOrDefault()?.Id ?? 1,
             GenderType = GenderType.Hombre,
-            CostValue = 100000,
-            SaleValue = 150000,
+            CostValue = 0,
+            SaleValue = 0,
             CaseNumber = string.Empty,
             Description = string.Empty
         };
@@ -1075,8 +1079,8 @@
         public int ItemTypeId { get; set; } = 1;
         public int? ProviderId { get; set; }
         public double Weight { get; set; }
-        public int GramValue { get; set; } = 200000;
-        public int GramSaleValue { get; set; } = 260000;
+        public int GramValue { get; set; } = 0;
+        public int GramSaleValue { get; set; } = 0;
         public int? Length { get; set; }
         public string Description { get; set; } = string.Empty;
     }
@@ -1087,8 +1091,8 @@
         public GenderType GenderType { get; set; } = GenderType.Hombre;
         public int? ProviderId { get; set; }
         public string CaseNumber { get; set; } = string.Empty;
-        public int CostValue { get; set; } = 100000;
-        public int SaleValue { get; set; } = 150000;
+        public int CostValue { get; set; } = 0;
+        public int SaleValue { get; set; } = 0;
         public string Description { get; set; } = string.Empty;
     }
 }

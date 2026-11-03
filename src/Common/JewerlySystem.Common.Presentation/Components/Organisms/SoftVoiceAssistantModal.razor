@@ -196,6 +196,27 @@
                             <span class="badge bg-light text-secondary border">Confianza: @((_operationResult.Confidence * 100).ToString("N0"))%</span>
                         </div>
 
+                        @if (!string.IsNullOrEmpty(_operationResult.EngineNotice))
+                        {
+                            <div class="mb-2">
+                                <span class="badge @(_operationResult.IsFromExample || _isExample ? "bg-info-subtle text-primary border border-info-subtle" : "bg-light text-secondary border") py-1 px-2 small">
+                                    <i class="bi @(_operationResult.IsFromExample || _isExample ? "bi-info-circle-fill text-primary" : "bi-cpu") me-1"></i>
+                                    @_operationResult.EngineNotice
+                                </span>
+                            </div>
+                        }
+
+                        @if (_operationResult.IsFromExample || _isExample)
+                        {
+                            <div class="alert alert-info py-2 px-3 small rounded-3 mb-3 d-flex align-items-center gap-2">
+                                <i class="bi bi-shield-lock-fill fs-4 text-primary"></i>
+                                <div>
+                                    <div class="fw-bold text-dark">Modo Demostración Activo</div>
+                                    <div class="text-danger fw-semibold">Los ejemplos de prueba son ilustrativos y no se pueden guardar en el sistema. Dicta o escribe tu propia orden real para registrarla.</div>
+                                </div>
+                            </div>
+                        }
+
                         <h6 class="fw-bold text-dark mb-3">
                             @_operationResult.Summary
                         </h6>
@@ -314,7 +335,16 @@
                                 <i class="bi bi-arrow-counterclockwise me-1"></i>Volver a Dictar
                             </button>
 
-                            @if (_operationResult.IsSuccess)
+                            @if (_operationResult.IsFromExample || _isExample)
+                            {
+                                <span class="d-inline-flex align-items-center gap-2">
+                                    <span class="text-muted small fst-italic">Ejemplo protegido contra guardado</span>
+                                    <button type="button" class="btn btn-secondary btn-lg px-4 py-2 rounded-3 fw-bold disabled" disabled>
+                                        <i class="bi bi-slash-circle me-1"></i> Guardado Inhabilitado
+                                    </button>
+                                </span>
+                            }
+                            else if (_operationResult.IsSuccess)
                             {
                                 <button type="button"
                                         class="btn btn-success btn-lg px-4 py-2 rounded-3 fw-bold d-inline-flex align-items-center gap-2 shadow-sm"
@@ -435,6 +465,7 @@
     private bool _isInterpreting = false;
     private bool _isExecuting = false;
     private bool _executionSuccess = false;
+    private bool _isExample = false;
     private VoiceOperationResult? _operationResult;
     private VoiceExecutionResult? _lastExecutionResult;
     private DotNetObjectReference<SoftVoiceAssistantModal>? _dotNetHelper;
@@ -448,6 +479,10 @@
     public async Task OnSpeechStateChanged(bool isListening)
     {
         _isListening = isListening;
+        if (isListening)
+        {
+            _isExample = false;
+        }
         await InvokeAsync(StateHasChanged);
     }
 
@@ -455,6 +490,7 @@
     public async Task OnSpeechResult(string finalTranscript, string interimTranscript)
     {
         _interimTranscript = interimTranscript;
+        _isExample = false;
         if (!string.IsNullOrWhiteSpace(finalTranscript))
         {
             _transcript = string.IsNullOrWhiteSpace(_transcript)
@@ -480,6 +516,7 @@
         _operationResult = null;
         _executionSuccess = false;
         _lastExecutionResult = null;
+        _isExample = false;
 
         if (_dotNetHelper == null)
         {
@@ -529,6 +566,7 @@
         _operationResult = null;
         _executionSuccess = false;
         _lastExecutionResult = null;
+        _isExample = false;
     }
 
     private async Task UseExample(string example, bool autoInterpret = false)
@@ -538,6 +576,7 @@
         _operationResult = null;
         _executionSuccess = false;
         _lastExecutionResult = null;
+        _isExample = true;
 
         if (autoInterpret)
         {
@@ -558,6 +597,14 @@
         try
         {
             _operationResult = await VoiceInterpreter.InterpretAsync(_transcript);
+            if (_isExample || (_operationResult != null && _operationResult.IsFromExample))
+            {
+                _isExample = true;
+                if (_operationResult != null)
+                {
+                    _operationResult.IsFromExample = true;
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -573,6 +620,12 @@
     private async Task ExecuteVoiceOperation()
     {
         if (_operationResult == null) return;
+
+        if (_isExample || _operationResult.IsFromExample)
+        {
+            MessageService.Warning("Los ejemplos de demostración son sólo ilustrativos y no se pueden guardar en la base de datos.");
+            return;
+        }
 
         _isExecuting = true;
         await InvokeAsync(StateHasChanged);

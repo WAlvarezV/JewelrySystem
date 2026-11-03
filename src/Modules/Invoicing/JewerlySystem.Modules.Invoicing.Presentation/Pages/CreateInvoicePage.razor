@@ -71,6 +71,7 @@
                             <AntDesign.InputNumber @bind-Value="_formModel.Value"
                                                    Min="0"
                                                    Step="50000"
+                                                   Placeholder="0"
                                                    Class="w-100" />
                         </FormItem>
                     </Col>
@@ -196,7 +197,7 @@
         public DateTime Date { get; set; } = DateTime.Today;
         public DateTime PaymentLimitDate { get; set; } = DateTime.Today.AddDays(30);
         public string? Description { get; set; }
-        public int Value { get; set; } = 1000000;
+        public int Value { get; set; } = 0;
         public int CreditValue { get; set; }
         public string InitialPaymentMethod { get; set; } = "EFECTIVO";
     }

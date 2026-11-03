@@ -224,8 +224,9 @@
                         <Col Span="12">
                             <FormItem Label="Valor ($)" Required="true">
                                 <AntDesign.InputNumber @bind-Value="_formModel.Value"
-                                                       Min="1000"
+                                                       Min="0"
                                                        Step="10000"
+                                                       Placeholder="0"
                                                        Class="w-100" />
                             </FormItem>
                         </Col>
@@ -307,7 +308,7 @@
         {
             RecordType = RecordType.INGRESO,
             PaymentMethod = PaymentMethod.EFECTIVO,
-            Value = 50000
+            Value = 0
         };
         _drawerVisible = true;
     }
@@ -364,7 +365,7 @@
     public class CashFormModel
     {
         public string Description { get; set; } = string.Empty;
-        public int Value { get; set; } = 50000;
+        public int Value { get; set; } = 0;
         public RecordType RecordType { get; set; } = RecordType.INGRESO;
         public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.EFECTIVO;
         public string? Number { get; set; }

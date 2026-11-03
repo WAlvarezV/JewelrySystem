@@ -151,15 +151,20 @@ public class GoogleGeminiVoiceService : IVoiceInterpreterService
                 }
             };
 
-            var model = _configuration["GoogleGemini:Model"] ?? "gemini-3.5-flash-lite";
+            var model = _configuration["GoogleGemini:Model"] ?? "gemini-2.5-flash";
             var url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey}";
             var response = await _httpClient.PostAsJsonAsync(url, requestBody, ct);
 
             if (!response.IsSuccessStatusCode)
             {
                 var errorBody = await response.Content.ReadAsStringAsync(ct);
-                _logger.LogError("Error al invocar Google Gemini API: {StatusCode} - {Error}", response.StatusCode, errorBody);
-                return ParseHeuristically(transcription, $"Error en API Gemini ({response.StatusCode}). Fallback local ejecutado.");
+                _logger.LogWarning("Error al invocar Google Gemini API: {StatusCode} - {Error}", response.StatusCode, errorBody);
+                
+                string notice = response.StatusCode == System.Net.HttpStatusCode.Forbidden
+                    ? "La API de Gemini requiere activar facturación en Google Cloud (Error 403). Usando analizador inteligente local."
+                    : $"Servicio Gemini no disponible ({response.StatusCode}). Usando analizador inteligente local.";
+
+                return ParseHeuristically(transcription, notice);
             }
 
             var jsonResult = await response.Content.ReadFromJsonAsync<GeminiApiResponse>(cancellationToken: ct);
@@ -177,6 +182,14 @@ public class GoogleGeminiVoiceService : IVoiceInterpreterService
             {
                 operation.RawTranscription = transcription;
                 operation.RawJson = text;
+                operation.EngineNotice = $"Procesado con Inteligencia Artificial Google Gemini ({model})";
+
+                if (IsDemoExampleText(transcription))
+                {
+                    operation.IsFromExample = true;
+                    operation.EngineNotice = "Modo Demostración: Los ejemplos de prueba no se pueden guardar en la base de datos.";
+                }
+
                 return operation;
             }
 
@@ -190,30 +203,51 @@ public class GoogleGeminiVoiceService : IVoiceInterpreterService
     }
 
     /// <summary>
-    /// Parser heurístico local para cuando no hay conexión o no se ha configurado la API Key de Gemini
+    /// Detecta si el texto dictado corresponde a uno de los ejemplos predeterminados de prueba.
+    /// </summary>
+    public static bool IsDemoExampleText(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return false;
+        var t = text.Trim();
+        return t.Contains("Carlos Ruiz con cédula 1020304050", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("Juan Carlos Pérez por 1800000", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("María Fernanda Gómez con cédula 10203040", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("compra de suministros de taller", StringComparison.OrdinalIgnoreCase)
+            || (t.Contains("cadena de oro", StringComparison.OrdinalIgnoreCase) && t.Contains("1042", StringComparison.OrdinalIgnoreCase) && t.Contains("450000", StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// Parser heurístico local estricto para cuando no hay conexión con Gemini.
+    /// No utiliza valores por defecto fácticos ni inventados.
     /// </summary>
     private static VoiceOperationResult ParseHeuristically(string text, string? notice = null)
     {
         var lower = text.ToLowerInvariant();
+        var isDemo = IsDemoExampleText(text);
+
         var result = new VoiceOperationResult
         {
             RawTranscription = text,
-            Confidence = 0.75
+            Confidence = 0.85,
+            IsFromExample = isDemo,
+            EngineNotice = isDemo
+                ? "Modo Demostración: Los ejemplos de prueba no se pueden guardar en la base de datos."
+                : (notice ?? "Procesado con analizador inteligente local")
         };
 
         // 1. Venta de artículo en inventario (requiere referencia obligatoria)
         if (lower.Contains("venta") || lower.Contains("vender") || lower.Contains("descargar") || lower.Contains("descargue"))
         {
             result.Intent = VoiceIntents.CrearVenta;
-            var (val, _) = ExtractMonetaryValues(text);
             var refNum = ExtractReferenceNumber(text);
+            var (val, _) = ExtractMonetaryValues(text, refNum);
             var custName = ExtractCustomerName(text);
-            var custId = ExtractNumberSequence(text, 6, 12);
+            var custId = ExtractCustomerDoc(text);
 
             result.Sale = new VoiceSalePayload
             {
                 Reference = refNum,
-                SaleValue = val > 0 ? val : 250000,
+                SaleValue = val,
                 Description = text,
                 CustomerName = custName,
                 CustomerIdentification = custId,
@@ -222,8 +256,17 @@ public class GoogleGeminiVoiceService : IVoiceInterpreterService
 
             if (refNum <= 0)
             {
-                result.Summary = $"Venta detectada por ${(result.Sale.SaleValue):N0}, pero falta el número de referencia para descargar el inventario.";
-                result.MissingFields.Add("Número de referencia del artículo (requerido para descargarlo de inventario)");
+                result.MissingFields.Add("Número de referencia del artículo en inventario");
+            }
+
+            if (val <= 0)
+            {
+                result.MissingFields.Add("Valor definitivo de la venta en pesos");
+            }
+
+            if (result.MissingFields.Any())
+            {
+                result.Summary = $"Venta detectada{(refNum > 0 ? $" para ref #{refNum}" : "")}{(val > 0 ? $" por ${val:N0}" : "")}, pero faltan datos: {string.Join(", ", result.MissingFields)}.";
             }
             else
             {
@@ -236,100 +279,198 @@ public class GoogleGeminiVoiceService : IVoiceInterpreterService
         else if (lower.Contains("contrato") || lower.Contains("hechura") || lower.Contains("reparación") || lower.Contains("reparacion") || lower.Contains("separar") || lower.Contains("separación"))
         {
             result.Intent = VoiceIntents.CrearContrato;
-            var (value, initial) = ExtractMonetaryValues(text);
+            var refNum = ExtractReferenceNumber(text);
+            var (value, initial) = ExtractMonetaryValues(text, refNum);
             var customerName = ExtractCustomerName(text);
+            var customerId = ExtractCustomerDoc(text);
 
             result.Contract = new VoiceContractPayload
             {
                 CustomerName = customerName,
+                CustomerIdentification = customerId,
                 Description = text,
-                Value = value > 0 ? value : 500000,
-                InitialPayment = initial > 0 ? initial : (value > 0 ? value / 2 : 100000),
+                Value = value,
+                InitialPayment = initial,
                 Weight = ExtractWeight(text),
                 PaymentMethod = lower.Contains("transferencia") ? "TRANSFERENCIA" : "EFECTIVO"
             };
 
-            result.Summary = $"Contrato para {result.Contract.CustomerName ?? "Cliente"} por ${(result.Contract.Value):N0} con abono de ${(result.Contract.InitialPayment):N0}.";
+            if (string.IsNullOrWhiteSpace(customerName))
+            {
+                result.MissingFields.Add("Nombre del cliente");
+            }
+
+            if (value <= 0)
+            {
+                result.MissingFields.Add("Valor total del contrato");
+            }
+
+            if (result.MissingFields.Any())
+            {
+                result.Summary = $"Contrato detectado{(value > 0 ? $" por ${value:N0}" : "")}, pero faltan datos: {string.Join(", ", result.MissingFields)}.";
+            }
+            else
+            {
+                var abonoStr = initial > 0 ? $" con abono de ${initial:N0}" : " sin abono inicial";
+                result.Summary = $"Contrato para {result.Contract.CustomerName} por ${(result.Contract.Value):N0}{abonoStr}.";
+            }
         }
         // 3. Cliente
         else if (lower.Contains("cliente") || lower.Contains("persona") || lower.Contains("registrar cliente") || lower.Contains("nuevo cliente"))
         {
             result.Intent = VoiceIntents.CrearCliente;
+            var fullName = ExtractCustomerName(text);
+            var custDoc = ExtractCustomerDoc(text);
+            var custPhone = ExtractCustomerPhone(text);
+
             result.Customer = new VoiceCustomerPayload
             {
-                FullName = ExtractCustomerName(text) ?? "Cliente Dictado",
-                IdentificationNumber = ExtractNumberSequence(text, 6, 12) ?? "10" + Random.Shared.Next(10000000, 99999999),
-                CellPhone = ExtractNumberSequence(text, 10, 10) ?? "300" + Random.Shared.Next(1000000, 9999999)
+                FullName = fullName ?? string.Empty,
+                IdentificationNumber = custDoc,
+                CellPhone = custPhone
             };
-            result.Summary = $"Registrar cliente {result.Customer.FullName} con documento {result.Customer.IdentificationNumber}.";
+
+            if (string.IsNullOrWhiteSpace(fullName))
+            {
+                result.MissingFields.Add("Nombre completo del cliente");
+                result.Summary = "Registro de cliente detectado, pero falta indicar el nombre.";
+            }
+            else
+            {
+                var docInfo = !string.IsNullOrEmpty(custDoc) ? $" con documento {custDoc}" : "";
+                var phoneInfo = !string.IsNullOrEmpty(custPhone) ? $" y celular {custPhone}" : "";
+                result.Summary = $"Registrar cliente {fullName}{docInfo}{phoneInfo}.";
+            }
         }
         // 4. Movimiento de Caja (Ingreso o Egreso general)
         else if (lower.Contains("caja") || lower.Contains("ingreso") || lower.Contains("gasto") || lower.Contains("egreso"))
         {
             result.Intent = VoiceIntents.CrearMovimientoCaja;
             var (val, _) = ExtractMonetaryValues(text);
-            var isEgreso = lower.Contains("gasto") || lower.Contains("egreso") || lower.Contains("pago de servicio");
+            var isEgreso = lower.Contains("gasto") || lower.Contains("egreso") || lower.Contains("pago de servicio") || lower.Contains("compra de");
 
             result.Cash = new VoiceCashPayload
             {
                 Description = text,
-                Value = val > 0 ? val : 150000,
+                Value = val,
                 RecordType = isEgreso ? "EGRESO" : "INGRESO",
                 PaymentMethod = lower.Contains("transferencia") ? "TRANSFERENCIA" : (lower.Contains("tarjeta") ? "TARJETA" : "EFECTIVO")
             };
-            result.Summary = $"{(isEgreso ? "Egreso" : "Ingreso")} de caja por ${(result.Cash.Value):N0} en {result.Cash.PaymentMethod}.";
+
+            if (val <= 0)
+            {
+                result.MissingFields.Add("Monto o valor del movimiento");
+                result.Summary = $"{(isEgreso ? "Egreso" : "Ingreso")} de caja detectado, pero falta especificar el valor.";
+            }
+            else
+            {
+                result.Summary = $"{(isEgreso ? "Egreso" : "Ingreso")} de caja por ${(result.Cash.Value):N0} en {result.Cash.PaymentMethod}.";
+            }
         }
         else
         {
             result.Intent = VoiceIntents.Desconocido;
-            result.Summary = "No se detectó una operación comercial clara (contrato, cliente, venta o movimiento de caja).";
+            result.Summary = "No se detectó una operación comercial clara (venta, contrato, cliente o movimiento de caja).";
             result.MissingFields.Add("Operación no identificada");
-        }
-
-        if (!string.IsNullOrWhiteSpace(notice))
-        {
-            result.Summary = $"[Modo Local] {result.Summary}";
         }
 
         return result;
     }
 
-    private static (int Total, int Initial) ExtractMonetaryValues(string text)
+    private static (int Total, int Initial) ExtractMonetaryValues(string text, int excludedReference = 0)
     {
-        // Buscar patrones como "2 millones", "500 mil", "$1.500.000", "2000000"
+        var cleanText = text;
+
+        // 1. Enmascarar la referencia para que su número jamás se interprete como valor monetario
+        if (excludedReference > 0)
+        {
+            cleanText = Regex.Replace(cleanText, $@"(?:referencia|ref\.?|código|codigo|joya|reloj|artículo|articulo|#)\s*#?\s*{excludedReference}\b", " [REF] ", RegexOptions.IgnoreCase);
+            cleanText = Regex.Replace(cleanText, $@"\b{excludedReference}\b", " [REF] ");
+        }
+
+        // 2. Enmascarar documentos de identidad (cédulas de 6 a 11 dígitos)
+        cleanText = Regex.Replace(cleanText, @"(?:cédula|cedula|cc|c\.c\.|nit|documento)\s*(?:de|no\.?|número|numero)?\s*(\d{6,11})\b", " [DOC] ", RegexOptions.IgnoreCase);
+
+        // 3. Enmascarar números telefónicos
+        cleanText = Regex.Replace(cleanText, @"(?:celular|cel|teléfono|telefono|tel|whatsapp)\s*(?:no\.?|número|numero)?\s*(\d{7,11})\b", " [TEL] ", RegexOptions.IgnoreCase);
+        cleanText = Regex.Replace(cleanText, @"\b3\d{9}\b", " [TEL] ");
+
         var total = 0;
         var initial = 0;
 
-        var millonMatch = Regex.Match(text, @"(\d+)\s*(?:millón|millon|millones)", RegexOptions.IgnoreCase);
-        if (millonMatch.Success && int.TryParse(millonMatch.Groups[1].Value, out var m))
+        // Detectar millones (ej: "2 millones", "1 millón 500 mil")
+        var millonMatches = Regex.Matches(cleanText, @"(\d+)\s*(?:millón|millon|millones)", RegexOptions.IgnoreCase);
+        foreach (Match m in millonMatches)
         {
-            total = m * 1_000_000;
-        }
-
-        var milMatch = Regex.Match(text, @"(?:abono\s*(?:de)?|anticipo\s*(?:de)?)\s*(\d+)\s*(?:mil)", RegexOptions.IgnoreCase);
-        if (milMatch.Success && int.TryParse(milMatch.Groups[1].Value, out var k))
-        {
-            initial = k * 1_000;
-        }
-        else
-        {
-            var anyMil = Regex.Matches(text, @"(\d+)\s*(?:mil)", RegexOptions.IgnoreCase);
-            if (anyMil.Count > 0 && int.TryParse(anyMil[0].Groups[1].Value, out var k2))
+            if (int.TryParse(m.Groups[1].Value, out var val))
             {
-                if (total == 0) total = k2 * 1_000;
-                else initial = k2 * 1_000;
+                var amount = val * 1_000_000;
+                var idx = m.Index;
+                var preceding = cleanText.Substring(Math.Max(0, idx - 25), Math.Min(25, idx)).ToLowerInvariant();
+                if (preceding.Contains("abono") || preceding.Contains("anticipo"))
+                {
+                    initial = amount;
+                }
+                else
+                {
+                    total = amount;
+                }
             }
         }
 
-        // Buscar números crudos grandes
-        var numberMatches = Regex.Matches(text, @"(?:\$?\s*)(\d{1,3}(?:\.\d{3})+|\d{4,9})");
-        foreach (Match match in numberMatches)
+        // Detectar miles (ej: "450 mil", "abono de 50 mil")
+        var milMatches = Regex.Matches(cleanText, @"(\d+)\s*(?:mil)\b", RegexOptions.IgnoreCase);
+        foreach (Match m in milMatches)
+        {
+            if (int.TryParse(m.Groups[1].Value, out var val))
+            {
+                var amount = val * 1_000;
+                var idx = m.Index;
+                var preceding = cleanText.Substring(Math.Max(0, idx - 25), Math.Min(25, idx)).ToLowerInvariant();
+                if (preceding.Contains("abono") || preceding.Contains("anticipo"))
+                {
+                    initial = amount;
+                }
+                else if (total == 0)
+                {
+                    total = amount;
+                }
+                else if (total > 0 && initial == 0)
+                {
+                    var lastMillonIdx = cleanText.LastIndexOf("millon", idx, StringComparison.OrdinalIgnoreCase);
+                    if (lastMillonIdx >= 0 && (idx - lastMillonIdx) < 25)
+                    {
+                        total += amount;
+                    }
+                    else
+                    {
+                        initial = amount;
+                    }
+                }
+            }
+        }
+
+        // Detectar montos crudos con formato o dígitos (ej: "450000", "$450.000", "450.000")
+        var rawMatches = Regex.Matches(cleanText, @"(?:\$?\s*)(\d{1,3}(?:\.\d{3})+|\d{4,9})\b");
+        foreach (Match match in rawMatches)
         {
             var raw = match.Groups[1].Value.Replace(".", "");
             if (int.TryParse(raw, out var n))
             {
-                if (total == 0) total = n;
-                else if (initial == 0) initial = n;
+                if (n <= 0) continue;
+                if (excludedReference > 0 && n == excludedReference) continue;
+
+                var idx = match.Index;
+                var preceding = cleanText.Substring(Math.Max(0, idx - 25), Math.Min(25, idx)).ToLowerInvariant();
+                if (preceding.Contains("abono") || preceding.Contains("anticipo"))
+                {
+                    if (initial == 0) initial = n;
+                }
+                else
+                {
+                    if (total == 0) total = n;
+                    else if (initial == 0 && n < total) initial = n;
+                }
             }
         }
 
@@ -350,11 +491,38 @@ public class GoogleGeminiVoiceService : IVoiceInterpreterService
 
     private static string? ExtractCustomerName(string text)
     {
-        var match = Regex.Match(text, @"(?:cliente|para|señor|señora|don|doña)\s+([A-ZÁÉÍÓÚÑa-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑa-záéíóúñ]+){1,3})", RegexOptions.IgnoreCase);
+        var match = Regex.Match(text, @"(?:cliente|para|señor|señora|don|doña|a nombre de)\s+([A-ZÁÉÍÓÚÑa-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑa-záéíóúñ]+){1,3})", RegexOptions.IgnoreCase);
         if (match.Success)
         {
-            return match.Groups[1].Value.Trim();
+            var name = match.Groups[1].Value.Trim();
+            name = Regex.Replace(name, @"\b(con|cédula|cedula|cc|telefono|celular|por|para)\b.*$", "", RegexOptions.IgnoreCase).Trim();
+            if (!string.IsNullOrWhiteSpace(name)) return name;
         }
+        return null;
+    }
+
+    private static string? ExtractCustomerDoc(string text)
+    {
+        var match = Regex.Match(text, @"(?:cédula|cedula|cc|c\.c\.|nit|documento)\s*(?:de|no\.?|número|numero)?\s*(\d{6,11})\b", RegexOptions.IgnoreCase);
+        if (match.Success) return match.Groups[1].Value;
+
+        var digits = Regex.Matches(text, @"\b(\d{7,10})\b");
+        foreach (Match d in digits)
+        {
+            var v = d.Groups[1].Value;
+            if (!v.StartsWith("3")) return v;
+        }
+        return null;
+    }
+
+    private static string? ExtractCustomerPhone(string text)
+    {
+        var match = Regex.Match(text, @"(?:celular|cel|teléfono|telefono|tel|whatsapp)\s*(?:no\.?|número|numero)?\s*(\d{7,11})\b", RegexOptions.IgnoreCase);
+        if (match.Success) return match.Groups[1].Value;
+
+        var mobMatch = Regex.Match(text, @"\b(3\d{9})\b");
+        if (mobMatch.Success) return mobMatch.Groups[1].Value;
+
         return null;
     }
 
