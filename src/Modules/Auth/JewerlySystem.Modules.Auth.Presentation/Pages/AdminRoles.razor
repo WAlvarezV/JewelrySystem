@@ -1,5 +1,5 @@
 @page "/admin/roles"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin,Administrador")]
 @inject ISender Sender
 @inject NavigationManager Navigation
 

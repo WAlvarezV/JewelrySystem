@@ -3,6 +3,7 @@
 @using System.Security.Claims
 @inject ISender Sender
 @inject IJSRuntime JS
+@inject NavigationManager Navigation
 
 <div class="container-fluid mt-3">
     <!-- Header -->
@@ -255,7 +256,16 @@
         }
         catch (Exception ex)
         {
-            _message = "Error registrando Passkey: " + ex.Message;
+            if (Navigation.Uri.Contains("127.0.0.1") || ex.Message.Contains("127.0.0.1"))
+            {
+                var port = new Uri(Navigation.Uri).Port;
+                var portStr = port > 0 ? $":{port}" : "";
+                _message = $"Las normas de seguridad WebAuthn impiden registrar Passkeys desde una dirección IP (127.0.0.1). Por favor abre el sistema desde http://localhost{portStr} (o https://localhost{portStr}).";
+            }
+            else
+            {
+                _message = "Error registrando Passkey: " + ex.Message;
+            }
             _isSuccess = false;
         }
         finally

@@ -34,6 +34,18 @@ window.webauthn = {
 
     createPasskey: async function (optionsJson) {
         try {
+            const currentHost = window.location.hostname;
+            const isIpAddress = /^(\d{1,3}\.){3}\d{1,3}$/.test(currentHost) || currentHost === "::1" || currentHost === "[::1]";
+
+            if (isIpAddress) {
+                const port = window.location.port ? ":" + window.location.port : "";
+                if (currentHost === "127.0.0.1") {
+                    throw new Error("WebAuthn / Passkeys no admite direcciones IP como '127.0.0.1'. Por favor abre el sistema desde " + window.location.protocol + "//localhost" + port + " para registrar Passkeys.");
+                } else {
+                    throw new Error("WebAuthn / Passkeys requiere un nombre de dominio (ej. localhost o tu dominio en Railway), no una dirección IP (" + currentHost + ").");
+                }
+            }
+
             const options = JSON.parse(optionsJson);
             options.challenge = this.coerceToArrayBuffer(options.challenge);
             options.user.id = this.coerceToArrayBuffer(options.user.id);
@@ -44,9 +56,13 @@ window.webauthn = {
                 }
             }
 
+            // Always align rp.id with the current domain in browser (e.g. jewelrysystem-production.up.railway.app or localhost)
+            if (options.rp) {
+                options.rp.id = currentHost;
+            }
+
             const cred = await navigator.credentials.create({ publicKey: options });
 
-            const utf8Decoder = new TextDecoder("utf-8");
             return JSON.stringify({
                 id: cred.id,
                 rawId: this.coerceToBase64Url(cred.rawId),
@@ -64,6 +80,18 @@ window.webauthn = {
 
     getAssertion: async function (optionsJson) {
         try {
+            const currentHost = window.location.hostname;
+            const isIpAddress = /^(\d{1,3}\.){3}\d{1,3}$/.test(currentHost) || currentHost === "::1" || currentHost === "[::1]";
+
+            if (isIpAddress) {
+                const port = window.location.port ? ":" + window.location.port : "";
+                if (currentHost === "127.0.0.1") {
+                    throw new Error("WebAuthn / Passkeys no admite direcciones IP como '127.0.0.1'. Por favor abre el sistema desde " + window.location.protocol + "//localhost" + port + " para iniciar sesión con Passkeys.");
+                } else {
+                    throw new Error("WebAuthn / Passkeys requiere un nombre de dominio (ej. localhost o tu dominio en Railway), no una dirección IP (" + currentHost + ").");
+                }
+            }
+
             const options = JSON.parse(optionsJson);
             options.challenge = this.coerceToArrayBuffer(options.challenge);
 
@@ -72,6 +100,9 @@ window.webauthn = {
                     options.allowCredentials[i].id = this.coerceToArrayBuffer(options.allowCredentials[i].id);
                 }
             }
+
+            // Always align rpId with the current domain in browser (e.g. jewelrysystem-production.up.railway.app or localhost)
+            options.rpId = currentHost;
 
             const assertion = await navigator.credentials.get({ publicKey: options });
 

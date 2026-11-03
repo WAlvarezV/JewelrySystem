@@ -31,17 +31,93 @@ public static class AuthModuleExtensions
         .AddSignInManager()
         .AddDefaultTokenProviders();
 
+        services.AddHttpContextAccessor();
+
         // FIDO2 / Passkeys
-        services.AddScoped<IFido2>(sp => new Fido2(new Fido2Configuration
+        services.AddScoped<IFido2>(sp =>
         {
-            RPID = configuration["Fido2:ServerDomain"] ?? "localhost",
-            RPName = "JewerlySystem",
-            Origins = new HashSet<string>
+            var httpContext = sp.GetService<Microsoft.AspNetCore.Http.IHttpContextAccessor>()?.HttpContext;
+            var config = sp.GetRequiredService<IConfiguration>();
+
+            var configuredDomain = config["Fido2:ServerDomain"];
+            var configuredOrigin = config["Fido2:Origin"];
+
+            // Detect Railway or public cloud environment
+            var isRailway = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RAILWAY_ENVIRONMENT"))
+                || !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RAILWAY_PROJECT_ID"))
+                || !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RAILWAY_STATIC_URL"))
+                || !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RAILWAY_PUBLIC_DOMAIN"));
+
+            var railwayDomain = Environment.GetEnvironmentVariable("RAILWAY_PUBLIC_DOMAIN")
+                ?? Environment.GetEnvironmentVariable("RAILWAY_STATIC_URL");
+
+            string serverDomain = "localhost";
+            var origins = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
-                configuration["Fido2:Origin"] ?? "https://localhost:5001",
-                "http://localhost:5000"
+                "https://localhost:5001",
+                "http://localhost:5000",
+                "https://localhost",
+                "http://localhost",
+                "https://127.0.0.1:5001",
+                "http://127.0.0.1:5000",
+                "https://jewelrysystem-production.up.railway.app",
+                "http://jewelrysystem-production.up.railway.app"
+            };
+
+            if (!string.IsNullOrWhiteSpace(railwayDomain))
+            {
+                var clean = railwayDomain.Trim().TrimEnd('/');
+                origins.Add($"https://{clean}");
+                origins.Add($"http://{clean}");
+                serverDomain = clean;
             }
-        }));
+
+            if (!string.IsNullOrWhiteSpace(configuredOrigin))
+            {
+                origins.Add(configuredOrigin.Trim().TrimEnd('/'));
+            }
+
+            if (httpContext != null)
+            {
+                var request = httpContext.Request;
+                var forwardedHost = request.Headers["X-Forwarded-Host"].FirstOrDefault();
+                var hostWithPort = !string.IsNullOrWhiteSpace(forwardedHost) ? forwardedHost : (request.Host.Value ?? "localhost");
+                var hostName = (hostWithPort.Split(':')[0] ?? "localhost").Trim();
+
+                var scheme = request.Headers["X-Forwarded-Proto"].FirstOrDefault() ?? request.Scheme;
+                if (string.IsNullOrWhiteSpace(scheme)) scheme = "https";
+
+                origins.Add($"{scheme}://{hostWithPort}");
+                origins.Add($"{scheme}://{hostName}");
+                origins.Add($"https://{hostName}");
+                origins.Add($"http://{hostName}");
+
+                // If running on a non-IP, non-localhost host (e.g. railway or custom domain)
+                if (!System.Net.IPAddress.TryParse(hostName, out _) && hostName != "localhost" && hostName != "0.0.0.0")
+                {
+                    serverDomain = hostName;
+                }
+            }
+            else if (isRailway)
+            {
+                serverDomain = !string.IsNullOrWhiteSpace(railwayDomain)
+                    ? railwayDomain.Trim().TrimEnd('/')
+                    : "jewelrysystem-production.up.railway.app";
+            }
+
+            // Explicit override if configured in appsettings and not "localhost"
+            if (!string.IsNullOrWhiteSpace(configuredDomain) && configuredDomain != "localhost")
+            {
+                serverDomain = configuredDomain.Trim();
+            }
+
+            return new Fido2(new Fido2Configuration
+            {
+                RPID = serverDomain,
+                RPName = "JewerlySystem",
+                Origins = origins
+            });
+        });
 
         services.AddScoped<IFido2Service, Fido2Service>();
         services.AddScoped<IMfaService, MfaService>();

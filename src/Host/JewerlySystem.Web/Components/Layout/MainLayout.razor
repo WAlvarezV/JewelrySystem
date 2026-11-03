@@ -38,11 +38,12 @@
 
                 <!-- Bottom User Avatar -->
                 <div class="mt-auto py-2 text-center w-100 border-top border-secondary border-opacity-25">
-                    <div class="avatar-small mx-auto rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center shadow-sm"
-                         title="Usuario: @(context.User.Identity?.Name ?? "Admin")"
-                         style="width: 36px; height: 36px; font-size: 0.85rem;">
-                        @(context.User.Identity?.Name?.Length > 0 ? context.User.Identity.Name[0].ToString().ToUpper() : "U")
-                    </div>
+                    <a href="profile" class="text-decoration-none" title="Mi Perfil (@(context.User.Identity?.Name ?? "Usuario"))">
+                        <div class="avatar-small mx-auto rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center shadow-sm"
+                             style="width: 36px; height: 36px; font-size: 0.85rem; cursor: pointer;">
+                            @(context.User.Identity?.Name?.Length > 0 ? context.User.Identity.Name[0].ToString().ToUpper() : "U")
+                        </div>
+                    </a>
                 </div>
             </aside>
 
@@ -93,6 +94,10 @@
                         <div class="vr my-1 text-muted"></div>
 
                         <div class="d-flex align-items-center gap-2">
+                            <a href="profile" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 py-1 px-2 text-decoration-none" title="Mi Perfil y Contraseña">
+                                <i class="bi bi-person-circle"></i>
+                                <span class="d-none d-md-inline fw-medium">Mi Perfil</span>
+                            </a>
                             <span class="small fw-semibold text-dark">
                                 @(context.User.Identity?.Name ?? "Usuario Conectado")
                             </span>
@@ -247,6 +252,9 @@
 </style>
 
 @code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
     private bool _showVoiceModal;
     private bool _isSiderCollapsed;
     private List<AppModuleDto> _modules = [];
@@ -258,7 +266,14 @@
     {
         try
         {
-            var res = await Sender.Send(new GetNavigationModulesQuery());
+            string? currentUserName = null;
+            if (AuthStateTask != null)
+            {
+                var auth = await AuthStateTask;
+                currentUserName = auth.User.Identity?.Name;
+            }
+
+            var res = await Sender.Send(new GetNavigationModulesQuery(currentUserName));
             if (res.IsSuccess && res.Value.Any())
             {
                 _modules = res.Value.ToList();

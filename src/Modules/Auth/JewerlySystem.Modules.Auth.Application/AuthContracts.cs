@@ -85,9 +85,9 @@ public class MenuDto
     public List<MenuDto> Children { get; set; } = [];
 }
 
-public record GetNavigationModulesQuery() : IQuery<IReadOnlyList<AppModuleDto>>;
+public record GetNavigationModulesQuery(string? UserId = null) : IQuery<IReadOnlyList<AppModuleDto>>;
 
-public record GetNavigationMenusQuery(string? ModuleKey = null) : IQuery<IReadOnlyList<MenuDto>>;
+public record GetNavigationMenusQuery(string? ModuleKey = null, string? UserId = null) : IQuery<IReadOnlyList<MenuDto>>;
 
 public record GetUserFavoritesQuery(string UserId) : IQuery<IReadOnlyList<MenuDto>>;
 
@@ -153,3 +153,30 @@ public record PermissionItemDto(
 public record GetPermissionsByRoleQuery(string RoleName) : IQuery<IReadOnlyList<PermissionItemDto>>;
 
 public record SavePermissionsCommand(string RoleName, IReadOnlyList<PermissionItemDto> Permissions) : ICommand<bool>;
+
+// ==========================================
+// DTOs & CQRS for User Profile & Password Change
+// ==========================================
+
+public record UserProfileDto(
+    string Id,
+    string UserName,
+    string Email,
+    string? PhoneNumber,
+    IReadOnlyList<string> Roles,
+    bool TwoFactorEnabled,
+    int PasskeyCount,
+    DateTime CreatedAt,
+    DateTime? LastLoginAt);
+
+public record GetUserProfileQuery(string UserIdOrEmail) : IQuery<UserProfileDto>;
+
+public record ChangeUserPasswordCommand(
+    string UserIdOrEmail,
+    string CurrentPassword,
+    string NewPassword,
+    string ConfirmPassword) : ICommand<bool>;
+
+public record UpdateUserProfileCommand(
+    string UserIdOrEmail,
+    string? PhoneNumber) : ICommand<bool>;

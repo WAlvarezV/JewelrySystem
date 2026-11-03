@@ -125,6 +125,21 @@ public class NavigationAndSecurityHandlers :
         }
         else
         {
+            if (!await _dbContext.MenuItems.AnyAsync(m => m.Route == "/profile", ct))
+            {
+                _dbContext.MenuItems.Add(new()
+                {
+                    Id = Guid.Parse("66666666-6666-6666-6666-666666666660"),
+                    ModuleKey = "ADMIN",
+                    Name = "Mi Perfil",
+                    Route = "/profile",
+                    Icon = "bi-person-circle",
+                    Order = 0,
+                    IsActive = true
+                });
+                await _dbContext.SaveChangesAsync(ct);
+            }
+
             if (!await _dbContext.MenuItems.AnyAsync(m => m.Route == "/auth/mfa", ct))
             {
                 _dbContext.MenuItems.Add(new()
@@ -241,6 +256,36 @@ public class NavigationAndSecurityHandlers :
                 .Select(m => new AppModuleDto(m.Id, m.Key, m.Name, m.Icon, m.Description, m.Order, m.IsActive))
                 .ToListAsync(cancellationToken);
 
+            if (!string.IsNullOrWhiteSpace(request.UserId))
+            {
+                var user = await _userManager.FindByIdAsync(request.UserId)
+                    ?? await _userManager.FindByNameAsync(request.UserId)
+                    ?? await _userManager.FindByEmailAsync(request.UserId);
+
+                if (user != null)
+                {
+                    var roles = await _userManager.GetRolesAsync(user);
+                    bool isAdmin = roles.Any(r => r.Equals("Admin", StringComparison.OrdinalIgnoreCase) || r.Equals("Administrador", StringComparison.OrdinalIgnoreCase));
+                    if (!isAdmin)
+                    {
+                        var allowedRoutes = await _dbContext.RolePermissions
+                            .AsNoTracking()
+                            .Where(p => roles.Contains(p.RoleName) && p.CanView)
+                            .Select(p => p.MenuRoute)
+                            .ToListAsync(cancellationToken);
+
+                        var allowedModuleKeys = await _dbContext.MenuItems
+                            .AsNoTracking()
+                            .Where(m => m.Route == "/profile" || allowedRoutes.Contains(m.Route))
+                            .Select(m => m.ModuleKey)
+                            .Distinct()
+                            .ToListAsync(cancellationToken);
+
+                        modules = modules.Where(m => allowedModuleKeys.Contains(m.Key, StringComparer.OrdinalIgnoreCase)).ToList();
+                    }
+                }
+            }
+
             return Result.Success<IReadOnlyList<AppModuleDto>>(modules);
         });
 
@@ -270,6 +315,30 @@ public class NavigationAndSecurityHandlers :
                     RequiredPermission = m.RequiredPermission
                 })
                 .ToListAsync(cancellationToken);
+
+            if (!string.IsNullOrWhiteSpace(request.UserId))
+            {
+                var user = await _userManager.FindByIdAsync(request.UserId)
+                    ?? await _userManager.FindByNameAsync(request.UserId)
+                    ?? await _userManager.FindByEmailAsync(request.UserId);
+
+                if (user != null)
+                {
+                    var roles = await _userManager.GetRolesAsync(user);
+                    bool isAdmin = roles.Any(r => r.Equals("Admin", StringComparison.OrdinalIgnoreCase) || r.Equals("Administrador", StringComparison.OrdinalIgnoreCase));
+                    if (!isAdmin)
+                    {
+                        var allowedRoutes = await _dbContext.RolePermissions
+                            .AsNoTracking()
+                            .Where(p => roles.Contains(p.RoleName) && p.CanView)
+                            .Select(p => p.MenuRoute)
+                            .ToListAsync(cancellationToken);
+
+                        // Profile is always allowed for any authenticated user
+                        allItems = allItems.Where(m => m.Route == "/profile" || allowedRoutes.Contains(m.Route, StringComparer.OrdinalIgnoreCase)).ToList();
+                    }
+                }
+            }
 
             // Build hierarchy for root menus
             var rootMenus = allItems.Where(m => m.ParentId == null).ToList();

@@ -274,7 +274,7 @@
     {
         try
         {
-            var allRes = await Sender.Send(new GetNavigationMenusQuery());
+            var allRes = await Sender.Send(new GetNavigationMenusQuery(UserId: UserId));
             if (allRes.IsSuccess)
             {
                 _allMenus = allRes.Value.ToList();

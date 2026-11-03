@@ -20,9 +20,19 @@
 
                     @if (!string.IsNullOrEmpty(ErrorFromQuery) || !string.IsNullOrEmpty(_errorMessage))
                     {
-                        <div class="alert alert-danger py-2 small d-flex align-items-center gap-2 mb-3" role="alert">
-                            <i class="bi bi-exclamation-triangle-fill"></i>
-                            <span>@(ErrorFromQuery ?? _errorMessage)</span>
+                        <div class="alert alert-danger py-2 small mb-3" role="alert">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <span>@(ErrorFromQuery ?? _errorMessage)</span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(_suggestedLocalhostUrl))
+                            {
+                                <div class="mt-2 pt-2 border-top border-danger border-opacity-25">
+                                    <a href="@_suggestedLocalhostUrl" class="btn btn-sm btn-outline-danger fw-semibold">
+                                        <i class="bi bi-box-arrow-up-right me-1"></i>Abrir en @(_suggestedLocalhostUrl)
+                                    </a>
+                                </div>
+                            }
                         </div>
                     }
 
@@ -177,6 +187,7 @@
 
     private bool _isLoading;
     private string? _errorMessage;
+    private string? _suggestedLocalhostUrl;
 
     protected override async Task OnInitializedAsync()
     {
@@ -193,6 +204,7 @@
     private async Task HandlePasskeyLogin()
     {
         _errorMessage = null;
+        _suggestedLocalhostUrl = null;
         _isLoading = true;
         try
         {
@@ -219,7 +231,16 @@
         }
         catch (Exception ex)
         {
-            _errorMessage = "Error de autenticación con Passkey: " + ex.Message;
+            if (Navigation.Uri.Contains("127.0.0.1") || ex.Message.Contains("127.0.0.1"))
+            {
+                var localhostUri = Navigation.Uri.Replace("127.0.0.1", "localhost");
+                _errorMessage = "WebAuthn / Passkeys no admite direcciones IP directas (127.0.0.1). Debes abrir el sistema usando 'localhost' en la barra de direcciones.";
+                _suggestedLocalhostUrl = localhostUri;
+            }
+            else
+            {
+                _errorMessage = "Error de autenticación con Passkey: " + ex.Message;
+            }
         }
         finally
         {

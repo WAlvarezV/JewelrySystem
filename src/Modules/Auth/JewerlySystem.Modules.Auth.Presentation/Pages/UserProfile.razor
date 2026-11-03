@@ -1,0 +1,531 @@
+@page "/profile"
+@page "/auth/profile"
+@attribute [Authorize]
+@using System.Security.Claims
+@inject ISender Sender
+@inject NavigationManager Navigation
+
+<div class="container-fluid mt-3">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold mb-1"><i class="bi bi-person-gear text-primary me-2"></i>Mi Perfil y Seguridad</h3>
+            <p class="text-muted small mb-0">Gestione la información de su cuenta, credenciales de acceso y métodos avanzados de autenticación.</p>
+        </div>
+        <div>
+            <button class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1 shadow-sm" @onclick="LoadProfileAsync" disabled="@_isLoadingProfile">
+                <i class="bi bi-arrow-clockwise @(_isLoadingProfile ? "spin" : "")"></i>
+                <span>Refrescar</span>
+            </button>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(_globalMessage))
+    {
+        <div class="alert @(_isGlobalSuccess ? "alert-success" : "alert-danger") alert-dismissible fade show py-2 small shadow-sm" role="alert">
+            <i class="bi @(_isGlobalSuccess ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill") me-2"></i>@_globalMessage
+            <button type="button" class="btn-close" @onclick="() => _globalMessage = null"></button>
+        </div>
+    }
+
+    @if (_isLoadingProfile)
+    {
+        <div class="text-center p-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <div class="text-muted small mt-2">Cargando datos de perfil...</div>
+        </div>
+    }
+    else if (_profile != null)
+    {
+        <!-- User Summary Banner -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
+            <div class="card-body p-4 text-white">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center shadow"
+                             style="width: 64px; height: 64px; font-size: 1.6rem; border: 3px solid rgba(255,255,255,0.3);">
+                            @(_profile.UserName.Length > 0 ? _profile.UserName[0].ToString().ToUpper() : "U")
+                        </div>
+                        <div>
+                            <h4 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                                @_profile.UserName
+                                <span class="badge bg-success-subtle text-success fs-6 fw-normal px-2 py-0 border border-success-subtle rounded-pill">
+                                    <i class="bi bi-check-circle-fill me-1"></i>Activo
+                                </span>
+                            </h4>
+                            <div class="text-white-50 small mb-2">
+                                <i class="bi bi-envelope me-1"></i>@_profile.Email
+                                @if (!string.IsNullOrEmpty(_profile.PhoneNumber))
+                                {
+                                    <span class="ms-3"><i class="bi bi-telephone me-1"></i>@_profile.PhoneNumber</span>
+                                }
+                            </div>
+                            <div class="d-flex flex-wrap gap-1">
+                                @foreach (var role in _profile.Roles)
+                                {
+                                    <span class="badge bg-primary px-2 py-1 small rounded-pill">
+                                        <i class="bi bi-shield-check me-1"></i>@role
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-column gap-1 text-white-50 small text-md-end">
+                        <div><i class="bi bi-calendar3 me-1"></i>Miembro desde: <span class="text-white fw-semibold">@_profile.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")</span></div>
+                        <div><i class="bi bi-clock-history me-1"></i>Último acceso: <span class="text-white fw-semibold">@(_profile.LastLoginAt.HasValue ? _profile.LastLoginAt.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm") : "Esta sesión")</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Column: Cambio de Contraseña -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary-subtle text-primary p-2 rounded-3">
+                                <i class="bi bi-key-fill fs-5"></i>
+                            </span>
+                            <div>
+                                <h5 class="fw-bold mb-0">Cambio de Contraseña</h5>
+                                <div class="text-muted small">Actualice su clave de acceso para mantener segura su cuenta.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        @if (!string.IsNullOrEmpty(_pwdMessage))
+                        {
+                            <div class="alert @(_isPwdSuccess ? "alert-success" : "alert-danger") alert-dismissible fade show py-2 small shadow-sm mb-4" role="alert">
+                                <i class="bi @(_isPwdSuccess ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill") me-2"></i>@_pwdMessage
+                                <button type="button" class="btn-close" @onclick="() => _pwdMessage = null"></button>
+                            </div>
+                        }
+
+                        <form @onsubmit="ChangePasswordAsync" @onsubmit:preventDefault>
+                            <!-- Contraseña Actual -->
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-secondary">
+                                    Contraseña Actual <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light text-muted border-end-0">
+                                        <i class="bi bi-lock"></i>
+                                    </span>
+                                    <input type="@(_showCurrentPwd ? "text" : "password")"
+                                           class="form-control border-start-0 border-end-0"
+                                           placeholder="Ingrese su contraseña actual"
+                                           @bind="_currentPassword"
+                                           disabled="@_isChangingPwd"
+                                           required />
+                                    <button class="btn btn-light border border-start-0 text-muted"
+                                            type="button"
+                                            @onclick="() => _showCurrentPwd = !_showCurrentPwd"
+                                            tabindex="-1">
+                                        <i class="bi @(_showCurrentPwd ? "bi-eye-slash" : "bi-eye")"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Nueva Contraseña -->
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-secondary">
+                                    Nueva Contraseña <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light text-muted border-end-0">
+                                        <i class="bi bi-shield-lock"></i>
+                                    </span>
+                                    <input type="@(_showNewPwd ? "text" : "password")"
+                                           class="form-control border-start-0 border-end-0"
+                                           placeholder="Mínimo 6 caracteres"
+                                           @bind="_newPassword"
+                                           @bind:event="oninput"
+                                           disabled="@_isChangingPwd"
+                                           required />
+                                    <button class="btn btn-light border border-start-0 text-muted"
+                                            type="button"
+                                            @onclick="() => _showNewPwd = !_showNewPwd"
+                                            tabindex="-1">
+                                        <i class="bi @(_showNewPwd ? "bi-eye-slash" : "bi-eye")"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Confirmar Nueva Contraseña -->
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-secondary">
+                                    Confirmar Nueva Contraseña <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light text-muted border-end-0">
+                                        <i class="bi bi-shield-check"></i>
+                                    </span>
+                                    <input type="@(_showConfirmPwd ? "text" : "password")"
+                                           class="form-control border-start-0 border-end-0"
+                                           placeholder="Repita la nueva contraseña"
+                                           @bind="_confirmPassword"
+                                           @bind:event="oninput"
+                                           disabled="@_isChangingPwd"
+                                           required />
+                                    <button class="btn btn-light border border-start-0 text-muted"
+                                            type="button"
+                                            @onclick="() => _showConfirmPwd = !_showConfirmPwd"
+                                            tabindex="-1">
+                                        <i class="bi @(_showConfirmPwd ? "bi-eye-slash" : "bi-eye")"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Requisitos en Vivo -->
+                            <div class="p-3 bg-light rounded-3 mb-4 border">
+                                <div class="small fw-semibold text-secondary mb-2">Requisitos de la contraseña:</div>
+                                <div class="d-flex flex-column gap-1 small">
+                                    <div class="d-flex align-items-center gap-2 @(_newPassword.Length >= 6 ? "text-success fw-semibold" : "text-muted")">
+                                        <i class="bi @(_newPassword.Length >= 6 ? "bi-check-circle-fill" : "bi-circle")"></i>
+                                        <span>Longitud mínima de 6 caracteres</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 @(!string.IsNullOrEmpty(_newPassword) && _newPassword == _confirmPassword ? "text-success fw-semibold" : "text-muted")">
+                                        <i class="bi @(!string.IsNullOrEmpty(_newPassword) && _newPassword == _confirmPassword ? "bi-check-circle-fill" : "bi-circle")"></i>
+                                        <span>Las contraseñas coinciden exactamente</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-outline-secondary px-3" @onclick="ResetPasswordForm" disabled="@_isChangingPwd">
+                                    Cancelar
+                                </button>
+                                <button type="submit" class="btn btn-primary d-flex align-items-center gap-2 px-4 shadow-sm" disabled="@(_isChangingPwd || _newPassword.Length < 6 || _newPassword != _confirmPassword)">
+                                    @if (_isChangingPwd)
+                                    {
+                                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                                        <span>Guardando...</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-check-lg"></i>
+                                        <span>Actualizar Contraseña</span>
+                                    }
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Seguridad y Datos de Contacto -->
+            <div class="col-lg-5">
+                <div class="d-flex flex-column gap-4">
+                    <!-- Seguridad de la Cuenta -->
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-header bg-white border-bottom py-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-success-subtle text-success p-2 rounded-3">
+                                    <i class="bi bi-shield-check fs-5"></i>
+                                </span>
+                                <div>
+                                    <h5 class="fw-bold mb-0">Métodos de Seguridad</h5>
+                                    <div class="text-muted small">Protección de acceso de alta seguridad.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-4 d-flex flex-column gap-3">
+                            <!-- MFA TOTP -->
+                            <div class="p-3 border rounded-3 bg-light d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-2">
+                                        <i class="bi bi-phone fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold small">Autenticador Móvil (MFA)</div>
+                                        <div class="text-muted" style="font-size: 0.78rem;">
+                                            @(_profile.TwoFactorEnabled ? "Activo (Google/MS Authenticator)" : "No configurado")
+                                        </div>
+                                    </div>
+                                </div>
+                                <a href="/auth/mfa" class="btn btn-sm btn-outline-primary px-3 rounded-pill">
+                                    Gestionar
+                                </a>
+                            </div>
+
+                            <!-- Passkeys WebAuthn -->
+                            <div class="p-3 border rounded-3 bg-light d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle bg-warning bg-opacity-10 text-warning p-2">
+                                        <i class="bi bi-fingerprint fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold small">Llaves de Acceso (Passkeys)</div>
+                                        <div class="text-muted" style="font-size: 0.78rem;">
+                                            @(_profile.PasskeyCount > 0 ? $"{_profile.PasskeyCount} llave(s) biométrica(s)" : "Sin passkeys configuradas")
+                                        </div>
+                                    </div>
+                                </div>
+                                <a href="/auth/passkeys" class="btn btn-sm btn-outline-warning text-dark px-3 rounded-pill">
+                                    Gestionar
+                                </a>
+                            </div>
+
+                            <!-- OTP por Correo -->
+                            <div class="p-3 border rounded-3 bg-light d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle bg-success bg-opacity-10 text-success p-2">
+                                        <i class="bi bi-envelope-check fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold small">Código OTP por Correo</div>
+                                        <div class="text-muted" style="font-size: 0.78rem;">Activo en cada inicio de sesión</div>
+                                    </div>
+                                </div>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                    Habilitado
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Datos de Contacto -->
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-header bg-white border-bottom py-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-info-subtle text-info p-2 rounded-3">
+                                    <i class="bi bi-person-lines-fill fs-5"></i>
+                                </span>
+                                <div>
+                                    <h5 class="fw-bold mb-0">Información de Contacto</h5>
+                                    <div class="text-muted small">Datos personales asociados a su cuenta.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            @if (!string.IsNullOrEmpty(_contactMessage))
+                            {
+                                <div class="alert @(_isContactSuccess ? "alert-success" : "alert-danger") alert-dismissible fade show py-2 small shadow-sm mb-3" role="alert">
+                                    <i class="bi @(_isContactSuccess ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill") me-2"></i>@_contactMessage
+                                    <button type="button" class="btn-close" @onclick="() => _contactMessage = null"></button>
+                                </div>
+                            }
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-secondary">Correo Electrónico</label>
+                                <input type="text" class="form-control bg-light" value="@_profile.Email" readonly disabled />
+                                <div class="form-text small text-muted">El correo electrónico principal solo puede ser modificado por un Administrador.</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-secondary">Teléfono de Contacto</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light text-muted">
+                                        <i class="bi bi-telephone"></i>
+                                    </span>
+                                    <input type="tel" class="form-control" placeholder="+57 300 1234567" @bind="_phoneNumber" disabled="@_isSavingContact" />
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-2 px-3" @onclick="SaveContactAsync" disabled="@_isSavingContact">
+                                    @if (_isSavingContact)
+                                    {
+                                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                                        <span>Guardando...</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-check-circle"></i>
+                                        <span>Guardar Teléfono</span>
+                                    }
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    private string _currentUserId = "";
+    private UserProfileDto? _profile;
+    private bool _isLoadingProfile = true;
+
+    // Password Form State
+    private string _currentPassword = "";
+    private string _newPassword = "";
+    private string _confirmPassword = "";
+    private bool _showCurrentPwd = false;
+    private bool _showNewPwd = false;
+    private bool _showConfirmPwd = false;
+    private bool _isChangingPwd = false;
+    private string? _pwdMessage;
+    private bool _isPwdSuccess;
+
+    // Contact Form State
+    private string _phoneNumber = "";
+    private bool _isSavingContact = false;
+    private string? _contactMessage;
+    private bool _isContactSuccess;
+
+    // Global Notification
+    private string? _globalMessage;
+    private bool _isGlobalSuccess;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProfileAsync();
+    }
+
+    private async Task LoadProfileAsync()
+    {
+        _isLoadingProfile = true;
+        _globalMessage = null;
+
+        try
+        {
+            if (AuthStateTask != null)
+            {
+                var auth = await AuthStateTask;
+                if (auth.User.Identity?.IsAuthenticated == true)
+                {
+                    _currentUserId = auth.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                        ?? auth.User.Identity.Name
+                        ?? "";
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(_currentUserId))
+            {
+                _globalMessage = "No se pudo identificar la sesión actual del usuario.";
+                _isGlobalSuccess = false;
+                return;
+            }
+
+            var res = await Sender.Send(new GetUserProfileQuery(_currentUserId));
+            if (res.IsSuccess)
+            {
+                _profile = res.Value;
+                _phoneNumber = _profile.PhoneNumber ?? "";
+            }
+            else
+            {
+                _globalMessage = res.Error.Message;
+                _isGlobalSuccess = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            _globalMessage = "Error al cargar información del perfil: " + ex.Message;
+            _isGlobalSuccess = false;
+        }
+        finally
+        {
+            _isLoadingProfile = false;
+        }
+    }
+
+    private async Task ChangePasswordAsync()
+    {
+        _pwdMessage = null;
+
+        if (string.IsNullOrWhiteSpace(_currentPassword))
+        {
+            _pwdMessage = "Por favor ingrese su contraseña actual.";
+            _isPwdSuccess = false;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_newPassword) || _newPassword.Length < 6)
+        {
+            _pwdMessage = "La nueva contraseña debe tener al menos 6 caracteres.";
+            _isPwdSuccess = false;
+            return;
+        }
+
+        if (_newPassword != _confirmPassword)
+        {
+            _pwdMessage = "La nueva contraseña y su confirmación no coinciden.";
+            _isPwdSuccess = false;
+            return;
+        }
+
+        _isChangingPwd = true;
+        try
+        {
+            var res = await Sender.Send(new ChangeUserPasswordCommand(
+                _currentUserId,
+                _currentPassword,
+                _newPassword,
+                _confirmPassword));
+
+            if (res.IsSuccess)
+            {
+                _pwdMessage = "¡Contraseña actualizada exitosamente! Puede usar su nueva contraseña en su próximo inicio de sesión.";
+                _isPwdSuccess = true;
+                _currentPassword = "";
+                _newPassword = "";
+                _confirmPassword = "";
+            }
+            else
+            {
+                _pwdMessage = res.Error.Message;
+                _isPwdSuccess = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            _pwdMessage = "Error inesperado al cambiar la contraseña: " + ex.Message;
+            _isPwdSuccess = false;
+        }
+        finally
+        {
+            _isChangingPwd = false;
+        }
+    }
+
+    private void ResetPasswordForm()
+    {
+        _currentPassword = "";
+        _newPassword = "";
+        _confirmPassword = "";
+        _pwdMessage = null;
+    }
+
+    private async Task SaveContactAsync()
+    {
+        _contactMessage = null;
+        _isSavingContact = true;
+
+        try
+        {
+            var res = await Sender.Send(new UpdateUserProfileCommand(_currentUserId, _phoneNumber));
+            if (res.IsSuccess)
+            {
+                _contactMessage = "Teléfono actualizado exitosamente.";
+                _isContactSuccess = true;
+                if (_profile != null)
+                {
+                    _profile = _profile with { PhoneNumber = _phoneNumber };
+                }
+            }
+            else
+            {
+                _contactMessage = res.Error.Message;
+                _isContactSuccess = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            _contactMessage = "Error al guardar información de contacto: " + ex.Message;
+            _isContactSuccess = false;
+        }
+        finally
+        {
+            _isSavingContact = false;
+        }
+    }
+}
