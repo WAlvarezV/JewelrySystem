@@ -274,17 +274,23 @@
                             }
                         </div>
                     </ActionColumn>
-                    <ActionColumn Title="Acciones" Align="ColumnAlign.Center" Width="95px">
-                        @if (context.Active)
-                        {
-                            <SoftActionButton Icon="export"
-                                              TooltipText="Descargar / Vender"
-                                              OnClick="@(() => Navigation.NavigateTo($"/inventory/discharge?ref={context.Reference}"))" />
-                        }
-                        else
-                        {
-                            <span class="sold-date small text-muted">@(context.DateOfSale?.ToString("dd/MM/yy") ?? "En Ajuste")</span>
-                        }
+                    <ActionColumn Title="Acciones" Align="ColumnAlign.Center" Width="140px">
+                        <div class="d-flex align-items-center justify-content-center gap-1">
+                            <SoftActionButton Icon="eye"
+                                              TooltipText="Ver Detalle"
+                                              OnClick="@(() => OpenViewJewelDrawer(context))" />
+
+                            <SoftActionButton Icon="edit"
+                                              TooltipText="Editar Joya"
+                                              OnClick="@(() => OpenEditJewelDrawer(context))" />
+
+                            @if (context.Active)
+                            {
+                                <SoftActionButton Icon="export"
+                                                  TooltipText="Descargar / Vender"
+                                                  OnClick="@(() => Navigation.NavigateTo($"/inventory/discharge?ref={context.Reference}"))" />
+                            }
+                        </div>
                     </ActionColumn>
                 </Table>
             }
@@ -492,17 +498,23 @@
                             }
                         </div>
                     </ActionColumn>
-                    <ActionColumn Title="Acciones" Align="ColumnAlign.Center" Width="95px">
-                        @if (context.Active)
-                        {
-                            <SoftActionButton Icon="export"
-                                              TooltipText="Descargar / Vender"
-                                              OnClick="@(() => Navigation.NavigateTo($"/inventory/discharge?ref={context.Reference}"))" />
-                        }
-                        else
-                        {
-                            <span class="sold-date small text-muted">@(context.DateOfSale?.ToString("dd/MM/yy") ?? "En Ajuste")</span>
-                        }
+                    <ActionColumn Title="Acciones" Align="ColumnAlign.Center" Width="140px">
+                        <div class="d-flex align-items-center justify-content-center gap-1">
+                            <SoftActionButton Icon="eye"
+                                              TooltipText="Ver Detalle"
+                                              OnClick="@(() => OpenViewWatchDrawer(context))" />
+
+                            <SoftActionButton Icon="edit"
+                                              TooltipText="Editar Reloj"
+                                              OnClick="@(() => OpenEditWatchDrawer(context))" />
+
+                            @if (context.Active)
+                            {
+                                <SoftActionButton Icon="export"
+                                                  TooltipText="Descargar / Vender"
+                                                  OnClick="@(() => Navigation.NavigateTo($"/inventory/discharge?ref={context.Reference}"))" />
+                            }
+                        </div>
                     </ActionColumn>
                 </Table>
             }
@@ -773,6 +785,296 @@
             </SoftButton>
         </FooterContent>
     </SoftDrawer>
+
+    <!-- SoftDrawer: Visualización de Artículo (Joya / Reloj) -->
+    <SoftDrawer Visible="@_drawerDetailVisible"
+                Title="@($"Detalle del Artículo #{_detailReference}")"
+                Description="@_detailCategory"
+                Width="680"
+                OnClose="@(() => _drawerDetailVisible = false)">
+        <ChildContent>
+            <div class="p-3 mb-3 rounded-3 bg-light border d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="p-3 rounded-circle @(_detailIsJewel ? "bg-warning bg-opacity-10 text-warning" : "bg-info bg-opacity-10 text-info") fs-2">
+                        <i class="bi @(_detailIsJewel ? "bi-gem" : "bi-watch")"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0 text-dark">Ref #@_detailReference</h4>
+                        <span class="text-muted small">@_detailCategory &bull; Registrado el @_detailDateOfEntry.ToString("dd/MM/yyyy")</span>
+                    </div>
+                </div>
+                <div>
+                    @if (_detailActive)
+                    {
+                        <span class="badge bg-success px-3 py-2 fs-6 rounded-pill">
+                            <i class="bi bi-check-circle me-1"></i>Activo en Stock
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary px-3 py-2 fs-6 rounded-pill">
+                            <i class="bi bi-bag-check me-1"></i>Descargado / Vendido
+                        </span>
+                    }
+                </div>
+            </div>
+
+            <SoftFormBox Title="Descripción y Características">
+                <p class="fs-6 text-dark mb-0 fw-medium">@_detailDescription</p>
+            </SoftFormBox>
+
+            <SoftFormBox Title="Especificaciones Técnicas">
+                <div class="row g-3">
+                    @if (_detailIsJewel)
+                    {
+                        <div class="col-6 col-md-4">
+                            <span class="text-muted small d-block">Tipo de Joya</span>
+                            <strong class="text-dark">@_detailCategory</strong>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <span class="text-muted small d-block">Peso Neto</span>
+                            <strong class="text-dark fs-5">@_detailWeight.ToString("N2") g</strong>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <span class="text-muted small d-block">Valor por Gramo</span>
+                            <strong class="text-dark">@_detailGramValue.ToString("C0")</strong>
+                        </div>
+                        @if (_detailLength.HasValue && _detailLength > 0)
+                        {
+                            <div class="col-6 col-md-4">
+                                <span class="text-muted small d-block">Longitud</span>
+                                <strong class="text-dark">@_detailLength cm</strong>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="col-6 col-md-4">
+                            <span class="text-muted small d-block">Marca</span>
+                            <strong class="text-dark">@_detailTitle</strong>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <span class="text-muted small d-block">Número de Caja / Serial</span>
+                            <strong class="text-dark fs-6">@_detailCaseNumber</strong>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <span class="text-muted small d-block">Género</span>
+                            <strong class="text-dark">@_detailGender</strong>
+                        </div>
+                    }
+                    <div class="col-6 col-md-4">
+                        <span class="text-muted small d-block">Proveedor / Procedencia</span>
+                        <strong class="text-dark">@_detailProviderName</strong>
+                    </div>
+                </div>
+            </SoftFormBox>
+
+            <SoftFormBox Title="Valorización Comercial">
+                <div class="row g-3">
+                    <div class="col-6 col-md-4">
+                        <span class="text-muted small d-block">Valor de Costo</span>
+                        <strong class="text-primary fs-5">@_detailCostValue.ToString("C0")</strong>
+                    </div>
+                    @if (_detailIsJewel)
+                    {
+                        <div class="col-6 col-md-4">
+                            <span class="text-muted small d-block">Precio Estimado Venta</span>
+                            <strong class="text-success fs-5">@((_detailGramValue * _detailWeight).ToString("C0"))</strong>
+                        </div>
+                    }
+                    @if (!_detailActive && _detailDateOfSale.HasValue)
+                    {
+                        <div class="col-6 col-md-4">
+                            <span class="text-muted small d-block">Fecha de Venta</span>
+                            <strong class="text-dark">@_detailDateOfSale.Value.ToString("dd/MM/yyyy")</strong>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <span class="text-muted small d-block">Valor de Venta Real</span>
+                            <strong class="text-success fs-5">@(_detailSaleValue?.ToString("C0") ?? "-")</strong>
+                        </div>
+                    }
+                </div>
+            </SoftFormBox>
+        </ChildContent>
+        <FooterContent>
+            <SoftButton OnClick="@(() => _drawerDetailVisible = false)">Cerrar</SoftButton>
+            <SoftButton Type="@ButtonType.Default" Icon="edit" OnClick="SwitchFromDetailToEdit">Editar Artículo</SoftButton>
+            @if (_detailActive)
+            {
+                <SoftButton Type="@ButtonType.Primary" Icon="export" OnClick="@(() => Navigation.NavigateTo($"/inventory/discharge?ref={_detailReference}"))">
+                    Descargar / Vender
+                </SoftButton>
+            }
+        </FooterContent>
+    </SoftDrawer>
+
+    <!-- SoftDrawer: Editar Joya -->
+    <SoftDrawer Visible="@_drawerEditJewelVisible"
+                Title="@($"Editar Joya #{_editJewelModel.Reference}")"
+                Description="Modifique las especificaciones, pesaje o descripción de la joya"
+                Width="720"
+                OnClose="@(() => _drawerEditJewelVisible = false)">
+        <ChildContent>
+            <Form Model="@_editJewelModel" Layout="@FormLayout.Vertical">
+                <SoftFormBox Title="1. Tipo de Joya y Origen">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <FormItem Label="N° de Referencia">
+                                <Input Value="@_editJewelModel.Reference.ToString()" Disabled="true" />
+                            </FormItem>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <FormItem Label="Tipo de Joya" Required="true">
+                                <Select TItem="ItemTypeDto"
+                                        TItemValue="int"
+                                        DataSource="@_itemTypes.Where(t => t.Id != 5).ToList()"
+                                        @bind-Value="_editJewelModel.ItemTypeId"
+                                        ValueName="@nameof(ItemTypeDto.Id)"
+                                        LabelName="@nameof(ItemTypeDto.Name)"
+                                        EnableSearch="true" />
+                            </FormItem>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <FormItem Label="Proveedor">
+                                <Select TItem="JewerlySystem.Modules.Customers.Application.DTOs.PersonDto"
+                                        TItemValue="int?"
+                                        DataSource="@_providers"
+                                        @bind-Value="_editJewelModel.ProviderId"
+                                        ValueName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.Id)"
+                                        LabelName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.FullName)"
+                                        EnableSearch="true"
+                                        AllowClear="true" />
+                            </FormItem>
+                        </div>
+                    </div>
+                </SoftFormBox>
+
+                <SoftFormBox Title="2. Pesaje y Valores">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-12 col-md-4">
+                            <FormItem Label="Peso (g)" Required="true">
+                                <AntDesign.InputNumber TValue="double"
+                                                       @bind-Value="_editJewelModel.Weight"
+                                                       Step="0.01"
+                                                       Min="0.01"
+                                                       OnChange="@(_ => RecalculateEditJewelCost())" />
+                            </FormItem>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <FormItem Label="Valor por Gramo ($)" Required="true">
+                                <AntDesign.InputNumber TValue="int"
+                                                       @bind-Value="_editJewelModel.GramValue"
+                                                       Step="1000"
+                                                       Min="0"
+                                                       OnChange="@(_ => RecalculateEditJewelCost())" />
+                            </FormItem>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <FormItem Label="Valor Costo ($)" Required="true">
+                                <AntDesign.InputNumber TValue="int"
+                                                       @bind-Value="_editJewelModel.CostValue"
+                                                       Step="10000"
+                                                       Min="0" />
+                            </FormItem>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <FormItem Label="Largo (cm)">
+                                <AntDesign.InputNumber TValue="int?"
+                                                       @bind-Value="_editJewelModel.Length"
+                                                       Min="1" />
+                            </FormItem>
+                        </div>
+                    </div>
+                </SoftFormBox>
+
+                <SoftFormBox Title="3. Descripción de la Joya">
+                    <SoftVoiceTextArea @bind-Value="_editJewelModel.Description"
+                                       Label="Descripción"
+                                       Required="true"
+                                       MaxLength="500" />
+                </SoftFormBox>
+            </Form>
+        </ChildContent>
+        <FooterContent>
+            <SoftButton OnClick="@(() => _drawerEditJewelVisible = false)">Cancelar</SoftButton>
+            <SoftButton Type="@ButtonType.Primary"
+                        Loading="@_isSavingEditJewel"
+                        OnClick="SaveEditJewelAsync">
+                Guardar Cambios
+            </SoftButton>
+        </FooterContent>
+    </SoftDrawer>
+
+    <!-- SoftDrawer: Editar Reloj -->
+    <SoftDrawer Visible="@_drawerEditWatchVisible"
+                Title="@($"Editar Reloj #{_editWatchModel.Reference}")"
+                Description="Modifique la marca, serial de caja o costo del reloj"
+                Width="720"
+                OnClose="@(() => _drawerEditWatchVisible = false)">
+        <ChildContent>
+            <Form Model="@_editWatchModel" Layout="@FormLayout.Vertical">
+                <SoftFormBox Title="1. Identificación del Reloj">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <FormItem Label="N° de Referencia">
+                                <Input Value="@_editWatchModel.Reference.ToString()" Disabled="true" />
+                            </FormItem>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <FormItem Label="Marca" Required="true">
+                                <Select TItem="BrandDto"
+                                        TItemValue="int"
+                                        DataSource="@_brands"
+                                        @bind-Value="_editWatchModel.BrandId"
+                                        ValueName="@nameof(BrandDto.Id)"
+                                        LabelName="@nameof(BrandDto.Name)"
+                                        EnableSearch="true" />
+                            </FormItem>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <FormItem Label="Género" Required="true">
+                                <Select TItem="GenderTypeOption"
+                                        TItemValue="GenderType"
+                                        DataSource="@_genderOptions"
+                                        @bind-Value="_editWatchModel.GenderType"
+                                        ValueName="@nameof(GenderTypeOption.Value)"
+                                        LabelName="@nameof(GenderTypeOption.Label)"
+                                        EnableSearch="true" />
+                            </FormItem>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <FormItem Label="Nro. de Caja / Serial">
+                                <Input @bind-Value="_editWatchModel.CaseNumber" />
+                            </FormItem>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <FormItem Label="Valor Costo ($)" Required="true">
+                                <AntDesign.InputNumber TValue="int"
+                                                       @bind-Value="_editWatchModel.CostValue"
+                                                       Step="10000"
+                                                       Min="0" />
+                            </FormItem>
+                        </div>
+                    </div>
+                </SoftFormBox>
+
+                <SoftFormBox Title="2. Descripción del Reloj">
+                    <SoftVoiceTextArea @bind-Value="_editWatchModel.Description"
+                                       Label="Descripción"
+                                       Required="true"
+                                       MaxLength="500" />
+                </SoftFormBox>
+            </Form>
+        </ChildContent>
+        <FooterContent>
+            <SoftButton OnClick="@(() => _drawerEditWatchVisible = false)">Cancelar</SoftButton>
+            <SoftButton Type="@ButtonType.Primary"
+                        Loading="@_isSavingEditWatch"
+                        OnClick="SaveEditWatchAsync">
+                Guardar Cambios
+            </SoftButton>
+        </FooterContent>
+    </SoftDrawer>
 </div>
 
 @code {
@@ -857,6 +1159,35 @@
     private bool _drawerWatchVisible;
     private bool _isSavingWatch;
     private WatchFormModel _watchFormModel = new();
+
+    // View Detail Drawer State
+    private bool _drawerDetailVisible;
+    private bool _detailIsJewel;
+    private int _detailReference;
+    private string _detailTitle = string.Empty;
+    private string _detailCategory = string.Empty;
+    private string _detailDescription = string.Empty;
+    private double _detailWeight;
+    private int _detailGramValue;
+    private int? _detailLength;
+    private string _detailCaseNumber = string.Empty;
+    private string _detailGender = string.Empty;
+    private int _detailCostValue;
+    private int? _detailSaleValue;
+    private DateTime _detailDateOfEntry;
+    private DateTime? _detailDateOfSale;
+    private bool _detailActive;
+    private int? _detailProviderId;
+    private string _detailProviderName = string.Empty;
+
+    // Edit Drawers State
+    private bool _drawerEditJewelVisible;
+    private bool _isSavingEditJewel;
+    private EditJewelModel _editJewelModel = new();
+
+    private bool _drawerEditWatchVisible;
+    private bool _isSavingEditWatch;
+    private EditWatchModel _editWatchModel = new();
 
     // Helper for diacritic-insensitive search (e.g. 'corazon' matches 'corazón', '15 anos' matches '15 años')
     private static string NormalizeSearchText(string? text)
@@ -1412,5 +1743,205 @@
         public int CostValue { get; set; } = 0;
         public int SaleValue { get; set; } = 0;
         public string Description { get; set; } = string.Empty;
+    }
+
+    public class EditJewelModel
+    {
+        public int Reference { get; set; }
+        public int ItemTypeId { get; set; } = 1;
+        public int? ProviderId { get; set; }
+        public double Weight { get; set; }
+        public int GramValue { get; set; }
+        public int CostValue { get; set; }
+        public int? Length { get; set; }
+        public string Description { get; set; } = string.Empty;
+    }
+
+    public class EditWatchModel
+    {
+        public int Reference { get; set; }
+        public int BrandId { get; set; }
+        public GenderType GenderType { get; set; } = GenderType.Hombre;
+        public int? ProviderId { get; set; }
+        public string CaseNumber { get; set; } = string.Empty;
+        public int CostValue { get; set; }
+        public string Description { get; set; } = string.Empty;
+    }
+
+    private void OpenViewJewelDrawer(JewelListItemDto jewel)
+    {
+        _detailIsJewel = true;
+        _detailReference = jewel.Reference;
+        _detailTitle = jewel.ItemTypeName;
+        _detailCategory = jewel.ItemTypeName;
+        _detailDescription = jewel.Description;
+        _detailWeight = jewel.Weight;
+        _detailGramValue = jewel.GramValue;
+        _detailLength = jewel.Length;
+        _detailCostValue = jewel.CostValue;
+        _detailSaleValue = jewel.SaleValue;
+        _detailDateOfEntry = jewel.DateOfEntry;
+        _detailDateOfSale = jewel.DateOfSale;
+        _detailActive = jewel.Active;
+        _detailProviderId = jewel.ProviderId;
+        _detailProviderName = _providers.FirstOrDefault(p => p.Id == jewel.ProviderId)?.FullName ?? "Stock Interno / General";
+        _drawerDetailVisible = true;
+    }
+
+    private void OpenViewWatchDrawer(WatchListItemDto watch)
+    {
+        _detailIsJewel = false;
+        _detailReference = watch.Reference;
+        _detailTitle = watch.BrandName;
+        _detailCategory = "Reloj de Vitrina";
+        _detailDescription = watch.Description;
+        _detailCaseNumber = watch.CaseNumber;
+        _detailGender = watch.GenderType.ToString();
+        _detailCostValue = watch.CostValue;
+        _detailSaleValue = watch.SaleValue;
+        _detailDateOfEntry = watch.DateOfEntry;
+        _detailDateOfSale = watch.DateOfSale;
+        _detailActive = watch.Active;
+        _detailProviderId = watch.ProviderId;
+        _detailProviderName = _providers.FirstOrDefault(p => p.Id == watch.ProviderId)?.FullName ?? "Stock Interno / General";
+        _drawerDetailVisible = true;
+    }
+
+    private void OpenEditJewelDrawer(JewelListItemDto jewel)
+    {
+        _editJewelModel = new EditJewelModel
+        {
+            Reference = jewel.Reference,
+            ItemTypeId = jewel.ItemTypeId,
+            Description = jewel.Description,
+            Weight = jewel.Weight,
+            GramValue = jewel.GramValue,
+            CostValue = jewel.CostValue,
+            Length = jewel.Length,
+            ProviderId = jewel.ProviderId
+        };
+        _drawerEditJewelVisible = true;
+    }
+
+    private void OpenEditWatchDrawer(WatchListItemDto watch)
+    {
+        _editWatchModel = new EditWatchModel
+        {
+            Reference = watch.Reference,
+            BrandId = watch.BrandId,
+            Description = watch.Description,
+            CaseNumber = watch.CaseNumber,
+            GenderType = watch.GenderType,
+            CostValue = watch.CostValue,
+            ProviderId = watch.ProviderId
+        };
+        _drawerEditWatchVisible = true;
+    }
+
+    private void RecalculateEditJewelCost()
+    {
+        if (_editJewelModel.Weight > 0 && _editJewelModel.GramValue > 0)
+        {
+            _editJewelModel.CostValue = (int)Math.Round(_editJewelModel.Weight * _editJewelModel.GramValue);
+        }
+    }
+
+    private void SwitchFromDetailToEdit()
+    {
+        _drawerDetailVisible = false;
+        if (_detailIsJewel)
+        {
+            var jewel = _jewelryItems.FirstOrDefault(j => j.Reference == _detailReference);
+            if (jewel != null) OpenEditJewelDrawer(jewel);
+        }
+        else
+        {
+            var watch = _watchItems.FirstOrDefault(w => w.Reference == _detailReference);
+            if (watch != null) OpenEditWatchDrawer(watch);
+        }
+    }
+
+    private async Task SaveEditJewelAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_editJewelModel.Description))
+        {
+            Message.Error("La descripción es obligatoria.");
+            return;
+        }
+        if (_editJewelModel.Weight <= 0)
+        {
+            Message.Error("El peso debe ser mayor a 0 gramos.");
+            return;
+        }
+
+        _isSavingEditJewel = true;
+        try
+        {
+            var cmd = new UpdateJewelItemCommand(
+                _editJewelModel.Reference,
+                _editJewelModel.ItemTypeId,
+                _editJewelModel.Description.Trim(),
+                _editJewelModel.Weight,
+                _editJewelModel.GramValue,
+                _editJewelModel.CostValue,
+                _editJewelModel.Length,
+                _editJewelModel.ProviderId
+            );
+
+            var res = await Sender.Send(cmd);
+            if (res.IsSuccess)
+            {
+                Message.Success($"Joya ref #{_editJewelModel.Reference} actualizada exitosamente.");
+                _drawerEditJewelVisible = false;
+                await LoadInventoryCatalogAsync();
+            }
+            else
+            {
+                Message.Error(res.Error.Message);
+            }
+        }
+        finally
+        {
+            _isSavingEditJewel = false;
+        }
+    }
+
+    private async Task SaveEditWatchAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_editWatchModel.Description))
+        {
+            Message.Error("La descripción es obligatoria.");
+            return;
+        }
+
+        _isSavingEditWatch = true;
+        try
+        {
+            var cmd = new UpdateWatchItemCommand(
+                _editWatchModel.Reference,
+                _editWatchModel.BrandId,
+                _editWatchModel.Description.Trim(),
+                _editWatchModel.CaseNumber?.Trim() ?? "-",
+                _editWatchModel.GenderType,
+                _editWatchModel.CostValue,
+                _editWatchModel.ProviderId
+            );
+
+            var res = await Sender.Send(cmd);
+            if (res.IsSuccess)
+            {
+                Message.Success($"Reloj ref #{_editWatchModel.Reference} actualizado exitosamente.");
+                _drawerEditWatchVisible = false;
+                await LoadInventoryCatalogAsync();
+            }
+            else
+            {
+                Message.Error(res.Error.Message);
+            }
+        }
+        finally
+        {
+            _isSavingEditWatch = false;
+        }
     }
 }
