@@ -5,6 +5,7 @@
 @inject ISender Sender
 @inject NavigationManager Navigation
 @inject IMessageService Message
+@inject ModalService ModalService
 
 <div class="inventory-container step-fade-in">
     <!-- Hero Header -->
@@ -231,7 +232,7 @@
                        Size="TableSize.Middle"
                        RowKey="@(x => x.Id.ToString())">
                     <PropertyColumn Property="c => c.Reference" Title="Referencia" Width="110px">
-                        <span class="ref-badge">#@context.Reference</span>
+                        <span class="ref-badge">#@context.Reference.ToString("D4")</span>
                     </PropertyColumn>
                     <PropertyColumn Property="c => c.ItemTypeName" Title="Tipo" Width="130px">
                         <SoftTag Color="gold">
@@ -456,7 +457,7 @@
                        Size="TableSize.Middle"
                        RowKey="@(x => x.Id.ToString())">
                     <PropertyColumn Property="c => c.Reference" Title="Referencia" Width="110px">
-                        <span class="ref-badge">#@context.Reference</span>
+                        <span class="ref-badge">#@context.Reference.ToString("D4")</span>
                     </PropertyColumn>
                     <PropertyColumn Property="c => c.BrandName" Title="Marca" Width="130px">
                         <SoftTag Color="cyan">
@@ -534,12 +535,11 @@
                              InfoTooltip="Número de referencia física/marquilla y procedencia de la pieza">
                     <div class="row g-3">
                         <div class="col-12 col-md-4">
-                            <FormItem Label="N° de Referencia" Required="true">
-                                <AntDesign.InputNumber TValue="int?"
-                                                       @bind-Value="_jewelFormModel.Reference"
-                                                       Min="1"
-                                                       Placeholder="Ej. 9493"
-                                                       Style="width: 100%; font-weight: bold; font-size: 1.05rem;" />
+                            <FormItem Label="N° de Referencia">
+                                <div class="form-control bg-light d-flex align-items-center justify-content-between text-muted fw-bold" style="height: 38px;">
+                                    <span><i class="bi bi-shield-lock-fill text-primary me-2"></i>Automática</span>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Secuencial</span>
+                                </div>
                             </FormItem>
                         </div>
                         <div class="col-12 col-md-4">
@@ -667,12 +667,11 @@
                              InfoTooltip="Referencia de inventario, fabricante, género objetivo y procedencia">
                     <div class="row g-3">
                         <div class="col-12 col-md-3">
-                            <FormItem Label="N° de Referencia" Required="true">
-                                <AntDesign.InputNumber TValue="int?"
-                                                       @bind-Value="_watchFormModel.Reference"
-                                                       Min="1"
-                                                       Placeholder="Ej. 3363"
-                                                       Style="width: 100%; font-weight: bold; font-size: 1.05rem;" />
+                            <FormItem Label="N° de Referencia">
+                                <div class="form-control bg-light d-flex align-items-center justify-content-between text-muted fw-bold" style="height: 38px;">
+                                    <span><i class="bi bi-shield-lock-fill text-primary me-2"></i>Automática</span>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Secuencial</span>
+                                </div>
                             </FormItem>
                         </div>
 
@@ -788,7 +787,7 @@
 
     <!-- SoftDrawer: Visualización de Artículo (Joya / Reloj) -->
     <SoftDrawer Visible="@_drawerDetailVisible"
-                Title="@($"Detalle del Artículo #{_detailReference}")"
+                Title="@($"Detalle del Artículo #{_detailReference.ToString("D4")}")"
                 Description="@_detailCategory"
                 Width="680"
                 OnClose="@(() => _drawerDetailVisible = false)">
@@ -799,7 +798,7 @@
                         <i class="bi @(_detailIsJewel ? "bi-gem" : "bi-watch")"></i>
                     </div>
                     <div>
-                        <h4 class="fw-bold mb-0 text-dark">Ref #@_detailReference</h4>
+                        <h4 class="fw-bold mb-0 text-dark">Ref #@_detailReference.ToString("D4")</h4>
                         <span class="text-muted small">@_detailCategory &bull; Registrado el @_detailDateOfEntry.ToString("dd/MM/yyyy")</span>
                     </div>
                 </div>
@@ -910,7 +909,7 @@
 
     <!-- SoftDrawer: Editar Joya -->
     <SoftDrawer Visible="@_drawerEditJewelVisible"
-                Title="@($"Editar Joya #{_editJewelModel.Reference}")"
+                Title="@($"Editar Joya #{_editJewelModel.Reference.ToString("D4")}")"
                 Description="Modifique las especificaciones, pesaje o descripción de la joya"
                 Width="720"
                 OnClose="@(() => _drawerEditJewelVisible = false)">
@@ -920,7 +919,7 @@
                     <div class="row g-3">
                         <div class="col-12 col-md-4">
                             <FormItem Label="N° de Referencia">
-                                <Input Value="@_editJewelModel.Reference.ToString()" Disabled="true" />
+                                <Input Value="@_editJewelModel.Reference.ToString("D4")" Disabled="true" />
                             </FormItem>
                         </div>
                         <div class="col-12 col-md-4">
@@ -1007,7 +1006,7 @@
 
     <!-- SoftDrawer: Editar Reloj -->
     <SoftDrawer Visible="@_drawerEditWatchVisible"
-                Title="@($"Editar Reloj #{_editWatchModel.Reference}")"
+                Title="@($"Editar Reloj #{_editWatchModel.Reference.ToString("D4")}")"
                 Description="Modifique la marca, serial de caja o costo del reloj"
                 Width="720"
                 OnClose="@(() => _drawerEditWatchVisible = false)">
@@ -1017,7 +1016,7 @@
                     <div class="row g-3">
                         <div class="col-12 col-md-4">
                             <FormItem Label="N° de Referencia">
-                                <Input Value="@_editWatchModel.Reference.ToString()" Disabled="true" />
+                                <Input Value="@_editWatchModel.Reference.ToString("D4")" Disabled="true" />
                             </FormItem>
                         </div>
                         <div class="col-12 col-md-4">
@@ -1525,7 +1524,6 @@
     {
         _jewelFormModel = new JewelFormModel
         {
-            Reference = null,
             ItemTypeId = _itemTypes.FirstOrDefault(t => t.Id != 5)?.Id ?? 1,
             GramValue = 0,
             GramSaleValue = 0,
@@ -1563,12 +1561,6 @@
 
     private async Task SaveJewelAsync()
     {
-        if (!_jewelFormModel.Reference.HasValue || _jewelFormModel.Reference.Value <= 0)
-        {
-            Message.Warning("Debe ingresar el número de referencia de la joya.");
-            return;
-        }
-
         if (_jewelFormModel.ItemTypeId <= 0)
         {
             Message.Warning("Debe seleccionar un tipo de joya válido.");
@@ -1605,14 +1597,18 @@
                 Weight: _jewelFormModel.Weight,
                 GramValue: _jewelFormModel.GramValue,
                 Length: _jewelFormModel.Length,
-                ProviderId: _jewelFormModel.ProviderId,
-                Reference: _jewelFormModel.Reference
+                ProviderId: _jewelFormModel.ProviderId
             );
 
             var result = await Sender.Send(cmd);
             if (result.IsSuccess)
             {
-                Message.Success($"¡Joya registrada con éxito en inventario con referencia #{_jewelFormModel.Reference}!");
+                await ModalService.SuccessAsync(new ConfirmOptions
+                {
+                    Title = "¡Joya Registrada Exitosamente!",
+                    Content = $"Se ha asignado la Referencia #{result.Value.FormattedReference} al nuevo artículo en inventario.",
+                    OkText = "Aceptar"
+                });
                 _drawerJewelVisible = false;
                 await LoadInventoryCatalogAsync();
             }
@@ -1636,7 +1632,6 @@
     {
         _watchFormModel = new WatchFormModel
         {
-            Reference = null,
             BrandId = _brands.FirstOrDefault()?.Id ?? 1,
             GenderType = GenderType.Hombre,
             CostValue = 0,
@@ -1654,12 +1649,6 @@
 
     private async Task SaveWatchAsync()
     {
-        if (!_watchFormModel.Reference.HasValue || _watchFormModel.Reference.Value <= 0)
-        {
-            Message.Warning("Debe ingresar el número de referencia del reloj.");
-            return;
-        }
-
         if (_watchFormModel.BrandId <= 0)
         {
             Message.Warning("Debe seleccionar una marca de reloj válida.");
@@ -1695,14 +1684,18 @@
                 GenderType: _watchFormModel.GenderType,
                 CaseNumber: _watchFormModel.CaseNumber.Trim(),
                 BrandId: _watchFormModel.BrandId,
-                ProviderId: _watchFormModel.ProviderId,
-                Reference: _watchFormModel.Reference
+                ProviderId: _watchFormModel.ProviderId
             );
 
             var result = await Sender.Send(cmd);
             if (result.IsSuccess)
             {
-                Message.Success($"¡Reloj registrado con éxito con referencia #{_watchFormModel.Reference}!");
+                await ModalService.SuccessAsync(new ConfirmOptions
+                {
+                    Title = "¡Reloj Registrado Exitosamente!",
+                    Content = $"Se ha asignado la Referencia #{result.Value.FormattedReference} al nuevo reloj registrado.",
+                    OkText = "Aceptar"
+                });
                 _drawerWatchVisible = false;
                 await LoadInventoryCatalogAsync();
             }
@@ -1723,7 +1716,6 @@
 
     public class JewelFormModel
     {
-        public int? Reference { get; set; }
         public int ItemTypeId { get; set; } = 1;
         public int? ProviderId { get; set; }
         public double Weight { get; set; }
@@ -1735,7 +1727,6 @@
 
     public class WatchFormModel
     {
-        public int? Reference { get; set; }
         public int BrandId { get; set; }
         public GenderType GenderType { get; set; } = GenderType.Hombre;
         public int? ProviderId { get; set; }

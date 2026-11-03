@@ -1,3 +1,4 @@
+using JewerlySystem.Modules.Inventory.Application.DTOs;
 using JewerlySystem.Modules.Inventory.Domain;
 
 namespace JewerlySystem.Modules.Inventory.Application;
@@ -14,6 +15,8 @@ public interface IInventoryRepository
     Task<IReadOnlyList<Brand>> GetBrandsAsync(CancellationToken ct = default);
     Task<IReadOnlyList<ItemType>> GetItemTypesAsync(CancellationToken ct = default);
     Task<int> GetNextItemReferenceAsync(CancellationToken ct = default);
+    Task<CreateItemResponse> CreateJewelItemAtomicAsync(Item item, Jewel jewel, CancellationToken ct = default);
+    Task<CreateItemResponse> CreateWatchItemAtomicAsync(Item item, Watch watch, CancellationToken ct = default);
     Task AddItemAsync(Item item, CancellationToken ct = default);
     Task AddJewelAsync(Jewel jewel, CancellationToken ct = default);
     Task AddWatchAsync(Watch watch, CancellationToken ct = default);

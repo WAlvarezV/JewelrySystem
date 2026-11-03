@@ -1,6 +1,7 @@
 using FluentValidation;
 using JewerlySystem.Common.Application;
 using JewerlySystem.Common.Domain;
+using JewerlySystem.Modules.Inventory.Application.DTOs;
 using JewerlySystem.Modules.Inventory.Domain;
 
 namespace JewerlySystem.Modules.Inventory.Application.Commands;
@@ -13,8 +14,7 @@ public record CreateJewelItemCommand(
     double Weight,
     int GramValue,
     int? Length = null,
-    int? ProviderId = null,
-    int? Reference = null) : ICommand<int>;
+    int? ProviderId = null) : ICommand<CreateItemResponse>;
 
 public class CreateJewelItemCommandValidator : AbstractValidator<CreateJewelItemCommand>
 {
@@ -24,14 +24,10 @@ public class CreateJewelItemCommandValidator : AbstractValidator<CreateJewelItem
         RuleFor(x => x.Description).NotEmpty().WithMessage("La descripción es obligatoria.");
         RuleFor(x => x.Weight).GreaterThan(0).WithMessage("El peso debe ser mayor a 0.");
         RuleFor(x => x.GramValue).GreaterThan(0).WithMessage("El valor por gramo debe ser mayor a 0.");
-        When(x => x.Reference.HasValue, () =>
-        {
-            RuleFor(x => x.Reference!.Value).GreaterThan(0).WithMessage("El número de referencia debe ser mayor a 0.");
-        });
     }
 }
 
-public class CreateJewelItemCommandHandler : ICommandHandler<CreateJewelItemCommand, int>
+public class CreateJewelItemCommandHandler : ICommandHandler<CreateJewelItemCommand, CreateItemResponse>
 {
     private readonly IInventoryRepository _repository;
 
@@ -40,25 +36,10 @@ public class CreateJewelItemCommandHandler : ICommandHandler<CreateJewelItemComm
         _repository = repository;
     }
 
-    public async Task<Result<int>> Handle(CreateJewelItemCommand request, CancellationToken cancellationToken)
+    public async Task<Result<CreateItemResponse>> Handle(CreateJewelItemCommand request, CancellationToken cancellationToken)
     {
-        int refToUse;
-        if (request.Reference.HasValue && request.Reference.Value > 0)
-        {
-            var existing = await _repository.GetItemByReferenceAsync(request.Reference.Value, cancellationToken);
-            if (existing != null)
-            {
-                return Result.Failure<int>(Error.Conflict("Items.DuplicateReference", $"La referencia #{request.Reference.Value} ya se encuentra registrada en el inventario."));
-            }
-            refToUse = request.Reference.Value;
-        }
-        else
-        {
-            refToUse = await _repository.GetNextItemReferenceAsync(cancellationToken);
-        }
-
         var item = new Item(
-            reference: refToUse,
+            reference: 0,
             costValue: request.CostValue,
             dateOfEntry: request.DateOfEntry,
             description: request.Description,
@@ -66,20 +47,15 @@ public class CreateJewelItemCommandHandler : ICommandHandler<CreateJewelItemComm
             providerId: request.ProviderId
         );
 
-        await _repository.AddItemAsync(item, cancellationToken);
-        await _repository.SaveChangesAsync(cancellationToken);
-
         var jewel = new Jewel(
-            itemId: item.Id,
+            itemId: 0,
             weight: request.Weight,
             gramValue: request.GramValue,
             length: request.Length
         );
 
-        await _repository.AddJewelAsync(jewel, cancellationToken);
-        await _repository.SaveChangesAsync(cancellationToken);
-
-        return Result.Success(item.Id);
+        var response = await _repository.CreateJewelItemAtomicAsync(item, jewel, cancellationToken);
+        return Result.Success(response);
     }
 }
 
@@ -91,8 +67,7 @@ public record CreateWatchItemCommand(
     GenderType GenderType,
     string CaseNumber,
     int BrandId,
-    int? ProviderId = null,
-    int? Reference = null) : ICommand<int>;
+    int? ProviderId = null) : ICommand<CreateItemResponse>;
 
 public class CreateWatchItemCommandValidator : AbstractValidator<CreateWatchItemCommand>
 {
@@ -102,14 +77,10 @@ public class CreateWatchItemCommandValidator : AbstractValidator<CreateWatchItem
         RuleFor(x => x.Description).NotEmpty().WithMessage("La descripción es obligatoria.");
         RuleFor(x => x.CaseNumber).NotEmpty().WithMessage("El número de caja es obligatorio.");
         RuleFor(x => x.BrandId).GreaterThan(0).WithMessage("La marca es obligatoria.");
-        When(x => x.Reference.HasValue, () =>
-        {
-            RuleFor(x => x.Reference!.Value).GreaterThan(0).WithMessage("El número de referencia debe ser mayor a 0.");
-        });
     }
 }
 
-public class CreateWatchItemCommandHandler : ICommandHandler<CreateWatchItemCommand, int>
+public class CreateWatchItemCommandHandler : ICommandHandler<CreateWatchItemCommand, CreateItemResponse>
 {
     private readonly IInventoryRepository _repository;
 
@@ -118,25 +89,10 @@ public class CreateWatchItemCommandHandler : ICommandHandler<CreateWatchItemComm
         _repository = repository;
     }
 
-    public async Task<Result<int>> Handle(CreateWatchItemCommand request, CancellationToken cancellationToken)
+    public async Task<Result<CreateItemResponse>> Handle(CreateWatchItemCommand request, CancellationToken cancellationToken)
     {
-        int refToUse;
-        if (request.Reference.HasValue && request.Reference.Value > 0)
-        {
-            var existing = await _repository.GetItemByReferenceAsync(request.Reference.Value, cancellationToken);
-            if (existing != null)
-            {
-                return Result.Failure<int>(Error.Conflict("Items.DuplicateReference", $"La referencia #{request.Reference.Value} ya se encuentra registrada en el inventario."));
-            }
-            refToUse = request.Reference.Value;
-        }
-        else
-        {
-            refToUse = await _repository.GetNextItemReferenceAsync(cancellationToken);
-        }
-
         var item = new Item(
-            reference: refToUse,
+            reference: 0,
             costValue: request.CostValue,
             dateOfEntry: request.DateOfEntry,
             description: request.Description,
@@ -144,20 +100,15 @@ public class CreateWatchItemCommandHandler : ICommandHandler<CreateWatchItemComm
             providerId: request.ProviderId
         );
 
-        await _repository.AddItemAsync(item, cancellationToken);
-        await _repository.SaveChangesAsync(cancellationToken);
-
         var watch = new Watch(
-            itemId: item.Id,
+            itemId: 0,
             genderType: request.GenderType,
             caseNumber: request.CaseNumber,
             brandId: request.BrandId
         );
 
-        await _repository.AddWatchAsync(watch, cancellationToken);
-        await _repository.SaveChangesAsync(cancellationToken);
-
-        return Result.Success(item.Id);
+        var response = await _repository.CreateWatchItemAtomicAsync(item, watch, cancellationToken);
+        return Result.Success(response);
     }
 }
 

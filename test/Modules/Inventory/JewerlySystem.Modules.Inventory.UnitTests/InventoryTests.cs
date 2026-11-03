@@ -1,6 +1,7 @@
 using FluentValidation.TestHelper;
 using JewerlySystem.Modules.Inventory.Application;
 using JewerlySystem.Modules.Inventory.Application.Commands;
+using JewerlySystem.Modules.Inventory.Application.DTOs;
 using JewerlySystem.Modules.Inventory.Domain;
 using NSubstitute;
 using Xunit;
@@ -33,11 +34,12 @@ public class InventoryTests
     }
 
     [Fact]
-    public async Task CreateJewelItemCommandHandler_ShouldAddItemAndJewel_WithNextReference()
+    public async Task CreateJewelItemCommandHandler_ShouldDelegateToAtomicCreation_AndReturnAssignedReference()
     {
         // Arrange
         var repository = Substitute.For<IInventoryRepository>();
-        repository.GetNextItemReferenceAsync(Arg.Any<CancellationToken>()).Returns(Task.FromResult(200));
+        repository.CreateJewelItemAtomicAsync(Arg.Any<Item>(), Arg.Any<Jewel>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new CreateItemResponse(10, 1)));
 
         var handler = new CreateJewelItemCommandHandler(repository);
         var command = new CreateJewelItemCommand(
@@ -54,63 +56,14 @@ public class InventoryTests
 
         // Assert
         Assert.True(result.IsSuccess);
-        await repository.Received(1).AddItemAsync(Arg.Is<Item>(i => i.Reference == 200 && i.CostValue == 80_000), Arg.Any<CancellationToken>());
-        await repository.Received(1).AddJewelAsync(Arg.Is<Jewel>(j => j.Weight == 5.2), Arg.Any<CancellationToken>());
-        await repository.Received(2).SaveChangesAsync(Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task CreateJewelItemCommandHandler_ShouldUseManualReference_WhenProvided()
-    {
-        // Arrange
-        var repository = Substitute.For<IInventoryRepository>();
-        repository.GetItemByReferenceAsync(9493, Arg.Any<CancellationToken>()).Returns(Task.FromResult<Item?>(null));
-
-        var handler = new CreateJewelItemCommandHandler(repository);
-        var command = new CreateJewelItemCommand(
-            CostValue: 150_000,
-            DateOfEntry: DateTime.UtcNow,
-            Description: "Anillo caballero 18k",
-            ItemTypeId: 1,
-            Weight: 4.5,
-            GramValue: 280_000,
-            Reference: 9493
+        Assert.Equal(10, result.Value.Id);
+        Assert.Equal(1, result.Value.Reference);
+        Assert.Equal("0001", result.Value.FormattedReference);
+        await repository.Received(1).CreateJewelItemAtomicAsync(
+            Arg.Is<Item>(i => i.CostValue == 80_000 && i.Description == "Anillo 18k"),
+            Arg.Is<Jewel>(j => j.Weight == 5.2 && j.GramValue == 250_000),
+            Arg.Any<CancellationToken>()
         );
-
-        // Act
-        var result = await handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        Assert.True(result.IsSuccess);
-        await repository.Received(1).AddItemAsync(Arg.Is<Item>(i => i.Reference == 9493), Arg.Any<CancellationToken>());
-        await repository.DidNotReceive().GetNextItemReferenceAsync(Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task CreateJewelItemCommandHandler_ShouldFail_WhenReferenceAlreadyExists()
-    {
-        // Arrange
-        var repository = Substitute.For<IInventoryRepository>();
-        var existing = new Item(9493, 100_000, DateTime.UtcNow, "Existente", 1);
-        repository.GetItemByReferenceAsync(9493, Arg.Any<CancellationToken>()).Returns(Task.FromResult<Item?>(existing));
-
-        var handler = new CreateJewelItemCommandHandler(repository);
-        var command = new CreateJewelItemCommand(
-            CostValue: 150_000,
-            DateOfEntry: DateTime.UtcNow,
-            Description: "Anillo duplicado",
-            ItemTypeId: 1,
-            Weight: 4.5,
-            GramValue: 280_000,
-            Reference: 9493
-        );
-
-        // Act
-        var result = await handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        Assert.False(result.IsSuccess);
-        Assert.Contains("ya se encuentra registrada", result.Error.Message);
     }
 
     [Fact]
@@ -128,11 +81,12 @@ public class InventoryTests
     }
 
     [Fact]
-    public async Task CreateWatchItemCommandHandler_ShouldAddWatchAndItem_Successfully()
+    public async Task CreateWatchItemCommandHandler_ShouldDelegateToAtomicCreation_AndReturnAssignedReference()
     {
         // Arrange
         var repository = Substitute.For<IInventoryRepository>();
-        repository.GetNextItemReferenceAsync(Arg.Any<CancellationToken>()).Returns(505);
+        repository.CreateWatchItemAtomicAsync(Arg.Any<Item>(), Arg.Any<Watch>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new CreateItemResponse(25, 2)));
 
         var handler = new CreateWatchItemCommandHandler(repository);
         var command = new CreateWatchItemCommand(
@@ -150,64 +104,28 @@ public class InventoryTests
 
         // Assert
         Assert.True(result.IsSuccess);
-        await repository.Received(1).AddItemAsync(Arg.Is<Item>(i => i.Reference == 505 && i.CostValue == 1_200_000), Arg.Any<CancellationToken>());
-        await repository.Received(1).AddWatchAsync(Arg.Is<Watch>(w => w.CaseNumber == "T137.410.11" && w.BrandId == 2), Arg.Any<CancellationToken>());
+        Assert.Equal(25, result.Value.Id);
+        Assert.Equal(2, result.Value.Reference);
+        Assert.Equal("0002", result.Value.FormattedReference);
+        await repository.Received(1).CreateWatchItemAtomicAsync(
+            Arg.Is<Item>(i => i.CostValue == 1_200_000 && i.Description == "Reloj Tissot PRX"),
+            Arg.Is<Watch>(w => w.CaseNumber == "T137.410.11" && w.BrandId == 2),
+            Arg.Any<CancellationToken>()
+        );
     }
 
     [Fact]
-    public async Task CreateWatchItemCommandHandler_ShouldUseManualReference_WhenProvided()
+    public void CreateWatchItemCommandValidator_ShouldHaveError_WhenCostValueIsZeroOrNegative()
     {
         // Arrange
-        var repository = Substitute.For<IInventoryRepository>();
-        repository.GetItemByReferenceAsync(3363, Arg.Any<CancellationToken>()).Returns(Task.FromResult<Item?>(null));
-
-        var handler = new CreateWatchItemCommandHandler(repository);
-        var command = new CreateWatchItemCommand(
-            CostValue: 450_000,
-            DateOfEntry: DateTime.UtcNow,
-            Description: "Reloj Casio Vintage",
-            ItemTypeId: 5,
-            GenderType: GenderType.Hombre,
-            CaseNumber: "A168WG",
-            BrandId: 1,
-            Reference: 3363
-        );
+        var validator = new CreateWatchItemCommandValidator();
+        var command = new CreateWatchItemCommand(0, DateTime.UtcNow, "Reloj", 5, GenderType.Hombre, "SN123", 1);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = validator.TestValidate(command);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        await repository.Received(1).AddItemAsync(Arg.Is<Item>(i => i.Reference == 3363), Arg.Any<CancellationToken>());
-        await repository.DidNotReceive().GetNextItemReferenceAsync(Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task CreateWatchItemCommandHandler_ShouldFail_WhenReferenceAlreadyExists()
-    {
-        // Arrange
-        var repository = Substitute.For<IInventoryRepository>();
-        var existing = new Item(3363, 200_000, DateTime.UtcNow, "Existente", 5);
-        repository.GetItemByReferenceAsync(3363, Arg.Any<CancellationToken>()).Returns(Task.FromResult<Item?>(existing));
-
-        var handler = new CreateWatchItemCommandHandler(repository);
-        var command = new CreateWatchItemCommand(
-            CostValue: 450_000,
-            DateOfEntry: DateTime.UtcNow,
-            Description: "Reloj Casio Duplicado",
-            ItemTypeId: 5,
-            GenderType: GenderType.Hombre,
-            CaseNumber: "A168WG",
-            BrandId: 1,
-            Reference: 3363
-        );
-
-        // Act
-        var result = await handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        Assert.False(result.IsSuccess);
-        Assert.Contains("ya se encuentra registrada", result.Error.Message);
+        result.ShouldHaveValidationErrorFor(x => x.CostValue);
     }
 
     [Fact]

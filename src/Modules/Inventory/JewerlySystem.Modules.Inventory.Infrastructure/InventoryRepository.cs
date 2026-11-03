@@ -1,4 +1,5 @@
 using JewerlySystem.Modules.Inventory.Application;
+using JewerlySystem.Modules.Inventory.Application.DTOs;
 using JewerlySystem.Modules.Inventory.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,6 +7,8 @@ namespace JewerlySystem.Modules.Inventory.Infrastructure;
 
 public class InventoryRepository : IInventoryRepository
 {
+    private static readonly SemaphoreSlim _referenceLock = new(1, 1);
+    private const long ReferenceAllocationLockId = 7492812938471;
     private readonly InventoryDbContext _dbContext;
 
     public InventoryRepository(InventoryDbContext dbContext)
@@ -20,7 +23,20 @@ public class InventoryRepository : IInventoryRepository
 
     public async Task<Item?> GetItemByReferenceAsync(int reference, CancellationToken ct = default)
     {
-        return await _dbContext.Items.FirstOrDefaultAsync(i => i.Reference == reference, ct);
+        var activeItem = await _dbContext.Items
+            .Where(i => i.Reference == reference && i.Active && i.DateOfSale == null)
+            .OrderByDescending(i => i.Id)
+            .FirstOrDefaultAsync(ct);
+
+        if (activeItem != null)
+        {
+            return activeItem;
+        }
+
+        return await _dbContext.Items
+            .Where(i => i.Reference == reference)
+            .OrderByDescending(i => i.Id)
+            .FirstOrDefaultAsync(ct);
     }
 
     public async Task<IReadOnlyList<Item>> ListItemsAsync(bool? activeOnly = null, int? itemTypeId = null, CancellationToken ct = default)
@@ -72,8 +88,92 @@ public class InventoryRepository : IInventoryRepository
 
     public async Task<int> GetNextItemReferenceAsync(CancellationToken ct = default)
     {
-        var maxRef = await _dbContext.Items.MaxAsync(i => (int?)i.Reference, ct) ?? 0;
-        return maxRef + 1;
+        var occupiedRefs = await _dbContext.Items
+            .Where(i => i.Active && i.DateOfSale == null && i.Reference > 0)
+            .Select(i => i.Reference)
+            .Distinct()
+            .ToListAsync(ct);
+
+        var occupiedSet = occupiedRefs.ToHashSet();
+        int candidate = 1;
+        while (occupiedSet.Contains(candidate))
+        {
+            candidate++;
+        }
+
+        return candidate;
+    }
+
+    public async Task<CreateItemResponse> CreateJewelItemAtomicAsync(Item item, Jewel jewel, CancellationToken ct = default)
+    {
+        await _referenceLock.WaitAsync(ct);
+        try
+        {
+            var isRelational = _dbContext.Database.IsRelational();
+            await using var tx = isRelational ? await _dbContext.Database.BeginTransactionAsync(ct) : null;
+
+            if (isRelational && _dbContext.Database.IsNpgsql())
+            {
+                await _dbContext.Database.ExecuteSqlRawAsync($"SELECT pg_advisory_xact_lock({ReferenceAllocationLockId});", ct);
+            }
+
+            var nextRef = await GetNextItemReferenceAsync(ct);
+            item.Reference = nextRef;
+
+            await _dbContext.Items.AddAsync(item, ct);
+            await _dbContext.SaveChangesAsync(ct);
+
+            jewel.ItemId = item.Id;
+            await _dbContext.Jewelry.AddAsync(jewel, ct);
+            await _dbContext.SaveChangesAsync(ct);
+
+            if (tx != null)
+            {
+                await tx.CommitAsync(ct);
+            }
+
+            return new CreateItemResponse(item.Id, nextRef);
+        }
+        finally
+        {
+            _referenceLock.Release();
+        }
+    }
+
+    public async Task<CreateItemResponse> CreateWatchItemAtomicAsync(Item item, Watch watch, CancellationToken ct = default)
+    {
+        await _referenceLock.WaitAsync(ct);
+        try
+        {
+            var isRelational = _dbContext.Database.IsRelational();
+            await using var tx = isRelational ? await _dbContext.Database.BeginTransactionAsync(ct) : null;
+
+            if (isRelational && _dbContext.Database.IsNpgsql())
+            {
+                await _dbContext.Database.ExecuteSqlRawAsync($"SELECT pg_advisory_xact_lock({ReferenceAllocationLockId});", ct);
+            }
+
+            var nextRef = await GetNextItemReferenceAsync(ct);
+            item.Reference = nextRef;
+
+            await _dbContext.Items.AddAsync(item, ct);
+            await _dbContext.SaveChangesAsync(ct);
+
+            watch.ItemId = item.Id;
+            await _dbContext.Watches.AddAsync(watch, ct);
+            await _dbContext.SaveChangesAsync(ct);
+
+            if (tx != null)
+            {
+                await tx.CommitAsync(ct);
+            }
+
+            return new CreateItemResponse(item.Id, nextRef);
+        }
+        finally
+        {
+            _referenceLock.Release();
+        }
     }
 
     public async Task AddItemAsync(Item item, CancellationToken ct = default)

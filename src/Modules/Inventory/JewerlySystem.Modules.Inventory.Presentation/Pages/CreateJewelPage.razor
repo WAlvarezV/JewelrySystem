@@ -4,6 +4,7 @@
 @inject ISender Sender
 @inject NavigationManager Navigation
 @inject IMessageService Message
+@inject ModalService ModalService
 
 <div class="create-jewel-container">
     <SoftHeroHeader Title="Registrar Nueva Joya"
@@ -38,12 +39,11 @@
 
                 <div class="row g-3">
                     <div class="col-12 col-md-4">
-                        <SoftTooltipLabel Label="N° de Referencia" Required="true" TooltipText="Número físico o código de inventario de la joya" />
-                        <AntDesign.InputNumber TValue="int?"
-                                               @bind-Value="_formModel.Reference"
-                                               Min="1"
-                                               Placeholder="Ej. 9493"
-                                               Style="width: 100%; font-weight: bold; font-size: 1.05rem;" />
+                        <SoftTooltipLabel Label="N° de Referencia" Required="false" TooltipText="Asignación automática y correlativa por el sistema al registrar (inicia en 0001)" />
+                        <div class="form-control bg-light d-flex align-items-center justify-content-between text-muted fw-bold" style="height: 38px;">
+                            <span><i class="bi bi-shield-lock-fill text-primary me-2"></i>Automática</span>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Secuencial</span>
+                        </div>
                     </div>
 
                     <div class="col-12 col-md-4">
@@ -257,12 +257,6 @@
 
     private async Task HandleSubmitAsync()
     {
-        if (!_formModel.Reference.HasValue || _formModel.Reference.Value <= 0)
-        {
-            Message.Warning("Debe ingresar el número de referencia de la joya.");
-            return;
-        }
-
         if (_formModel.ItemTypeId <= 0)
         {
             Message.Warning("Debe seleccionar un tipo de joya válido.");
@@ -300,8 +294,7 @@
                 Weight: _formModel.Weight,
                 GramValue: _formModel.GramValue,
                 Length: _formModel.Length,
-                ProviderId: _formModel.ProviderId,
-                Reference: _formModel.Reference
+                ProviderId: _formModel.ProviderId
             );
 
             var result = await Sender.Send(cmd);
@@ -311,8 +304,17 @@
                 return;
             }
 
-            Message.Success($"¡Joya #{_formModel.Reference} registrada con éxito en inventario con ID #{result.Value}!");
-            Navigation.NavigateTo("/inventory");
+            await ModalService.SuccessAsync(new ConfirmOptions
+            {
+                Title = "¡Joya Registrada Exitosamente!",
+                Content = $"Se ha asignado la Referencia #{result.Value.FormattedReference} al nuevo artículo registrado.",
+                OkText = "Ir al Inventario",
+                OnOk = (e) =>
+                {
+                    Navigation.NavigateTo("/inventory");
+                    return Task.CompletedTask;
+                }
+            });
         }
         catch (Exception ex)
         {
@@ -326,7 +328,6 @@
 
     public class JewelFormModel
     {
-        public int? Reference { get; set; }
         public int ItemTypeId { get; set; } = 1;
         public int? ProviderId { get; set; }
         public double Weight { get; set; }

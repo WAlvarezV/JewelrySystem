@@ -36,6 +36,11 @@ public record ItemTypeDto(
     int Id,
     string Name);
 
+public record CreateItemResponse(int Id, int Reference)
+{
+    public string FormattedReference => Reference.ToString("D4");
+}
+
 public record ItemDetailDto(
     int Id,
     int Reference,
