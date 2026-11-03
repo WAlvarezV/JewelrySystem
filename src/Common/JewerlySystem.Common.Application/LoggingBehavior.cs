@@ -1,3 +1,4 @@
+using JewerlySystem.Common.Application.Security;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -20,7 +21,15 @@ public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
     {
         var requestName = typeof(TRequest).Name;
 
-        _logger.LogInformation("Processing {RequestName}: {@Request}", requestName, request);
+        // Hardening ISO 27701 / OWASP A09: No serializar payloads sensibles en texto plano
+        if (DataSanitizer.IsSensitive(requestName))
+        {
+            _logger.LogInformation("Processing {RequestName}: [REDACTED_SECURITY_DATA]", requestName);
+        }
+        else
+        {
+            _logger.LogInformation("Processing {RequestName}: {@Request}", requestName, request);
+        }
 
         var response = await next();
 

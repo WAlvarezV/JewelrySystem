@@ -79,6 +79,10 @@ public static class ServiceCollectionExtensions
         })
         .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
         {
+            options.Cookie.Name = "JewerlySystem.Auth";
+            options.Cookie.HttpOnly = true;
+            options.Cookie.SameSite = SameSiteMode.Lax;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
             options.LoginPath = "/";
             options.LogoutPath = "/logout";
             options.ExpireTimeSpan = TimeSpan.FromHours(8);
@@ -87,8 +91,32 @@ public static class ServiceCollectionExtensions
         .AddCookie(IdentityConstants.TwoFactorUserIdScheme, options =>
         {
             options.Cookie.Name = "JewerlySystem.2FA";
+            options.Cookie.HttpOnly = true;
+            options.Cookie.SameSite = SameSiteMode.Strict;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
             options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
         });
+
+        // Configuración de HSTS estricto (ISO 27001 A.8.24 / SOC 2 CC6.7 / OWASP A02)
+        services.AddHsts(options =>
+        {
+            options.Preload = true;
+            options.IncludeSubDomains = true;
+            options.MaxAge = TimeSpan.FromDays(365);
+        });
+
+        // Antiforgery Cookie Hardening
+        services.AddAntiforgery(options =>
+        {
+            options.Cookie.Name = "JewerlySystem.XSRF";
+            options.Cookie.HttpOnly = true;
+            options.Cookie.SameSite = SameSiteMode.Strict;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+            options.HeaderName = "X-XSRF-TOKEN";
+        });
+
+        // Hardening de Rate Limiting y ProblemDetails
+        services.AddSecurityHardening();
 
         services.AddAuthorization();
         services.AddCascadingAuthenticationState();

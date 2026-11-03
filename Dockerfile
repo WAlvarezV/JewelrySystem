@@ -13,17 +13,22 @@ COPY src/ ./src/
 WORKDIR /src/src/Host/JewerlySystem.Web
 RUN dotnet publish "JewerlySystem.Web.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-# Stage 2: Runtime
+# Stage 2: Runtime (Hardened Non-Root Container - ISO 27001 A.8.9 / OWASP A02)
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 
-ENV ASPNETCORE_URLS=http://+:8080
-ENV PORT=8080
-ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
-ENV LC_ALL=es_CO.UTF-8
-ENV LANG=es_CO.UTF-8
+ENV ASPNETCORE_URLS=http://+:8080 \
+    PORT=8080 \
+    DOTNET_EnableDiagnostics=0 \
+    DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
+    LC_ALL=es_CO.UTF-8 \
+    LANG=es_CO.UTF-8
+
 EXPOSE 8080
 
-COPY --from=build /app/publish .
+COPY --from=build --chown=$APP_UID:$APP_UID /app/publish .
+
+# Run as non-privileged app user (UID 1654)
+USER $APP_UID
 
 ENTRYPOINT ["dotnet", "JewerlySystem.Web.dll"]

@@ -15,7 +15,7 @@ public static class AuthEndpointsExtensions
 {
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
-        // 0. Multi-Tenant Switch Endpoint
+        // 0. Multi-Tenant Switch Endpoint (Hardened - OWASP A01 / ISO 27001 A.8.2)
         app.MapGet("/api/tenants/switch", (
             string tenantId,
             string? returnUrl,
@@ -25,18 +25,28 @@ public static class AuthEndpointsExtensions
             var tenant = tenantRegistry.GetTenant(tenantId);
             if (tenant != null)
             {
+                var userEmail = httpContext.User.FindFirstValue(ClaimTypes.Email);
+                if (httpContext.User.Identity?.IsAuthenticated == true && !string.IsNullOrWhiteSpace(userEmail))
+                {
+                    if (!tenant.CanUserAccess(userEmail))
+                    {
+                        return Results.Redirect("/?error=" + Uri.EscapeDataString("No tienes permisos para acceder a esta joyería (inquilino)."));
+                    }
+                }
+
                 var cookieOptions = new CookieOptions
                 {
                     Path = "/",
                     HttpOnly = false,
                     SameSite = SameSiteMode.Lax,
+                    Secure = httpContext.Request.IsHttps,
                     Expires = DateTimeOffset.UtcNow.AddYears(1)
                 };
                 httpContext.Response.Cookies.Append("active_tenant", tenant.Id, cookieOptions);
                 httpContext.Response.Cookies.Append("pomona_theme", tenant.DefaultTheme, cookieOptions);
             }
 
-            return Results.Redirect(string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl);
+            return Results.Redirect(SafeLocalUrl(returnUrl, "/"));
         });
 
         // 1. Standard HTTP POST Login Endpoint with Mandatory MFA
@@ -84,7 +94,7 @@ public static class AuthEndpointsExtensions
             {
                 new(ClaimTypes.NameIdentifier, user.Id),
                 new(ClaimTypes.Email, user.Email ?? ""),
-                new("returnUrl", string.IsNullOrWhiteSpace(returnUrl) ? "/dashboard" : returnUrl),
+                new("returnUrl", SafeLocalUrl(returnUrl, "/dashboard")),
                 new("mfaMethod", hasAuthenticator ? "authenticator" : "email")
             };
             var twoFactorIdentity = new ClaimsIdentity(twoFactorClaims, IdentityConstants.TwoFactorUserIdScheme);
@@ -116,12 +126,14 @@ public static class AuthEndpointsExtensions
                 var htmlBody = templateService.GenerateHtml("otp-mfa-template.html", templateValues);
                 var sent = await emailSender.SendEmailAsync(user.Email ?? "", "Código de Seguridad MFA - JewerlySystem", htmlBody);
 
-                logger.LogInformation("MFA OTP generado para {Email}: [{Otp}]. Enviado: {Sent}", user.Email, otp, sent);
+                // Hardening OWASP A07/A09: Nunca escribir códigos OTP o secretos en los logs
+                logger.LogInformation("MFA OTP generado exitosamente para {Email}. Enviado: {Sent}", user.Email, sent);
 
                 var masked = MaskEmail(user.Email);
                 return Results.Redirect($"/?mfa=true&method=email&email={Uri.EscapeDataString(masked)}");
             }
-        }).DisableAntiforgery();
+        }).DisableAntiforgery()
+          .RequireRateLimiting(SecurityExtensions.AuthRateLimitPolicy);
 
         // 2. Verify MFA OTP (Authenticator App or Email OTP)
         app.MapPost("/api/auth/verify-otp", async (
@@ -230,8 +242,9 @@ public static class AuthEndpointsExtensions
             user.LastLoginAt = DateTime.UtcNow;
             await userManager.UpdateAsync(user);
 
-            return Results.Redirect(returnUrl);
-        }).DisableAntiforgery();
+            return Results.Redirect(SafeLocalUrl(returnUrl, "/dashboard"));
+        }).DisableAntiforgery()
+          .RequireRateLimiting(SecurityExtensions.AuthRateLimitPolicy);
 
         // 3. Resend OTP via Email
         app.MapPost("/api/auth/resend-otp", async (
@@ -275,17 +288,19 @@ public static class AuthEndpointsExtensions
             var htmlBody = templateService.GenerateHtml("otp-mfa-template.html", templateValues);
             var sent = await emailSender.SendEmailAsync(user.Email ?? "", "Nuevo Código de Seguridad MFA - JewerlySystem", htmlBody);
 
-            logger.LogInformation("Reenvío MFA OTP para {Email}: [{Otp}]. Enviado: {Sent}", user.Email, otp, sent);
+            // Hardening OWASP A07/A09: Nunca escribir códigos OTP o secretos en los logs
+            logger.LogInformation("Reenvío MFA OTP para {Email}. Enviado: {Sent}", user.Email, sent);
 
             return Results.Redirect($"/?mfa=true&email={Uri.EscapeDataString(MaskEmail(email))}&message={Uri.EscapeDataString("Se ha enviado un nuevo código a tu correo.")}");
-        }).DisableAntiforgery();
+        }).DisableAntiforgery()
+          .RequireRateLimiting(SecurityExtensions.AuthRateLimitPolicy);
 
         // 4. Passkeys WebAuthn Endpoints
         app.MapPost("/api/auth/passkey/assertion-options", async (ISender sender, string? username) =>
         {
             var result = await sender.Send(new GetPasskeyAssertionOptionsQuery(username));
             return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(result.Error);
-        });
+        }).RequireRateLimiting(SecurityExtensions.AuthRateLimitPolicy);
 
         app.MapPost("/api/auth/passkey/login", async (
             HttpContext httpContext,
@@ -364,7 +379,8 @@ public static class AuthEndpointsExtensions
             await userManager.UpdateAsync(user);
 
             return Results.Redirect("/dashboard");
-        }).DisableAntiforgery();
+        }).DisableAntiforgery()
+          .RequireRateLimiting(SecurityExtensions.AuthRateLimitPolicy);
 
         app.MapPost("/api/auth/passkey/verify-assertion", async (HttpContext httpContext, ISender sender, UserManager<ApplicationUser> userManager, string clientResponseJson) =>
         {
@@ -451,5 +467,18 @@ public static class AuthEndpointsExtensions
         if (name.Length <= 2)
             return $"{name[0]}*@{domain}";
         return $"{name[0]}{new string('*', Math.Max(1, name.Length - 2))}{name[^1]}@{domain}";
+    }
+
+    /// <summary>
+    /// Mitiga Open Redirects (OWASP Top 10 A01 / CWE-601) validando URLs locales.
+    /// </summary>
+    private static string SafeLocalUrl(string? url, string defaultUrl = "/dashboard")
+    {
+        if (string.IsNullOrWhiteSpace(url)) return defaultUrl;
+        if (url.StartsWith('/') && !url.StartsWith("//") && !url.StartsWith("/\\"))
+        {
+            return url;
+        }
+        return defaultUrl;
     }
 }
