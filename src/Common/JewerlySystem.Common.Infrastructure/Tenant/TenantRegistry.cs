@@ -19,29 +19,25 @@ public class TenantRegistry : ITenantRegistry
 
     public TenantRegistry(IConfiguration configuration)
     {
-        // 1. Resolve base connection strings
-        var defaultCs = configuration.GetConnectionString("PomonaCs")
+        // 1. Resolve raw base connection string from config or Railway environment
+        var rawDefaultCs = configuration.GetConnectionString("PomonaCs")
             ?? configuration.GetConnectionString("DefaultConnection")
+            ?? configuration["DATABASE_URL"]
+            ?? Environment.GetEnvironmentVariable("DATABASE_URL")
             ?? "Host=localhost;Port=5432;Database=IntZaioNJewerly;Username=postgres;Password=IntZaioN";
 
-        var oroPlataCs = configuration.GetConnectionString("OroPlataCs");
+        var defaultCs = NormalizeNpgsqlConnectionString(rawDefaultCs);
 
-        // Derive OroPlata database name from defaultCs if not explicitly set
-        if (string.IsNullOrWhiteSpace(oroPlataCs))
+        var rawOroPlataCs = configuration.GetConnectionString("OroPlataCs");
+        string oroPlataCs;
+
+        if (!string.IsNullOrWhiteSpace(rawOroPlataCs))
         {
-            try
-            {
-                var npgsqlBuilder = new NpgsqlConnectionStringBuilder(defaultCs);
-                var originalDb = npgsqlBuilder.Database ?? "IntZaioNJewerly";
-                npgsqlBuilder.Database = originalDb.EndsWith("_OroPlata", StringComparison.OrdinalIgnoreCase)
-                    ? originalDb
-                    : $"{originalDb}_OroPlata";
-                oroPlataCs = npgsqlBuilder.ConnectionString;
-            }
-            catch
-            {
-                oroPlataCs = defaultCs.Replace("Database=IntZaioNJewerly", "Database=IntZaioNJewerly_OroPlata");
-            }
+            oroPlataCs = NormalizeNpgsqlConnectionString(rawOroPlataCs);
+        }
+        else
+        {
+            oroPlataCs = DeriveDatabaseConnectionString(defaultCs, "_OroPlata");
         }
 
         // 2. Register Tenant: Joyería Pomona
@@ -81,5 +77,50 @@ public class TenantRegistry : ITenantRegistry
     {
         var tenant = GetTenant(tenantId);
         return tenant?.ConnectionString ?? GetDefaultTenant().ConnectionString;
+    }
+
+    public static string NormalizeNpgsqlConnectionString(string cs)
+    {
+        if (string.IsNullOrWhiteSpace(cs)) return cs;
+
+        if (cs.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) ||
+            cs.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                var uri = new Uri(cs);
+                var userInfo = uri.UserInfo.Split(':');
+                var user = Uri.UnescapeDataString(userInfo[0]);
+                var pass = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "";
+                var host = uri.Host;
+                var port = uri.Port > 0 ? uri.Port : 5432;
+                var db = uri.AbsolutePath.TrimStart('/');
+
+                return $"Host={host};Port={port};Database={db};Username={user};Password={pass};Trust Server Certificate=true;Include Error Detail=true;";
+            }
+            catch
+            {
+                // Fallback to original
+            }
+        }
+
+        return cs;
+    }
+
+    private static string DeriveDatabaseConnectionString(string normalizedBaseCs, string suffix)
+    {
+        try
+        {
+            var builder = new NpgsqlConnectionStringBuilder(normalizedBaseCs);
+            var originalDb = builder.Database ?? "IntZaioNJewerly";
+            builder.Database = originalDb.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)
+                ? originalDb
+                : $"{originalDb}{suffix}";
+            return builder.ConnectionString;
+        }
+        catch
+        {
+            return normalizedBaseCs.Replace("Database=IntZaioNJewerly", $"Database=IntZaioNJewerly{suffix}");
+        }
     }
 }

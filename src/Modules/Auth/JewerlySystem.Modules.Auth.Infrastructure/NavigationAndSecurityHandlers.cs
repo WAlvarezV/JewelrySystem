@@ -33,7 +33,7 @@ public class NavigationAndSecurityHandlers :
     private readonly AuthDbContext _dbContext;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
-    private static volatile bool _isSeeded = false;
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, bool> _seededTenants = new(StringComparer.OrdinalIgnoreCase);
     private static readonly SemaphoreSlim _seedLock = new(1, 1);
 
     public NavigationAndSecurityHandlers(
@@ -63,7 +63,8 @@ public class NavigationAndSecurityHandlers :
 
     private async Task EnsureNavigationSeededAsync(CancellationToken ct)
     {
-        if (_isSeeded)
+        var dbName = _dbContext.Database.GetDbConnection().Database ?? "default";
+        if (_seededTenants.ContainsKey(dbName))
         {
             return;
         }
@@ -71,7 +72,7 @@ public class NavigationAndSecurityHandlers :
         await _seedLock.WaitAsync(ct);
         try
         {
-            if (_isSeeded)
+            if (_seededTenants.ContainsKey(dbName))
             {
                 return;
             }
@@ -236,7 +237,7 @@ public class NavigationAndSecurityHandlers :
         }
 
         await _dbContext.SaveChangesAsync(ct);
-        _isSeeded = true;
+        _seededTenants[dbName] = true;
         }
         finally
         {

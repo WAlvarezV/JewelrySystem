@@ -10,16 +10,23 @@
     <div class="row justify-content-center align-items-center" style="min-height: 80vh;">
         <div class="col-12 col-sm-10 col-md-7 col-lg-5 col-xl-4">
             <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
-                <!-- Luxury Brand Header -->
-                <div class="pomona-login-header text-center py-4 px-3 position-relative" style="background: var(--brand-primary-gradient, linear-gradient(135deg, #701C2C 0%, #4D0E1A 100%)); border-bottom: 2px solid var(--brand-gold, #D4AF37);">
-                    <div class="d-inline-flex p-2 rounded-circle mb-2 align-items-center justify-content-center shadow-sm" style="background: rgba(255, 255, 255, 0.12); border: 1.5px solid rgba(212, 175, 55, 0.5);">
-                        <img src="@TenantContext.CurrentTenant.SymbolUrl" alt="@TenantContext.CurrentTenant.ShortName" style="width: 48px; height: 48px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));" />
+                <!-- General Luxury Platform Header -->
+                <div class="pomona-login-header text-center py-4 px-3 position-relative" style="background: linear-gradient(135deg, #18181B 0%, #27272A 50%, #09090B 100%); border-bottom: 2.5px solid #C59B27;">
+                    <div class="d-inline-flex p-2 rounded-circle mb-2 align-items-center justify-content-center shadow-sm" style="background: rgba(255, 255, 255, 0.08); border: 1.5px solid rgba(197, 155, 39, 0.65); width: 62px; height: 62px;">
+                        <svg viewBox="0 0 100 100" style="width: 38px; height: 38px;" xmlns="http://www.w3.org/2000/svg">
+                            <polygon points="50,6 94,50 50,94 6,50" fill="none" stroke="#C59B27" stroke-width="7" stroke-linejoin="round" />
+                            <polygon points="50,24 76,50 50,76 24,50" fill="none" stroke="#C59B27" stroke-width="6" stroke-linejoin="round" />
+                            <line x1="50" y1="6" x2="50" y2="24" stroke="#C59B27" stroke-width="6" />
+                            <line x1="94" y1="50" x2="76" y2="50" stroke="#C59B27" stroke-width="6" />
+                            <line x1="50" y1="94" x2="50" y2="76" stroke="#C59B27" stroke-width="6" />
+                            <line x1="6" y1="50" x2="24" y2="50" stroke="#C59B27" stroke-width="6" />
+                        </svg>
                     </div>
-                    <h2 class="text-white fw-bold m-0" style="font-family: 'Cinzel', 'Playfair Display', Georgia, serif; font-size: 1.65rem; letter-spacing: 3px;">
-                        @TenantContext.CurrentTenant.ShortName
+                    <h2 class="text-white fw-bold m-0" style="font-family: 'Cinzel', 'Playfair Display', Georgia, serif; font-size: 1.55rem; letter-spacing: 3px;">
+                        JEWELRY SYSTEM
                     </h2>
-                    <div class="text-uppercase" style="color: var(--brand-gold, #D4AF37); font-size: 0.72rem; letter-spacing: 2px; font-weight: 600;">
-                        @TenantContext.CurrentTenant.Name
+                    <div class="text-uppercase" style="color: #C59B27; font-size: 0.72rem; letter-spacing: 2px; font-weight: 600;">
+                        Plataforma de Joyería & Relojería
                     </div>
                 </div>
 
@@ -171,7 +178,7 @@
                 </div>
             </div>
             <div class="text-center text-muted small mt-3">
-                &copy; 2026 @TenantContext.CurrentTenant.Name &bull; Todos los derechos reservados
+                &copy; 2026 Jewelry System &bull; Todos los derechos reservados
             </div>
         </div>
     </div>

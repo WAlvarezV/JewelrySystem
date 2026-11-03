@@ -2,6 +2,9 @@
 @inject ISender Sender
 @inject NavigationManager Navigation
 @inject ITenantContext TenantContext
+@inject IJSRuntime JS
+
+<PageTitle>@TenantContext.CurrentTenant.Name</PageTitle>
 
 <AuthorizeView>
     <Authorized>
@@ -360,6 +363,21 @@
         catch
         {
             // fallback
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("updateBrowserBranding", TenantContext.CurrentTenant.Name, TenantContext.CurrentTenant.SymbolUrl);
+            }
+            catch
+            {
+                // JavaScript runtime not available yet during prerender
+            }
         }
     }
 

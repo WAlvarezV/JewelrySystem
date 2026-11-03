@@ -1,4 +1,6 @@
 @namespace JewerlySystem.Common.Presentation.Components.Atoms
+@using JewerlySystem.Common.Application
+@inject IServiceProvider ServiceProvider
 
 <div class="pomona-logo-wrapper d-inline-flex align-items-center gap-2 @Class" style="@Style">
     @if (Variant == LogoVariant.SymbolOnly || Variant == LogoVariant.FullHorizontal || Variant == LogoVariant.FullVertical)
@@ -6,7 +8,7 @@
         <div class="pomona-symbol-container d-inline-flex align-items-center justify-content-center"
              style="width: @(Size)px; height: @(Size)px; min-width: @(Size)px; @GetContainerStyle()">
             <img src="@GetImageSrc()"
-                 alt="Pomona Joyería & Relojería"
+                 alt="@GetTitle()"
                  style="width: 100%; height: 100%; object-fit: contain; @GetImgFilterStyle()" />
         </div>
     }
@@ -15,10 +17,10 @@
     {
         <div class="pomona-brand-text d-flex flex-column text-start">
             <span class="pomona-title fw-bold" style="font-family: 'Cinzel', 'Playfair Display', 'Times New Roman', Georgia, serif; font-size: @(Size * 0.45)px; line-height: 1.1; letter-spacing: 2px; color: @GetTextColor();">
-                POMONA
+                @GetTitle()
             </span>
             <span class="pomona-subtitle text-uppercase" style="font-size: @(Size * 0.22)px; letter-spacing: 1.5px; font-weight: 600; color: @GetSubtitleColor();">
-                Joyería & Relojería
+                @GetSubtitle()
             </span>
         </div>
     }
@@ -26,10 +28,10 @@
     {
         <div class="pomona-brand-text d-flex flex-column text-center mt-1">
             <span class="pomona-title fw-bold" style="font-family: 'Cinzel', 'Playfair Display', 'Times New Roman', Georgia, serif; font-size: @(Size * 0.4)px; line-height: 1.1; letter-spacing: 2px; color: @GetTextColor();">
-                POMONA
+                @GetTitle()
             </span>
             <span class="pomona-subtitle text-uppercase" style="font-size: @(Size * 0.2)px; letter-spacing: 1.5px; font-weight: 600; color: @GetSubtitleColor();">
-                Joyería & Relojería
+                @GetSubtitle()
             </span>
         </div>
     }
@@ -58,18 +60,39 @@
     [Parameter] public string Class { get; set; } = string.Empty;
     [Parameter] public string Style { get; set; } = string.Empty;
 
-    private string GetImageSrc() => Color switch
+    private ITenantContext? _tenantContext;
+
+    protected override void OnInitialized()
     {
-        LogoColor.Burgundy => "images/pomona-symbol-burgundy.png",
-        LogoColor.Gold => "images/pomona-symbol-gold.png",
-        LogoColor.OriginalSquare => "images/pomona-logo-square.png",
-        _ => "images/pomona-symbol-white.png"
-    };
+        _tenantContext = ServiceProvider.GetService(typeof(ITenantContext)) as ITenantContext;
+    }
+
+    private string GetTitle() =>
+        _tenantContext?.CurrentTenant.ShortName ?? "POMONA";
+
+    private string GetSubtitle() =>
+        _tenantContext?.CurrentTenant.Name ?? "Joyería & Relojería";
+
+    private string GetImageSrc()
+    {
+        if (_tenantContext?.CurrentTenant.Id == "oro-plata")
+        {
+            return _tenantContext.CurrentTenant.SymbolUrl;
+        }
+
+        return Color switch
+        {
+            LogoColor.Burgundy => "images/pomona-symbol-burgundy.png",
+            LogoColor.Gold => "images/pomona-symbol-gold.png",
+            LogoColor.OriginalSquare => "images/pomona-logo-square.png",
+            _ => "images/pomona-symbol-white.png"
+        };
+    }
 
     private string GetContainerStyle()
     {
         if (!WithBox) return string.Empty;
-        return "background: linear-gradient(135deg, #701C2C 0%, #4D0E1A 100%); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 8px; padding: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.25);";
+        return "background: var(--brand-primary-gradient, linear-gradient(135deg, #701C2C 0%, #4D0E1A 100%)); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 8px; padding: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.25);";
     }
 
     private string GetImgFilterStyle() =>

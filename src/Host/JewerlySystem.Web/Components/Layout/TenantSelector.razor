@@ -2,9 +2,9 @@
 @inject IJSRuntime JS
 @inject AuthenticationStateProvider AuthStateProvider
 
-<div class="pomona-tenant-selector position-relative d-inline-flex align-items-center">
-    @if (_accessibleTenants.Count > 1)
-    {
+@if (_accessibleTenants.Count > 1)
+{
+    <div class="pomona-tenant-selector position-relative d-inline-flex align-items-center">
         <button type="button"
                 class="btn btn-sm btn-light border d-flex align-items-center gap-2 px-2 py-1 rounded-2 shadow-2xs pomona-tenant-toggle-btn"
                 title="Cambiar joyería activa"
@@ -56,20 +56,8 @@
                 }
             </div>
         }
-    }
-    else
-    {
-        <!-- Solo tiene 1 joyería asignada -->
-        <div class="d-flex align-items-center gap-2 px-2 py-1 rounded-2 border bg-light text-secondary">
-            <img src="@TenantContext.CurrentTenant.SymbolUrl"
-                 alt="@TenantContext.CurrentTenant.ShortName"
-                 style="width: 18px; height: 18px; object-fit: contain;" />
-            <span class="small fw-semibold d-none d-md-inline">
-                @TenantContext.CurrentTenant.Name
-            </span>
-        </div>
-    }
-</div>
+    </div>
+}
 
 @code {
     private bool _isOpen = false;

@@ -108,13 +108,7 @@ public class WebTenantContext : ITenantContext, ITenantConnectionProvider
             var match = _registry.GetTenant(cookieTenantId);
             if (match != null)
             {
-                // Verify user permission if authenticated
-                var user = httpContext?.User;
-                var userEmail = user?.FindFirstValue(ClaimTypes.Email) ?? user?.FindFirstValue(ClaimTypes.Name);
-                if (string.IsNullOrWhiteSpace(userEmail) || match.CanUserAccess(userEmail))
-                {
-                    return match;
-                }
+                return match;
             }
         }
 
