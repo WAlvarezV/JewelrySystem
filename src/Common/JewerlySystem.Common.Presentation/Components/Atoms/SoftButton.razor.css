@@ -9,13 +9,13 @@
 }
 
 ::deep .soft-btn.ant-btn-primary {
-    background: var(--brand-blue-gradient, linear-gradient(135deg, #1677ff 0%, #0958d9 100%));
+    background: var(--brand-primary-gradient, linear-gradient(135deg, #701C2C 0%, #4D0E1A 100%));
     border: none;
-    box-shadow: 0 2px 6px rgba(22, 119, 255, 0.25);
+    box-shadow: var(--brand-primary-shadow, 0 2px 6px rgba(112, 28, 44, 0.25));
 }
 
 ::deep .soft-btn.ant-btn-primary:hover {
-    box-shadow: 0 4px 12px rgba(22, 119, 255, 0.4);
+    box-shadow: 0 4px 12px rgba(112, 28, 44, 0.4);
     transform: translateY(-1px);
 }
 

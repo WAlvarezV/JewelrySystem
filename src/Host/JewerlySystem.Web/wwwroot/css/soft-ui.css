@@ -1,22 +1,62 @@
 /* ==========================================================================
-   SI.SIOT SOFT UI DESIGN SYSTEM TOKENS & OVERRIDES (JEWERLYSYSTEM 2.0)
+   POMONA JOYERÍA & RELOJERÍA - DESIGN SYSTEM TOKENS & ANT DESIGN THEMES
    ========================================================================== */
 
-:root {
-    /* Brand Colors */
-    --brand-blue: #1677ff;
-    --brand-blue-hover: #4096ff;
-    --brand-blue-light: #e6f4ff;
-    --brand-blue-gradient: linear-gradient(135deg, #1677ff 0%, #0958d9 100%);
-    --brand-navy: #0f172a;
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root,
+[data-theme="pomona-imperial"] {
+    /* 1. Pomona Imperial Official Brand Palette (#701C2C Wine & #D4AF37 Gold) */
+    --brand-primary: #701C2C;
+    --brand-primary-hover: #8B293C;
+    --brand-primary-active: #54131F;
+    --brand-primary-light: #FBF0F2;
+    --brand-primary-gradient: linear-gradient(135deg, #701C2C 0%, #4D0E1A 100%);
+    --brand-primary-shadow: 0 4px 14px rgba(112, 28, 44, 0.35);
+
+    /* Luxury Accent: Champagne & Gold */
+    --brand-gold: #D4AF37;
+    --brand-gold-hover: #E5C358;
+    --brand-gold-light: #FCF8ED;
+    --brand-gold-gradient: linear-gradient(135deg, #D4AF37 0%, #AA820A 100%);
+
+    /* Warm Ivory & Deep Wine Navigation Rail */
+    --brand-ivory: #FEFEF6;
+    --brand-rail-bg: #1B050A;
+    --brand-rail-border: #380C16;
+    --brand-rail-active: linear-gradient(135deg, #701C2C 0%, #8B293C 100%);
+    --brand-rail-glow: 0 4px 14px rgba(112, 28, 44, 0.5);
+
+    /* Ant Design Blazor Native Theme Tokens */
+    --ant-primary-color: #701C2C;
+    --ant-primary-color-hover: #8B293C;
+    --ant-primary-color-active: #54131F;
+    --ant-primary-color-outline: rgba(112, 28, 44, 0.2);
+    --ant-primary-1: #FAF0F2;
+    --ant-primary-2: #F5D7DC;
+    --ant-primary-3: #E8A8B3;
+    --ant-primary-4: #DC798B;
+    --ant-primary-5: #BF435A;
+    --ant-primary-6: #701C2C;
+    --ant-primary-7: #5A1422;
+    --ant-primary-8: #460D19;
+    --ant-primary-9: #340712;
+    --ant-primary-10: #22030A;
+
+    /* Legacy SI.SIOT / Blueprint Aliases (Full Backward Compatibility) */
+    --brand-blue: var(--brand-primary);
+    --brand-blue-hover: var(--brand-primary-hover);
+    --brand-blue-light: var(--brand-primary-light);
+    --brand-blue-gradient: var(--brand-primary-gradient);
+    --brand-navy: #1B050A;
 
     /* Status Colors */
-    --soft-success: #52c41a;
-    --soft-success-light: #f6ffed;
-    --soft-warning: #faad14;
-    --soft-warning-light: #fffbe6;
-    --soft-error: #ff4d4f;
-    --soft-error-light: #fff2f0;
+    --soft-success: #15803d;
+    --soft-success-light: #f0fdf4;
+    --soft-warning: #b45309;
+    --soft-warning-light: #fffbeb;
+    --soft-error: #b91c1c;
+    --soft-error-light: #fef2f2;
 
     /* Soft UI Radii - Rounded Standards */
     --soft-border-radius-xs: 4px;
@@ -31,16 +71,140 @@
     --soft-box-shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.04);
     --soft-box-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
     --soft-box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
-    --soft-box-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.11);
+    --soft-box-shadow-hover: 0 8px 24px rgba(112, 28, 44, 0.12);
     --soft-box-shadow-dropdown: 0 10px 25px -4px rgba(0, 0, 0, 0.10), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
 
-    /* Neutral Colors */
-    --soft-bg-light: #f8fafc;
-    --soft-bg-surface: #ffffff;
-    --soft-border-color: #e2e8f0;
-    --soft-text-title: #0f172a;
-    --soft-text-body: #334155;
-    --soft-text-muted: #64748b;
+    /* Neutral Colors - Surface & Typography */
+    --soft-bg-light: #F8F9FA;
+    --soft-bg-surface: #FFFFFF;
+    --soft-border-color: #E6E8EC;
+    --soft-text-title: #1B050A;
+    --soft-text-body: #374151;
+    --soft-text-muted: #6B7280;
+}
+
+/* ==========================================================================
+   THEME 2: POMONA DARK LUXURY (Noche de Diamantes & Obsidian Wine)
+   ========================================================================== */
+[data-theme="pomona-dark"] {
+    --brand-primary: #9E2D41;
+    --brand-primary-hover: #BF3B54;
+    --brand-primary-active: #7A1C2E;
+    --brand-primary-light: rgba(158, 45, 65, 0.18);
+    --brand-primary-gradient: linear-gradient(135deg, #9E2D41 0%, #681525 100%);
+    --brand-primary-shadow: 0 4px 14px rgba(158, 45, 65, 0.5);
+
+    --brand-gold: #E6CA65;
+    --brand-gold-hover: #F2DA7F;
+    --brand-gold-light: rgba(230, 202, 101, 0.15);
+    --brand-gold-gradient: linear-gradient(135deg, #E6CA65 0%, #B89228 100%);
+
+    --brand-ivory: #FEFEF6;
+    --brand-rail-bg: #0D0305;
+    --brand-rail-border: #2D0B12;
+    --brand-rail-active: linear-gradient(135deg, #9E2D41 0%, #7A1C2E 100%);
+    --brand-rail-glow: 0 4px 16px rgba(158, 45, 65, 0.6);
+
+    /* Ant Design Blazor Native Theme Tokens */
+    --ant-primary-color: #9E2D41;
+    --ant-primary-color-hover: #BF3B54;
+    --ant-primary-color-active: #7A1C2E;
+    --ant-primary-color-outline: rgba(158, 45, 65, 0.3);
+
+    --soft-bg-light: #120508;
+    --soft-bg-surface: #1E0B11;
+    --soft-border-color: #36141E;
+    --soft-text-title: #FEFEF6;
+    --soft-text-body: #DCD3D6;
+    --soft-text-muted: #9E8C91;
+
+    --brand-blue: var(--brand-primary);
+    --brand-blue-hover: var(--brand-primary-hover);
+    --brand-blue-light: var(--brand-primary-light);
+    --brand-blue-gradient: var(--brand-primary-gradient);
+    --brand-navy: #0D0305;
+}
+
+/* ==========================================================================
+   THEME 3: POMONA ROYAL GOLD (Alta Joyería & Relojería Áurea)
+   ========================================================================== */
+[data-theme="pomona-gold"] {
+    --brand-primary: #C5A059;
+    --brand-primary-hover: #D8B46D;
+    --brand-primary-active: #A6843D;
+    --brand-primary-light: #FBF7EE;
+    --brand-primary-gradient: linear-gradient(135deg, #D4AF37 0%, #996515 100%);
+    --brand-primary-shadow: 0 4px 14px rgba(197, 160, 89, 0.4);
+
+    --brand-gold: #D4AF37;
+    --brand-gold-hover: #E5C358;
+    --brand-gold-light: #FCF8ED;
+    --brand-gold-gradient: linear-gradient(135deg, #D4AF37 0%, #AA820A 100%);
+
+    --brand-ivory: #FEFEF6;
+    --brand-rail-bg: #1A1308;
+    --brand-rail-border: #382A14;
+    --brand-rail-active: linear-gradient(135deg, #C5A059 0%, #996515 100%);
+    --brand-rail-glow: 0 4px 14px rgba(197, 160, 89, 0.5);
+
+    --ant-primary-color: #C5A059;
+    --ant-primary-color-hover: #D8B46D;
+    --ant-primary-color-active: #A6843D;
+    --ant-primary-color-outline: rgba(197, 160, 89, 0.25);
+
+    --soft-bg-light: #FAF8F5;
+    --soft-bg-surface: #FFFFFF;
+    --soft-border-color: #E8E2D5;
+    --soft-text-title: #1C150A;
+    --soft-text-body: #3D3528;
+    --soft-text-muted: #7A705E;
+
+    --brand-blue: var(--brand-primary);
+    --brand-blue-hover: var(--brand-primary-hover);
+    --brand-blue-light: var(--brand-primary-light);
+    --brand-blue-gradient: var(--brand-primary-gradient);
+    --brand-navy: #1A1308;
+}
+
+/* ==========================================================================
+   THEME 4: POMONA ROSE GOLD (Oro Rosa Elegante & Contemporáneo)
+   ========================================================================== */
+[data-theme="pomona-rose"] {
+    --brand-primary: #9B4455;
+    --brand-primary-hover: #B45B6D;
+    --brand-primary-active: #803140;
+    --brand-primary-light: #FCF1F3;
+    --brand-primary-gradient: linear-gradient(135deg, #B76E79 0%, #863644 100%);
+    --brand-primary-shadow: 0 4px 14px rgba(155, 68, 85, 0.35);
+
+    --brand-gold: #C88A78;
+    --brand-gold-hover: #DC9D8B;
+    --brand-gold-light: #FDF4F1;
+    --brand-gold-gradient: linear-gradient(135deg, #C88A78 0%, #A56553 100%);
+
+    --brand-ivory: #FEFEF6;
+    --brand-rail-bg: #220B11;
+    --brand-rail-border: #3D1821;
+    --brand-rail-active: linear-gradient(135deg, #9B4455 0%, #B76E79 100%);
+    --brand-rail-glow: 0 4px 14px rgba(155, 68, 85, 0.45);
+
+    --ant-primary-color: #9B4455;
+    --ant-primary-color-hover: #B45B6D;
+    --ant-primary-color-active: #803140;
+    --ant-primary-color-outline: rgba(155, 68, 85, 0.25);
+
+    --soft-bg-light: #FAF5F6;
+    --soft-bg-surface: #FFFFFF;
+    --soft-border-color: #EADEE1;
+    --soft-text-title: #220B11;
+    --soft-text-body: #3D292D;
+    --soft-text-muted: #7E6A6F;
+
+    --brand-blue: var(--brand-primary);
+    --brand-blue-hover: var(--brand-primary-hover);
+    --brand-blue-light: var(--brand-primary-light);
+    --brand-blue-gradient: var(--brand-primary-gradient);
+    --brand-navy: #220B11;
 }
 
 /* ==========================================================================
@@ -88,15 +252,15 @@
 
 .ant-btn-primary,
 .btn-primary {
-    background: var(--brand-blue-gradient) !important;
+    background: var(--brand-primary-gradient) !important;
     border: none !important;
-    box-shadow: 0 2px 8px rgba(22, 119, 255, 0.25) !important;
+    box-shadow: var(--brand-primary-shadow, 0 2px 8px rgba(112, 28, 44, 0.25)) !important;
     color: #ffffff !important;
 }
 
 .ant-btn-primary:hover,
 .btn-primary:hover {
-    box-shadow: 0 4px 14px rgba(22, 119, 255, 0.40) !important;
+    box-shadow: 0 4px 14px rgba(112, 28, 44, 0.40) !important;
     transform: translateY(-1px) !important;
 }
 
@@ -139,8 +303,8 @@
 .ant-picker-focused,
 .form-control:focus,
 .form-select:focus {
-    border-color: var(--brand-blue) !important;
-    box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.16) !important;
+    border-color: var(--brand-primary) !important;
+    box-shadow: 0 0 0 3px rgba(112, 28, 44, 0.18) !important;
     outline: none !important;
 }
 
@@ -517,16 +681,16 @@
 }
 
 .quick-choice-card:hover {
-    border-color: var(--brand-blue);
-    background-color: #f0f7ff;
+    border-color: var(--brand-primary);
+    background-color: var(--brand-primary-light);
     transform: translateY(-2px);
     box-shadow: var(--soft-box-shadow-sm);
 }
 
 .quick-choice-card.active {
-    border-color: var(--brand-blue);
-    background-color: #f0f7ff;
-    box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.25);
+    border-color: var(--brand-primary);
+    background-color: var(--brand-primary-light);
+    box-shadow: 0 0 0 2px rgba(112, 28, 44, 0.25);
 }
 
 .quick-choice-card .choice-icon {
@@ -570,4 +734,70 @@
     font-weight: 600;
     line-height: 1.4;
     white-space: nowrap;
+}
+
+/* ==========================================================================
+   POMONA DARK LUXURY MODE COMPONENT OVERRIDES
+   ========================================================================== */
+[data-theme="pomona-dark"] body,
+[data-theme="pomona-dark"] .app-main-workspace {
+    background-color: var(--soft-bg-light) !important;
+    color: var(--soft-text-body) !important;
+}
+
+[data-theme="pomona-dark"] .navbar,
+[data-theme="pomona-dark"] .soft-sider,
+[data-theme="pomona-dark"] .nav-menu-container,
+[data-theme="pomona-dark"] .nav-menu-header,
+[data-theme="pomona-dark"] .card,
+[data-theme="pomona-dark"] .ant-card,
+[data-theme="pomona-dark"] .soft-card,
+[data-theme="pomona-dark"] .ant-table-wrapper,
+[data-theme="pomona-dark"] .metric-card {
+    background-color: var(--soft-bg-surface) !important;
+    border-color: var(--soft-border-color) !important;
+    color: var(--soft-text-body) !important;
+}
+
+[data-theme="pomona-dark"] .ant-table-thead > tr > th {
+    background-color: #17070C !important;
+    color: #D6CCD0 !important;
+    border-bottom-color: var(--soft-border-color) !important;
+}
+
+[data-theme="pomona-dark"] .ant-table-tbody > tr > td {
+    color: var(--soft-text-body) !important;
+    border-bottom-color: var(--soft-border-color) !important;
+}
+
+[data-theme="pomona-dark"] .ant-table-tbody > tr:hover > td {
+    background-color: #270F17 !important;
+}
+
+[data-theme="pomona-dark"] .ant-input,
+[data-theme="pomona-dark"] .form-control,
+[data-theme="pomona-dark"] .form-select,
+[data-theme="pomona-dark"] .ant-select:not(.ant-select-customize-input) .ant-select-selector {
+    background-color: #17070C !important;
+    border-color: var(--soft-border-color) !important;
+    color: var(--soft-text-title) !important;
+}
+
+[data-theme="pomona-dark"] .text-dark {
+    color: var(--soft-text-title) !important;
+}
+
+[data-theme="pomona-dark"] .bg-white {
+    background-color: var(--soft-bg-surface) !important;
+}
+
+[data-theme="pomona-dark"] .bg-light {
+    background-color: var(--soft-bg-light) !important;
+}
+
+[data-theme="pomona-dark"] .border-bottom,
+[data-theme="pomona-dark"] .border-end,
+[data-theme="pomona-dark"] .border-top,
+[data-theme="pomona-dark"] .border {
+    border-color: var(--soft-border-color) !important;
 }

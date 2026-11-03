@@ -5,16 +5,17 @@
 <AuthorizeView>
     <Authorized>
         <div class="app-container d-flex" style="height: 100vh; overflow: hidden;">
-            <!-- 1. PRIMARY RAIL (SI.SIOT Style Module Bar) -->
-            <aside class="app-primary-rail d-flex flex-column align-items-center py-2 bg-dark text-white border-end" style="width: 74px; min-width: 74px; z-index: 1020; background-color: #111827 !important;">
+            <!-- 1. PRIMARY RAIL (Pomona Luxury Module Bar) -->
+            <aside class="app-primary-rail d-flex flex-column align-items-center py-2 text-white border-end" style="width: 76px; min-width: 76px; z-index: 1020; background-color: var(--brand-rail-bg, #1B050A) !important; border-color: var(--brand-rail-border, #380C16) !important;">
                 <!-- Brand / Logo -->
                 <div class="rail-logo my-2 text-center">
-                    <a href="dashboard" class="text-decoration-none">
-                        <div class="d-inline-flex p-2 rounded-3 bg-primary text-white shadow-sm">
-                            <i class="bi bi-gem fs-4"></i>
+                    <a href="dashboard" class="text-decoration-none d-flex flex-column align-items-center" title="Pomona Joyería & Relojería">
+                        <div class="d-inline-flex p-1 rounded-3 align-items-center justify-content-center shadow-sm"
+                             style="width: 44px; height: 44px; background: linear-gradient(135deg, #701C2C 0%, #4D0E1A 100%); border: 1.5px solid rgba(212, 175, 55, 0.45); box-shadow: 0 4px 10px rgba(0,0,0,0.35);">
+                            <img src="images/pomona-symbol-white.png" alt="Pomona" style="width: 32px; height: 32px; object-fit: contain;" />
                         </div>
+                        <div class="text-white mt-1" style="font-family: 'Cinzel', 'Playfair Display', Georgia, serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 1.5px;">POMONA</div>
                     </a>
-                    <div class="text-white-50" style="font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px;">JS 2.0</div>
                 </div>
 
                 <hr class="w-75 my-2 border-secondary opacity-25" />
@@ -87,8 +88,13 @@
                             <span class="small">Dictar con IA</span>
                         </button>
 
+                        <!-- Selector de Temas Visuales (Ant Design Themes) -->
+                        <ThemeSelector />
+
+                        <div class="vr my-1 text-muted"></div>
+
                         <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-                            <i class="bi bi-shield-check me-1"></i> MFA & Passkeys Activo
+                            <i class="bi bi-shield-check me-1"></i> MFA Activo
                         </span>
 
                         <div class="vr my-1 text-muted"></div>
@@ -176,24 +182,25 @@
 
     .rail-module-btn {
         background-color: transparent;
-        color: #9ca3af;
+        color: #BCAAA4;
         transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         cursor: pointer;
         border-radius: var(--soft-border-radius-lg, 12px) !important;
     }
     .rail-module-btn:hover {
-        background-color: #1f2937;
-        color: #ffffff;
+        background-color: rgba(255, 255, 255, 0.10);
+        color: #FFFFFF;
         border-radius: var(--soft-border-radius-lg, 12px) !important;
     }
     .rail-module-btn.active {
-        background-color: #2563eb !important;
+        background: var(--brand-rail-active, linear-gradient(135deg, #701C2C 0%, #8B293C 100%)) !important;
         color: #ffffff !important;
-        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.45);
+        box-shadow: var(--brand-rail-glow, 0 4px 14px rgba(112, 28, 44, 0.5));
+        border: 1px solid rgba(212, 175, 55, 0.4) !important;
         border-radius: var(--soft-border-radius-lg, 12px) !important;
     }
     .rail-module-btn.active i {
-        color: #ffffff;
+        color: var(--brand-gold, #D4AF37) !important;
     }
 
     /* Sider Toggle Button */
@@ -207,12 +214,13 @@
 
     /* Voice Header Button */
     .voice-header-btn {
-        background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%) !important;
+        background: linear-gradient(135deg, #701C2C 0%, #8B293C 60%, #B8860B 100%) !important;
+        border: 1px solid rgba(212, 175, 55, 0.35) !important;
         transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .voice-header-btn:hover {
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35) !important;
+        box-shadow: 0 4px 12px rgba(112, 28, 44, 0.45) !important;
     }
 
     /* Floating Action Button for Voice Assistant */
@@ -223,19 +231,19 @@
         width: 52px;
         height: 52px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
-        border: none;
+        background: linear-gradient(135deg, #701C2C 0%, #B8860B 100%);
+        border: 1.5px solid rgba(212, 175, 55, 0.5);
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
         z-index: 1040;
-        box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
+        box-shadow: 0 8px 24px rgba(112, 28, 44, 0.45);
         transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .soft-voice-fab:hover {
         transform: translateY(-3px) scale(1.06);
-        box-shadow: 0 12px 28px rgba(124, 58, 237, 0.5);
+        box-shadow: 0 12px 28px rgba(112, 28, 44, 0.6);
     }
     .soft-voice-fab-badge {
         position: absolute;

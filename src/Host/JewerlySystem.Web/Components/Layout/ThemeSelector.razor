@@ -1,0 +1,93 @@
+@using AntDesign
+@inject IJSRuntime JS
+
+<div class="pomona-theme-selector d-inline-flex align-items-center">
+    <Dropdown Trigger="@(new Trigger[] { Trigger.Click })" Placement="@Placement.BottomRight">
+        <Overlay>
+            <Menu Class="p-1 rounded-3 shadow-lg border" Style="min-width: 230px;">
+                <MenuItem Class="fw-semibold text-muted small px-3 py-2 border-bottom mb-1" Disabled="true">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span><i class="bi bi-palette2 me-2 text-warning"></i>TEMAS POMONA</span>
+                        <span class="badge bg-light text-dark border small" style="font-size: 0.65rem;">Ant Design</span>
+                    </div>
+                </MenuItem>
+
+                @foreach (var theme in _themes)
+                {
+                    bool isSelected = string.Equals(_currentTheme, theme.Key, StringComparison.OrdinalIgnoreCase);
+                    <MenuItem Key="@theme.Key"
+                              Class="@(isSelected ? "bg-light fw-bold" : "")"
+                              OnClick="() => SelectTheme(theme.Key)">
+                        <div class="d-flex align-items-center justify-content-between w-100 py-1">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="theme-color-indicator rounded-circle shadow-xs"
+                                      style="width: 14px; height: 14px; display: inline-block; background: @theme.Color; border: 1.5px solid @theme.BorderColor;"></span>
+                                <span style="font-size: 0.85rem;">@theme.Name</span>
+                            </div>
+                            @if (isSelected)
+                            {
+                                <i class="bi bi-check2 text-success fw-bold fs-6"></i>
+                            }
+                        </div>
+                    </MenuItem>
+                }
+            </Menu>
+        </Overlay>
+        <ChildContent>
+            <button type="button"
+                    class="btn btn-sm btn-light border d-flex align-items-center gap-2 px-2 py-1 rounded-2 shadow-2xs pomona-theme-toggle-btn"
+                    title="Cambiar tema visual del sistema">
+                <span class="theme-color-indicator rounded-circle"
+                      style="width: 11px; height: 11px; display: inline-block; background: @GetCurrentColor(); border: 1px solid rgba(0,0,0,0.15);"></span>
+                <span class="small fw-semibold d-none d-lg-inline">@GetCurrentName()</span>
+                <i class="bi bi-chevron-down text-muted" style="font-size: 0.65rem;"></i>
+            </button>
+        </ChildContent>
+    </Dropdown>
+</div>
+
+@code {
+    private record ThemeOption(string Key, string Name, string Color, string BorderColor);
+
+    private readonly List<ThemeOption> _themes = new()
+    {
+        new("pomona-imperial", "Pomona Imperial (Vino & Oro)", "linear-gradient(135deg, #701C2C 50%, #D4AF37 50%)", "#701C2C"),
+        new("pomona-dark", "Pomona Dark Luxury (Noche)", "#120508", "#9E2D41"),
+        new("pomona-gold", "Pomona Royal Gold (Oro)", "#D4AF37", "#AA820A"),
+        new("pomona-rose", "Pomona Rose Gold (Rosa)", "#B76E79", "#863644")
+    };
+
+    private string _currentTheme = "pomona-imperial";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                var stored = await JS.InvokeAsync<string?>("localStorage.getItem", "pomona_theme");
+                if (!string.IsNullOrEmpty(stored) && _themes.Any(t => t.Key == stored))
+                {
+                    _currentTheme = stored;
+                    StateHasChanged();
+                }
+            }
+            catch
+            {
+                // Local storage not yet available or SSR mode
+            }
+        }
+    }
+
+    private async Task SelectTheme(string themeKey)
+    {
+        _currentTheme = themeKey;
+        await JS.InvokeVoidAsync("window.setPomonaTheme", themeKey);
+    }
+
+    private string GetCurrentName() =>
+        _themes.FirstOrDefault(t => t.Key == _currentTheme)?.Name.Split('(')[0].Trim() ?? "Tema";
+
+    private string GetCurrentColor() =>
+        _themes.FirstOrDefault(t => t.Key == _currentTheme)?.Color ?? "#701C2C";
+}

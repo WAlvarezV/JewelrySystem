@@ -12,20 +12,20 @@
 }
 
 .soft-selection-card:hover {
-    border-color: var(--brand-blue-hover, #4096ff);
-    box-shadow: 0 4px 12px rgba(22, 119, 255, 0.08);
+    border-color: var(--brand-primary-hover, #8B293C);
+    box-shadow: 0 4px 12px rgba(112, 28, 44, 0.12);
     transform: translateY(-1px);
 }
 
 .soft-selection-card.selected {
-    border-color: var(--brand-blue, #1677ff);
-    background-color: var(--brand-blue-light, #e6f4ff);
-    box-shadow: 0 4px 14px rgba(22, 119, 255, 0.15);
+    border-color: var(--brand-primary, #701C2C);
+    background-color: var(--brand-primary-light, #FBF0F2);
+    box-shadow: 0 4px 14px rgba(112, 28, 44, 0.18);
 }
 
 .soft-selection-card-icon {
     font-size: 1.4rem;
-    color: var(--brand-blue, #1677ff);
+    color: var(--brand-primary, #701C2C);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -50,5 +50,5 @@
 
 .soft-selection-card-check {
     font-size: 1.2rem;
-    color: var(--brand-blue, #1677ff);
+    color: var(--brand-primary, #701C2C);
 }
