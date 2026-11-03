@@ -93,10 +93,10 @@ public static class SecurityExtensions
             // Content Security Policy optimizado para Blazor Server (WebSockets wss/ws y DOM morphing)
             headers["Content-Security-Policy"] =
                 "default-src 'self'; " +
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-                "style-src 'self' 'unsafe-inline'; " +
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; " +
+                "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; " +
                 "img-src 'self' data: https:; " +
-                "font-src 'self' data:; " +
+                "font-src 'self' data: https://cdn.jsdelivr.net https://fonts.gstatic.com; " +
                 "connect-src 'self' ws: wss: http: https:; " +
                 "frame-ancestors 'none'; " +
                 "object-src 'none'; " +
