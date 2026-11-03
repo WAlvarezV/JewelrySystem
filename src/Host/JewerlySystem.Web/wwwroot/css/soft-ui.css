@@ -766,6 +766,53 @@ body[data-theme="pomona-emerald"],
 }
 
 /* ==========================================================================
+   9.1 GLOBAL NOTIFICATIONS & MESSAGE POPUPS (Positioning & Z-Index Fix)
+   ========================================================================== */
+.ant-message {
+    position: fixed !important;
+    top: 72px !important; /* Clears sticky header (56px) so message floats right below it */
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 9999 !important; /* Higher than header (1020), drawer (1030) or backdrop */
+    pointer-events: none;
+    text-align: center;
+}
+
+.ant-message-notice {
+    padding: 6px;
+    text-align: center;
+}
+
+.ant-message-notice-content {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 10px 20px !important;
+    background: var(--soft-bg-surface, #ffffff) !important;
+    color: var(--soft-text-title, #1f2937) !important;
+    border-radius: var(--soft-border-radius-md, 8px) !important;
+    box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid var(--soft-border-color, #e2e8f0) !important;
+    font-weight: 500 !important;
+    font-size: 0.88rem !important;
+    pointer-events: all;
+}
+
+.ant-notification {
+    position: fixed !important;
+    top: 72px !important;
+    right: 24px !important;
+    z-index: 9999 !important;
+}
+
+.ant-notification-notice {
+    background: var(--soft-bg-surface, #ffffff) !important;
+    border-radius: var(--soft-border-radius-lg, 12px) !important;
+    border: 1px solid var(--soft-border-color, #e2e8f0) !important;
+    box-shadow: var(--soft-box-shadow-dropdown) !important;
+}
+
+/* ==========================================================================
    10. TABS (8px Rounded)
    ========================================================================== */
 .ant-tabs-card > .ant-tabs-nav .ant-tabs-tab {

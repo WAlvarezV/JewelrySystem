@@ -167,8 +167,9 @@
                     <div class="col-12 col-md-4">
                         <FormItem Label="Valor Total del Contrato ($)" Required="true">
                             <AntDesign.InputNumber @bind-Value="_formModel.Value"
-                                                   Min="1000"
+                                                   Min="0"
                                                    Step="50000"
+                                                   Placeholder="0"
                                                    Class="w-100" />
                         </FormItem>
                     </div>
@@ -177,6 +178,7 @@
                             <AntDesign.InputNumber @bind-Value="_formModel.InitialPayment"
                                                    Min="0"
                                                    Step="50000"
+                                                   Placeholder="0"
                                                    Class="w-100" />
                         </FormItem>
                     </div>
@@ -431,8 +433,8 @@
         public int? ProviderId { get; set; }
         public string Description { get; set; } = string.Empty;
 
-        public int Value { get; set; } = 250000;
-        public int InitialPayment { get; set; } = 50000;
+        public int Value { get; set; } = 0;
+        public int InitialPayment { get; set; } = 0;
         public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.EFECTIVO;
         public DateTime DeliveryDate { get; set; } = DateTime.Today.AddDays(15);
     }

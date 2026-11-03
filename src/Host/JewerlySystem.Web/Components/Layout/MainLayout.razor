@@ -36,16 +36,6 @@
                         </button>
                     }
                 </nav>
-
-                <!-- Bottom User Avatar -->
-                <div class="mt-auto py-2 text-center w-100 border-top border-secondary border-opacity-25">
-                    <a href="profile" class="text-decoration-none" title="Mi Perfil (@(context.User.Identity?.Name ?? "Usuario"))">
-                        <div class="avatar-small mx-auto rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center shadow-sm"
-                             style="width: 36px; height: 36px; font-size: 0.85rem; cursor: pointer;">
-                            @(context.User.Identity?.Name?.Length > 0 ? context.User.Identity.Name[0].ToString().ToUpper() : "U")
-                        </div>
-                    </a>
-                </div>
             </aside>
 
             <!-- 2. SIDER WITH NAVMENU (Filtered by Active Module + Favorites) -->

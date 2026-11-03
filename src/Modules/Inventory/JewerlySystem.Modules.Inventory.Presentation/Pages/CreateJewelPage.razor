@@ -83,7 +83,8 @@
                         <AntDesign.InputNumber TValue="int"
                                                @bind-Value="_formModel.GramValue"
                                                Step="1000"
-                                               Min="1"
+                                               Min="0"
+                                               Placeholder="0"
                                                Style="width: 100%;"
                                                OnChange="@(_ => RecalculateValues())" />
                     </div>
@@ -95,7 +96,8 @@
                         <AntDesign.InputNumber TValue="int"
                                                @bind-Value="_formModel.GramSaleValue"
                                                Step="1000"
-                                               Min="1"
+                                               Min="0"
+                                               Placeholder="0"
                                                Style="width: 100%; font-weight: bold; color: var(--soft-success, #52c41a);"
                                                OnChange="@(_ => RecalculateValues())" />
                     </div>
@@ -230,7 +232,7 @@
 
     private void ApplyMarkupPercent(double percent)
     {
-        if (_formModel.GramValue <= 0) _formModel.GramValue = 200000;
+        if (_formModel.GramValue <= 0) return;
         _formModel.GramSaleValue = (int)Math.Round(_formModel.GramValue * (1.0 + (percent / 100.0)));
         RecalculateValues();
     }
@@ -311,8 +313,8 @@
         public int ItemTypeId { get; set; } = 1;
         public int? ProviderId { get; set; }
         public double Weight { get; set; }
-        public int GramValue { get; set; } = 200000;
-        public int GramSaleValue { get; set; } = 260000;
+        public int GramValue { get; set; } = 0;
+        public int GramSaleValue { get; set; } = 0;
         public int? Length { get; set; }
         public string Description { get; set; } = string.Empty;
     }

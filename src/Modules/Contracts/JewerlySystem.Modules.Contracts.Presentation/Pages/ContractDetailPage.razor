@@ -178,9 +178,10 @@
 
                 <FormItem Label="Monto del Abono ($)" Required="true">
                     <AntDesign.InputNumber @bind-Value="_paymentModel.Amount"
-                                           Min="1000"
+                                           Min="1"
                                            Max="@_contract.Balance"
-                                           Step="50000"
+                                           Step="10000"
+                                           Placeholder="0"
                                            Class="w-100" />
                 </FormItem>
 
@@ -332,7 +333,7 @@
 
     public class PaymentModel
     {
-        public int Amount { get; set; } = 50000;
+        public int Amount { get; set; } = 0;
         public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.EFECTIVO;
     }
 }
