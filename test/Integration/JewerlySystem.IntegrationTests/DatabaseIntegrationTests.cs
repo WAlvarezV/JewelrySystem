@@ -96,4 +96,48 @@ public class DatabaseIntegrationTests
         Assert.NotNull(entityType.FindProperty(nameof(Jewel.Weight)));
         Assert.NotNull(entityType.FindProperty(nameof(Jewel.GramValue)));
     }
+
+    [Fact]
+    public async Task Ensure_JoglisUser_Is_Seeded_In_Pomona()
+    {
+        var options = new DbContextOptionsBuilder<JewerlyDbContext>()
+            .UseNpgsql("Host=localhost;Port=5432;Database=IntZaioNJewerly;Username=postgres;Password=IntZaioN;")
+            .Options;
+
+        await using var db = new JewerlyDbContext(options);
+        var vendedorRoleId = "90e87e25-6d98-4d3b-ab05-38ea72d7ccfa";
+        var email = "joglisjjc@gmail.com";
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (user == null)
+        {
+            var userId = Guid.NewGuid().ToString();
+            var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<JewerlySystem.Modules.Auth.Infrastructure.ApplicationUser>();
+            var newUser = new JewerlySystem.Modules.Auth.Infrastructure.ApplicationUser
+            {
+                Id = userId,
+                UserName = email,
+                NormalizedUserName = email.ToUpperInvariant(),
+                Email = email,
+                NormalizedEmail = email.ToUpperInvariant(),
+                EmailConfirmed = true,
+                SecurityStamp = Guid.NewGuid().ToString(),
+                ConcurrencyStamp = Guid.NewGuid().ToString(),
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+            newUser.PasswordHash = hasher.HashPassword(newUser, "JPomona123");
+            db.Users.Add(newUser);
+            await db.SaveChangesAsync();
+
+            db.UserRoles.Add(new Microsoft.AspNetCore.Identity.IdentityUserRole<string>
+            {
+                UserId = userId,
+                RoleId = vendedorRoleId
+            });
+            await db.SaveChangesAsync();
+        }
+
+        var check = await db.Users.FirstOrDefaultAsync(u => u.Email == email);
+        Assert.NotNull(check);
+    }
 }

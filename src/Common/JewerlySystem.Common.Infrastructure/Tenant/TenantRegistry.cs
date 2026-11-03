@@ -53,7 +53,7 @@ public class TenantRegistry : ITenantRegistry
             DefaultTheme: "pomona-imperial",
             SymbolUrl: "images/pomona-symbol-white.png",
             LogoUrl: "images/pomona-logo-square.png",
-            AllowedUserEmails: new List<string> { "walvarez@ingnova.team", "admin@joyeriapomona.com", "william.alvarezv@gmail.com" }
+            AllowedUserEmails: new List<string> { "walvarez@ingnova.team", "admin@joyeriapomona.com", "william.alvarezv@gmail.com", "joglisjjc@gmail.com" }
         ));
 
         // 3. Register Tenant: Joyería Oro & Plata

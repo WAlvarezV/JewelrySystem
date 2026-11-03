@@ -153,3 +153,33 @@ public class DischargeItemCommandHandler : ICommandHandler<DischargeItemCommand,
         return Result.Success(true);
     }
 }
+
+public record ToggleItemActiveCommand(int Reference, bool IsActive) : ICommand<bool>;
+
+public class ToggleItemActiveCommandHandler : ICommandHandler<ToggleItemActiveCommand, bool>
+{
+    private readonly IInventoryRepository _repository;
+
+    public ToggleItemActiveCommandHandler(IInventoryRepository repository)
+    {
+        _repository = repository;
+    }
+
+    public async Task<Result<bool>> Handle(ToggleItemActiveCommand request, CancellationToken cancellationToken)
+    {
+        var item = await _repository.GetItemByReferenceAsync(request.Reference, cancellationToken);
+        if (item == null)
+        {
+            return Result.Failure<bool>(Error.NotFound("Items.NotFound", $"Artículo con referencia #{request.Reference} no encontrado."));
+        }
+
+        item.Active = request.IsActive;
+        if (request.IsActive && item.DateOfSale != null)
+        {
+            item.DateOfSale = null;
+        }
+
+        await _repository.SaveChangesAsync(cancellationToken);
+        return Result.Success(true);
+    }
+}

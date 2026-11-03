@@ -44,10 +44,10 @@
         <div class="d-flex align-items-center gap-3">
             <RadioGroup @bind-Value="_activeGroup" ButtonStyle="@RadioButtonStyle.Solid">
                 <Radio RadioButton="true" Value="@("JEWELRY")">
-                    <span class="fs-6"><i class="bi bi-gem me-1 text-warning"></i> <b>Grupo Joyería</b> (@_jewelryItems.Count(x => x.Active))</span>
+                    <span class="fs-6"><i class="bi bi-gem me-1 text-warning"></i> <b>Grupo Joyería</b> (@_jewelryItems.Count(x => x.Active)/@_jewelryItems.Count activas)</span>
                 </Radio>
                 <Radio RadioButton="true" Value="@("WATCHES")">
-                    <span class="fs-6"><i class="bi bi-watch me-1 text-primary"></i> <b>Grupo Relojes</b> (@_watchItems.Count(x => x.Active))</span>
+                    <span class="fs-6"><i class="bi bi-watch me-1 text-primary"></i> <b>Grupo Relojes</b> (@_watchItems.Count(x => x.Active)/@_watchItems.Count activos)</span>
                 </Radio>
             </RadioGroup>
         </div>
@@ -55,6 +55,29 @@
         <div class="d-none d-md-flex align-items-center gap-2 text-muted small pe-2">
             <span>Módulo Activo: <b>INVENTARIO</b> &bull;</span>
             <span>Categoría: <b>@(_activeGroup == "JEWELRY" ? "Metales Preciosos" : "Alta Relojería")</b></span>
+        </div>
+    </div>
+
+    <!-- Inventory Adjustment & Audit Mode Banner -->
+    <div class="alert alert-warning border-warning border-opacity-25 bg-warning bg-opacity-10 rounded-3 p-2.5 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2 shadow-xs">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-sliders text-warning fs-5"></i>
+            <div>
+                <strong class="text-dark">Ajuste de Inventario Físico:</strong>
+                <span class="text-muted ms-1 small">Todos los artículos continúan visibles en el catálogo. Usa el interruptor <b>(Switch)</b> para activar únicamente las piezas confirmadas en tienda.</span>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-white text-dark border px-2 py-1 small">
+                @if (_activeGroup == "JEWELRY")
+                {
+                    <text>Joyas: <b>@_jewelryItems.Count(x => x.Active)</b> activas de @_jewelryItems.Count</text>
+                }
+                else
+                {
+                    <text>Relojes: <b>@_watchItems.Count(x => x.Active)</b> activos de @_watchItems.Count</text>
+                }
+            </span>
         </div>
     </div>
 
@@ -198,17 +221,23 @@
                     <PropertyColumn Property="c => c.DateOfEntry" Title="Ingreso" Width="110px">
                         <span class="date-text">@context.DateOfEntry.ToString("dd/MM/yyyy")</span>
                     </PropertyColumn>
-                    <PropertyColumn Property="c => c.Active" Title="Estado" Width="120px" Align="ColumnAlign.Center">
-                        @if (context.Active)
-                        {
-                            <SoftTag Color="green">Disponible</SoftTag>
-                        }
-                        else
-                        {
-                            <SoftTag Color="default">Descargado</SoftTag>
-                        }
-                    </PropertyColumn>
-                    <ActionColumn Title="Acciones" Align="ColumnAlign.Center" Width="90px">
+                    <ActionColumn Title="Activo / Estado" Width="165px" Align="ColumnAlign.Center">
+                        <div class="d-inline-flex align-items-center justify-content-center gap-2">
+                            <Switch Checked="@context.Active"
+                                    Loading="@(_togglingRef == context.Reference)"
+                                    Disabled="@(_togglingRef == context.Reference)"
+                                    OnChange="@((bool val) => ToggleItemActiveAsync(context.Reference, val))" />
+                            @if (context.Active)
+                            {
+                                <SoftTag Color="green">Activo</SoftTag>
+                            }
+                            else
+                            {
+                                <SoftTag Color="default">Inactivo</SoftTag>
+                            }
+                        </div>
+                    </ActionColumn>
+                    <ActionColumn Title="Acciones" Align="ColumnAlign.Center" Width="95px">
                         @if (context.Active)
                         {
                             <SoftActionButton Icon="export"
@@ -217,7 +246,7 @@
                         }
                         else
                         {
-                            <span class="sold-date">@context.DateOfSale?.ToString("dd/MM/yy")</span>
+                            <span class="sold-date small text-muted">@(context.DateOfSale?.ToString("dd/MM/yy") ?? "En Ajuste")</span>
                         }
                     </ActionColumn>
                 </Table>
@@ -373,17 +402,23 @@
                     <PropertyColumn Property="c => c.DateOfEntry" Title="Ingreso" Width="110px">
                         <span class="date-text">@context.DateOfEntry.ToString("dd/MM/yyyy")</span>
                     </PropertyColumn>
-                    <PropertyColumn Property="c => c.Active" Title="Estado" Width="120px" Align="ColumnAlign.Center">
-                        @if (context.Active)
-                        {
-                            <SoftTag Color="green">Disponible</SoftTag>
-                        }
-                        else
-                        {
-                            <SoftTag Color="default">Descargado</SoftTag>
-                        }
-                    </PropertyColumn>
-                    <ActionColumn Title="Acciones" Align="ColumnAlign.Center" Width="90px">
+                    <ActionColumn Title="Activo / Estado" Width="165px" Align="ColumnAlign.Center">
+                        <div class="d-inline-flex align-items-center justify-content-center gap-2">
+                            <Switch Checked="@context.Active"
+                                    Loading="@(_togglingRef == context.Reference)"
+                                    Disabled="@(_togglingRef == context.Reference)"
+                                    OnChange="@((bool val) => ToggleItemActiveAsync(context.Reference, val))" />
+                            @if (context.Active)
+                            {
+                                <SoftTag Color="green">Activo</SoftTag>
+                            }
+                            else
+                            {
+                                <SoftTag Color="default">Inactivo</SoftTag>
+                            }
+                        </div>
+                    </ActionColumn>
+                    <ActionColumn Title="Acciones" Align="ColumnAlign.Center" Width="95px">
                         @if (context.Active)
                         {
                             <SoftActionButton Icon="export"
@@ -392,7 +427,7 @@
                         }
                         else
                         {
-                            <span class="sold-date">@context.DateOfSale?.ToString("dd/MM/yy")</span>
+                            <span class="sold-date small text-muted">@(context.DateOfSale?.ToString("dd/MM/yy") ?? "En Ajuste")</span>
                         }
                     </ActionColumn>
                 </Table>
@@ -701,9 +736,9 @@
 
     private readonly List<StatusFilterOption> _statusFilterOptions = new()
     {
-        new() { Value = "", Label = "Todos los Estados" },
-        new() { Value = "active", Label = "Disponibles en Stock" },
-        new() { Value = "sold", Label = "Descargados / Vendidos" },
+        new() { Value = "", Label = "Todos los Estados (Ver Todo)" },
+        new() { Value = "active", Label = "Solo Activos en Stock" },
+        new() { Value = "inactive", Label = "Solo Inactivos (Por Activar)" },
     };
 
     private readonly List<GenderFilterOption> _genderFilterOptions = new()
@@ -753,7 +788,7 @@
             {
                 list = list.Where(i => i.Active);
             }
-            else if (_selectedJewelryStatusFilter == "sold")
+            else if (_selectedJewelryStatusFilter == "inactive" || _selectedJewelryStatusFilter == "sold")
             {
                 list = list.Where(i => !i.Active);
             }
@@ -791,12 +826,55 @@
             {
                 list = list.Where(i => i.Active);
             }
-            else if (_selectedWatchStatusFilter == "sold")
+            else if (_selectedWatchStatusFilter == "inactive" || _selectedWatchStatusFilter == "sold")
             {
                 list = list.Where(i => !i.Active);
             }
 
             return list.ToList();
+        }
+    }
+
+    private int? _togglingRef;
+
+    private async Task ToggleItemActiveAsync(int reference, bool isActive)
+    {
+        _togglingRef = reference;
+        try
+        {
+            var cmd = new ToggleItemActiveCommand(reference, isActive);
+            var result = await Sender.Send(cmd);
+            if (result.IsSuccess)
+            {
+                var jIdx = _jewelryItems.FindIndex(j => j.Reference == reference);
+                if (jIdx >= 0)
+                {
+                    _jewelryItems[jIdx] = _jewelryItems[jIdx] with { Active = isActive };
+                }
+
+                var wIdx = _watchItems.FindIndex(w => w.Reference == reference);
+                if (wIdx >= 0)
+                {
+                    _watchItems[wIdx] = _watchItems[wIdx] with { Active = isActive };
+                }
+
+                Message.Success(isActive
+                    ? $"Artículo #{reference} activado en inventario."
+                    : $"Artículo #{reference} desactivado de inventario.");
+            }
+            else
+            {
+                Message.Error(result.Error.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            Message.Error($"Error al actualizar estado del artículo #{reference}: {ex.Message}");
+        }
+        finally
+        {
+            _togglingRef = null;
+            StateHasChanged();
         }
     }
 

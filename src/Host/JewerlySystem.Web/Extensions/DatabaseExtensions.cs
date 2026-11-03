@@ -43,6 +43,7 @@ public static class DatabaseExtensions
                     {
                         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
                         await sender.Send(new GetNavigationModulesQuery());
+                        await SeedPomonaUsersAsync(tenantDb, logger);
                     }
                     catch (Exception ex)
                     {
@@ -53,6 +54,9 @@ public static class DatabaseExtensions
                 {
                     await SeedOroPlataTenantAsync(tenantDb, registry, logger);
                 }
+
+                // 4. Asegurar que los artículos iniciales de inventario queden desactivados una única vez para auditoría física
+                await DeactivateInitialInventoryOnceAsync(tenantDb, tenant.Id, logger);
 
                 logger.LogInformation("Tenant '{TenantId}' database initialized successfully.", tenant.Id);
             }
@@ -292,6 +296,87 @@ public static class DatabaseExtensions
         catch (Exception ex)
         {
             logger.LogWarning(ex, "Note on OroPlata tenant seeding: {Message}", ex.Message);
+        }
+    }
+
+    private static async Task SeedPomonaUsersAsync(JewerlyDbContext pomonaDb, ILogger logger)
+    {
+        try
+        {
+            var vendedorRoleId = "90e87e25-6d98-4d3b-ab05-38ea72d7ccfa";
+            var email = "joglisjjc@gmail.com";
+            var user = await pomonaDb.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null)
+            {
+                var userId = Guid.NewGuid().ToString();
+                var hasher = new PasswordHasher<ApplicationUser>();
+                var newUser = new ApplicationUser
+                {
+                    Id = userId,
+                    UserName = email,
+                    NormalizedUserName = email.ToUpperInvariant(),
+                    Email = email,
+                    NormalizedEmail = email.ToUpperInvariant(),
+                    EmailConfirmed = true,
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                    ConcurrencyStamp = Guid.NewGuid().ToString(),
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                };
+                newUser.PasswordHash = hasher.HashPassword(newUser, "JPomona123");
+                pomonaDb.Users.Add(newUser);
+                await pomonaDb.SaveChangesAsync();
+
+                // Assign Vendedor role
+                if (!await pomonaDb.UserRoles.AnyAsync(ur => ur.UserId == userId && ur.RoleId == vendedorRoleId))
+                {
+                    pomonaDb.UserRoles.Add(new IdentityUserRole<string>
+                    {
+                        UserId = userId,
+                        RoleId = vendedorRoleId
+                    });
+                    await pomonaDb.SaveChangesAsync();
+                }
+                logger.LogInformation("Usuario {Email} creado exitosamente con rol Vendedor en Pomona.", email);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Error asegurando usuario Pomona: {Message}", ex.Message);
+        }
+    }
+
+    private static async Task DeactivateInitialInventoryOnceAsync(JewerlyDbContext tenantDb, string tenantId, ILogger logger)
+    {
+        try
+        {
+            await tenantDb.Database.ExecuteSqlRawAsync(@"
+                CREATE TABLE IF NOT EXISTS ""__SystemMigrations"" (
+                    ""MigrationId"" VARCHAR(150) PRIMARY KEY,
+                    ""AppliedAt"" TIMESTAMP WITHOUT TIME ZONE NOT NULL
+                );");
+
+            var migrationId = "20261103_DeactivateInitialInventoryForAudit";
+            var alreadyApplied = await tenantDb.Database.SqlQueryRaw<string>(
+                @"SELECT ""MigrationId"" FROM ""__SystemMigrations"" WHERE ""MigrationId"" = {0}", migrationId)
+                .AnyAsync();
+
+            if (!alreadyApplied)
+            {
+                logger.LogInformation("Aplicando migración de ajuste de inventario en tenant '{TenantId}'...", tenantId);
+                var deactivatedCount = await tenantDb.Database.ExecuteSqlRawAsync(
+                    @"UPDATE ""Items"" SET ""Active"" = false WHERE ""Active"" = true;");
+
+                await tenantDb.Database.ExecuteSqlRawAsync(
+                    @"INSERT INTO ""__SystemMigrations"" (""MigrationId"", ""AppliedAt"") VALUES ({0}, {1});",
+                    migrationId, DateTime.UtcNow);
+
+                logger.LogInformation("Auditoría de inventario inicializada: {Count} artículos desactivados en tenant '{TenantId}' (visibles en catálogo).", deactivatedCount, tenantId);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "No se pudo ejecutar DeactivateInitialInventoryOnceAsync en tenant '{TenantId}'.", tenantId);
         }
     }
 }

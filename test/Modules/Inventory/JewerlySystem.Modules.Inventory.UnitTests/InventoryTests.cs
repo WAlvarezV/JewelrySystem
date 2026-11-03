@@ -146,4 +146,69 @@ public class InventoryTests
         Assert.NotNull(result.Value.Jewel);
         Assert.Equal(3.5, result.Value.Jewel.Weight);
     }
+
+    [Fact]
+    public async Task ToggleItemActiveCommandHandler_ShouldActivateItem_AndClearDateOfSale()
+    {
+        // Arrange
+        var repository = Substitute.For<IInventoryRepository>();
+        var item = new Item(888, 150_000, DateTime.UtcNow.AddDays(-20), "Cadena", 2)
+        {
+            Id = 30,
+            Active = false,
+            DateOfSale = DateTime.UtcNow.AddDays(-5),
+            SaleValue = 200_000
+        };
+
+        repository.GetItemByReferenceAsync(888, Arg.Any<CancellationToken>()).Returns(item);
+        var handler = new ToggleItemActiveCommandHandler(repository);
+
+        // Act
+        var result = await handler.Handle(new ToggleItemActiveCommand(888, true), CancellationToken.None);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.True(item.Active);
+        Assert.Null(item.DateOfSale);
+        await repository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ToggleItemActiveCommandHandler_ShouldDeactivateItem_WhenFalse()
+    {
+        // Arrange
+        var repository = Substitute.For<IInventoryRepository>();
+        var item = new Item(999, 300_000, DateTime.UtcNow, "Reloj", 5)
+        {
+            Id = 40,
+            Active = true
+        };
+
+        repository.GetItemByReferenceAsync(999, Arg.Any<CancellationToken>()).Returns(item);
+        var handler = new ToggleItemActiveCommandHandler(repository);
+
+        // Act
+        var result = await handler.Handle(new ToggleItemActiveCommand(999, false), CancellationToken.None);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.False(item.Active);
+        await repository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ToggleItemActiveCommandHandler_ShouldReturnNotFound_WhenItemDoesNotExist()
+    {
+        // Arrange
+        var repository = Substitute.For<IInventoryRepository>();
+        repository.GetItemByReferenceAsync(1234, Arg.Any<CancellationToken>()).Returns((Item?)null);
+        var handler = new ToggleItemActiveCommandHandler(repository);
+
+        // Act
+        var result = await handler.Handle(new ToggleItemActiveCommand(1234, true), CancellationToken.None);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal("Items.NotFound", result.Error.Code);
+    }
 }
