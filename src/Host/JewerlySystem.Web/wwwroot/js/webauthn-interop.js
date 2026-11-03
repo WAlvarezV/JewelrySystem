@@ -63,13 +63,28 @@ window.webauthn = {
 
             const cred = await navigator.credentials.create({ publicKey: options });
 
+            let transports = [];
+            if (cred.response.getTransports && typeof cred.response.getTransports === "function") {
+                transports = cred.response.getTransports();
+            }
+
+            let clientExtensionResults = {};
+            if (cred.getClientExtensionResults && typeof cred.getClientExtensionResults === "function") {
+                clientExtensionResults = cred.getClientExtensionResults();
+            }
+
+            const clientDataB64 = this.coerceToBase64Url(cred.response.clientDataJSON);
+
             return JSON.stringify({
                 id: cred.id,
                 rawId: this.coerceToBase64Url(cred.rawId),
-                type: cred.type,
+                type: cred.type || "public-key",
+                clientExtensionResults: clientExtensionResults,
                 response: {
                     attestationObject: this.coerceToBase64Url(cred.response.attestationObject),
-                    clientDataJson: this.coerceToBase64Url(cred.response.clientDataJSON)
+                    clientDataJSON: clientDataB64,
+                    clientDataJson: clientDataB64,
+                    transports: transports
                 }
             });
         } catch (err) {
@@ -106,13 +121,22 @@ window.webauthn = {
 
             const assertion = await navigator.credentials.get({ publicKey: options });
 
+            let clientExtensionResults = {};
+            if (assertion.getClientExtensionResults && typeof assertion.getClientExtensionResults === "function") {
+                clientExtensionResults = assertion.getClientExtensionResults();
+            }
+
+            const clientDataB64 = this.coerceToBase64Url(assertion.response.clientDataJSON);
+
             return JSON.stringify({
                 id: assertion.id,
                 rawId: this.coerceToBase64Url(assertion.rawId),
-                type: assertion.type,
+                type: assertion.type || "public-key",
+                clientExtensionResults: clientExtensionResults,
                 response: {
                     authenticatorData: this.coerceToBase64Url(assertion.response.authenticatorData),
-                    clientDataJson: this.coerceToBase64Url(assertion.response.clientDataJSON),
+                    clientDataJSON: clientDataB64,
+                    clientDataJson: clientDataB64,
                     signature: this.coerceToBase64Url(assertion.response.signature),
                     userHandle: assertion.response.userHandle ? this.coerceToBase64Url(assertion.response.userHandle) : null
                 }

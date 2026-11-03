@@ -21,6 +21,11 @@ public class Fido2Service : IFido2Service
     private readonly IFido2 _fido2;
     private readonly AuthDbContext _dbContext;
 
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
     public Fido2Service(IFido2 fido2, AuthDbContext dbContext)
     {
         _fido2 = fido2;
@@ -57,13 +62,37 @@ public class Fido2Service : IFido2Service
     {
         try
         {
-            var assertionResponse = JsonSerializer.Deserialize<AuthenticatorAssertionRawResponse>(clientResponseJson);
-            if (assertionResponse == null)
+            byte[]? rawId = null;
+
+            try
             {
-                return Result.Failure<string>(Error.Validation("Fido2.InvalidPayload", "Respuesta FIDO2 inválida."));
+                var assertionResponse = JsonSerializer.Deserialize<AuthenticatorAssertionRawResponse>(clientResponseJson, JsonOptions);
+                rawId = assertionResponse?.RawId;
+            }
+            catch
+            {
+                // Fallback for strict deserializers or schema variations across devices (e.g. iOS Apple Passwords)
             }
 
-            var rawId = assertionResponse.RawId;
+            if (rawId == null || rawId.Length == 0)
+            {
+                using var doc = JsonDocument.Parse(clientResponseJson);
+                var root = doc.RootElement;
+                if (root.TryGetProperty("rawId", out var rawElem) || root.TryGetProperty("rawid", out rawElem) || root.TryGetProperty("id", out rawElem))
+                {
+                    var str = rawElem.GetString();
+                    if (!string.IsNullOrEmpty(str))
+                    {
+                        rawId = DecodeBase64Url(str);
+                    }
+                }
+            }
+
+            if (rawId == null || rawId.Length == 0)
+            {
+                return Result.Failure<string>(Error.Validation("Fido2.InvalidPayload", "Respuesta FIDO2 inválida o identificador de credencial ausente."));
+            }
+
             var userCredentials = await _dbContext.PasskeyCredentials.ToListAsync(ct);
             var storedKey = userCredentials.FirstOrDefault(k => k.CredentialId.SequenceEqual(rawId));
 
@@ -135,17 +164,59 @@ public class Fido2Service : IFido2Service
             var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId || u.Email == userId || u.UserName == userId, ct);
             var realUserId = user?.Id ?? userId;
 
-            var attestationResponse = JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(clientResponseJson);
-            if (attestationResponse == null)
+            byte[]? rawId = null;
+            byte[]? attestationObject = null;
+
+            try
             {
-                return Result.Failure<bool>(Error.Validation("Fido2.InvalidPayload", "Respuesta de registro FIDO2 inválida."));
+                var attestationResponse = JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(clientResponseJson, JsonOptions);
+                if (attestationResponse != null)
+                {
+                    rawId = attestationResponse.RawId;
+                    attestationObject = attestationResponse.Response?.AttestationObject;
+                }
+            }
+            catch
+            {
+                // Fallback for schema variations or strict property requirements across devices (e.g. iOS Apple Passwords)
+            }
+
+            if (rawId == null || attestationObject == null)
+            {
+                using var doc = JsonDocument.Parse(clientResponseJson);
+                var root = doc.RootElement;
+                if (root.TryGetProperty("rawId", out var rawIdElem) || root.TryGetProperty("rawid", out rawIdElem) || root.TryGetProperty("id", out rawIdElem))
+                {
+                    var rawIdStr = rawIdElem.GetString();
+                    if (!string.IsNullOrEmpty(rawIdStr))
+                    {
+                        rawId = DecodeBase64Url(rawIdStr);
+                    }
+                }
+
+                if (root.TryGetProperty("response", out var respElem))
+                {
+                    if (respElem.TryGetProperty("attestationObject", out var attObjElem) || respElem.TryGetProperty("attestationobject", out attObjElem))
+                    {
+                        var attObjStr = attObjElem.GetString();
+                        if (!string.IsNullOrEmpty(attObjStr))
+                        {
+                            attestationObject = DecodeBase64Url(attObjStr);
+                        }
+                    }
+                }
+            }
+
+            if (rawId == null || rawId.Length == 0 || attestationObject == null || attestationObject.Length == 0)
+            {
+                return Result.Failure<bool>(Error.Validation("Fido2.InvalidPayload", "Respuesta de registro FIDO2 incompleta o inválida."));
             }
 
             var newKey = new PasskeyCredential(
                 userId: realUserId,
                 name: string.IsNullOrWhiteSpace(keyName) ? "Passkey de usuario" : keyName,
-                credentialId: attestationResponse.RawId,
-                publicKey: attestationResponse.Response.AttestationObject,
+                credentialId: rawId,
+                publicKey: attestationObject,
                 userHandle: Encoding.UTF8.GetBytes(realUserId),
                 signatureCounter: 0,
                 aaGuid: Guid.NewGuid()
@@ -160,5 +231,16 @@ public class Fido2Service : IFido2Service
         {
             return Result.Failure<bool>(Error.Failure("Fido2.RegistrationError", ex.Message));
         }
+    }
+
+    private static byte[] DecodeBase64Url(string input)
+    {
+        string s = input.Trim().Replace('-', '+').Replace('_', '/');
+        switch (s.Length % 4)
+        {
+            case 2: s += "=="; break;
+            case 3: s += "="; break;
+        }
+        return Convert.FromBase64String(s);
     }
 }
