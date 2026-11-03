@@ -130,11 +130,26 @@
         <SoftFilterCard>
             <div class="row g-3 g-md-4 align-items-center py-1">
                 <div class="col-12 col-md-5">
-                    <div class="d-flex align-items-center gap-2">
-                        <Input Placeholder="Buscar joya por referencia o descripción..."
-                               PrefixIcon="search"
-                               @bind-Value="_searchJewelryTerm"
-                               AllowClear="true" />
+                    <div class="d-flex align-items-center gap-1">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 text-muted">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text"
+                                   class="form-control border-start-0 ps-0"
+                                   placeholder="Buscar joya por ref (#), tipo (anillo, cadena) o descripción..."
+                                   value="@_searchJewelryTerm"
+                                   @oninput="OnJewelrySearchInput" />
+                            @if (!string.IsNullOrWhiteSpace(_searchJewelryTerm))
+                            {
+                                <button class="btn btn-outline-secondary border-start-0 bg-white text-muted"
+                                        type="button"
+                                        title="Limpiar búsqueda"
+                                        @onclick="ClearJewelrySearch">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                </button>
+                            }
+                        </div>
                         <SoftVoiceButton @bind-TargetText="_searchJewelryTerm"
                                          Append="false"
                                          TooltipText="Buscar por voz"
@@ -302,11 +317,26 @@
         <SoftFilterCard>
             <div class="row g-3 g-md-4 align-items-center py-1">
                 <div class="col-12 col-md-4">
-                    <div class="d-flex align-items-center gap-2">
-                        <Input Placeholder="Buscar por serial, marca o descripción..."
-                               PrefixIcon="search"
-                               @bind-Value="_searchWatchTerm"
-                               AllowClear="true" />
+                    <div class="d-flex align-items-center gap-1">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 text-muted">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text"
+                                   class="form-control border-start-0 ps-0"
+                                   placeholder="Buscar por ref (#), serial, marca o detalle..."
+                                   value="@_searchWatchTerm"
+                                   @oninput="OnWatchSearchInput" />
+                            @if (!string.IsNullOrWhiteSpace(_searchWatchTerm))
+                            {
+                                <button class="btn btn-outline-secondary border-start-0 bg-white text-muted"
+                                        type="button"
+                                        title="Limpiar búsqueda"
+                                        @onclick="ClearWatchSearch">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                </button>
+                            }
+                        </div>
                         <SoftVoiceButton @bind-TargetText="_searchWatchTerm"
                                          Append="false"
                                          TooltipText="Buscar por voz"
@@ -765,6 +795,42 @@
     private bool _isSavingWatch;
     private WatchFormModel _watchFormModel = new();
 
+    // Helper for diacritic-insensitive search (e.g. 'corazon' matches 'corazón', '15 anos' matches '15 años')
+    private static string NormalizeSearchText(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+        var normalized = text.Trim().Normalize(System.Text.NormalizationForm.FormD);
+        var sb = new System.Text.StringBuilder(normalized.Length);
+        foreach (var c in normalized)
+        {
+            if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark)
+            {
+                sb.Append(c);
+            }
+        }
+        return sb.ToString().Normalize(System.Text.NormalizationForm.FormC).ToLowerInvariant();
+    }
+
+    private void OnJewelrySearchInput(ChangeEventArgs e)
+    {
+        _searchJewelryTerm = e.Value?.ToString() ?? string.Empty;
+    }
+
+    private void ClearJewelrySearch()
+    {
+        _searchJewelryTerm = string.Empty;
+    }
+
+    private void OnWatchSearchInput(ChangeEventArgs e)
+    {
+        _searchWatchTerm = e.Value?.ToString() ?? string.Empty;
+    }
+
+    private void ClearWatchSearch()
+    {
+        _searchWatchTerm = string.Empty;
+    }
+
     // Filtered lists
     private List<JewelListItemDto> FilteredJewelry
     {
@@ -774,9 +840,24 @@
 
             if (!string.IsNullOrWhiteSpace(_searchJewelryTerm))
             {
-                var term = _searchJewelryTerm.Trim().ToLowerInvariant();
-                list = list.Where(i => i.Reference.ToString().Contains(term) ||
-                                       (i.Description != null && i.Description.ToLowerInvariant().Contains(term)));
+                var rawTerm = _searchJewelryTerm.Trim();
+                var normTerm = NormalizeSearchText(rawTerm);
+                var digitsOnly = new string(rawTerm.Where(char.IsDigit).ToArray());
+                var words = normTerm.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                list = list.Where(i =>
+                {
+                    var refStr = i.Reference.ToString();
+                    // 1. Direct match on reference number: "#9493", "9493", "ref 9493", "ref. 9493", "493"
+                    if (!string.IsNullOrEmpty(digitsOnly) && refStr.Contains(digitsOnly))
+                    {
+                        return true;
+                    }
+
+                    // 2. Comprehensive text search across Reference, ItemType (Anillo, Cadena, etc.) and Description
+                    var searchable = NormalizeSearchText($"{refStr} {i.ItemTypeName} {i.Description}");
+                    return words.All(w => searchable.Contains(w));
+                });
             }
 
             if (_selectedJewelryTypeFilter > 0)
@@ -805,11 +886,24 @@
 
             if (!string.IsNullOrWhiteSpace(_searchWatchTerm))
             {
-                var term = _searchWatchTerm.Trim().ToLowerInvariant();
-                list = list.Where(i => i.Reference.ToString().Contains(term) ||
-                                       i.CaseNumber.ToLowerInvariant().Contains(term) ||
-                                       i.BrandName.ToLowerInvariant().Contains(term) ||
-                                       (i.Description != null && i.Description.ToLowerInvariant().Contains(term)));
+                var rawTerm = _searchWatchTerm.Trim();
+                var normTerm = NormalizeSearchText(rawTerm);
+                var digitsOnly = new string(rawTerm.Where(char.IsDigit).ToArray());
+                var words = normTerm.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                list = list.Where(i =>
+                {
+                    var refStr = i.Reference.ToString();
+                    // 1. Direct match on numeric reference (e.g. "#3363", "3363", "ref 3363")
+                    if (!string.IsNullOrEmpty(digitsOnly) && refStr.Contains(digitsOnly))
+                    {
+                        return true;
+                    }
+
+                    // 2. Searchable across Reference, Brand (Casio, Rolex), Case/Serial (LTP-1094E, etc.), Gender, and Description
+                    var searchable = NormalizeSearchText($"{refStr} {i.BrandName} {i.CaseNumber} {i.GenderType} {i.Description}");
+                    return words.All(w => searchable.Contains(w));
+                });
             }
 
             if (_selectedWatchBrandFilter > 0)
