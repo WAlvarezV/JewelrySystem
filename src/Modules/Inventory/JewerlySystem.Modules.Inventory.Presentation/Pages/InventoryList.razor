@@ -128,8 +128,8 @@
 
         <!-- Barra de Búsqueda y Filtros Joyería -->
         <SoftFilterCard>
-            <div class="row g-3 g-md-4 align-items-center py-1">
-                <div class="col-12 col-md-5">
+            <div class="row g-2 g-md-3 align-items-center py-1">
+                <div class="col-12 col-md-5 col-lg-4">
                     <div class="d-flex align-items-center gap-1">
                         <div class="input-group">
                             <span class="input-group-text bg-white border-end-0 text-muted">
@@ -156,7 +156,7 @@
                                          ButtonClass="btn-outline-secondary" />
                     </div>
                 </div>
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-sm-6 col-md-3 col-lg-3">
                     <Select TItemValue="int"
                             TItem="ItemTypeDto"
                             DataSource="@_jewelryTypeOptions"
@@ -166,7 +166,7 @@
                             EnableSearch="true"
                             Placeholder="Tipo de joya..." />
                 </div>
-                <div class="col-12 col-md-3">
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                     <Select TItemValue="string"
                             TItem="StatusFilterOption"
                             DataSource="@_statusFilterOptions"
@@ -175,6 +175,17 @@
                             LabelName="@nameof(StatusFilterOption.Label)"
                             EnableSearch="true"
                             Placeholder="Estado..." />
+                </div>
+                <div class="col-12 col-md-12 col-lg-2">
+                    <button class="btn @(HasJewelryFilters ? "btn-outline-danger" : "btn-outline-secondary text-muted") w-100 d-flex align-items-center justify-content-center gap-1"
+                            type="button"
+                            style="height: 38px;"
+                            disabled="@(!HasJewelryFilters)"
+                            title="Restablecer todos los filtros de joyería"
+                            @onclick="ResetJewelryFilters">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                        <span class="fw-medium">Limpiar filtros</span>
+                    </button>
                 </div>
             </div>
         </SoftFilterCard>
@@ -193,11 +204,22 @@
                     <SoftResultView Status="ResultStatus.Info"
                                     Title="No se encontraron joyas"
                                     Subtitle="No hay piezas de joyería que coincidan con los filtros seleccionados.">
-                        <SoftButton Type="@ButtonType.Primary"
-                                    Icon="plus-circle"
-                                    OnClick="OpenCreateJewelDrawer">
-                            Registrar Nueva Joya
-                        </SoftButton>
+                        <div class="d-flex justify-content-center align-items-center gap-2 flex-wrap">
+                            @if (HasJewelryFilters)
+                            {
+                                <button class="btn btn-outline-secondary d-inline-flex align-items-center gap-1"
+                                        type="button"
+                                        @onclick="ResetJewelryFilters">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                    <span>Limpiar Filtros</span>
+                                </button>
+                            }
+                            <SoftButton Type="@ButtonType.Primary"
+                                        Icon="plus-circle"
+                                        OnClick="OpenCreateJewelDrawer">
+                                Registrar Nueva Joya
+                            </SoftButton>
+                        </div>
                     </SoftResultView>
                 </div>
             }
@@ -315,8 +337,8 @@
 
         <!-- Barra de Búsqueda y Filtros Relojes -->
         <SoftFilterCard>
-            <div class="row g-3 g-md-4 align-items-center py-1">
-                <div class="col-12 col-md-4">
+            <div class="row g-2 g-md-3 align-items-center py-1">
+                <div class="col-12 col-lg-3 col-xl-3">
                     <div class="d-flex align-items-center gap-1">
                         <div class="input-group">
                             <span class="input-group-text bg-white border-end-0 text-muted">
@@ -343,7 +365,7 @@
                                          ButtonClass="btn-outline-secondary" />
                     </div>
                 </div>
-                <div class="col-12 col-md-3">
+                <div class="col-6 col-sm-6 col-md-3 col-lg-2 col-xl-2">
                     <Select TItemValue="int"
                             TItem="BrandFilterOption"
                             DataSource="@_brandFilterOptions"
@@ -351,9 +373,9 @@
                             ValueName="@nameof(BrandFilterOption.Id)"
                             LabelName="@nameof(BrandFilterOption.Name)"
                             EnableSearch="true"
-                            Placeholder="Filtrar por marca..." />
+                            Placeholder="Marca..." />
                 </div>
-                <div class="col-12 col-md-3">
+                <div class="col-6 col-sm-6 col-md-3 col-lg-2 col-xl-2">
                     <Select TItemValue="string"
                             TItem="GenderFilterOption"
                             DataSource="@_genderFilterOptions"
@@ -363,7 +385,7 @@
                             EnableSearch="true"
                             Placeholder="Género..." />
                 </div>
-                <div class="col-12 col-md-2">
+                <div class="col-6 col-sm-6 col-md-3 col-lg-3 col-xl-3">
                     <Select TItemValue="string"
                             TItem="StatusFilterOption"
                             DataSource="@_statusFilterOptions"
@@ -372,6 +394,17 @@
                             LabelName="@nameof(StatusFilterOption.Label)"
                             EnableSearch="true"
                             Placeholder="Estado..." />
+                </div>
+                <div class="col-6 col-sm-6 col-md-3 col-lg-2 col-xl-2">
+                    <button class="btn @(HasWatchFilters ? "btn-outline-danger" : "btn-outline-secondary text-muted") w-100 d-flex align-items-center justify-content-center gap-1"
+                            type="button"
+                            style="height: 38px;"
+                            disabled="@(!HasWatchFilters)"
+                            title="Restablecer todos los filtros de relojes"
+                            @onclick="ResetWatchFilters">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                        <span class="fw-medium">Limpiar</span>
+                    </button>
                 </div>
             </div>
         </SoftFilterCard>
@@ -390,11 +423,22 @@
                     <SoftResultView Status="ResultStatus.Info"
                                     Title="No se encontraron relojes"
                                     Subtitle="No hay relojes que coincidan con los filtros seleccionados.">
-                        <SoftButton Type="@ButtonType.Primary"
-                                    Icon="plus-circle"
-                                    OnClick="OpenCreateWatchDrawer">
-                            Registrar Nuevo Reloj
-                        </SoftButton>
+                        <div class="d-flex justify-content-center align-items-center gap-2 flex-wrap">
+                            @if (HasWatchFilters)
+                            {
+                                <button class="btn btn-outline-secondary d-inline-flex align-items-center gap-1"
+                                        type="button"
+                                        @onclick="ResetWatchFilters">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                    <span>Limpiar Filtros</span>
+                                </button>
+                            }
+                            <SoftButton Type="@ButtonType.Primary"
+                                        Icon="plus-circle"
+                                        OnClick="OpenCreateWatchDrawer">
+                                Registrar Nuevo Reloj
+                            </SoftButton>
+                        </div>
                     </SoftResultView>
                 </div>
             }
@@ -821,6 +865,18 @@
         _searchJewelryTerm = string.Empty;
     }
 
+    private bool HasJewelryFilters =>
+        !string.IsNullOrWhiteSpace(_searchJewelryTerm) ||
+        _selectedJewelryTypeFilter != 0 ||
+        !string.IsNullOrWhiteSpace(_selectedJewelryStatusFilter);
+
+    private void ResetJewelryFilters()
+    {
+        _searchJewelryTerm = string.Empty;
+        _selectedJewelryTypeFilter = 0;
+        _selectedJewelryStatusFilter = string.Empty;
+    }
+
     private void OnWatchSearchInput(ChangeEventArgs e)
     {
         _searchWatchTerm = e.Value?.ToString() ?? string.Empty;
@@ -829,6 +885,20 @@
     private void ClearWatchSearch()
     {
         _searchWatchTerm = string.Empty;
+    }
+
+    private bool HasWatchFilters =>
+        !string.IsNullOrWhiteSpace(_searchWatchTerm) ||
+        _selectedWatchBrandFilter != 0 ||
+        !string.IsNullOrWhiteSpace(_selectedWatchGenderFilter) ||
+        !string.IsNullOrWhiteSpace(_selectedWatchStatusFilter);
+
+    private void ResetWatchFilters()
+    {
+        _searchWatchTerm = string.Empty;
+        _selectedWatchBrandFilter = 0;
+        _selectedWatchGenderFilter = string.Empty;
+        _selectedWatchStatusFilter = string.Empty;
     }
 
     // Filtered lists

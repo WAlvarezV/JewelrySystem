@@ -74,7 +74,17 @@
                     <Radio RadioButton="true" Value="@("PAID")">Pagadas</Radio>
                 </RadioGroup>
             </div>
-            <div class="col-12 col-lg-2 text-lg-end">
+            <div class="col-12 col-lg-2 text-lg-end d-flex align-items-center justify-content-lg-end gap-2 flex-wrap">
+                @if (HasFilters)
+                {
+                    <button class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1 py-1"
+                            type="button"
+                            title="Limpiar filtros"
+                            @onclick="ResetFilters">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                        <span>Limpiar</span>
+                    </button>
+                }
                 <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill small">
                     <i class="bi bi-funnel me-1"></i> <b>@FilteredInvoices.Count</b> facturas
                 </span>
@@ -380,6 +390,14 @@
     private bool _isLoading = true;
     private string _searchTerm = string.Empty;
     private string _statusFilter = "ALL";
+
+    private bool HasFilters => !string.IsNullOrWhiteSpace(_searchTerm) || _statusFilter != "ALL";
+
+    private void ResetFilters()
+    {
+        _searchTerm = string.Empty;
+        _statusFilter = "ALL";
+    }
 
     // Create Drawer
     private bool _createDrawerVisible;
