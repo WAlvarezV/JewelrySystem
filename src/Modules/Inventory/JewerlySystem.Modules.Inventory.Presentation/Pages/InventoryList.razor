@@ -518,10 +518,19 @@
         <ChildContent>
             <Form Model="@_jewelFormModel" Layout="@FormLayout.Vertical">
                 <!-- 1. Clasificación y Proveedor -->
-                <SoftFormBox Title="1. Tipo de Joya y Origen"
-                             InfoTooltip="Categoría de joyería y procedencia de la pieza">
+                <SoftFormBox Title="1. Referencia, Tipo de Joya y Origen"
+                             InfoTooltip="Número de referencia física/marquilla y procedencia de la pieza">
                     <div class="row g-3">
-                        <div class="col-12 col-md-6">
+                        <div class="col-12 col-md-4">
+                            <FormItem Label="N° de Referencia" Required="true">
+                                <AntDesign.InputNumber TValue="int?"
+                                                       @bind-Value="_jewelFormModel.Reference"
+                                                       Min="1"
+                                                       Placeholder="Ej. 9493"
+                                                       Style="width: 100%; font-weight: bold; font-size: 1.05rem;" />
+                            </FormItem>
+                        </div>
+                        <div class="col-12 col-md-4">
                             <FormItem Label="Tipo de Joya" Required="true">
                                 <Select TItem="ItemTypeDto"
                                         TItemValue="int"
@@ -533,7 +542,7 @@
                                         Placeholder="Seleccione tipo de joya..." />
                             </FormItem>
                         </div>
-                        <div class="col-12 col-md-6">
+                        <div class="col-12 col-md-4">
                             <FormItem Label="Proveedor / Origen">
                                 <Select TItem="JewerlySystem.Modules.Customers.Application.DTOs.PersonDto"
                                         TItemValue="int?"
@@ -642,10 +651,20 @@
         <ChildContent>
             <Form Model="@_watchFormModel" Layout="@FormLayout.Vertical">
                 <!-- 1. Marca, Origen y Clasificación -->
-                <SoftFormBox Title="1. Marca, Origen y Clasificación"
-                             InfoTooltip="Información del fabricante, género objetivo y procedencia">
+                <SoftFormBox Title="1. Referencia, Marca y Origen"
+                             InfoTooltip="Referencia de inventario, fabricante, género objetivo y procedencia">
                     <div class="row g-3">
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-3">
+                            <FormItem Label="N° de Referencia" Required="true">
+                                <AntDesign.InputNumber TValue="int?"
+                                                       @bind-Value="_watchFormModel.Reference"
+                                                       Min="1"
+                                                       Placeholder="Ej. 3363"
+                                                       Style="width: 100%; font-weight: bold; font-size: 1.05rem;" />
+                            </FormItem>
+                        </div>
+
+                        <div class="col-12 col-md-3">
                             <FormItem Label="Marca del Reloj" Required="true">
                                 <Select TItem="BrandDto"
                                         TItemValue="int"
@@ -658,7 +677,7 @@
                             </FormItem>
                         </div>
 
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-3">
                             <FormItem Label="Género / Segmento" Required="true">
                                 <Select TItem="GenderTypeOption"
                                         TItemValue="GenderType"
@@ -671,7 +690,7 @@
                             </FormItem>
                         </div>
 
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-3">
                             <FormItem Label="Proveedor / Origen">
                                 <Select TItem="JewerlySystem.Modules.Customers.Application.DTOs.PersonDto"
                                         TItemValue="int?"
@@ -680,7 +699,7 @@
                                         ValueName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.Id)"
                                         LabelName="@nameof(JewerlySystem.Modules.Customers.Application.DTOs.PersonDto.FullName)"
                                         EnableSearch="true"
-                                        Placeholder="-- Stock Interno / Empeño --"
+                                        Placeholder="-- Stock Interno --"
                                         AllowClear="true" />
                             </FormItem>
                         </div>
@@ -1136,6 +1155,7 @@
     {
         _jewelFormModel = new JewelFormModel
         {
+            Reference = null,
             ItemTypeId = _itemTypes.FirstOrDefault(t => t.Id != 5)?.Id ?? 1,
             GramValue = 0,
             GramSaleValue = 0,
@@ -1173,6 +1193,12 @@
 
     private async Task SaveJewelAsync()
     {
+        if (!_jewelFormModel.Reference.HasValue || _jewelFormModel.Reference.Value <= 0)
+        {
+            Message.Warning("Debe ingresar el número de referencia de la joya.");
+            return;
+        }
+
         if (_jewelFormModel.ItemTypeId <= 0)
         {
             Message.Warning("Debe seleccionar un tipo de joya válido.");
@@ -1209,13 +1235,14 @@
                 Weight: _jewelFormModel.Weight,
                 GramValue: _jewelFormModel.GramValue,
                 Length: _jewelFormModel.Length,
-                ProviderId: _jewelFormModel.ProviderId
+                ProviderId: _jewelFormModel.ProviderId,
+                Reference: _jewelFormModel.Reference
             );
 
             var result = await Sender.Send(cmd);
             if (result.IsSuccess)
             {
-                Message.Success($"¡Joya registrada con éxito en inventario con ID #{result.Value}!");
+                Message.Success($"¡Joya registrada con éxito en inventario con referencia #{_jewelFormModel.Reference}!");
                 _drawerJewelVisible = false;
                 await LoadInventoryCatalogAsync();
             }
@@ -1239,6 +1266,7 @@
     {
         _watchFormModel = new WatchFormModel
         {
+            Reference = null,
             BrandId = _brands.FirstOrDefault()?.Id ?? 1,
             GenderType = GenderType.Hombre,
             CostValue = 0,
@@ -1256,6 +1284,12 @@
 
     private async Task SaveWatchAsync()
     {
+        if (!_watchFormModel.Reference.HasValue || _watchFormModel.Reference.Value <= 0)
+        {
+            Message.Warning("Debe ingresar el número de referencia del reloj.");
+            return;
+        }
+
         if (_watchFormModel.BrandId <= 0)
         {
             Message.Warning("Debe seleccionar una marca de reloj válida.");
@@ -1291,13 +1325,14 @@
                 GenderType: _watchFormModel.GenderType,
                 CaseNumber: _watchFormModel.CaseNumber.Trim(),
                 BrandId: _watchFormModel.BrandId,
-                ProviderId: _watchFormModel.ProviderId
+                ProviderId: _watchFormModel.ProviderId,
+                Reference: _watchFormModel.Reference
             );
 
             var result = await Sender.Send(cmd);
             if (result.IsSuccess)
             {
-                Message.Success($"¡Reloj registrado con éxito con referencia #{result.Value}!");
+                Message.Success($"¡Reloj registrado con éxito con referencia #{_watchFormModel.Reference}!");
                 _drawerWatchVisible = false;
                 await LoadInventoryCatalogAsync();
             }
@@ -1318,6 +1353,7 @@
 
     public class JewelFormModel
     {
+        public int? Reference { get; set; }
         public int ItemTypeId { get; set; } = 1;
         public int? ProviderId { get; set; }
         public double Weight { get; set; }
@@ -1329,6 +1365,7 @@
 
     public class WatchFormModel
     {
+        public int? Reference { get; set; }
         public int BrandId { get; set; }
         public GenderType GenderType { get; set; } = GenderType.Hombre;
         public int? ProviderId { get; set; }

@@ -13,7 +13,8 @@ public record CreateJewelItemCommand(
     double Weight,
     int GramValue,
     int? Length = null,
-    int? ProviderId = null) : ICommand<int>;
+    int? ProviderId = null,
+    int? Reference = null) : ICommand<int>;
 
 public class CreateJewelItemCommandValidator : AbstractValidator<CreateJewelItemCommand>
 {
@@ -23,6 +24,10 @@ public class CreateJewelItemCommandValidator : AbstractValidator<CreateJewelItem
         RuleFor(x => x.Description).NotEmpty().WithMessage("La descripción es obligatoria.");
         RuleFor(x => x.Weight).GreaterThan(0).WithMessage("El peso debe ser mayor a 0.");
         RuleFor(x => x.GramValue).GreaterThan(0).WithMessage("El valor por gramo debe ser mayor a 0.");
+        When(x => x.Reference.HasValue, () =>
+        {
+            RuleFor(x => x.Reference!.Value).GreaterThan(0).WithMessage("El número de referencia debe ser mayor a 0.");
+        });
     }
 }
 
@@ -37,10 +42,23 @@ public class CreateJewelItemCommandHandler : ICommandHandler<CreateJewelItemComm
 
     public async Task<Result<int>> Handle(CreateJewelItemCommand request, CancellationToken cancellationToken)
     {
-        var nextRef = await _repository.GetNextItemReferenceAsync(cancellationToken);
+        int refToUse;
+        if (request.Reference.HasValue && request.Reference.Value > 0)
+        {
+            var existing = await _repository.GetItemByReferenceAsync(request.Reference.Value, cancellationToken);
+            if (existing != null)
+            {
+                return Result.Failure<int>(Error.Conflict("Items.DuplicateReference", $"La referencia #{request.Reference.Value} ya se encuentra registrada en el inventario."));
+            }
+            refToUse = request.Reference.Value;
+        }
+        else
+        {
+            refToUse = await _repository.GetNextItemReferenceAsync(cancellationToken);
+        }
 
         var item = new Item(
-            reference: nextRef,
+            reference: refToUse,
             costValue: request.CostValue,
             dateOfEntry: request.DateOfEntry,
             description: request.Description,
@@ -73,7 +91,8 @@ public record CreateWatchItemCommand(
     GenderType GenderType,
     string CaseNumber,
     int BrandId,
-    int? ProviderId = null) : ICommand<int>;
+    int? ProviderId = null,
+    int? Reference = null) : ICommand<int>;
 
 public class CreateWatchItemCommandValidator : AbstractValidator<CreateWatchItemCommand>
 {
@@ -83,6 +102,10 @@ public class CreateWatchItemCommandValidator : AbstractValidator<CreateWatchItem
         RuleFor(x => x.Description).NotEmpty().WithMessage("La descripción es obligatoria.");
         RuleFor(x => x.CaseNumber).NotEmpty().WithMessage("El número de caja es obligatorio.");
         RuleFor(x => x.BrandId).GreaterThan(0).WithMessage("La marca es obligatoria.");
+        When(x => x.Reference.HasValue, () =>
+        {
+            RuleFor(x => x.Reference!.Value).GreaterThan(0).WithMessage("El número de referencia debe ser mayor a 0.");
+        });
     }
 }
 
@@ -97,10 +120,23 @@ public class CreateWatchItemCommandHandler : ICommandHandler<CreateWatchItemComm
 
     public async Task<Result<int>> Handle(CreateWatchItemCommand request, CancellationToken cancellationToken)
     {
-        var nextRef = await _repository.GetNextItemReferenceAsync(cancellationToken);
+        int refToUse;
+        if (request.Reference.HasValue && request.Reference.Value > 0)
+        {
+            var existing = await _repository.GetItemByReferenceAsync(request.Reference.Value, cancellationToken);
+            if (existing != null)
+            {
+                return Result.Failure<int>(Error.Conflict("Items.DuplicateReference", $"La referencia #{request.Reference.Value} ya se encuentra registrada en el inventario."));
+            }
+            refToUse = request.Reference.Value;
+        }
+        else
+        {
+            refToUse = await _repository.GetNextItemReferenceAsync(cancellationToken);
+        }
 
         var item = new Item(
-            reference: nextRef,
+            reference: refToUse,
             costValue: request.CostValue,
             dateOfEntry: request.DateOfEntry,
             description: request.Description,
