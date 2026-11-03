@@ -2131,32 +2131,38 @@ html, body {
         display: none !important;
     }
 
-    /* Form Controls & Inputs */
+    /* Form Controls & Inputs (16px font-size prevents iOS Safari auto-zoom) */
     .ant-input,
     .ant-input-number,
     .ant-select-selector,
-    .ant-picker {
-        min-height: 38px !important;
-        font-size: 0.88rem !important;
+    .ant-picker,
+    .form-control,
+    .form-select {
+        min-height: 42px !important;
+        font-size: 16px !important;
     }
 
     /* Buttons: Touch-friendly targets */
     .btn,
     .ant-btn {
-        min-height: 36px !important;
-        font-size: 0.85rem !important;
+        min-height: 42px !important;
+        font-size: 0.92rem !important;
     }
     .btn-sm,
     .ant-btn-sm {
-        min-height: 32px !important;
-        font-size: 0.78rem !important;
+        min-height: 36px !important;
+        font-size: 0.82rem !important;
     }
 
-    /* General Cards */
-    .card,
+    /* General Cards: Maintain full-bleed headers and scoped body padding */
+    .card {
+        padding: 0 !important;
+        border-radius: var(--soft-border-radius-md, 12px) !important;
+    }
+    .card > .card-body,
     .soft-card {
-        padding: 12px 14px !important;
-        border-radius: var(--soft-border-radius-md, 10px) !important;
+        padding: 14px 16px !important;
+        border-radius: var(--soft-border-radius-md, 12px) !important;
     }
 
     /* Quick Choice Cards on Mobile */
