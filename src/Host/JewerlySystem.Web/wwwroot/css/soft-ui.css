@@ -332,6 +332,73 @@ body[data-theme="pomona-sapphire"],
 }
 
 /* ==========================================================================
+   THEME 6: POMONA ROYAL EMERALD (Esmeralda Colombiana & Oro)
+   ========================================================================== */
+html[data-theme="pomona-emerald"],
+body[data-theme="pomona-emerald"],
+[data-theme="pomona-emerald"] {
+    --brand-primary: #059669;
+    --brand-primary-hover: #10B981;
+    --brand-primary-active: #047857;
+    --brand-primary-light: #ECFDF5;
+    --brand-primary-gradient: linear-gradient(135deg, #059669 0%, #064E3B 100%);
+    --brand-primary-shadow: 0 4px 14px rgba(5, 150, 105, 0.40);
+
+    /* Button Text & Icon Contrast Tokens */
+    --brand-btn-text: #FFFFFF;
+    --brand-btn-icon: #FFFFFF;
+
+    /* Luxury Accent: Warm Gold */
+    --brand-gold: #D4AF37;
+    --brand-gold-hover: #E5C358;
+    --brand-gold-light: #FCF8ED;
+    --brand-gold-gradient: linear-gradient(135deg, #D4AF37 0%, #AA820A 100%);
+
+    --brand-ivory: #FEFEF6;
+    --brand-rail-bg: #03170F; /* Deep Forest Emerald Obsidian */
+    --brand-rail-border: #0B3322;
+    --brand-rail-active: linear-gradient(135deg, #059669 0%, #064E3B 100%);
+    --brand-rail-active-text: #FFFFFF;
+    --brand-rail-active-icon: #D4AF37; /* Gold on Emerald */
+    --brand-rail-active-border: rgba(212, 175, 55, 0.5);
+    --brand-rail-glow: 0 4px 14px rgba(5, 150, 105, 0.55);
+
+    --brand-header-accent: #059669;
+
+    /* Ant Design Blazor Native Theme Tokens */
+    --ant-primary-color: #059669;
+    --ant-primary-color-hover: #10B981;
+    --ant-primary-color-active: #047857;
+    --ant-primary-color-outline: rgba(5, 150, 105, 0.25);
+    --ant-primary-1: #ECFDF5;
+    --ant-primary-2: #D1FAE5;
+    --ant-primary-3: #A7F3D0;
+    --ant-primary-4: #6EE7B7;
+    --ant-primary-5: #34D399;
+    --ant-primary-6: #059669;
+    --ant-primary-7: #047857;
+    --ant-primary-8: #065F46;
+    --ant-primary-9: #064E3B;
+    --ant-primary-10: #022C22;
+
+    --soft-bg-light: #F0F7F4; /* Cool Mint / Sage Porcelain Mist */
+    --soft-bg-surface: #FFFFFF;
+    --soft-border-color: #D1E7DD;
+    --soft-text-title: #06281E;
+    --soft-text-body: #1E3932;
+    --soft-text-muted: #5C7A70;
+
+    --nav-hover-bg: #ECFDF5;
+    --nav-active-text: #047857;
+
+    --brand-blue: var(--brand-primary);
+    --brand-blue-hover: var(--brand-primary-hover);
+    --brand-blue-light: var(--brand-primary-light);
+    --brand-blue-gradient: var(--brand-primary-gradient);
+    --brand-navy: #03170F;
+}
+
+/* ==========================================================================
    GLOBAL BOOTSTRAP & ANT DESIGN HARMONIZATION BRIDGE
    ========================================================================== */
 .bg-primary {
@@ -1336,4 +1403,70 @@ body[data-theme="pomona-sapphire"] .app-main-workspace,
 
 [data-theme="pomona-sapphire"] .nav-item-link.active i {
     color: #1D4ED8 !important;
+}
+
+/* --------------------------------------------------------------------------
+   6. POMONA ROYAL EMERALD (Esmeralda Colombiana & Oro)
+   -------------------------------------------------------------------------- */
+html[data-theme="pomona-emerald"] body,
+html[data-theme="pomona-emerald"] .app-main-workspace,
+body[data-theme="pomona-emerald"] .app-main-workspace,
+[data-theme="pomona-emerald"] .app-main-workspace,
+[data-theme="pomona-emerald"] .bg-light {
+    background-color: #F0F7F4 !important;
+    color: #1E3932 !important;
+}
+
+[data-theme="pomona-emerald"] .navbar,
+[data-theme="pomona-emerald"] .soft-sider,
+[data-theme="pomona-emerald"] .nav-menu-container,
+[data-theme="pomona-emerald"] .nav-menu-header {
+    background-color: #FFFFFF !important;
+    border-color: #D1E7DD !important;
+}
+
+[data-theme="pomona-emerald"] .navbar {
+    border-bottom: 2px solid #059669 !important;
+}
+
+[data-theme="pomona-emerald"] .card,
+[data-theme="pomona-emerald"] .ant-card,
+[data-theme="pomona-emerald"] .soft-card,
+[data-theme="pomona-emerald"] .ant-table-wrapper,
+[data-theme="pomona-emerald"] .metric-card,
+[data-theme="pomona-emerald"] .bg-white {
+    background-color: #FFFFFF !important;
+    border-color: #D1E7DD !important;
+}
+
+[data-theme="pomona-emerald"] .card-header,
+[data-theme="pomona-emerald"] .ant-card-head {
+    background-color: #F0FDF4 !important;
+    border-bottom: 1.5px solid #D1E7DD !important;
+    color: #06281E !important;
+}
+
+[data-theme="pomona-emerald"] .ant-table-thead > tr > th {
+    background-color: #E6F4EA !important;
+    color: #065F46 !important;
+    border-bottom-color: #D1E7DD !important;
+}
+
+[data-theme="pomona-emerald"] .ant-table-tbody > tr:hover > td {
+    background-color: #F2FAF5 !important;
+}
+
+[data-theme="pomona-emerald"] .dropdown-menu {
+    background-color: #FFFFFF !important;
+    border-color: #D1E7DD !important;
+}
+
+[data-theme="pomona-emerald"] .nav-item-link.active {
+    background-color: #ECFDF5 !important;
+    color: #047857 !important;
+    border-left: 3px solid #059669 !important;
+}
+
+[data-theme="pomona-emerald"] .nav-item-link.active i {
+    color: #047857 !important;
 }

@@ -77,7 +77,7 @@
                         </span>
                     </div>
 
-                    <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center gap-2 ms-auto">
                         <!-- Botón Asistente de Operaciones por Voz con IA -->
                         <button type="button"
                                 class="btn btn-sm d-flex align-items-center gap-2 px-3 py-1 shadow-sm rounded-pill fw-semibold border-0 voice-header-btn"
@@ -85,35 +85,94 @@
                                 title="Dictar cualquier operación (Ventas, Contratos, Clientes, Gastos) de la forma más simple">
                             <i class="bi bi-stars text-warning fs-6"></i>
                             <i class="bi bi-mic-fill fs-6"></i>
-                            <span class="small">Dictar con IA</span>
+                            <span class="small d-none d-sm-inline">Dictar con IA</span>
                         </button>
 
                         <!-- Selector de Temas Visuales (Ant Design Themes) -->
                         <ThemeSelector />
 
-                        <div class="vr my-1 text-muted"></div>
+                        <div class="vr my-1 text-muted opacity-25"></div>
 
-                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 d-none d-md-inline-flex align-items-center">
                             <i class="bi bi-shield-check me-1"></i> MFA Activo
                         </span>
 
-                        <div class="vr my-1 text-muted"></div>
+                        <div class="vr my-1 text-muted opacity-25 d-none d-md-block"></div>
 
-                        <div class="d-flex align-items-center gap-2">
-                            <a href="profile" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 py-1 px-2 text-decoration-none" title="Mi Perfil y Contraseña">
-                                <i class="bi bi-person-circle"></i>
-                                <span class="d-none d-md-inline fw-medium">Mi Perfil</span>
-                            </a>
-                            <span class="small fw-semibold text-dark">
-                                @(context.User.Identity?.Name ?? "Usuario Conectado")
-                            </span>
-                            <form method="post" action="/logout" class="d-inline">
-                                <AntiforgeryToken />
-                                <button type="submit" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 py-1 px-2" title="Cerrar sesión">
-                                    <i class="bi bi-box-arrow-right"></i>
-                                    <span>Salir</span>
-                                </button>
-                            </form>
+                        <!-- Dropdown de Usuario (SI.SIOT Style - Alineado a la derecha con inicial y nombre) -->
+                        <div class="position-relative d-inline-flex align-items-center user-dropdown-container">
+                            <button type="button"
+                                    class="btn btn-sm btn-light border d-flex align-items-center gap-2 px-2 py-1 rounded-2 shadow-2xs user-profile-toggle-btn"
+                                    title="Opciones de cuenta de usuario"
+                                    @onclick="ToggleUserDropdown">
+                                <div class="avatar-small rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center shadow-xs"
+                                     style="width: 28px; height: 28px; font-size: 0.78rem;">
+                                    @(context.User.Identity?.Name?.Length > 0 ? context.User.Identity.Name[0].ToString().ToUpper() : "U")
+                                </div>
+                                <span class="small fw-semibold text-dark d-none d-sm-inline text-truncate" style="max-width: 140px;">
+                                    @(context.User.Identity?.Name ?? "Usuario")
+                                </span>
+                                <i class="bi @(_isUserDropdownOpen ? "bi-chevron-up" : "bi-chevron-down") text-muted" style="font-size: 0.65rem;"></i>
+                            </button>
+
+                            @if (_isUserDropdownOpen)
+                            {
+                                <!-- Backdrop para cerrar al hacer clic afuera -->
+                                <div class="user-dropdown-backdrop"
+                                     style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1040; background: transparent;"
+                                     @onclick="CloseUserDropdown"></div>
+
+                                <div class="dropdown-menu show dropdown-menu-end shadow-lg border p-1 rounded-3 user-dropdown-menu"
+                                     style="position: absolute; right: 0; top: 100%; margin-top: 6px; z-index: 1050; min-width: 230px;">
+                                    <!-- Header con avatar y nombre -->
+                                    <div class="px-3 py-2 border-bottom d-flex align-items-center gap-2 mb-1">
+                                        <div class="avatar-small rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center shadow-xs"
+                                             style="width: 36px; height: 36px; font-size: 0.95rem;">
+                                            @(context.User.Identity?.Name?.Length > 0 ? context.User.Identity.Name[0].ToString().ToUpper() : "U")
+                                        </div>
+                                        <div class="d-flex flex-column min-w-0">
+                                            <span class="small fw-bold text-dark text-truncate">
+                                                @(context.User.Identity?.Name ?? "Usuario")
+                                            </span>
+                                            <span class="text-muted" style="font-size: 0.7rem;">
+                                                <i class="bi bi-circle-fill text-success me-1" style="font-size: 0.45rem;"></i>Sesión activa
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Opción: Mi Perfil -->
+                                    <a href="profile"
+                                       class="dropdown-item d-flex align-items-center gap-2 px-3 py-2 rounded-2 text-secondary"
+                                       style="cursor: pointer; transition: all 0.15s ease;"
+                                       @onclick="CloseUserDropdown">
+                                        <i class="bi bi-person-circle text-primary fs-6"></i>
+                                        <span style="font-size: 0.85rem;">Mi Perfil</span>
+                                    </a>
+
+                                    <!-- Opción: Seguridad & Passkeys -->
+                                    <a href="auth/passkeys"
+                                       class="dropdown-item d-flex align-items-center gap-2 px-3 py-2 rounded-2 text-secondary"
+                                       style="cursor: pointer; transition: all 0.15s ease;"
+                                       @onclick="CloseUserDropdown">
+                                        <i class="bi bi-shield-lock text-success fs-6"></i>
+                                        <span style="font-size: 0.85rem;">Seguridad & Passkeys</span>
+                                    </a>
+
+                                    <hr class="dropdown-divider my-1 opacity-25" />
+
+                                    <!-- Opción: Salir / Cerrar Sesión -->
+                                    <form method="post" action="/logout" class="m-0 p-0">
+                                        <AntiforgeryToken />
+                                        <button type="submit"
+                                                class="dropdown-item d-flex align-items-center gap-2 px-3 py-2 rounded-2 text-danger w-100 border-0 bg-transparent text-start"
+                                                style="cursor: pointer; transition: all 0.15s ease;"
+                                                title="Cerrar sesión">
+                                            <i class="bi bi-box-arrow-right fs-6"></i>
+                                            <span style="font-size: 0.85rem; font-weight: 500;">Cerrar sesión</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            }
                         </div>
                     </div>
                 </header>
@@ -275,6 +334,7 @@
 
     private bool _showVoiceModal;
     private bool _isSiderCollapsed;
+    private bool _isUserDropdownOpen;
     private List<AppModuleDto> _modules = [];
     private string _activeModuleKey = "CONTRACTS";
     private string _activeModuleTitle = "Contratos";
@@ -326,5 +386,15 @@
             _activeModuleIcon = module.Icon;
             _isSiderCollapsed = false; // Despliega siempre al cambiar de módulo
         }
+    }
+
+    private void ToggleUserDropdown()
+    {
+        _isUserDropdownOpen = !_isUserDropdownOpen;
+    }
+
+    private void CloseUserDropdown()
+    {
+        _isUserDropdownOpen = false;
     }
 }
