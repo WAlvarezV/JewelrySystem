@@ -265,6 +265,73 @@ body[data-theme="pomona-rose"],
 }
 
 /* ==========================================================================
+   THEME 5: POMONA ROYAL SAPPHIRE (Azul Zafiro Real & Platino)
+   ========================================================================== */
+html[data-theme="pomona-sapphire"],
+body[data-theme="pomona-sapphire"],
+[data-theme="pomona-sapphire"] {
+    --brand-primary: #1D4ED8;
+    --brand-primary-hover: #2563EB;
+    --brand-primary-active: #1E3A8A;
+    --brand-primary-light: #EFF6FF;
+    --brand-primary-gradient: linear-gradient(135deg, #1D4ED8 0%, #0F2B5C 100%);
+    --brand-primary-shadow: 0 4px 14px rgba(29, 78, 216, 0.40);
+
+    /* Button Text & Icon Contrast Tokens */
+    --brand-btn-text: #FFFFFF;
+    --brand-btn-icon: #FFFFFF;
+
+    /* Luxury Accent: Platinum / Ice Silver & Diamond */
+    --brand-gold: #38BDF8;
+    --brand-gold-hover: #7DD3FC;
+    --brand-gold-light: #F0F9FF;
+    --brand-gold-gradient: linear-gradient(135deg, #38BDF8 0%, #0284C7 100%);
+
+    --brand-ivory: #F8FAFC;
+    --brand-rail-bg: #071326; /* Deep Midnight Navy Velvet */
+    --brand-rail-border: #132A4D;
+    --brand-rail-active: linear-gradient(135deg, #1D4ED8 0%, #0F2B5C 100%);
+    --brand-rail-active-text: #FFFFFF;
+    --brand-rail-active-icon: #38BDF8; /* Ice Blue / Platinum Diamond */
+    --brand-rail-active-border: rgba(56, 189, 248, 0.5);
+    --brand-rail-glow: 0 4px 14px rgba(29, 78, 216, 0.55);
+
+    --brand-header-accent: #1D4ED8;
+
+    /* Ant Design Blazor Native Theme Tokens */
+    --ant-primary-color: #1D4ED8;
+    --ant-primary-color-hover: #2563EB;
+    --ant-primary-color-active: #1E3A8A;
+    --ant-primary-color-outline: rgba(29, 78, 216, 0.25);
+    --ant-primary-1: #EFF6FF;
+    --ant-primary-2: #DBEAFE;
+    --ant-primary-3: #BFDBFE;
+    --ant-primary-4: #93C5FD;
+    --ant-primary-5: #60A5FA;
+    --ant-primary-6: #1D4ED8;
+    --ant-primary-7: #1E40AF;
+    --ant-primary-8: #1E3A8A;
+    --ant-primary-9: #172554;
+    --ant-primary-10: #0B1329;
+
+    --soft-bg-light: #F0F4F8; /* Cool Platinum Silver Mist */
+    --soft-bg-surface: #FFFFFF;
+    --soft-border-color: #CBD5E1;
+    --soft-text-title: #0B192C;
+    --soft-text-body: #1E293B;
+    --soft-text-muted: #64748B;
+
+    --nav-hover-bg: #EFF6FF;
+    --nav-active-text: #1D4ED8;
+
+    --brand-blue: var(--brand-primary);
+    --brand-blue-hover: var(--brand-primary-hover);
+    --brand-blue-light: var(--brand-primary-light);
+    --brand-blue-gradient: var(--brand-primary-gradient);
+    --brand-navy: #071326;
+}
+
+/* ==========================================================================
    GLOBAL BOOTSTRAP & ANT DESIGN HARMONIZATION BRIDGE
    ========================================================================== */
 .bg-primary {
@@ -1203,4 +1270,70 @@ body[data-theme="pomona-imperial"] .app-main-workspace,
 
 [data-theme="pomona-imperial"] .nav-item-link.active i {
     color: #701C2C !important;
+}
+
+/* --------------------------------------------------------------------------
+   5. POMONA ROYAL SAPPHIRE (Azul Zafiro Real & Platino)
+   -------------------------------------------------------------------------- */
+html[data-theme="pomona-sapphire"] body,
+html[data-theme="pomona-sapphire"] .app-main-workspace,
+body[data-theme="pomona-sapphire"] .app-main-workspace,
+[data-theme="pomona-sapphire"] .app-main-workspace,
+[data-theme="pomona-sapphire"] .bg-light {
+    background-color: #F0F4F8 !important;
+    color: #1E293B !important;
+}
+
+[data-theme="pomona-sapphire"] .navbar,
+[data-theme="pomona-sapphire"] .soft-sider,
+[data-theme="pomona-sapphire"] .nav-menu-container,
+[data-theme="pomona-sapphire"] .nav-menu-header {
+    background-color: #FFFFFF !important;
+    border-color: #CBD5E1 !important;
+}
+
+[data-theme="pomona-sapphire"] .navbar {
+    border-bottom: 2px solid #1D4ED8 !important;
+}
+
+[data-theme="pomona-sapphire"] .card,
+[data-theme="pomona-sapphire"] .ant-card,
+[data-theme="pomona-sapphire"] .soft-card,
+[data-theme="pomona-sapphire"] .ant-table-wrapper,
+[data-theme="pomona-sapphire"] .metric-card,
+[data-theme="pomona-sapphire"] .bg-white {
+    background-color: #FFFFFF !important;
+    border-color: #CBD5E1 !important;
+}
+
+[data-theme="pomona-sapphire"] .card-header,
+[data-theme="pomona-sapphire"] .ant-card-head {
+    background-color: #F8FAFC !important;
+    border-bottom: 1.5px solid #CBD5E1 !important;
+    color: #0B192C !important;
+}
+
+[data-theme="pomona-sapphire"] .ant-table-thead > tr > th {
+    background-color: #F1F5F9 !important;
+    color: #1E3A8A !important;
+    border-bottom-color: #CBD5E1 !important;
+}
+
+[data-theme="pomona-sapphire"] .ant-table-tbody > tr:hover > td {
+    background-color: #F0F7FF !important;
+}
+
+[data-theme="pomona-sapphire"] .dropdown-menu {
+    background-color: #FFFFFF !important;
+    border-color: #CBD5E1 !important;
+}
+
+[data-theme="pomona-sapphire"] .nav-item-link.active {
+    background-color: #EFF6FF !important;
+    color: #1D4ED8 !important;
+    border-left: 3px solid #1D4ED8 !important;
+}
+
+[data-theme="pomona-sapphire"] .nav-item-link.active i {
+    color: #1D4ED8 !important;
 }
