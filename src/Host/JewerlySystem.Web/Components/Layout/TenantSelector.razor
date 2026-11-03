@@ -1,0 +1,97 @@
+@inject ITenantContext TenantContext
+@inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthStateProvider
+
+<div class="pomona-tenant-selector position-relative d-inline-flex align-items-center">
+    @if (_accessibleTenants.Count > 1)
+    {
+        <button type="button"
+                class="btn btn-sm btn-light border d-flex align-items-center gap-2 px-2 py-1 rounded-2 shadow-2xs pomona-tenant-toggle-btn"
+                title="Cambiar joyería activa"
+                @onclick="ToggleDropdown">
+            <img src="@TenantContext.CurrentTenant.SymbolUrl"
+                 alt="@TenantContext.CurrentTenant.ShortName"
+                 style="width: 18px; height: 18px; object-fit: contain; border-radius: 3px;" />
+            <span class="small fw-semibold d-none d-md-inline text-truncate" style="max-width: 160px;">
+                @TenantContext.CurrentTenant.Name
+            </span>
+            <i class="bi @(_isOpen ? "bi-chevron-up" : "bi-chevron-down") text-muted" style="font-size: 0.65rem;"></i>
+        </button>
+
+        @if (_isOpen)
+        {
+            <!-- Backdrop para cerrar al hacer clic afuera -->
+            <div class="pomona-tenant-backdrop"
+                 style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1040; background: transparent;"
+                 @onclick="CloseDropdown"></div>
+
+            <div class="dropdown-menu show dropdown-menu-end shadow-lg border p-1 rounded-3"
+                 style="position: absolute; right: 0; top: 100%; margin-top: 6px; z-index: 1050; min-width: 260px;">
+                <div class="fw-bold text-muted small px-3 py-2 border-bottom d-flex align-items-center justify-content-between mb-1">
+                    <span><i class="bi bi-shop me-2 text-warning"></i>SEDES & JOYERÍAS</span>
+                    <span class="badge bg-light text-dark border small" style="font-size: 0.65rem;">Multi-tenant</span>
+                </div>
+
+                @foreach (var tenant in _accessibleTenants)
+                {
+                    bool isSelected = string.Equals(TenantContext.CurrentTenant.Id, tenant.Id, StringComparison.OrdinalIgnoreCase);
+                    <button type="button"
+                            class="dropdown-item d-flex align-items-center justify-content-between px-3 py-2 rounded-2 border-0 @(isSelected ? "fw-bold bg-light" : "")"
+                            style="cursor: pointer; transition: all 0.15s ease;"
+                            @onclick="() => SelectTenant(tenant)">
+                        <div class="d-flex align-items-center gap-2 min-w-0">
+                            <img src="@tenant.SymbolUrl"
+                                 alt="@tenant.ShortName"
+                                 style="width: 22px; height: 22px; object-fit: contain; border-radius: 4px;" />
+                            <div class="d-flex flex-column text-start min-w-0">
+                                <span class="text-truncate" style="font-size: 0.85rem;">@tenant.Name</span>
+                                <span class="text-muted" style="font-size: 0.68rem;">@tenant.ShortName</span>
+                            </div>
+                        </div>
+                        @if (isSelected)
+                        {
+                            <i class="bi bi-check-lg text-success fw-bold fs-5"></i>
+                        }
+                    </button>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <!-- Solo tiene 1 joyería asignada -->
+        <div class="d-flex align-items-center gap-2 px-2 py-1 rounded-2 border bg-light text-secondary">
+            <img src="@TenantContext.CurrentTenant.SymbolUrl"
+                 alt="@TenantContext.CurrentTenant.ShortName"
+                 style="width: 18px; height: 18px; object-fit: contain;" />
+            <span class="small fw-semibold d-none d-md-inline">
+                @TenantContext.CurrentTenant.Name
+            </span>
+        </div>
+    }
+</div>
+
+@code {
+    private bool _isOpen = false;
+    private IReadOnlyList<TenantInfo> _accessibleTenants = new List<TenantInfo>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userEmail = authState.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
+            ?? authState.User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+
+        _accessibleTenants = TenantContext.GetTenantsForUser(userEmail);
+    }
+
+    private void ToggleDropdown() => _isOpen = !_isOpen;
+    private void CloseDropdown() => _isOpen = false;
+
+    private async Task SelectTenant(TenantInfo tenant)
+    {
+        _isOpen = false;
+        if (tenant.Id == TenantContext.CurrentTenant.Id) return;
+
+        await JS.InvokeVoidAsync("switchTenant", tenant.Id, tenant.DefaultTheme);
+    }
+}

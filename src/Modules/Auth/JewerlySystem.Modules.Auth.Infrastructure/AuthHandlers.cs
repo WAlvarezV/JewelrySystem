@@ -122,7 +122,7 @@ public class LoginWithMfaCommandHandler : ICommandHandler<LoginWithMfaCommand, b
 
 public class PasskeyHandlers :
     IQueryHandler<GetPasskeyAssertionOptionsQuery, string>,
-    ICommandHandler<VerifyPasskeyAssertionCommand, bool>,
+    ICommandHandler<VerifyPasskeyAssertionCommand, string>,
     IQueryHandler<GetPasskeyCreationOptionsQuery, string>,
     ICommandHandler<RegisterPasskeyCommand, bool>
 {
@@ -132,11 +132,8 @@ public class PasskeyHandlers :
     public async Task<Result<string>> Handle(GetPasskeyAssertionOptionsQuery request, CancellationToken cancellationToken) =>
         await _fido2Service.CreateAssertionOptionsAsync(request.Username, cancellationToken);
 
-    public async Task<Result<bool>> Handle(VerifyPasskeyAssertionCommand request, CancellationToken cancellationToken)
-    {
-        var result = await _fido2Service.VerifyAssertionAsync(request.AssertionResponseJson, cancellationToken);
-        return result.IsSuccess ? Result.Success(true) : Result.Failure<bool>(result.Error);
-    }
+    public async Task<Result<string>> Handle(VerifyPasskeyAssertionCommand request, CancellationToken cancellationToken) =>
+        await _fido2Service.VerifyAssertionAsync(request.AssertionResponseJson, cancellationToken);
 
     public async Task<Result<string>> Handle(GetPasskeyCreationOptionsQuery request, CancellationToken cancellationToken) =>
         await _fido2Service.CreateCreationOptionsAsync(request.UserId, request.DisplayName, cancellationToken);

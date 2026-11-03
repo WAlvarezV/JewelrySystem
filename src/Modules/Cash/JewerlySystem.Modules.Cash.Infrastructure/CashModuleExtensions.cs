@@ -17,8 +17,12 @@ public static class CashModuleExtensions
             ?? configuration.GetConnectionString("DefaultConnection")
             ?? "Host=localhost;Port=5432;Database=IntZaioNJewerly;Username=postgres;Password=IntZaioN";
 
-        services.AddDbContext<CashDbContext>(options =>
-            options.UseNpgsql(connectionString));
+        services.AddDbContext<CashDbContext>((sp, options) =>
+        {
+            var tenantConn = sp.GetService<JewerlySystem.Common.Application.ITenantConnectionProvider>();
+            var cs = tenantConn?.GetCurrentConnectionString() ?? connectionString;
+            options.UseNpgsql(cs);
+        });
 
         services.AddScoped<ICashRepository, CashRepository>();
 

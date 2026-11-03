@@ -44,7 +44,7 @@ public record GetPasskeyAssertionOptionsQuery(string? Username)
     : IQuery<string>;
 
 public record VerifyPasskeyAssertionCommand(string AssertionResponseJson)
-    : ICommand<bool>;
+    : ICommand<string>;
 
 public record GetPasskeyCreationOptionsQuery(string UserId, string DisplayName)
     : IQuery<string>;

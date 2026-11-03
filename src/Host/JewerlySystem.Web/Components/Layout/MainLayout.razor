@@ -1,20 +1,23 @@
 @inherits LayoutComponentBase
 @inject ISender Sender
 @inject NavigationManager Navigation
+@inject ITenantContext TenantContext
 
 <AuthorizeView>
     <Authorized>
         <div class="app-container d-flex" style="height: 100vh; overflow: hidden;">
-            <!-- 1. PRIMARY RAIL (Pomona Luxury Module Bar) -->
+            <!-- 1. PRIMARY RAIL (Luxury Module Bar) -->
             <aside class="app-primary-rail d-flex flex-column align-items-center py-2 text-white border-end" style="width: 76px; min-width: 76px; z-index: 1020; background-color: var(--brand-rail-bg, #1B050A) !important; border-color: var(--brand-rail-border, #380C16) !important;">
                 <!-- Brand / Logo -->
                 <div class="rail-logo my-2 text-center">
-                    <a href="dashboard" class="text-decoration-none d-flex flex-column align-items-center" title="Pomona Joyería & Relojería">
+                    <a href="dashboard" class="text-decoration-none d-flex flex-column align-items-center" title="@TenantContext.CurrentTenant.Name">
                         <div class="d-inline-flex p-1 rounded-3 align-items-center justify-content-center shadow-sm"
                              style="width: 44px; height: 44px; background: var(--brand-primary-gradient); border: 1.5px solid rgba(212, 175, 55, 0.45); box-shadow: 0 4px 10px rgba(0,0,0,0.35);">
-                            <img src="images/pomona-symbol-white.png" alt="Pomona" style="width: 32px; height: 32px; object-fit: contain;" />
+                            <img src="@TenantContext.CurrentTenant.SymbolUrl" alt="@TenantContext.CurrentTenant.ShortName" style="width: 32px; height: 32px; object-fit: contain;" />
                         </div>
-                        <div class="text-white mt-1" style="font-family: 'Cinzel', 'Playfair Display', Georgia, serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 1.5px;">POMONA</div>
+                        <div class="text-white mt-1 text-truncate" style="font-family: 'Cinzel', 'Playfair Display', Georgia, serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 1.2px; max-width: 72px;">
+                            @TenantContext.CurrentTenant.ShortName
+                        </div>
                     </a>
                 </div>
 
@@ -77,6 +80,9 @@
                             <i class="bi bi-mic-fill fs-6"></i>
                             <span class="small d-none d-sm-inline">Dictar con IA</span>
                         </button>
+
+                        <!-- Selector de Joyerías (Multi-tenant) -->
+                        <TenantSelector />
 
                         <!-- Selector de Temas Visuales (Ant Design Themes) -->
                         <ThemeSelector />

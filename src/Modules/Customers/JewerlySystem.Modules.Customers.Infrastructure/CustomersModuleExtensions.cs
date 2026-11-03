@@ -17,8 +17,12 @@ public static class CustomersModuleExtensions
             ?? configuration.GetConnectionString("DefaultConnection")
             ?? "Host=localhost;Port=5432;Database=IntZaioNJewerly;Username=postgres;Password=IntZaioN";
 
-        services.AddDbContext<CustomersDbContext>(options =>
-            options.UseNpgsql(connectionString));
+        services.AddDbContext<CustomersDbContext>((sp, options) =>
+        {
+            var tenantConn = sp.GetService<JewerlySystem.Common.Application.ITenantConnectionProvider>();
+            var cs = tenantConn?.GetCurrentConnectionString() ?? connectionString;
+            options.UseNpgsql(cs);
+        });
 
         services.AddScoped<ICustomerRepository, CustomerRepository>();
 

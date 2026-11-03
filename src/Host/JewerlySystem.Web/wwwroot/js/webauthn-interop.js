@@ -89,6 +89,9 @@ window.webauthn = {
             });
         } catch (err) {
             console.error("Passkey registration failed:", err);
+            if (err && (err.name === "NotAllowedError" || err.message?.includes("not allowed"))) {
+                throw new Error("Operación cancelada por el usuario o tiempo agotado.");
+            }
             throw err.message || err;
         }
     },
@@ -143,7 +146,40 @@ window.webauthn = {
             });
         } catch (err) {
             console.error("Passkey assertion failed:", err);
+            if (err && (err.name === "NotAllowedError" || err.message?.includes("not allowed"))) {
+                throw new Error("Operación cancelada por el usuario o tiempo agotado.");
+            }
             throw err.message || err;
+        }
+    },
+
+    submitPasskeyLogin: function (assertionJson) {
+        try {
+            var form = document.getElementById("passkeyLoginForm");
+            var input = document.getElementById("passkeyResponseJson");
+            if (form && input) {
+                input.value = assertionJson;
+                form.submit();
+                return true;
+            }
+
+            var dynamicForm = document.createElement("form");
+            dynamicForm.method = "POST";
+            dynamicForm.action = "/api/auth/passkey/login";
+            dynamicForm.style.display = "none";
+
+            var hiddenInput = document.createElement("input");
+            hiddenInput.type = "hidden";
+            hiddenInput.name = "clientResponseJson";
+            hiddenInput.value = assertionJson;
+
+            dynamicForm.appendChild(hiddenInput);
+            document.body.appendChild(dynamicForm);
+            dynamicForm.submit();
+            return true;
+        } catch (e) {
+            console.error("Error submitting passkey login:", e);
+            throw e;
         }
     }
 };

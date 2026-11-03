@@ -4,21 +4,22 @@
 @inject ISender Sender
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
+@inject ITenantContext TenantContext
 
 <div class="container">
     <div class="row justify-content-center align-items-center" style="min-height: 80vh;">
         <div class="col-12 col-sm-10 col-md-7 col-lg-5 col-xl-4">
             <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
-                <!-- Luxury Pomona Brand Header -->
-                <div class="pomona-login-header text-center py-4 px-3 position-relative" style="background: linear-gradient(135deg, #701C2C 0%, #4D0E1A 100%); border-bottom: 2px solid #D4AF37;">
+                <!-- Luxury Brand Header -->
+                <div class="pomona-login-header text-center py-4 px-3 position-relative" style="background: var(--brand-primary-gradient, linear-gradient(135deg, #701C2C 0%, #4D0E1A 100%)); border-bottom: 2px solid var(--brand-gold, #D4AF37);">
                     <div class="d-inline-flex p-2 rounded-circle mb-2 align-items-center justify-content-center shadow-sm" style="background: rgba(255, 255, 255, 0.12); border: 1.5px solid rgba(212, 175, 55, 0.5);">
-                        <img src="images/pomona-symbol-white.png" alt="Pomona Logo" style="width: 48px; height: 48px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));" />
+                        <img src="@TenantContext.CurrentTenant.SymbolUrl" alt="@TenantContext.CurrentTenant.ShortName" style="width: 48px; height: 48px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));" />
                     </div>
                     <h2 class="text-white fw-bold m-0" style="font-family: 'Cinzel', 'Playfair Display', Georgia, serif; font-size: 1.65rem; letter-spacing: 3px;">
-                        POMONA
+                        @TenantContext.CurrentTenant.ShortName
                     </h2>
-                    <div class="text-uppercase" style="color: #D4AF37; font-size: 0.72rem; letter-spacing: 2px; font-weight: 600;">
-                        Joyería & Relojería
+                    <div class="text-uppercase" style="color: var(--brand-gold, #D4AF37); font-size: 0.72rem; letter-spacing: 2px; font-weight: 600;">
+                        @TenantContext.CurrentTenant.Name
                     </div>
                 </div>
 
@@ -163,10 +164,14 @@
                             <span>Passkey / Biometría</span>
                         </button>
                     }
+
+                    <form id="passkeyLoginForm" method="post" action="/api/auth/passkey/login" style="display: none;">
+                        <input type="hidden" name="clientResponseJson" id="passkeyResponseJson" />
+                    </form>
                 </div>
             </div>
             <div class="text-center text-muted small mt-3">
-                &copy; 2026 Pomona Joyería & Relojería &bull; Todos los derechos reservados
+                &copy; 2026 @TenantContext.CurrentTenant.Name &bull; Todos los derechos reservados
             </div>
         </div>
     </div>
@@ -227,16 +232,10 @@
             }
 
             var assertionJson = await JS.InvokeAsync<string>("webauthn.getAssertion", optResult.Value);
-            var verifyCommand = new VerifyPasskeyAssertionCommand(assertionJson);
-            var verifyResult = await Sender.Send(verifyCommand);
-
-            if (verifyResult.IsFailure)
+            if (!string.IsNullOrWhiteSpace(assertionJson))
             {
-                _errorMessage = verifyResult.Error.Message;
-                return;
+                await JS.InvokeVoidAsync("webauthn.submitPasskeyLogin", assertionJson);
             }
-
-            Navigation.NavigateTo("/dashboard", forceLoad: true);
         }
         catch (Exception ex)
         {

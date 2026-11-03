@@ -7,12 +7,38 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 
+using JewerlySystem.Common.Infrastructure.Tenant;
+
 namespace JewerlySystem.Web.Extensions;
 
 public static class AuthEndpointsExtensions
 {
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
+        // 0. Multi-Tenant Switch Endpoint
+        app.MapGet("/api/tenants/switch", (
+            string tenantId,
+            string? returnUrl,
+            HttpContext httpContext,
+            ITenantRegistry tenantRegistry) =>
+        {
+            var tenant = tenantRegistry.GetTenant(tenantId);
+            if (tenant != null)
+            {
+                var cookieOptions = new CookieOptions
+                {
+                    Path = "/",
+                    HttpOnly = false,
+                    SameSite = SameSiteMode.Lax,
+                    Expires = DateTimeOffset.UtcNow.AddYears(1)
+                };
+                httpContext.Response.Cookies.Append("active_tenant", tenant.Id, cookieOptions);
+                httpContext.Response.Cookies.Append("pomona_theme", tenant.DefaultTheme, cookieOptions);
+            }
+
+            return Results.Redirect(string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl);
+        });
+
         // 1. Standard HTTP POST Login Endpoint with Mandatory MFA
         app.MapPost("/api/auth/login", async (
             HttpContext httpContext,
@@ -261,23 +287,65 @@ public static class AuthEndpointsExtensions
             return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(result.Error);
         });
 
-        app.MapPost("/api/auth/passkey/verify-assertion", async (HttpContext httpContext, ISender sender, UserManager<ApplicationUser> userManager, string clientResponseJson) =>
+        app.MapPost("/api/auth/passkey/login", async (
+            HttpContext httpContext,
+            ISender sender,
+            UserManager<ApplicationUser> userManager) =>
         {
+            string? clientResponseJson = null;
+
+            if (httpContext.Request.HasFormContentType)
+            {
+                var form = await httpContext.Request.ReadFormAsync();
+                clientResponseJson = form["clientResponseJson"].ToString();
+            }
+            else
+            {
+                using var reader = new StreamReader(httpContext.Request.Body);
+                clientResponseJson = await reader.ReadToEndAsync();
+            }
+
+            if (string.IsNullOrWhiteSpace(clientResponseJson))
+            {
+                return Results.Redirect("/?error=" + Uri.EscapeDataString("Datos de verificación Passkey vacíos."));
+            }
+
             var result = await sender.Send(new VerifyPasskeyAssertionCommand(clientResponseJson));
             if (result.IsFailure)
             {
-                return Results.BadRequest(result.Error);
+                return Results.Redirect("/?error=" + Uri.EscapeDataString(result.Error.Message ?? "Error al validar la llave de seguridad Passkey."));
             }
 
-            const string adminEmail = "walvarez@ingnova.team";
-            var user = await userManager.FindByEmailAsync(adminEmail);
-            var roles = user != null ? await userManager.GetRolesAsync(user) : new List<string> { "Admin", "Administrador" };
+            var userId = result.Value;
+            ApplicationUser? user = null;
+            if (!string.IsNullOrEmpty(userId))
+            {
+                user = await userManager.FindByIdAsync(userId) 
+                    ?? await userManager.FindByEmailAsync(userId) 
+                    ?? await userManager.FindByNameAsync(userId);
+            }
 
+            if (user == null)
+            {
+                const string adminEmail = "walvarez@ingnova.team";
+                user = await userManager.FindByEmailAsync(adminEmail);
+            }
+
+            if (user == null)
+            {
+                return Results.Redirect("/?error=" + Uri.EscapeDataString("Usuario asociado a la Passkey no encontrado."));
+            }
+
+            // Clear temporary 2FA cookie if any
+            await httpContext.SignOutAsync(IdentityConstants.TwoFactorUserIdScheme);
+
+            // Issue production authentication cookie
+            var roles = await userManager.GetRolesAsync(user);
             var claims = new List<Claim>
             {
-                new(ClaimTypes.NameIdentifier, user?.Id ?? Guid.NewGuid().ToString()),
-                new(ClaimTypes.Name, user?.UserName ?? adminEmail),
-                new(ClaimTypes.Email, user?.Email ?? adminEmail),
+                new(ClaimTypes.NameIdentifier, user.Id),
+                new(ClaimTypes.Name, user.UserName ?? user.Email ?? "Usuario"),
+                new(ClaimTypes.Email, user.Email ?? ""),
                 new(ClaimTypes.AuthenticationMethod, "Passkey")
             };
             foreach (var role in roles)
@@ -292,8 +360,64 @@ public static class AuthEndpointsExtensions
                 ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
             });
 
+            user.LastLoginAt = DateTime.UtcNow;
+            await userManager.UpdateAsync(user);
+
+            return Results.Redirect("/dashboard");
+        }).DisableAntiforgery();
+
+        app.MapPost("/api/auth/passkey/verify-assertion", async (HttpContext httpContext, ISender sender, UserManager<ApplicationUser> userManager, string clientResponseJson) =>
+        {
+            var result = await sender.Send(new VerifyPasskeyAssertionCommand(clientResponseJson));
+            if (result.IsFailure)
+            {
+                return Results.BadRequest(result.Error);
+            }
+
+            var userId = result.Value;
+            ApplicationUser? user = null;
+            if (!string.IsNullOrEmpty(userId))
+            {
+                user = await userManager.FindByIdAsync(userId) 
+                    ?? await userManager.FindByEmailAsync(userId) 
+                    ?? await userManager.FindByNameAsync(userId);
+            }
+
+            if (user == null)
+            {
+                const string adminEmail = "walvarez@ingnova.team";
+                user = await userManager.FindByEmailAsync(adminEmail);
+            }
+
+            var roles = user != null ? await userManager.GetRolesAsync(user) : new List<string> { "Admin", "Administrador" };
+
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, user?.Id ?? Guid.NewGuid().ToString()),
+                new(ClaimTypes.Name, user?.UserName ?? user?.Email ?? "Usuario"),
+                new(ClaimTypes.Email, user?.Email ?? ""),
+                new(ClaimTypes.AuthenticationMethod, "Passkey")
+            };
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity), new AuthenticationProperties
+            {
+                IsPersistent = true,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+            });
+
+            if (user != null)
+            {
+                user.LastLoginAt = DateTime.UtcNow;
+                await userManager.UpdateAsync(user);
+            }
+
             return Results.Ok(new { Succeeded = true });
-        });
+        }).DisableAntiforgery();
 
         app.MapPost("/api/auth/passkey/creation-options", async (ISender sender, string userId, string displayName) =>
         {

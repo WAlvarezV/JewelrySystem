@@ -1517,3 +1517,148 @@ body[data-theme="pomona-emerald"] .app-main-workspace,
 [data-theme="pomona-emerald"] .nav-item-link.active i {
     color: #047857 !important;
 }
+
+/* ==========================================================================
+   ORO & PLATA JOYERÍA - LUXURY GOLD, PLATINUM & SLATE DESIGN THEME
+   ========================================================================== */
+html[data-theme="oroplata-classic"],
+body[data-theme="oroplata-classic"],
+[data-theme="oroplata-classic"],
+html[data-theme="theme-oroplata"],
+body[data-theme="theme-oroplata"],
+[data-theme="theme-oroplata"] {
+    /* Brand Primary: Golden Diamond Luxury (#C59B27) */
+    --brand-primary: #C59B27;
+    --brand-primary-hover: #D8AA30;
+    --brand-primary-active: #9A7718;
+    --brand-primary-light: #FDF9EE;
+    --brand-primary-gradient: linear-gradient(135deg, #C59B27 0%, #9A7718 100%);
+    --brand-primary-shadow: 0 4px 14px rgba(197, 155, 39, 0.35);
+
+    /* Button Text & Contrast */
+    --brand-btn-text: #FFFFFF;
+    --brand-btn-icon: #FFFFFF;
+
+    /* Luxury Accent: Warm Gold & Platinum */
+    --brand-gold: #D4AF37;
+    --brand-gold-hover: #E5C358;
+    --brand-gold-light: #FDFDFB;
+    --brand-gold-gradient: linear-gradient(135deg, #D4AF37 0%, #A6A6A6 100%);
+
+    /* Sleek Onyx & Platinum Navigation Rail */
+    --brand-ivory: #F8FAFC;
+    --brand-rail-bg: #141824;
+    --brand-rail-border: #232B3E;
+    --brand-rail-active: linear-gradient(135deg, #C59B27 0%, #D4AF37 100%);
+    --brand-rail-active-text: #141824;
+    --brand-rail-active-icon: #141824;
+    --brand-rail-active-border: rgba(197, 155, 39, 0.65);
+    --brand-rail-glow: 0 4px 14px rgba(197, 155, 39, 0.5);
+
+    /* Header Accent Line */
+    --brand-header-accent: #C59B27;
+
+    /* Ant Design Blazor Native Theme Tokens */
+    --ant-primary-color: #C59B27;
+    --ant-primary-color-hover: #D8AA30;
+    --ant-primary-color-active: #9A7718;
+    --ant-primary-color-outline: rgba(197, 155, 39, 0.2);
+    --ant-primary-1: #FEFCE8;
+    --ant-primary-2: #FEF08A;
+    --ant-primary-3: #FDE047;
+    --ant-primary-4: #EAB308;
+    --ant-primary-5: #CA8A04;
+    --ant-primary-6: #C59B27;
+    --ant-primary-7: #A16207;
+    --ant-primary-8: #854D0E;
+    --ant-primary-9: #713F12;
+    --ant-primary-10: #422006;
+
+    /* Blueprint Aliases */
+    --brand-blue: var(--brand-primary);
+    --brand-blue-hover: var(--brand-primary-hover);
+    --brand-blue-light: var(--brand-primary-light);
+    --brand-blue-gradient: var(--brand-primary-gradient);
+    --brand-navy: #141824;
+
+    /* Status Colors */
+    --soft-success: #15803d;
+    --soft-success-light: #f0fdf4;
+    --soft-warning: #b45309;
+    --soft-warning-light: #fffbeb;
+    --soft-error: #b91c1c;
+    --soft-error-light: #fef2f2;
+
+    /* Surface & Typography */
+    --soft-bg-light: #F8F9FA;
+    --soft-bg-surface: #FFFFFF;
+    --soft-border-color: #E2E8F0;
+    --soft-text-title: #111827;
+    --soft-text-body: #374151;
+    --soft-text-muted: #6B7280;
+
+    --nav-hover-bg: #FDF9EE;
+    --nav-active-text: #A16207;
+}
+
+html[data-theme="oroplata-classic"] body,
+html[data-theme="oroplata-classic"] .app-main-workspace,
+body[data-theme="oroplata-classic"] .app-main-workspace,
+[data-theme="oroplata-classic"] .app-main-workspace,
+[data-theme="oroplata-classic"] .bg-light {
+    background-color: #F8F9FA !important;
+}
+
+[data-theme="oroplata-classic"] .navbar,
+[data-theme="oroplata-classic"] .soft-sider,
+[data-theme="oroplata-classic"] .nav-menu-container,
+[data-theme="oroplata-classic"] .nav-menu-header {
+    background-color: #FFFFFF !important;
+    border-color: #E2E8F0 !important;
+}
+
+[data-theme="oroplata-classic"] .navbar {
+    border-bottom: 2px solid #C59B27 !important;
+}
+
+[data-theme="oroplata-classic"] .card,
+[data-theme="oroplata-classic"] .ant-card,
+[data-theme="oroplata-classic"] .soft-card,
+[data-theme="oroplata-classic"] .ant-table-wrapper,
+[data-theme="oroplata-classic"] .metric-card,
+[data-theme="oroplata-classic"] .bg-white {
+    background-color: #FFFFFF !important;
+    border-color: #E2E8F0 !important;
+}
+
+[data-theme="oroplata-classic"] .card-header,
+[data-theme="oroplata-classic"] .ant-card-head {
+    background-color: #FDF9EE !important;
+    border-bottom: 1.5px solid #E2E8F0 !important;
+    color: #111827 !important;
+}
+
+[data-theme="oroplata-classic"] .ant-table-thead > tr > th {
+    background-color: #F8FAFC !important;
+    color: #475569 !important;
+    border-bottom-color: #E2E8F0 !important;
+}
+
+[data-theme="oroplata-classic"] .ant-table-tbody > tr:hover > td {
+    background-color: #FDFBF4 !important;
+}
+
+[data-theme="oroplata-classic"] .dropdown-menu {
+    background-color: #FFFFFF !important;
+    border-color: #E2E8F0 !important;
+}
+
+[data-theme="oroplata-classic"] .nav-item-link.active {
+    background-color: #FEFCE8 !important;
+    color: #A16207 !important;
+    border-left: 3px solid #C59B27 !important;
+}
+
+[data-theme="oroplata-classic"] .nav-item-link.active i {
+    color: #A16207 !important;
+}

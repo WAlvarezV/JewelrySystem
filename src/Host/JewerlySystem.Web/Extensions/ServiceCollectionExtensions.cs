@@ -17,6 +17,9 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
+using JewerlySystem.Common.Infrastructure.Tenant;
+using JewerlySystem.Web.Tenants;
+
 namespace JewerlySystem.Web.Extensions;
 
 public static class ServiceCollectionExtensions
@@ -27,11 +30,19 @@ public static class ServiceCollectionExtensions
             ?? configuration.GetConnectionString("DefaultConnection")
             ?? "Host=localhost;Port=5432;Database=IntZaioNJewerly;Username=postgres;Password=IntZaioN";
 
+        // Multi-Tenant Infrastructure
+        services.AddSingleton<ITenantRegistry, TenantRegistry>();
+        services.AddScoped<WebTenantContext>();
+        services.AddScoped<ITenantContext>(sp => sp.GetRequiredService<WebTenantContext>());
+        services.AddScoped<ITenantConnectionProvider>(sp => sp.GetRequiredService<WebTenantContext>());
+
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<AuditInterceptor>();
         services.AddDbContext<JewerlyDbContext>((sp, options) =>
         {
-            options.UseNpgsql(connectionString);
+            var tenantConn = sp.GetService<ITenantConnectionProvider>();
+            var cs = tenantConn?.GetCurrentConnectionString() ?? connectionString;
+            options.UseNpgsql(cs);
             var auditInterceptor = sp.GetRequiredService<AuditInterceptor>();
             options.AddInterceptors(auditInterceptor);
         });

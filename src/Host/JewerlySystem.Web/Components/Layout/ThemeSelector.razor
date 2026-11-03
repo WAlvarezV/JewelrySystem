@@ -22,7 +22,7 @@
              style="position: absolute; right: 0; top: 100%; margin-top: 6px; z-index: 1050; min-width: 250px;">
             <div class="fw-bold text-muted small px-3 py-2 border-bottom d-flex align-items-center justify-content-between mb-1">
                 <span><i class="bi bi-palette2 me-2 text-warning"></i>TEMAS DEL SISTEMA</span>
-                <span class="badge bg-light text-dark border small" style="font-size: 0.65rem;">Pomona Look</span>
+                <span class="badge bg-light text-dark border small" style="font-size: 0.65rem;">Luxury Look</span>
             </div>
 
             @foreach (var theme in _themes)
@@ -52,12 +52,13 @@
 
     private readonly List<ThemeOption> _themes = new()
     {
-        new("pomona-imperial", "Pomona Imperial (Vino & Oro)", "linear-gradient(135deg, #701C2C 50%, #D4AF37 50%)", "#701C2C"),
-        new("pomona-emerald", "Pomona Emerald (Esmeralda & Oro)", "linear-gradient(135deg, #059669 50%, #D4AF37 50%)", "#059669"),
-        new("pomona-sapphire", "Pomona Sapphire (Azul Zafiro)", "linear-gradient(135deg, #1D4ED8 50%, #38BDF8 50%)", "#1D4ED8"),
-        new("pomona-dark", "Pomona Dark Luxury (Noche)", "#0D0205", "#E03E5C"),
-        new("pomona-gold", "Pomona Royal Gold (Oro)", "#D4AF37", "#9E7412"),
-        new("pomona-rose", "Pomona Rose Gold (Rosa)", "#B76E79", "#8A2B3D")
+        new("pomona-imperial", "Imperial (Vino & Oro)", "linear-gradient(135deg, #701C2C 50%, #D4AF37 50%)", "#701C2C"),
+        new("oroplata-classic", "Oro & Plata (Dorado & Platino)", "linear-gradient(135deg, #C59B27 50%, #141824 50%)", "#C59B27"),
+        new("pomona-emerald", "Emerald (Esmeralda & Oro)", "linear-gradient(135deg, #059669 50%, #D4AF37 50%)", "#059669"),
+        new("pomona-sapphire", "Sapphire (Azul Zafiro)", "linear-gradient(135deg, #1D4ED8 50%, #38BDF8 50%)", "#1D4ED8"),
+        new("pomona-dark", "Dark Luxury (Noche & Oro)", "#0D0205", "#E03E5C"),
+        new("pomona-gold", "Royal Gold (Oro Puro)", "#D4AF37", "#9E7412"),
+        new("pomona-rose", "Rose Gold (Oro Rosa)", "#B76E79", "#8A2B3D")
     };
 
     private string _currentTheme = "pomona-imperial";

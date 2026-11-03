@@ -39,6 +39,20 @@
             window.applyPomonaTheme(themeName);
         };
 
+        window.switchTenant = function(tenantId, defaultTheme) {
+            try {
+                localStorage.setItem('active_tenant', tenantId);
+                if (defaultTheme) {
+                    localStorage.setItem('pomona_theme', defaultTheme);
+                }
+                document.cookie = "active_tenant=" + encodeURIComponent(tenantId) + "; path=/; max-age=31536000; SameSite=Lax";
+                if (defaultTheme) {
+                    document.cookie = "pomona_theme=" + encodeURIComponent(defaultTheme) + "; path=/; max-age=31536000; SameSite=Lax";
+                }
+            } catch(e) {}
+            window.location.href = "/api/tenants/switch?tenantId=" + encodeURIComponent(tenantId) + "&returnUrl=" + encodeURIComponent(window.location.pathname);
+        };
+
         // Run immediately on page load
         (function() {
             try {

@@ -15,8 +15,12 @@ public static class AuthModuleExtensions
             ?? configuration.GetConnectionString("DefaultConnection")
             ?? "Host=localhost;Port=5432;Database=IntZaioNJewerly;Username=postgres;Password=IntZaioN";
 
-        services.AddDbContext<AuthDbContext>(options =>
-            options.UseNpgsql(connectionString));
+        services.AddDbContext<AuthDbContext>((sp, options) =>
+        {
+            var tenantConn = sp.GetService<JewerlySystem.Common.Application.ITenantConnectionProvider>();
+            var cs = tenantConn?.GetCurrentConnectionString() ?? connectionString;
+            options.UseNpgsql(cs);
+        });
 
         services.AddIdentityCore<ApplicationUser>(options =>
         {
