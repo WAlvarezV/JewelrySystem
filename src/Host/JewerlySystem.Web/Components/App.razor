@@ -68,9 +68,24 @@
         // Run immediately on page load
         (function() {
             try {
-                var tenant = localStorage.getItem('active_tenant') || 'pomona';
+                var path = (window.location.pathname || '').toLowerCase();
+                var tenant = 'pomona';
+
+                if (path.indexOf('/oro-plata') !== -1) {
+                    tenant = 'oro-plata';
+                    try { localStorage.setItem('active_tenant', 'oro-plata'); } catch(e) {}
+                } else if (path.indexOf('/pomona') !== -1) {
+                    tenant = 'pomona';
+                    try { localStorage.setItem('active_tenant', 'pomona'); } catch(e) {}
+                } else {
+                    tenant = localStorage.getItem('active_tenant') || 'pomona';
+                }
+
                 var defaultTheme = (tenant === 'oro-plata') ? 'oroplata-classic' : 'pomona-imperial';
-                var theme = localStorage.getItem('pomona_theme') || defaultTheme;
+                var theme = (path.indexOf('/oro-plata') !== -1 || path.indexOf('/pomona') !== -1)
+                    ? defaultTheme
+                    : (localStorage.getItem('pomona_theme') || defaultTheme);
+
                 document.documentElement.setAttribute('data-theme', theme);
 
                 var isOroPlata = (tenant === 'oro-plata');

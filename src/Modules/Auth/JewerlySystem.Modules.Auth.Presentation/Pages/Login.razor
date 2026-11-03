@@ -1,5 +1,6 @@
 @page "/"
 @page "/login"
+@page "/{TenantSlug}/login"
 @attribute [AllowAnonymous]
 @inject ISender Sender
 @inject NavigationManager Navigation
@@ -10,29 +11,54 @@
     <div class="row justify-content-center align-items-center" style="min-height: 80vh;">
         <div class="col-12 col-sm-10 col-md-7 col-lg-5 col-xl-4">
             <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
-                <!-- General Luxury Platform Header -->
-                <div class="pomona-login-header text-center py-4 px-3 position-relative" style="background: linear-gradient(135deg, #18181B 0%, #27272A 50%, #09090B 100%); border-bottom: 2.5px solid #C59B27;">
-                    <div class="d-inline-flex p-2 rounded-circle mb-2 align-items-center justify-content-center shadow-sm" style="background: rgba(255, 255, 255, 0.08); border: 1.5px solid rgba(197, 155, 39, 0.65); width: 62px; height: 62px;">
-                        <svg viewBox="0 0 100 100" style="width: 38px; height: 38px;" xmlns="http://www.w3.org/2000/svg">
-                            <polygon points="50,6 94,50 50,94 6,50" fill="none" stroke="#C59B27" stroke-width="7" stroke-linejoin="round" />
-                            <polygon points="50,24 76,50 50,76 24,50" fill="none" stroke="#C59B27" stroke-width="6" stroke-linejoin="round" />
-                            <line x1="50" y1="6" x2="50" y2="24" stroke="#C59B27" stroke-width="6" />
-                            <line x1="94" y1="50" x2="76" y2="50" stroke="#C59B27" stroke-width="6" />
-                            <line x1="50" y1="94" x2="50" y2="76" stroke="#C59B27" stroke-width="6" />
-                            <line x1="6" y1="50" x2="24" y2="50" stroke="#C59B27" stroke-width="6" />
-                        </svg>
+                @if (_tenant != null)
+                {
+                    <!-- Dedicated Jewelry Luxury Brand Header -->
+                    <div class="pomona-login-header text-center py-4 px-3 position-relative"
+                         style="background: @GetHeaderGradient(); border-bottom: 2.5px solid @GetHeaderBorderColor();">
+                        <div class="d-inline-flex p-2 rounded-3 mb-2 align-items-center justify-content-center shadow-sm"
+                             style="background: rgba(255, 255, 255, 0.12); border: 1.5px solid @GetHeaderBorderColor(); width: 62px; height: 62px;">
+                            <img src="@_tenant.SymbolUrl" alt="@_tenant.ShortName"
+                                 style="width: 40px; height: 40px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));" />
+                        </div>
+                        <h2 class="text-white fw-bold m-0" style="font-family: 'Cinzel', 'Playfair Display', Georgia, serif; font-size: 1.6rem; letter-spacing: 2.5px;">
+                            @_tenant.ShortName
+                        </h2>
+                        <div class="text-uppercase" style="color: @GetHeaderAccentColor(); font-size: 0.75rem; letter-spacing: 2px; font-weight: 600;">
+                            @_tenant.Name
+                        </div>
                     </div>
-                    <h2 class="text-white fw-bold m-0" style="font-family: 'Cinzel', 'Playfair Display', Georgia, serif; font-size: 1.55rem; letter-spacing: 3px;">
-                        JEWELRY SYSTEM
-                    </h2>
-                    <div class="text-uppercase" style="color: #C59B27; font-size: 0.72rem; letter-spacing: 2px; font-weight: 600;">
-                        Plataforma de Joyería & Relojería
+                }
+                else
+                {
+                    <!-- General Luxury Platform Header -->
+                    <div class="pomona-login-header text-center py-4 px-3 position-relative"
+                         style="background: linear-gradient(135deg, #18181B 0%, #27272A 50%, #09090B 100%); border-bottom: 2.5px solid #C59B27;">
+                        <div class="d-inline-flex p-2 rounded-circle mb-2 align-items-center justify-content-center shadow-sm"
+                             style="background: rgba(255, 255, 255, 0.08); border: 1.5px solid rgba(197, 155, 39, 0.65); width: 62px; height: 62px;">
+                            <svg viewBox="0 0 100 100" style="width: 38px; height: 38px;" xmlns="http://www.w3.org/2000/svg">
+                                <polygon points="50,6 94,50 50,94 6,50" fill="none" stroke="#C59B27" stroke-width="7" stroke-linejoin="round" />
+                                <polygon points="50,24 76,50 50,76 24,50" fill="none" stroke="#C59B27" stroke-width="6" stroke-linejoin="round" />
+                                <line x1="50" y1="6" x2="50" y2="24" stroke="#C59B27" stroke-width="6" />
+                                <line x1="94" y1="50" x2="76" y2="50" stroke="#C59B27" stroke-width="6" />
+                                <line x1="50" y1="94" x2="50" y2="76" stroke="#C59B27" stroke-width="6" />
+                                <line x1="6" y1="50" x2="24" y2="50" stroke="#C59B27" stroke-width="6" />
+                            </svg>
+                        </div>
+                        <h2 class="text-white fw-bold m-0" style="font-family: 'Cinzel', 'Playfair Display', Georgia, serif; font-size: 1.55rem; letter-spacing: 3px;">
+                            JEWELRY SYSTEM
+                        </h2>
+                        <div class="text-uppercase" style="color: #C59B27; font-size: 0.72rem; letter-spacing: 2px; font-weight: 600;">
+                            Plataforma de Joyería & Relojería
+                        </div>
                     </div>
-                </div>
+                }
 
                 <div class="card-body p-3 p-sm-4">
                     <div class="text-center mb-3">
-                        <p class="text-muted small mb-0">Acceso Seguro &bull; Contraseña, MFA & Passkeys</p>
+                        <p class="text-muted small mb-0">
+                            @(_tenant != null ? $"Acceso {_tenant.Name} • Contraseña, MFA & Passkeys" : "Acceso Seguro • Contraseña, MFA & Passkeys")
+                        </p>
                     </div>
 
                     @if (!string.IsNullOrEmpty(ErrorFromQuery) || !string.IsNullOrEmpty(_errorMessage))
@@ -95,7 +121,11 @@
                             </div>
                         }
 
-                        <form method="post" action="/api/auth/verify-otp">
+                        <form method="post" action="@GetFormAction("/api/auth/verify-otp")">
+                            @if (_tenant != null)
+                            {
+                                <input type="hidden" name="tenant" value="@_tenant.Id" />
+                            }
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Código de Verificación</label>
                                 <input name="otpCode" type="text" class="form-control form-control-lg text-center fw-bold fs-3 letter-spacing" placeholder="000000" maxlength="10" inputmode="numeric" autocomplete="one-time-code" autofocus required />
@@ -122,7 +152,11 @@
                         <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
                             @if (MethodFromQuery != "authenticator")
                             {
-                                <form method="post" action="/api/auth/resend-otp">
+                                <form method="post" action="@GetFormAction("/api/auth/resend-otp")">
+                                    @if (_tenant != null)
+                                    {
+                                        <input type="hidden" name="tenant" value="@_tenant.Id" />
+                                    }
                                     <button type="submit" class="btn btn-link text-decoration-none p-0 small fw-semibold">
                                         <i class="bi bi-arrow-clockwise me-1"></i>Reenviar código
                                     </button>
@@ -132,19 +166,23 @@
                             {
                                 <span class="text-muted small"><i class="bi bi-info-circle me-1"></i>Código rotativo (30s)</span>
                             }
-                            <a href="/" class="btn btn-link text-secondary text-decoration-none p-0 small">
+                            <a href="@GetReturnUrl()" class="btn btn-link text-secondary text-decoration-none p-0 small">
                                 <i class="bi bi-arrow-left me-1"></i>Volver
                             </a>
                         </div>
                     }
                     else
                     {
-                        <form method="post" action="/api/auth/login">
+                        <form method="post" action="@GetFormAction("/api/auth/login")">
+                            @if (_tenant != null)
+                            {
+                                <input type="hidden" name="tenant" value="@_tenant.Id" />
+                            }
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Usuario o Correo</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-white text-muted"><i class="bi bi-person"></i></span>
-                                    <input name="username" type="text" class="form-control" placeholder="walvarez@ingnova.team" autofocus required />
+                                    <input name="username" type="text" class="form-control" placeholder="@GetUsernamePlaceholder()" autofocus required />
                                 </div>
                             </div>
 
@@ -172,19 +210,26 @@
                         </button>
                     }
 
-                    <form id="passkeyLoginForm" method="post" action="/api/auth/passkey/login" style="display: none;">
+                    <form id="passkeyLoginForm" method="post" action="@GetFormAction("/api/auth/passkey/login")" style="display: none;">
+                        @if (_tenant != null)
+                        {
+                            <input type="hidden" name="tenant" value="@_tenant.Id" />
+                        }
                         <input type="hidden" name="clientResponseJson" id="passkeyResponseJson" />
                     </form>
                 </div>
             </div>
             <div class="text-center text-muted small mt-3">
-                &copy; 2026 Jewelry System &bull; Todos los derechos reservados
+                &copy; 2026 @(_tenant?.Name ?? "Jewelry System") &bull; Todos los derechos reservados
             </div>
         </div>
     </div>
 </div>
 
 @code {
+    [Parameter]
+    public string? TenantSlug { get; set; }
+
     [SupplyParameterFromQuery(Name = "error")]
     public string? ErrorFromQuery { get; set; }
 
@@ -206,12 +251,15 @@
     [CascadingParameter]
     private Task<AuthenticationState>? AuthStateTask { get; set; }
 
+    private TenantInfo? _tenant;
     private bool _isLoading;
     private string? _errorMessage;
     private string? _suggestedLocalhostUrl;
 
     protected override async Task OnInitializedAsync()
     {
+        ResolveTenant();
+
         if (AuthStateTask != null)
         {
             var authState = await AuthStateTask;
@@ -221,6 +269,81 @@
             }
         }
     }
+
+    protected override void OnParametersSet()
+    {
+        ResolveTenant();
+    }
+
+    private void ResolveTenant()
+    {
+        if (!string.IsNullOrWhiteSpace(TenantSlug))
+        {
+            _tenant = TenantContext.AvailableTenants
+                .FirstOrDefault(t => string.Equals(t.Id, TenantSlug, StringComparison.OrdinalIgnoreCase));
+        }
+        else
+        {
+            _tenant = null;
+        }
+
+        if (_tenant != null)
+        {
+            TenantContext.SetCurrentTenant(_tenant.Id);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && _tenant != null)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("setPomonaTheme", _tenant.DefaultTheme);
+                await JS.InvokeVoidAsync("updateBrowserBranding", _tenant.Name, _tenant.SymbolUrl);
+            }
+            catch
+            {
+                // JavaScript runtime not available yet during prerender
+            }
+        }
+    }
+
+    private string GetHeaderGradient()
+    {
+        if (_tenant?.Id == "oro-plata")
+        {
+            return "linear-gradient(135deg, #141824 0%, #232B3E 100%)";
+        }
+        return "linear-gradient(135deg, #701C2C 0%, #4D0E1A 100%)";
+    }
+
+    private string GetHeaderBorderColor()
+    {
+        if (_tenant?.Id == "oro-plata")
+        {
+            return "#C59B27";
+        }
+        return "#D4AF37";
+    }
+
+    private string GetHeaderAccentColor()
+    {
+        if (_tenant?.Id == "oro-plata")
+        {
+            return "#D4AF37";
+        }
+        return "#D4AF37";
+    }
+
+    private string GetFormAction(string baseEndpoint) =>
+        _tenant != null ? $"{baseEndpoint}?tenant={_tenant.Id}" : baseEndpoint;
+
+    private string GetReturnUrl() =>
+        _tenant != null ? $"/{_tenant.Id}/login" : "/";
+
+    private string GetUsernamePlaceholder() =>
+        _tenant?.Id == "oro-plata" ? "walvarez@ingnova.team" : (_tenant?.Id == "pomona" ? "admin@joyeriapomona.com" : "usuario@joyeria.com");
 
     private async Task HandlePasskeyLogin()
     {

@@ -86,28 +86,71 @@ public class WebTenantContext : ITenantContext, ITenantConnectionProvider
     private TenantInfo ResolveInitialTenant()
     {
         var httpContext = _httpContextAccessor.HttpContext;
-        string? cookieTenantId = null;
+        string? candidateTenantId = null;
 
         if (httpContext != null)
         {
             // 1. Check Query parameter ?tenant=
             if (httpContext.Request.Query.TryGetValue("tenant", out var qVal) && !string.IsNullOrWhiteSpace(qVal))
             {
-                cookieTenantId = qVal.ToString();
+                candidateTenantId = qVal.ToString();
             }
 
-            // 2. Check Cookie
-            if (string.IsNullOrWhiteSpace(cookieTenantId) && httpContext.Request.Cookies.TryGetValue("active_tenant", out var cVal))
+            // 2. Check Path segment (e.g. /pomona/login or /oro-plata/login)
+            if (string.IsNullOrWhiteSpace(candidateTenantId))
             {
-                cookieTenantId = cVal;
+                var path = httpContext.Request.Path.Value ?? "";
+                var segments = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+                if (segments.Length > 0)
+                {
+                    var firstSegment = segments[0];
+                    if (_registry.GetTenant(firstSegment) != null)
+                    {
+                        candidateTenantId = firstSegment;
+                    }
+                }
+            }
+
+            // 3. Check Header (X-Tenant-Id)
+            if (string.IsNullOrWhiteSpace(candidateTenantId) && httpContext.Request.Headers.TryGetValue("X-Tenant-Id", out var hVal) && !string.IsNullOrWhiteSpace(hVal))
+            {
+                candidateTenantId = hVal.ToString();
+            }
+
+            // 4. Check Cookie (active_tenant)
+            if (string.IsNullOrWhiteSpace(candidateTenantId) && httpContext.Request.Cookies.TryGetValue("active_tenant", out var cVal))
+            {
+                candidateTenantId = cVal;
             }
         }
 
-        if (!string.IsNullOrWhiteSpace(cookieTenantId))
+        if (!string.IsNullOrWhiteSpace(candidateTenantId))
         {
-            var match = _registry.GetTenant(cookieTenantId);
+            var match = _registry.GetTenant(candidateTenantId);
             if (match != null)
             {
+                // Sync cookies if headers not yet sent
+                if (httpContext != null && !httpContext.Response.HasStarted)
+                {
+                    try
+                    {
+                        var cookieOptions = new CookieOptions
+                        {
+                            Path = "/",
+                            HttpOnly = false,
+                            SameSite = SameSiteMode.Lax,
+                            Secure = httpContext.Request.IsHttps,
+                            Expires = DateTimeOffset.UtcNow.AddYears(1)
+                        };
+                        httpContext.Response.Cookies.Append("active_tenant", match.Id, cookieOptions);
+                        httpContext.Response.Cookies.Append("pomona_theme", match.DefaultTheme, cookieOptions);
+                    }
+                    catch
+                    {
+                        // Ignore if response already committed
+                    }
+                }
+
                 return match;
             }
         }
