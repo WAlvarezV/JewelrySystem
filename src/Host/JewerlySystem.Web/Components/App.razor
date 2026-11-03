@@ -23,18 +23,28 @@
 
     <!-- Immediate theme initializer before render to avoid FOUC -->
     <script>
+        window.applyPomonaTheme = function(themeName) {
+            themeName = themeName || localStorage.getItem('pomona_theme') || 'pomona-imperial';
+            try {
+                localStorage.setItem('pomona_theme', themeName);
+            } catch(e) {}
+            document.documentElement.setAttribute('data-theme', themeName);
+            if (document.body) {
+                document.body.setAttribute('data-theme', themeName);
+            }
+        };
+
+        window.setPomonaTheme = function(themeName) {
+            window.applyPomonaTheme(themeName);
+        };
+
+        // Run immediately on page load
         (function() {
             try {
                 var theme = localStorage.getItem('pomona_theme') || 'pomona-imperial';
                 document.documentElement.setAttribute('data-theme', theme);
             } catch(e) {}
         })();
-        window.setPomonaTheme = function(themeName) {
-            try {
-                localStorage.setItem('pomona_theme', themeName);
-                document.documentElement.setAttribute('data-theme', themeName);
-            } catch(e) {}
-        };
     </script>
 
     <HeadOutlet @rendermode="InteractiveServer" />

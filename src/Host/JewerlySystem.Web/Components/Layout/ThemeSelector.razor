@@ -1,49 +1,50 @@
-@using AntDesign
 @inject IJSRuntime JS
 
-<div class="pomona-theme-selector d-inline-flex align-items-center">
-    <Dropdown Trigger="@(new Trigger[] { Trigger.Click })" Placement="@Placement.BottomRight">
-        <Overlay>
-            <Menu Class="p-1 rounded-3 shadow-lg border" Style="min-width: 230px;">
-                <MenuItem Class="fw-semibold text-muted small px-3 py-2 border-bottom mb-1" Disabled="true">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <span><i class="bi bi-palette2 me-2 text-warning"></i>TEMAS POMONA</span>
-                        <span class="badge bg-light text-dark border small" style="font-size: 0.65rem;">Ant Design</span>
-                    </div>
-                </MenuItem>
+<div class="pomona-theme-selector position-relative d-inline-flex align-items-center">
+    <button type="button"
+            class="btn btn-sm btn-light border d-flex align-items-center gap-2 px-2 py-1 rounded-2 shadow-2xs pomona-theme-toggle-btn"
+            title="Cambiar tema visual del sistema"
+            @onclick="ToggleDropdown">
+        <span class="theme-color-indicator rounded-circle shadow-xs"
+              style="width: 13px; height: 13px; display: inline-block; background: @GetCurrentColor(); border: 1.5px solid @GetCurrentBorder();"></span>
+        <span class="small fw-semibold d-none d-lg-inline">@GetCurrentName()</span>
+        <i class="bi @(_isOpen ? "bi-chevron-up" : "bi-chevron-down") text-muted" style="font-size: 0.65rem;"></i>
+    </button>
 
-                @foreach (var theme in _themes)
-                {
-                    bool isSelected = string.Equals(_currentTheme, theme.Key, StringComparison.OrdinalIgnoreCase);
-                    <MenuItem Key="@theme.Key"
-                              Class="@(isSelected ? "bg-light fw-bold" : "")"
-                              OnClick="() => SelectTheme(theme.Key)">
-                        <div class="d-flex align-items-center justify-content-between w-100 py-1">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="theme-color-indicator rounded-circle shadow-xs"
-                                      style="width: 14px; height: 14px; display: inline-block; background: @theme.Color; border: 1.5px solid @theme.BorderColor;"></span>
-                                <span style="font-size: 0.85rem;">@theme.Name</span>
-                            </div>
-                            @if (isSelected)
-                            {
-                                <i class="bi bi-check2 text-success fw-bold fs-6"></i>
-                            }
-                        </div>
-                    </MenuItem>
-                }
-            </Menu>
-        </Overlay>
-        <ChildContent>
-            <button type="button"
-                    class="btn btn-sm btn-light border d-flex align-items-center gap-2 px-2 py-1 rounded-2 shadow-2xs pomona-theme-toggle-btn"
-                    title="Cambiar tema visual del sistema">
-                <span class="theme-color-indicator rounded-circle"
-                      style="width: 11px; height: 11px; display: inline-block; background: @GetCurrentColor(); border: 1px solid rgba(0,0,0,0.15);"></span>
-                <span class="small fw-semibold d-none d-lg-inline">@GetCurrentName()</span>
-                <i class="bi bi-chevron-down text-muted" style="font-size: 0.65rem;"></i>
-            </button>
-        </ChildContent>
-    </Dropdown>
+    @if (_isOpen)
+    {
+        <!-- Backdrop para cerrar al hacer clic afuera -->
+        <div class="pomona-theme-backdrop"
+             style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1040; background: transparent;"
+             @onclick="CloseDropdown"></div>
+
+        <div class="dropdown-menu show dropdown-menu-end shadow-lg border p-1 rounded-3"
+             style="position: absolute; right: 0; top: 100%; margin-top: 6px; z-index: 1050; min-width: 250px; background: #ffffff;">
+            <div class="fw-bold text-muted small px-3 py-2 border-bottom d-flex align-items-center justify-content-between mb-1">
+                <span><i class="bi bi-palette2 me-2 text-warning"></i>TEMAS DEL SISTEMA</span>
+                <span class="badge bg-light text-dark border small" style="font-size: 0.65rem;">Ant Design</span>
+            </div>
+
+            @foreach (var theme in _themes)
+            {
+                bool isSelected = string.Equals(_currentTheme, theme.Key, StringComparison.OrdinalIgnoreCase);
+                <button type="button"
+                        class="dropdown-item d-flex align-items-center justify-content-between px-3 py-2 rounded-2 border-0 @(isSelected ? "bg-light fw-bold text-dark" : "text-secondary")"
+                        style="cursor: pointer; transition: all 0.15s ease;"
+                        @onclick="() => SelectTheme(theme.Key)">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="rounded-circle shadow-xs"
+                              style="width: 16px; height: 16px; display: inline-block; background: @theme.Color; border: 1.5px solid @theme.BorderColor;"></span>
+                        <span style="font-size: 0.85rem;">@theme.Name</span>
+                    </div>
+                    @if (isSelected)
+                    {
+                        <i class="bi bi-check-lg text-success fw-bold fs-5"></i>
+                    }
+                </button>
+            }
+        </div>
+    }
 </div>
 
 @code {
@@ -58,6 +59,7 @@
     };
 
     private string _currentTheme = "pomona-imperial";
+    private bool _isOpen = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -74,15 +76,36 @@
             }
             catch
             {
-                // Local storage not yet available or SSR mode
+                // LocalStorage not yet available during prerender
             }
         }
+    }
+
+    private void ToggleDropdown()
+    {
+        _isOpen = !_isOpen;
+    }
+
+    private void CloseDropdown()
+    {
+        _isOpen = false;
     }
 
     private async Task SelectTheme(string themeKey)
     {
         _currentTheme = themeKey;
-        await JS.InvokeVoidAsync("window.setPomonaTheme", themeKey);
+        _isOpen = false;
+
+        try
+        {
+            await JS.InvokeVoidAsync("setPomonaTheme", themeKey);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error switching theme via IJSRuntime: {ex.Message}");
+        }
+
+        StateHasChanged();
     }
 
     private string GetCurrentName() =>
@@ -90,4 +113,7 @@
 
     private string GetCurrentColor() =>
         _themes.FirstOrDefault(t => t.Key == _currentTheme)?.Color ?? "#701C2C";
+
+    private string GetCurrentBorder() =>
+        _themes.FirstOrDefault(t => t.Key == _currentTheme)?.BorderColor ?? "#701C2C";
 }

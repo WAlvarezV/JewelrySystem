@@ -1,0 +1,103 @@
+using JewerlySystem.Common.Application;
+using JewerlySystem.Common.Application.Emailing;
+using JewerlySystem.Common.Application.Voice;
+using JewerlySystem.Common.Infrastructure;
+using JewerlySystem.Common.Infrastructure.Emailing;
+using JewerlySystem.Modules.Auth.Infrastructure;
+using JewerlySystem.Modules.Cash.Infrastructure;
+using JewerlySystem.Modules.Contracts.Infrastructure;
+using JewerlySystem.Modules.Customers.Infrastructure;
+using JewerlySystem.Modules.Inventory.Infrastructure;
+using JewerlySystem.Modules.Invoicing.Infrastructure;
+using JewerlySystem.Web.Components;
+using JewerlySystem.Web.Data;
+using JewerlySystem.Web.Services;
+using JewerlySystem.Web.Services.Voice;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
+namespace JewerlySystem.Web.Extensions;
+
+public static class ServiceCollectionExtensions
+{
+    public static IServiceCollection AddHostInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString("PomonaCs")
+            ?? configuration.GetConnectionString("DefaultConnection")
+            ?? "Host=localhost;Port=5432;Database=IntZaioNJewerly;Username=postgres;Password=IntZaioN";
+
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<AuditInterceptor>();
+        services.AddDbContext<JewerlyDbContext>((sp, options) =>
+        {
+            options.UseNpgsql(connectionString);
+            var auditInterceptor = sp.GetRequiredService<AuditInterceptor>();
+            options.AddInterceptors(auditInterceptor);
+        });
+
+        // Emailing & Templates
+        services.AddSingleton<IEmailTemplateService, EmailTemplateService>();
+        services.AddHttpClient<IEmailSender, ResendEmailSender>();
+
+        // Voice AI Intelligence & Operations
+        services.AddVoiceIntelligence();
+        services.AddScoped<IVoiceCommandDispatcher, VoiceCommandDispatcher>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddAppModules(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddAuthModule(configuration);
+        services.AddContractsModule(configuration);
+        services.AddCustomersModule(configuration);
+        services.AddInventoryModule(configuration);
+        services.AddCashModule(configuration);
+        services.AddInvoicingModule(configuration);
+
+        return services;
+    }
+
+    public static IServiceCollection AddAppSecurity(this IServiceCollection services)
+    {
+        services.AddAuthentication(options =>
+        {
+            options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        })
+        .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+        {
+            options.LoginPath = "/";
+            options.LogoutPath = "/logout";
+            options.ExpireTimeSpan = TimeSpan.FromHours(8);
+            options.SlidingExpiration = true;
+        })
+        .AddCookie(IdentityConstants.TwoFactorUserIdScheme, options =>
+        {
+            options.Cookie.Name = "JewerlySystem.2FA";
+            options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+        });
+
+        services.AddAuthorization();
+        services.AddCascadingAuthenticationState();
+
+        return services;
+    }
+
+    public static IEndpointRouteBuilder MapAppRazorComponents(this WebApplication app)
+    {
+        app.MapRazorComponents<App>()
+            .AddInteractiveServerRenderMode()
+            .AddAdditionalAssemblies(
+                typeof(JewerlySystem.Modules.Auth.Presentation.Pages.Login).Assembly,
+                typeof(JewerlySystem.Modules.Contracts.Presentation.Pages.ContractsList).Assembly,
+                typeof(JewerlySystem.Modules.Inventory.Presentation.Pages.InventoryList).Assembly,
+                typeof(JewerlySystem.Modules.Cash.Presentation.Pages.CashDaily).Assembly,
+                typeof(JewerlySystem.Modules.Customers.Presentation.Pages.CustomersList).Assembly,
+                typeof(JewerlySystem.Modules.Invoicing.Presentation.Pages.InvoicingList).Assembly
+            );
+
+        return app;
+    }
+}

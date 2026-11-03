@@ -11,7 +11,7 @@
                 <div class="rail-logo my-2 text-center">
                     <a href="dashboard" class="text-decoration-none d-flex flex-column align-items-center" title="Pomona Joyería & Relojería">
                         <div class="d-inline-flex p-1 rounded-3 align-items-center justify-content-center shadow-sm"
-                             style="width: 44px; height: 44px; background: linear-gradient(135deg, #701C2C 0%, #4D0E1A 100%); border: 1.5px solid rgba(212, 175, 55, 0.45); box-shadow: 0 4px 10px rgba(0,0,0,0.35);">
+                             style="width: 44px; height: 44px; background: var(--brand-primary-gradient); border: 1.5px solid rgba(212, 175, 55, 0.45); box-shadow: 0 4px 10px rgba(0,0,0,0.35);">
                             <img src="images/pomona-symbol-white.png" alt="Pomona" style="width: 32px; height: 32px; object-fit: contain;" />
                         </div>
                         <div class="text-white mt-1" style="font-family: 'Cinzel', 'Playfair Display', Georgia, serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 1.5px;">POMONA</div>
@@ -214,13 +214,13 @@
 
     /* Voice Header Button */
     .voice-header-btn {
-        background: linear-gradient(135deg, #701C2C 0%, #8B293C 60%, #B8860B 100%) !important;
+        background: var(--brand-primary-gradient) !important;
         border: 1px solid rgba(212, 175, 55, 0.35) !important;
         transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .voice-header-btn:hover {
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(112, 28, 44, 0.45) !important;
+        box-shadow: var(--brand-rail-glow, 0 4px 12px rgba(112, 28, 44, 0.45)) !important;
     }
 
     /* Floating Action Button for Voice Assistant */
@@ -231,19 +231,19 @@
         width: 52px;
         height: 52px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #701C2C 0%, #B8860B 100%);
+        background: var(--brand-primary-gradient);
         border: 1.5px solid rgba(212, 175, 55, 0.5);
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
         z-index: 1040;
-        box-shadow: 0 8px 24px rgba(112, 28, 44, 0.45);
+        box-shadow: var(--brand-rail-glow, 0 8px 24px rgba(112, 28, 44, 0.45));
         transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .soft-voice-fab:hover {
         transform: translateY(-3px) scale(1.06);
-        box-shadow: 0 12px 28px rgba(112, 28, 44, 0.6);
+        box-shadow: var(--brand-primary-shadow, 0 12px 28px rgba(112, 28, 44, 0.6));
     }
     .soft-voice-fab-badge {
         position: absolute;
