@@ -1,4 +1,5 @@
 @inherits LayoutComponentBase
+@implements IDisposable
 @inject ISender Sender
 @inject NavigationManager Navigation
 @inject ITenantContext TenantContext
@@ -9,8 +10,9 @@
 <AuthorizeView>
     <Authorized>
         <div class="app-container d-flex" style="height: 100vh; overflow: hidden;">
-            <!-- 1. PRIMARY RAIL (Luxury Module Bar) -->
-            <aside class="app-primary-rail d-flex flex-column align-items-center py-2 text-white border-end" style="width: 76px; min-width: 76px; z-index: 1020; background-color: var(--brand-rail-bg, #1B050A) !important; border-color: var(--brand-rail-border, #380C16) !important;">
+            <!-- 1. PRIMARY RAIL (Luxury Module Bar - Desktop & Laptop ≥ 768px) -->
+            <aside class="app-primary-rail d-none d-md-flex flex-column align-items-center py-2 text-white border-end"
+                   style="width: 76px; min-width: 76px; z-index: 1020; background-color: var(--brand-rail-bg, #1B050A) !important; border-color: var(--brand-rail-border, #380C16) !important;">
                 <!-- Brand / Logo -->
                 <div class="rail-logo my-2 text-center">
                     <a href="dashboard" class="text-decoration-none d-flex flex-column align-items-center" title="@TenantContext.CurrentTenant.Name">
@@ -44,8 +46,8 @@
                 </nav>
             </aside>
 
-            <!-- 2. SIDER WITH NAVMENU (Filtered by Active Module + Favorites) -->
-            <aside class="soft-sider h-100 @(_isSiderCollapsed ? "collapsed" : "")">
+            <!-- 2. SIDER WITH NAVMENU (Desktop & Laptop ≥ 768px, Filtered by Active Module + Favorites) -->
+            <aside class="soft-sider d-none d-md-block h-100 @(_isSiderCollapsed ? "collapsed" : "")">
                 <NavMenu ActiveModuleKey="@_activeModuleKey"
                          ActiveModuleTitle="@_activeModuleTitle"
                          ActiveModuleIcon="@_activeModuleIcon"
@@ -54,29 +56,123 @@
                          OnToggleCollapse="ToggleSider" />
             </aside>
 
+            <!-- 2.1 MOBILE OFFCANVAS DRAWER (Slide-Over navigation on < 768px) -->
+            @if (_isMobileDrawerOpen)
+            {
+                <div class="mobile-nav-backdrop d-md-none" @onclick="CloseMobileDrawer"></div>
+            }
+            <aside class="mobile-nav-drawer d-md-none @(_isMobileDrawerOpen ? "open" : "")" aria-hidden="@(!_isMobileDrawerOpen)">
+                <!-- Mobile Drawer Header -->
+                <div class="mobile-drawer-header p-3 d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2 min-w-0">
+                        <div class="p-1 rounded-2 bg-white bg-opacity-10 border border-white border-opacity-25 d-flex align-items-center justify-content-center shadow-xs" style="width: 36px; height: 36px;">
+                            <img src="@TenantContext.CurrentTenant.SymbolUrl" alt="@TenantContext.CurrentTenant.ShortName" style="width: 26px; height: 26px; object-fit: contain;" />
+                        </div>
+                        <div class="min-w-0">
+                            <div class="fw-bold text-white text-truncate" style="font-family: 'Cinzel', Georgia, serif; font-size: 0.95rem; line-height: 1.15;">
+                                @TenantContext.CurrentTenant.Name
+                            </div>
+                            <div class="text-white-50 text-truncate" style="font-size: 0.68rem; letter-spacing: 0.5px;">@TenantContext.CurrentTenant.ShortName &bull; Joyería & Relojería</div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-light border-0 rounded-circle p-1 d-flex align-items-center justify-content-center ms-2"
+                            style="width: 34px; height: 34px;" @onclick="CloseMobileDrawer" title="Cerrar menú">
+                        <i class="bi bi-x-lg fs-6"></i>
+                    </button>
+                </div>
+
+                <!-- Module Selector Pills (Quick switch between all modules) -->
+                <div class="mobile-modules-bar p-2 border-bottom">
+                    <div class="small fw-bold text-muted px-2 py-1" style="font-size: 0.68rem; letter-spacing: 0.5px;">MÓDULO:</div>
+                    <div class="d-flex gap-1.5 overflow-auto py-1 px-1 mobile-modules-scroll">
+                        @foreach (var mod in _modules)
+                        {
+                            bool isActive = string.Equals(_activeModuleKey, mod.Key, StringComparison.OrdinalIgnoreCase);
+                            <button type="button"
+                                    class="mobile-module-pill @(isActive ? "active" : "")"
+                                    @onclick="() => SelectMobileModule(mod)">
+                                <i class="bi @mod.Icon"></i>
+                                <span>@mod.Name</span>
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <!-- NavMenu Content inside Mobile Drawer -->
+                <div class="mobile-nav-content flex-grow-1 overflow-auto">
+                    <NavMenu ActiveModuleKey="@_activeModuleKey"
+                             ActiveModuleTitle="@_activeModuleTitle"
+                             ActiveModuleIcon="@_activeModuleIcon"
+                             UserId="@(context.User.Identity?.Name ?? "system-user")"
+                             IsCollapsed="false" />
+                </div>
+
+                <!-- Mobile Drawer Footer Actions -->
+                <div class="mobile-drawer-footer p-3 border-top d-flex flex-column gap-2">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="small text-muted fw-semibold" style="font-size: 0.78rem;"><i class="bi bi-palette2 me-1"></i>Tema visual:</span>
+                        <ThemeSelector />
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="small text-muted fw-semibold" style="font-size: 0.78rem;"><i class="bi bi-shop me-1"></i>Sede / Joyería:</span>
+                        <TenantSelector />
+                    </div>
+                    <div class="d-flex gap-2 pt-2 border-top">
+                        <a href="profile" class="btn btn-sm btn-light border flex-grow-1 d-flex align-items-center justify-content-center gap-1 py-1.5" @onclick="CloseMobileDrawer">
+                            <i class="bi bi-person text-primary"></i>
+                            <span class="small fw-semibold">Mi Perfil</span>
+                        </a>
+                        <form method="post" action="/logout" class="m-0 p-0 flex-grow-1">
+                            <AntiforgeryToken />
+                            <button type="submit" class="btn btn-sm btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-1 py-1.5">
+                                <i class="bi bi-box-arrow-right"></i>
+                                <span class="small fw-semibold">Cerrar Sesión</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </aside>
+
             <!-- 3. MAIN CONTENT WORKSPACE -->
             <div class="app-main-workspace flex-grow-1 d-flex flex-column h-100" style="overflow-y: auto;">
                 <!-- Header Topbar -->
-                <header class="navbar app-header px-4 py-2 d-flex justify-content-between align-items-center sticky-top shadow-sm">
-                    <div class="d-flex align-items-center gap-2">
-                        <!-- Botón para Colapsar/Expandir Menú Lateral (SI.SIOT Style) -->
+                <header class="navbar app-header px-3 px-md-4 py-2 d-flex justify-content-between align-items-center sticky-top shadow-sm">
+                    <div class="d-flex align-items-center gap-2 min-w-0">
+                        <!-- Desktop Sider Toggle Button (≥ 768px) -->
                         <button type="button"
-                                class="btn btn-sm btn-light border rounded-2 d-flex align-items-center justify-content-center p-2 text-secondary sider-toggle-btn"
+                                class="btn btn-sm btn-light border rounded-2 d-none d-md-flex align-items-center justify-content-center p-2 text-secondary sider-toggle-btn"
                                 @onclick="ToggleSider"
                                 title="@(_isSiderCollapsed ? "Expandir menú de navegación" : "Ocultar menú lateral")">
                             <i class="bi @(_isSiderCollapsed ? "bi-layout-sidebar text-primary" : "bi-layout-sidebar-inset text-secondary") fs-5"></i>
                         </button>
 
-                        <span class="text-muted small d-none d-sm-inline">Módulo actual:</span>
-                        <span class="badge bg-primary px-2 py-1 fw-semibold d-flex align-items-center gap-1">
+                        <!-- Mobile Menu Hamburger Button (< 768px) -->
+                        <button type="button"
+                                class="btn btn-sm btn-light border rounded-2 d-flex d-md-none align-items-center justify-content-center p-2 text-secondary mobile-menu-toggle-btn"
+                                @onclick="ToggleMobileDrawer"
+                                title="Abrir menú de navegación">
+                            <i class="bi bi-list fs-5"></i>
+                        </button>
+
+                        <!-- Mobile Tenant Brand (Visible only on mobile header) -->
+                        <div class="d-flex align-items-center gap-2 d-md-none min-w-0">
+                            <img src="@TenantContext.CurrentTenant.SymbolUrl" alt="" style="width: 22px; height: 22px; object-fit: contain;" />
+                            <span class="fw-bold text-dark text-truncate" style="font-family: 'Cinzel', Georgia, serif; font-size: 0.88rem; max-width: 130px;">
+                                @TenantContext.CurrentTenant.ShortName
+                            </span>
+                        </div>
+
+                        <!-- Desktop Module Badge (≥ 768px) -->
+                        <span class="text-muted small d-none d-xl-inline">Módulo actual:</span>
+                        <span class="badge bg-primary px-2.5 py-1.5 fw-semibold d-none d-md-inline-flex align-items-center gap-1">
                             <i class="bi @_activeModuleIcon"></i> @_activeModuleTitle
                         </span>
                     </div>
 
-                    <div class="d-flex align-items-center gap-2 ms-auto">
+                    <div class="d-flex align-items-center gap-1 gap-sm-2 ms-auto">
                         <!-- Botón Asistente de Operaciones por Voz con IA -->
                         <button type="button"
-                                class="btn btn-sm d-flex align-items-center gap-2 px-3 py-1 shadow-sm rounded-pill fw-semibold border-0 voice-header-btn"
+                                class="btn btn-sm d-flex align-items-center gap-1.5 px-2 px-sm-3 py-1 shadow-sm rounded-pill fw-semibold border-0 voice-header-btn"
                                 @onclick="() => _showVoiceModal = true"
                                 title="Dictar cualquier operación (Ventas, Contratos, Clientes, Gastos) de la forma más simple">
                             <i class="bi bi-stars text-warning fs-6"></i>
@@ -88,11 +184,13 @@
                         <TenantSelector />
 
                         <!-- Selector de Temas Visuales (Ant Design Themes) -->
-                        <ThemeSelector />
+                        <div class="d-none d-sm-inline-flex">
+                            <ThemeSelector />
+                        </div>
 
-                        <div class="vr my-1 text-muted opacity-25"></div>
+                        <div class="vr my-1 text-muted opacity-25 d-none d-md-block"></div>
 
-                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 d-none d-md-inline-flex align-items-center">
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 d-none d-lg-inline-flex align-items-center">
                             <i class="bi bi-shield-check me-1"></i> MFA Activo
                         </span>
 
@@ -101,14 +199,14 @@
                         <!-- Dropdown de Usuario (SI.SIOT Style - Alineado a la derecha con inicial y nombre) -->
                         <div class="position-relative d-inline-flex align-items-center user-dropdown-container">
                             <button type="button"
-                                    class="btn btn-sm btn-light border d-flex align-items-center gap-2 px-2 py-1 rounded-2 shadow-2xs user-profile-toggle-btn"
+                                    class="btn btn-sm btn-light border d-flex align-items-center gap-1.5 px-2 py-1 rounded-2 shadow-2xs user-profile-toggle-btn"
                                     title="Opciones de cuenta de usuario"
                                     @onclick="ToggleUserDropdown">
                                 <div class="avatar-small rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center shadow-xs"
                                      style="width: 28px; height: 28px; font-size: 0.78rem;">
                                     @(context.User.Identity?.Name?.Length > 0 ? context.User.Identity.Name[0].ToString().ToUpper() : "U")
                                 </div>
-                                <span class="small fw-semibold text-dark d-none d-sm-inline text-truncate" style="max-width: 140px;">
+                                <span class="small fw-semibold text-dark d-none d-sm-inline text-truncate" style="max-width: 130px;">
                                     @(context.User.Identity?.Name ?? "Usuario")
                                 </span>
                                 <i class="bi @(_isUserDropdownOpen ? "bi-chevron-up" : "bi-chevron-down") text-muted" style="font-size: 0.65rem;"></i>
@@ -122,7 +220,7 @@
                                      @onclick="CloseUserDropdown"></div>
 
                                 <div class="dropdown-menu show dropdown-menu-end shadow-lg border p-1 rounded-3 user-dropdown-menu"
-                                     style="position: absolute; right: 0; top: 100%; margin-top: 6px; z-index: 1050; min-width: 230px;">
+                                     style="position: absolute; right: 0; top: 100%; margin-top: 6px; z-index: 1050; min-width: 230px; max-width: calc(100vw - 20px);">
                                     <!-- Header con avatar y nombre -->
                                     <div class="px-3 py-2 border-bottom d-flex align-items-center gap-2 mb-1">
                                         <div class="avatar-small rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center shadow-xs"
@@ -176,11 +274,38 @@
                     </div>
                 </header>
 
-                <!-- Page Body -->
-                <main class="p-4 flex-grow-1">
+                <!-- Page Body (Responsive padding for mobile and 13"+ laptops) -->
+                <main class="app-main-content flex-grow-1">
                     @Body
                 </main>
             </div>
+
+            <!-- 4. MOBILE BOTTOM NAVIGATION BAR (< 768px - Thumb-zone ergonomía) -->
+            <nav class="mobile-bottom-bar d-flex d-md-none justify-content-around align-items-center">
+                @foreach (var mod in _modules.Take(4))
+                {
+                    bool isActive = string.Equals(_activeModuleKey, mod.Key, StringComparison.OrdinalIgnoreCase);
+                    <button type="button"
+                            class="mobile-bottom-btn @(isActive ? "active" : "")"
+                            @onclick="() => OnBottomNavClick(mod)"
+                            title="@mod.Name">
+                        <i class="bi @mod.Icon mobile-bottom-icon"></i>
+                        <span class="mobile-bottom-label">@mod.Name</span>
+                        @if (isActive)
+                        {
+                            <span class="mobile-bottom-dot"></span>
+                        }
+                    </button>
+                }
+                <button type="button"
+                        class="mobile-bottom-btn @(_isMobileDrawerOpen ? "active" : "")"
+                        @onclick="ToggleMobileDrawer"
+                        title="Menú de navegación">
+                    <i class="bi @(_isMobileDrawerOpen ? "bi-x-lg text-primary" : "bi-grid-fill") mobile-bottom-icon"></i>
+                    <span class="mobile-bottom-label">Menú</span>
+                </button>
+            </nav>
+
             <AntContainer />
             <SoftVoiceAssistantModal @bind-Visible="_showVoiceModal" />
 
@@ -203,136 +328,13 @@
     </NotAuthorized>
 </AuthorizeView>
 
-<style>
-    /* SI.SIOT Collapsible Sider Animation & Specs */
-    .soft-sider {
-        width: 250px;
-        min-width: 250px;
-        max-width: 250px;
-        transition: width 0.22s cubic-bezier(0.16, 1, 0.3, 1),
-                    min-width 0.22s cubic-bezier(0.16, 1, 0.3, 1),
-                    max-width 0.22s cubic-bezier(0.16, 1, 0.3, 1),
-                    opacity 0.18s ease-in-out;
-        overflow: hidden;
-        white-space: nowrap;
-    }
-
-    .soft-sider.collapsed {
-        width: 68px !important;
-        min-width: 68px !important;
-        max-width: 68px !important;
-        opacity: 1 !important;
-        pointer-events: auto !important;
-    }
-
-    /* Ocultar barras de desplazamiento laterales en el menú de módulos */
-    .rail-modules-nav {
-        scrollbar-width: none !important;
-        -ms-overflow-style: none !important;
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
-    }
-    .rail-modules-nav::-webkit-scrollbar {
-        display: none !important;
-        width: 0 !important;
-        height: 0 !important;
-    }
-
-    .rail-module-btn {
-        background-color: transparent;
-        color: #BCAAA4;
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        cursor: pointer;
-        border-radius: var(--soft-border-radius-lg, 12px) !important;
-    }
-    .rail-module-btn:hover {
-        background-color: rgba(255, 255, 255, 0.10);
-        color: #FFFFFF;
-        border-radius: var(--soft-border-radius-lg, 12px) !important;
-    }
-    .rail-module-btn.active {
-        background: var(--brand-rail-active, linear-gradient(135deg, #701C2C 0%, #8B293C 100%)) !important;
-        color: var(--brand-rail-active-text, #ffffff) !important;
-        box-shadow: var(--brand-rail-glow, 0 4px 14px rgba(112, 28, 44, 0.5));
-        border: 1px solid var(--brand-rail-active-border, rgba(212, 175, 55, 0.4)) !important;
-        border-radius: var(--soft-border-radius-lg, 12px) !important;
-    }
-    .rail-module-btn.active i {
-        color: var(--brand-rail-active-icon, #D4AF37) !important;
-    }
-    .rail-module-btn.active span {
-        color: var(--brand-rail-active-text, #ffffff) !important;
-    }
-
-    /* Sider Toggle Button */
-    .sider-toggle-btn {
-        transition: all 0.15s ease-in-out;
-    }
-    .sider-toggle-btn:hover {
-        background-color: #f3f4f6;
-        color: #111827;
-    }
-
-    /* Voice Header Button */
-    .voice-header-btn {
-        background: var(--brand-primary-gradient) !important;
-        border: 1px solid rgba(212, 175, 55, 0.35) !important;
-        color: var(--brand-btn-text, #ffffff) !important;
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .voice-header-btn * {
-        color: var(--brand-btn-text, #ffffff) !important;
-    }
-    .voice-header-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: var(--brand-rail-glow, 0 4px 12px rgba(112, 28, 44, 0.45)) !important;
-    }
-
-    /* Floating Action Button for Voice Assistant */
-    .soft-voice-fab {
-        position: fixed;
-        bottom: 24px;
-        right: 28px;
-        width: 52px;
-        height: 52px;
-        border-radius: 50%;
-        background: var(--brand-primary-gradient);
-        border: 1.5px solid rgba(212, 175, 55, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        z-index: 1040;
-        box-shadow: var(--brand-rail-glow, 0 8px 24px rgba(112, 28, 44, 0.45));
-        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .soft-voice-fab:hover {
-        transform: translateY(-3px) scale(1.06);
-        box-shadow: var(--brand-primary-shadow, 0 12px 28px rgba(112, 28, 44, 0.6));
-    }
-    .soft-voice-fab i.voice-fab-icon {
-        color: var(--brand-btn-text, #ffffff) !important;
-    }
-    .soft-voice-fab-badge {
-        position: absolute;
-        top: -2px;
-        right: -2px;
-        background: #f59e0b;
-        color: #111827;
-        font-size: 0.65rem;
-        font-weight: 800;
-        padding: 1px 5px;
-        border-radius: 9999px;
-        border: 2px solid #ffffff;
-    }
-</style>
-
 @code {
     [CascadingParameter]
     private Task<AuthenticationState>? AuthStateTask { get; set; }
 
     private bool _showVoiceModal;
     private bool _isSiderCollapsed;
+    private bool _isMobileDrawerOpen;
     private bool _isUserDropdownOpen;
     private List<AppModuleDto> _modules = [];
     private string _activeModuleKey = "CONTRACTS";
@@ -341,6 +343,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        Navigation.LocationChanged += HandleLocationChanged;
+
         try
         {
             string? currentUserName = null;
@@ -386,6 +390,16 @@
         _isSiderCollapsed = !_isSiderCollapsed;
     }
 
+    private void ToggleMobileDrawer()
+    {
+        _isMobileDrawerOpen = !_isMobileDrawerOpen;
+    }
+
+    private void CloseMobileDrawer()
+    {
+        _isMobileDrawerOpen = false;
+    }
+
     private void SelectModule(AppModuleDto module)
     {
         if (string.Equals(_activeModuleKey, module.Key, StringComparison.OrdinalIgnoreCase) && !_isSiderCollapsed)
@@ -402,6 +416,27 @@
         }
     }
 
+    private void SelectMobileModule(AppModuleDto module)
+    {
+        _activeModuleKey = module.Key;
+        _activeModuleTitle = module.Name;
+        _activeModuleIcon = module.Icon;
+    }
+
+    private void OnBottomNavClick(AppModuleDto module)
+    {
+        if (string.Equals(_activeModuleKey, module.Key, StringComparison.OrdinalIgnoreCase))
+        {
+            // Abre o cierra el drawer al pulsar el módulo actual
+            _isMobileDrawerOpen = !_isMobileDrawerOpen;
+        }
+        else
+        {
+            SelectMobileModule(module);
+            _isMobileDrawerOpen = true;
+        }
+    }
+
     private void ToggleUserDropdown()
     {
         _isUserDropdownOpen = !_isUserDropdownOpen;
@@ -410,5 +445,17 @@
     private void CloseUserDropdown()
     {
         _isUserDropdownOpen = false;
+    }
+
+    private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        _isMobileDrawerOpen = false;
+        _isUserDropdownOpen = false;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= HandleLocationChanged;
     }
 }

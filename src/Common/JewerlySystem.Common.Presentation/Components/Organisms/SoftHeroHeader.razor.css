@@ -1,57 +1,129 @@
 .soft-hero-header {
     background: var(--brand-primary-gradient, linear-gradient(135deg, #701C2C 0%, #4D0E1A 100%));
     border-radius: var(--soft-border-radius-lg, 12px);
-    padding: 24px 28px;
-    margin-bottom: 24px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
     color: #ffffff;
     box-shadow: var(--brand-primary-shadow, 0 8px 24px rgba(112, 28, 44, 0.25));
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
     flex-wrap: wrap;
+    transition: all 0.2s ease;
 }
 
 .soft-hero-content {
     display: flex;
     align-items: center;
     gap: 16px;
+    min-width: 0;
 }
 
 .soft-hero-icon {
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
     background: rgba(255, 255, 255, 0.18);
     backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border-radius: var(--soft-border-radius-md, 8px);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.6rem;
+    font-size: 1.45rem;
     color: #ffffff;
 }
 
 .soft-hero-titles {
     display: flex;
     flex-direction: column;
+    min-width: 0;
 }
 
 .soft-hero-title {
     margin: 0;
-    font-size: 1.45rem;
+    font-size: 1.35rem;
     font-weight: 700;
     color: #ffffff;
     letter-spacing: -0.4px;
+    line-height: 1.25;
 }
 
 .soft-hero-subtitle {
     margin: 4px 0 0;
-    font-size: 0.92rem;
+    font-size: 0.88rem;
     color: rgba(255, 255, 255, 0.88);
+    line-height: 1.35;
 }
 
 .soft-hero-actions {
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   RESPONSIVE OPTIMIZATIONS: 13" Laptops & Desktops (992px to 1440px)
+   ========================================================================== */
+@media (min-width: 992px) and (max-width: 1440px) {
+    .soft-hero-header {
+        padding: 16px 20px;
+        margin-bottom: 16px;
+        gap: 14px;
+    }
+    .soft-hero-icon {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        font-size: 1.35rem;
+    }
+    .soft-hero-title {
+        font-size: 1.25rem;
+    }
+    .soft-hero-subtitle {
+        font-size: 0.84rem;
+    }
+}
+
+/* ==========================================================================
+   RESPONSIVE OPTIMIZATIONS: Mobile Devices (< 768px)
+   ========================================================================== */
+@media (max-width: 767.98px) {
+    .soft-hero-header {
+        padding: 14px 16px;
+        margin-bottom: 14px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        border-radius: var(--soft-border-radius-md, 10px);
+    }
+    .soft-hero-content {
+        gap: 12px;
+        width: 100%;
+    }
+    .soft-hero-icon {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        font-size: 1.2rem;
+    }
+    .soft-hero-title {
+        font-size: 1.12rem;
+    }
+    .soft-hero-subtitle {
+        font-size: 0.78rem;
+        margin-top: 2px;
+    }
+    .soft-hero-actions {
+        width: 100%;
+        justify-content: stretch;
+        gap: 8px;
+    }
+    .soft-hero-actions > * {
+        flex: 1 1 auto;
+        text-align: center;
+        justify-content: center;
+    }
 }

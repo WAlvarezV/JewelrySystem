@@ -622,17 +622,21 @@ body[data-theme="pomona-emerald"],
     border-radius: var(--soft-border-radius-lg) !important; /* 12px */
     box-shadow: var(--soft-box-shadow-sm) !important;
     border: 1px solid var(--soft-border-color) !important;
-    overflow: hidden !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
 }
 
 .ant-table {
     border-radius: var(--soft-border-radius-lg) !important;
     background: transparent !important;
+    min-width: 100% !important;
 }
 
 .ant-table-container {
     border-radius: var(--soft-border-radius-lg) !important;
-    overflow: hidden !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
 }
 
 .ant-table-thead > tr > th {
@@ -1661,4 +1665,565 @@ body[data-theme="oroplata-classic"] .app-main-workspace,
 
 [data-theme="oroplata-classic"] .nav-item-link.active i {
     color: #A16207 !important;
+}
+
+/* ==========================================================================
+   14. COMPREHENSIVE RESPONSIVE UX/UI ARCHITECTURE (Mobile & 13"+ Laptops)
+   ========================================================================== */
+
+/* SI.SIOT Collapsible Sider Animation & Specs */
+.soft-sider {
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
+    transition: width 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                min-width 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                max-width 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.18s ease-in-out;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.soft-sider.collapsed {
+    width: 68px !important;
+    min-width: 68px !important;
+    max-width: 68px !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+/* Primary Rail & Module Navigation */
+.rail-modules-nav {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+.rail-modules-nav::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+.rail-module-btn {
+    background-color: transparent;
+    color: #BCAAA4;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+    border-radius: var(--soft-border-radius-lg, 12px) !important;
+}
+.rail-module-btn:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+    color: #FFFFFF;
+    border-radius: var(--soft-border-radius-lg, 12px) !important;
+}
+.rail-module-btn.active {
+    background: var(--brand-rail-active, linear-gradient(135deg, #701C2C 0%, #8B293C 100%)) !important;
+    color: var(--brand-rail-active-text, #ffffff) !important;
+    box-shadow: var(--brand-rail-glow, 0 4px 14px rgba(112, 28, 44, 0.5));
+    border: 1px solid var(--brand-rail-active-border, rgba(212, 175, 55, 0.4)) !important;
+    border-radius: var(--soft-border-radius-lg, 12px) !important;
+}
+.rail-module-btn.active i {
+    color: var(--brand-rail-active-icon, #D4AF37) !important;
+}
+.rail-module-btn.active span {
+    color: var(--brand-rail-active-text, #ffffff) !important;
+}
+
+/* Sider Toggle Button */
+.sider-toggle-btn {
+    transition: all 0.15s ease-in-out;
+}
+.sider-toggle-btn:hover {
+    background-color: #f3f4f6;
+    color: #111827;
+}
+
+/* Voice Header Button */
+.voice-header-btn {
+    background: var(--brand-primary-gradient) !important;
+    border: 1px solid rgba(212, 175, 55, 0.35) !important;
+    color: var(--brand-btn-text, #ffffff) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.voice-header-btn * {
+    color: var(--brand-btn-text, #ffffff) !important;
+}
+.voice-header-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--brand-rail-glow, 0 4px 12px rgba(112, 28, 44, 0.45)) !important;
+}
+
+/* Floating Action Button for Voice Assistant */
+.soft-voice-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 28px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--brand-primary-gradient);
+    border: 1.5px solid rgba(212, 175, 55, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1040;
+    box-shadow: var(--brand-rail-glow, 0 8px 24px rgba(112, 28, 44, 0.45));
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.soft-voice-fab:hover {
+    transform: translateY(-3px) scale(1.06);
+    box-shadow: var(--brand-primary-shadow, 0 12px 28px rgba(112, 28, 44, 0.6));
+}
+.soft-voice-fab i.voice-fab-icon {
+    color: var(--brand-btn-text, #ffffff) !important;
+}
+.soft-voice-fab-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: #f59e0b;
+    color: #111827;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 9999px;
+    border: 2px solid #ffffff;
+}
+
+/* Workspace Content Spacing */
+.app-main-content {
+    padding: 20px 24px;
+}
+
+/* Mobile Offcanvas Drawer */
+.mobile-nav-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1045;
+    animation: fadeInBackdrop 0.2s ease-out;
+}
+
+@keyframes fadeInBackdrop {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.mobile-nav-drawer {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 86vw;
+    max-width: 320px;
+    background: var(--soft-bg-surface, #ffffff);
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 8px 0 24px rgba(0, 0, 0, 0.25);
+    transform: translateX(-100%);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+}
+
+.mobile-nav-drawer.open {
+    transform: translateX(0);
+}
+
+.mobile-drawer-header {
+    background: var(--brand-rail-bg, #1B050A);
+    color: #ffffff;
+    border-bottom: 2px solid var(--brand-header-accent, #701C2C);
+}
+
+.mobile-modules-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.mobile-modules-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.mobile-module-pill {
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--soft-text-body, #374151);
+    border: 1px solid var(--soft-border-color, #e2e8f0);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.mobile-module-pill.active {
+    background: var(--brand-primary-gradient, linear-gradient(135deg, #701C2C 0%, #4D0E1A 100%));
+    color: #ffffff !important;
+    border-color: rgba(212, 175, 55, 0.5);
+    box-shadow: 0 2px 8px rgba(112, 28, 44, 0.35);
+}
+.mobile-module-pill.active i {
+    color: var(--brand-gold, #D4AF37) !important;
+}
+
+.mobile-drawer-footer {
+    background: var(--soft-bg-light, #f8fafc);
+    border-color: var(--soft-border-color, #e2e8f0) !important;
+}
+
+/* Mobile Bottom Navigation Bar */
+.mobile-bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 58px;
+    background: var(--soft-bg-surface, #ffffff);
+    border-top: 1px solid var(--soft-border-color, #e2e8f0);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+    z-index: 1030;
+    padding: 0 6px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.mobile-bottom-btn {
+    background: transparent;
+    border: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    height: 100%;
+    color: var(--soft-text-muted, #64748b);
+    padding: 4px 2px;
+    position: relative;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.mobile-bottom-btn.active {
+    color: var(--brand-primary, #701C2C) !important;
+}
+
+.mobile-bottom-icon {
+    font-size: 1.25rem;
+    line-height: 1;
+    margin-bottom: 2px;
+    transition: transform 0.15s ease;
+}
+
+.mobile-bottom-btn.active .mobile-bottom-icon {
+    color: var(--brand-primary, #701C2C);
+    transform: translateY(-1px) scale(1.08);
+}
+
+.mobile-bottom-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    max-width: 68px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mobile-bottom-dot {
+    position: absolute;
+    bottom: 3px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--brand-primary, #701C2C);
+}
+
+/* Universal Touch & Scrollbar Standards */
+html, body {
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.35);
+    border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.55);
+}
+
+/* Ant Design Table Mobile & Laptop Ergonomics */
+.ant-table-wrapper {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+.ant-table-content {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+/* Responsive Theme Styling for Mobile Drawer & Bottom Navigation */
+[data-theme="pomona-dark"] .mobile-nav-drawer,
+[data-theme="pomona-dark"] .mobile-bottom-bar,
+[data-theme="pomona-dark"] .mobile-drawer-footer {
+    background-color: #0D0205 !important;
+    border-color: #330A14 !important;
+    color: #F5EDEF !important;
+}
+[data-theme="pomona-dark"] .mobile-drawer-header {
+    background-color: #050002 !important;
+    border-bottom: 2px solid #E03E5C !important;
+}
+[data-theme="pomona-dark"] .mobile-bottom-btn {
+    color: #9E8E92 !important;
+}
+[data-theme="pomona-dark"] .mobile-bottom-btn.active {
+    color: #E03E5C !important;
+}
+[data-theme="pomona-dark"] .mobile-bottom-btn.active .mobile-bottom-icon {
+    color: #E03E5C !important;
+}
+[data-theme="pomona-dark"] .mobile-module-pill {
+    background-color: #1A070D !important;
+    border-color: #380E1C !important;
+    color: #D6CCD0 !important;
+}
+
+[data-theme="oroplata-classic"] .mobile-drawer-header {
+    background-color: #141824 !important;
+    border-bottom: 2px solid #C59B27 !important;
+}
+[data-theme="oroplata-classic"] .mobile-bottom-btn.active {
+    color: #C59B27 !important;
+}
+[data-theme="oroplata-classic"] .mobile-bottom-btn.active .mobile-bottom-icon {
+    color: #C59B27 !important;
+}
+
+[data-theme="pomona-emerald"] .mobile-drawer-header {
+    background-color: #042F2E !important;
+    border-bottom: 2px solid #059669 !important;
+}
+[data-theme="pomona-emerald"] .mobile-bottom-btn.active {
+    color: #059669 !important;
+}
+[data-theme="pomona-emerald"] .mobile-bottom-btn.active .mobile-bottom-icon {
+    color: #059669 !important;
+}
+
+[data-theme="pomona-sapphire"] .mobile-drawer-header {
+    background-color: #0B192C !important;
+    border-bottom: 2px solid #1D4ED8 !important;
+}
+[data-theme="pomona-sapphire"] .mobile-bottom-btn.active {
+    color: #1D4ED8 !important;
+}
+[data-theme="pomona-sapphire"] .mobile-bottom-btn.active .mobile-bottom-icon {
+    color: #1D4ED8 !important;
+}
+
+/* ==========================================================================
+   MOBILE VIEWPORT BREAKPOINT (< 768px)
+   ========================================================================== */
+@media (max-width: 767.98px) {
+    /* Responsive Modals */
+    .ant-modal {
+        max-width: calc(100vw - 20px) !important;
+        margin: 10px auto !important;
+    }
+    .ant-modal-content {
+        border-radius: 14px !important;
+        max-height: calc(100vh - 28px) !important;
+        overflow-y: auto !important;
+    }
+    .ant-modal-header {
+        padding: 12px 16px !important;
+    }
+    .ant-modal-body {
+        padding: 12px 14px !important;
+    }
+    .ant-modal-footer {
+        padding: 10px 14px !important;
+    }
+
+    /* Responsive Drawers */
+    .ant-drawer-content {
+        max-width: 100vw !important;
+    }
+
+    /* Table Mobile Optimizations */
+    .ant-table-thead > tr > th,
+    .ant-table-tbody > tr > td {
+        padding: 9px 12px !important;
+        font-size: 0.81rem !important;
+        white-space: nowrap;
+    }
+    .ant-table-pagination.ant-pagination {
+        margin: 12px 6px !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 4px !important;
+    }
+
+    /* Segmented Controls & Radio Buttons on Mobile */
+    .ant-radio-group {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 4px !important;
+        width: 100% !important;
+    }
+    .ant-radio-button-wrapper {
+        flex: 1 1 auto !important;
+        text-align: center !important;
+        padding: 0 8px !important;
+        font-size: 0.78rem !important;
+        height: 34px !important;
+        line-height: 32px !important;
+        border-radius: 6px !important;
+    }
+
+    /* Metrics Grid: 2 columns on mobile for instant visibility */
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        margin-bottom: 14px !important;
+    }
+    .metric-card {
+        padding: 10px 12px !important;
+        gap: 10px !important;
+        border-radius: 10px !important;
+    }
+    .metric-icon {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        font-size: 1.15rem !important;
+        border-radius: 8px !important;
+    }
+    .metric-label {
+        font-size: 0.68rem !important;
+        letter-spacing: 0.2px !important;
+        margin-bottom: 1px !important;
+    }
+    .metric-value {
+        font-size: 1.12rem !important;
+        line-height: 1.15 !important;
+    }
+    .metric-subtext {
+        display: none !important;
+    }
+
+    /* Form Controls & Inputs */
+    .ant-input,
+    .ant-input-number,
+    .ant-select-selector,
+    .ant-picker {
+        min-height: 38px !important;
+        font-size: 0.88rem !important;
+    }
+
+    /* Buttons: Touch-friendly targets */
+    .btn,
+    .ant-btn {
+        min-height: 36px !important;
+        font-size: 0.85rem !important;
+    }
+    .btn-sm,
+    .ant-btn-sm {
+        min-height: 32px !important;
+        font-size: 0.78rem !important;
+    }
+
+    /* General Cards */
+    .card,
+    .soft-card {
+        padding: 12px 14px !important;
+        border-radius: var(--soft-border-radius-md, 10px) !important;
+    }
+
+    /* Quick Choice Cards on Mobile */
+    .quick-choice-card {
+        padding: 10px 12px !important;
+        border-radius: var(--soft-border-radius-md, 10px) !important;
+    }
+    .quick-choice-card .choice-icon {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        font-size: 1.15rem !important;
+        border-radius: 8px !important;
+    }
+    .quick-choice-card .choice-title {
+        font-size: 0.88rem !important;
+    }
+    .quick-choice-card .choice-desc {
+        font-size: 0.74rem !important;
+    }
+
+    /* Dropdowns bounded to viewport */
+    .dropdown-menu {
+        max-width: calc(100vw - 20px) !important;
+    }
+}
+
+/* ==========================================================================
+   13" TO 15" LAPTOP VIEWPORT OPTIMIZATIONS (992px to 1440px)
+   ========================================================================== */
+@media (min-width: 992px) and (max-width: 1440px) {
+    /* Compact, elegant density so complex business pages fit above the fold */
+    .metrics-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 12px !important;
+        margin-bottom: 16px !important;
+    }
+    .metric-card {
+        padding: 14px 16px !important;
+        gap: 12px !important;
+    }
+    .metric-icon {
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px !important;
+        font-size: 1.25rem !important;
+    }
+    .metric-value {
+        font-size: 1.32rem !important;
+    }
+    .metric-label {
+        font-size: 0.7rem !important;
+    }
+
+    /* Table density for 13" laptop screens (1280x720, 1366x768, 125% DPI) */
+    .ant-table-thead > tr > th {
+        padding: 10px 14px !important;
+        font-size: 0.8rem !important;
+    }
+    .ant-table-tbody > tr > td {
+        padding: 10px 14px !important;
+        font-size: 0.84rem !important;
+    }
+
+    /* Forms & Inputs */
+    .soft-form-box {
+        padding: 16px 18px !important;
+        margin-bottom: 14px !important;
+    }
 }

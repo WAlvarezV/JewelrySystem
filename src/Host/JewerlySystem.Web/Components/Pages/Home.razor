@@ -2,61 +2,61 @@
 @attribute [Authorize]
 @inject ITenantContext TenantContext
 
-<div class="container-fluid">
-    <div class="row mb-4">
+<div class="container-fluid px-0 px-sm-2">
+    <div class="row mb-3 mb-md-4">
         <div class="col-12">
-            <div class="p-4 bg-white rounded-3 shadow-sm border-0 d-flex align-items-center justify-content-between flex-wrap gap-3" style="border-left: 4px solid var(--brand-primary, #701C2C) !important;">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="d-inline-flex p-2 rounded-3 shadow-xs" style="background: var(--brand-primary-gradient, linear-gradient(135deg, #701C2C 0%, #4D0E1A 100%)); border: 1.5px solid rgba(212, 175, 55, 0.45);">
-                        <img src="@TenantContext.CurrentTenant.SymbolUrl" alt="@TenantContext.CurrentTenant.ShortName" style="width: 40px; height: 40px; object-fit: contain;" />
+            <div class="p-3 p-md-4 bg-white rounded-3 shadow-sm border-0 d-flex align-items-center justify-content-between flex-wrap gap-3" style="border-left: 4px solid var(--brand-primary, #701C2C) !important;">
+                <div class="d-flex align-items-center gap-2.5 gap-md-3 min-w-0">
+                    <div class="d-inline-flex p-2 rounded-3 shadow-xs flex-shrink-0" style="background: var(--brand-primary-gradient, linear-gradient(135deg, #701C2C 0%, #4D0E1A 100%)); border: 1.5px solid rgba(212, 175, 55, 0.45);">
+                        <img src="@TenantContext.CurrentTenant.SymbolUrl" alt="@TenantContext.CurrentTenant.ShortName" style="width: 36px; height: 36px; object-fit: contain;" />
                     </div>
-                    <div>
-                        <h2 class="fw-bold text-dark m-0" style="font-family: 'Cinzel', 'Playfair Display', Georgia, serif; letter-spacing: 1px;">
-                            @TenantContext.CurrentTenant.ShortName <span style="font-size: 1.05rem; color: var(--brand-gold, #D4AF37); font-family: sans-serif; font-weight: 600;">@TenantContext.CurrentTenant.Name</span>
+                    <div class="min-w-0">
+                        <h2 class="fw-bold text-dark m-0 text-truncate" style="font-family: 'Cinzel', 'Playfair Display', Georgia, serif; letter-spacing: 0.5px; font-size: calc(1.1rem + 0.5vw);">
+                            @TenantContext.CurrentTenant.ShortName <span class="d-none d-sm-inline" style="font-size: 0.95rem; color: var(--brand-gold, #D4AF37); font-family: sans-serif; font-weight: 600;">&bull; @TenantContext.CurrentTenant.Name</span>
                         </h2>
-                        <p class="text-muted mb-0 small">Sistema Integral de Operaciones para Joyería, Empeños, Relojería, Caja y Facturación.</p>
+                        <p class="text-muted mb-0 small text-truncate">Sistema Integral de Operaciones para Joyería, Empeños, Relojería, Caja y Facturación.</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
+    <div class="row g-3 g-md-4">
+        <div class="col-12 col-md-4">
+            <div class="card h-100 shadow-sm border-0 p-1">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex align-items-center mb-2">
                         <i class="bi bi-file-earmark-text text-primary fs-3 me-2"></i>
                         <h5 class="card-title mb-0 fw-bold">Contratos</h5>
                     </div>
-                    <p class="card-text text-muted">Gestión de contratos de compraventa, empeño, abonos y control de saldos.</p>
-                    <a href="contracts" class="btn btn-outline-primary btn-sm">Ver Contratos</a>
+                    <p class="card-text text-muted small flex-grow-1">Gestión de contratos de compraventa, empeño, abonos y control de saldos.</p>
+                    <a href="contracts" class="btn btn-outline-primary btn-sm w-100 mt-2 py-2 fw-semibold">Ver Contratos</a>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
+        <div class="col-12 col-md-4">
+            <div class="card h-100 shadow-sm border-0 p-1">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex align-items-center mb-2">
                         <i class="bi bi-box-seam text-warning fs-3 me-2"></i>
                         <h5 class="card-title mb-0 fw-bold">Inventario</h5>
                     </div>
-                    <p class="card-text text-muted">Control de stock de joyas de oro y relojería por marca y características.</p>
-                    <a href="inventory" class="btn btn-outline-warning btn-sm">Ver Inventario</a>
+                    <p class="card-text text-muted small flex-grow-1">Control de stock de joyas de oro y relojería por marca y características.</p>
+                    <a href="inventory" class="btn btn-outline-warning btn-sm w-100 mt-2 py-2 fw-semibold">Ver Inventario</a>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
+        <div class="col-12 col-md-4">
+            <div class="card h-100 shadow-sm border-0 p-1">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex align-items-center mb-2">
                         <i class="bi bi-shield-lock text-success fs-3 me-2"></i>
                         <h5 class="card-title mb-0 fw-bold">Seguridad & Passkeys</h5>
                     </div>
-                    <p class="card-text text-muted">Autenticación moderna biométrica FIDO2 / WebAuthn y doble factor (TOTP).</p>
-                    <a href="auth/passkeys" class="btn btn-outline-success btn-sm">Configurar Passkeys</a>
+                    <p class="card-text text-muted small flex-grow-1">Autenticación moderna biométrica FIDO2 / WebAuthn y doble factor (TOTP).</p>
+                    <a href="auth/passkeys" class="btn btn-outline-success btn-sm w-100 mt-2 py-2 fw-semibold">Configurar Passkeys</a>
                 </div>
             </div>
         </div>
