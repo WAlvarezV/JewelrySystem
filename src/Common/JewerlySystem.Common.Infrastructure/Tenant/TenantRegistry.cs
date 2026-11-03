@@ -20,11 +20,15 @@ public class TenantRegistry : ITenantRegistry
     public TenantRegistry(IConfiguration configuration)
     {
         // 1. Resolve raw base connection string from config or Railway environment
-        var rawDefaultCs = configuration.GetConnectionString("PomonaCs")
-            ?? configuration.GetConnectionString("DefaultConnection")
-            ?? configuration["DATABASE_URL"]
-            ?? Environment.GetEnvironmentVariable("DATABASE_URL")
-            ?? "Host=localhost;Port=5432;Database=IntZaioNJewerly;Username=postgres;Password=IntZaioN";
+        var rawDefaultCs = configuration.GetConnectionString("PomonaCs");
+        if (string.IsNullOrWhiteSpace(rawDefaultCs))
+            rawDefaultCs = configuration.GetConnectionString("DefaultConnection");
+        if (string.IsNullOrWhiteSpace(rawDefaultCs))
+            rawDefaultCs = configuration["DATABASE_URL"];
+        if (string.IsNullOrWhiteSpace(rawDefaultCs))
+            rawDefaultCs = Environment.GetEnvironmentVariable("DATABASE_URL");
+        if (string.IsNullOrWhiteSpace(rawDefaultCs))
+            rawDefaultCs = "Host=localhost;Port=5432;Database=IntZaioNJewerly;Username=postgres;Password=IntZaioN";
 
         var defaultCs = NormalizeNpgsqlConnectionString(rawDefaultCs);
 

@@ -26,9 +26,15 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddHostInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("PomonaCs")
-            ?? configuration.GetConnectionString("DefaultConnection")
-            ?? "Host=localhost;Port=5432;Database=IntZaioNJewerly;Username=postgres;Password=IntZaioN";
+        var rawCs = configuration.GetConnectionString("PomonaCs");
+        if (string.IsNullOrWhiteSpace(rawCs))
+            rawCs = configuration.GetConnectionString("DefaultConnection");
+        if (string.IsNullOrWhiteSpace(rawCs))
+            rawCs = configuration["DATABASE_URL"] ?? Environment.GetEnvironmentVariable("DATABASE_URL");
+        if (string.IsNullOrWhiteSpace(rawCs))
+            rawCs = "Host=localhost;Port=5432;Database=IntZaioNJewerly;Username=postgres;Password=IntZaioN";
+
+        var connectionString = TenantRegistry.NormalizeNpgsqlConnectionString(rawCs);
 
         // Multi-Tenant Infrastructure
         services.AddSingleton<ITenantRegistry, TenantRegistry>();
