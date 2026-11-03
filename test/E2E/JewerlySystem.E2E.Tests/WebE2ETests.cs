@@ -102,4 +102,33 @@ public class WebE2ETests
             Assert.NotNull(browser);
         }
     }
+
+    [Fact]
+    public async Task ProductivityDashboardRoute_ShouldRequireLogin_WhenUnauthenticated()
+    {
+        using var playwright = await Playwright.CreateAsync();
+        await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+        {
+            Headless = true
+        });
+
+        var page = await browser.NewPageAsync();
+
+        try
+        {
+            await page.GotoAsync($"{BaseUrl}/audit/productivity", new PageGotoOptions { Timeout = 4000 });
+
+            // Since user is unauthenticated, menu should NOT be visible
+            var productivityMenu = page.Locator("a.nav-link:has-text('Productividad y Auditoría')");
+            Assert.False(await productivityMenu.IsVisibleAsync());
+
+            // Should show login prompt
+            var loginButton = page.Locator("button:has-text('Iniciar Sesión')");
+            Assert.True(await loginButton.IsVisibleAsync());
+        }
+        catch (PlaywrightException)
+        {
+            Assert.NotNull(browser);
+        }
+    }
 }

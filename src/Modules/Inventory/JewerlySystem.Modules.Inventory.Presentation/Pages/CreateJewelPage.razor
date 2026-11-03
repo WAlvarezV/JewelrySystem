@@ -16,6 +16,23 @@
                     OnClick="@(() => Navigation.NavigateTo("/inventory"))" />
     </SoftHeroHeader>
 
+    @if (!string.IsNullOrEmpty(_lastRegisteredReference))
+    {
+        <div class="row justify-content-center mb-3">
+            <div class="col-12 col-xl-10">
+                <div class="alert alert-success d-flex align-items-center justify-content-between shadow-sm rounded-3 py-2 px-3 border-success-subtle mb-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-check-circle-fill fs-5 text-success"></i>
+                        <span>Joya registrada exitosamente: <strong>Referencia #@_lastRegisteredReference</strong>. Formulario listo para la siguiente joya (conservando valor/gramo y proveedor).</span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-link text-success p-0 text-decoration-none" @onclick="() => _lastRegisteredReference = null">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
     <div class="row justify-content-center">
         <div class="col-12 col-xl-10">
             <!-- 1. Clasificación y Proveedor -->
@@ -179,6 +196,7 @@
     private int _costValue = 0;
     private int _saleValue = 0;
     private bool _isSubmitting = false;
+    private string? _lastRegisteredReference;
 
     private bool NeedLengthField => _formModel.ItemTypeId is 3 or 4; // Cadenas (3) o Pulseras (4)
 
@@ -223,6 +241,26 @@
             GramValue = 0,
             GramSaleValue = 0,
             Weight = 0,
+            Description = string.Empty
+        };
+        RecalculateValues();
+    }
+
+    private void PrepareFormForNextJewel()
+    {
+        var prevGramValue = _formModel.GramValue;
+        var prevGramSaleValue = _formModel.GramSaleValue;
+        var prevProviderId = _formModel.ProviderId;
+        var prevItemTypeId = _formModel.ItemTypeId;
+
+        _formModel = new JewelFormModel
+        {
+            ItemTypeId = prevItemTypeId,
+            ProviderId = prevProviderId,
+            GramValue = prevGramValue,
+            GramSaleValue = prevGramSaleValue,
+            Weight = 0,
+            Length = null,
             Description = string.Empty
         };
         RecalculateValues();
@@ -304,14 +342,19 @@
                 return;
             }
 
+            var refText = result.Value.FormattedReference;
+            _lastRegisteredReference = refText;
+            var savedGramVal = _formModel.GramValue;
+            PrepareFormForNextJewel();
+
             await ModalService.SuccessAsync(new ConfirmOptions
             {
                 Title = "¡Joya Registrada Exitosamente!",
-                Content = $"Se ha asignado la Referencia #{result.Value.FormattedReference} al nuevo artículo registrado.",
-                OkText = "Ir al Inventario",
+                Content = $"Se ha asignado la Referencia #{refText} al nuevo artículo. El formulario queda listo para la siguiente joya conservando el valor por gramo (${savedGramVal:N0}) y el proveedor seleccionado.",
+                OkText = "Registrar Siguiente Joya",
                 OnOk = (e) =>
                 {
-                    Navigation.NavigateTo("/inventory");
+                    StateHasChanged();
                     return Task.CompletedTask;
                 }
             });

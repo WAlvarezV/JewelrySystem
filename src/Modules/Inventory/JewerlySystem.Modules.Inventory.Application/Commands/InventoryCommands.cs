@@ -30,10 +30,12 @@ public class CreateJewelItemCommandValidator : AbstractValidator<CreateJewelItem
 public class CreateJewelItemCommandHandler : ICommandHandler<CreateJewelItemCommand, CreateItemResponse>
 {
     private readonly IInventoryRepository _repository;
+    private readonly IUserActivityTracker? _activityTracker;
 
-    public CreateJewelItemCommandHandler(IInventoryRepository repository)
+    public CreateJewelItemCommandHandler(IInventoryRepository repository, IUserActivityTracker? activityTracker = null)
     {
         _repository = repository;
+        _activityTracker = activityTracker;
     }
 
     public async Task<Result<CreateItemResponse>> Handle(CreateJewelItemCommand request, CancellationToken cancellationToken)
@@ -55,6 +57,23 @@ public class CreateJewelItemCommandHandler : ICommandHandler<CreateJewelItemComm
         );
 
         var response = await _repository.CreateJewelItemAtomicAsync(item, jewel, cancellationToken);
+        if (response == null)
+        {
+            return Result.Failure<CreateItemResponse>(Error.Failure("Items.CreateFailed", "No se pudo registrar la joya en inventario."));
+        }
+
+        if (_activityTracker != null)
+        {
+            await _activityTracker.TrackActivityAsync(
+                actionKey: ActionWeightRegistry.InventoryCreateJewel,
+                category: ActionWeightRegistry.CategoryNewRecord,
+                description: $"Creó Joya Ref #{response.Reference} - {request.Description} ({request.Weight:F2}g)",
+                weightScore: 10,
+                entityName: "Item",
+                entityReference: response.Reference.ToString(),
+                cancellationToken: cancellationToken);
+        }
+
         return Result.Success(response);
     }
 }
@@ -83,10 +102,12 @@ public class CreateWatchItemCommandValidator : AbstractValidator<CreateWatchItem
 public class CreateWatchItemCommandHandler : ICommandHandler<CreateWatchItemCommand, CreateItemResponse>
 {
     private readonly IInventoryRepository _repository;
+    private readonly IUserActivityTracker? _activityTracker;
 
-    public CreateWatchItemCommandHandler(IInventoryRepository repository)
+    public CreateWatchItemCommandHandler(IInventoryRepository repository, IUserActivityTracker? activityTracker = null)
     {
         _repository = repository;
+        _activityTracker = activityTracker;
     }
 
     public async Task<Result<CreateItemResponse>> Handle(CreateWatchItemCommand request, CancellationToken cancellationToken)
@@ -108,6 +129,23 @@ public class CreateWatchItemCommandHandler : ICommandHandler<CreateWatchItemComm
         );
 
         var response = await _repository.CreateWatchItemAtomicAsync(item, watch, cancellationToken);
+        if (response == null)
+        {
+            return Result.Failure<CreateItemResponse>(Error.Failure("Items.CreateFailed", "No se pudo registrar el reloj en inventario."));
+        }
+
+        if (_activityTracker != null)
+        {
+            await _activityTracker.TrackActivityAsync(
+                actionKey: ActionWeightRegistry.InventoryCreateWatch,
+                category: ActionWeightRegistry.CategoryNewRecord,
+                description: $"Creó Reloj Ref #{response.Reference} - {request.Description} (Caja #{request.CaseNumber})",
+                weightScore: 10,
+                entityName: "Item",
+                entityReference: response.Reference.ToString(),
+                cancellationToken: cancellationToken);
+        }
+
         return Result.Success(response);
     }
 }
@@ -120,10 +158,12 @@ public record DischargeItemCommand(
 public class DischargeItemCommandHandler : ICommandHandler<DischargeItemCommand, bool>
 {
     private readonly IInventoryRepository _repository;
+    private readonly IUserActivityTracker? _activityTracker;
 
-    public DischargeItemCommandHandler(IInventoryRepository repository)
+    public DischargeItemCommandHandler(IInventoryRepository repository, IUserActivityTracker? activityTracker = null)
     {
         _repository = repository;
+        _activityTracker = activityTracker;
     }
 
     public async Task<Result<bool>> Handle(DischargeItemCommand request, CancellationToken cancellationToken)
@@ -137,6 +177,18 @@ public class DischargeItemCommandHandler : ICommandHandler<DischargeItemCommand,
         item.Discharge(request.SaleDate, request.SaleValue);
         await _repository.SaveChangesAsync(cancellationToken);
 
+        if (_activityTracker != null)
+        {
+            await _activityTracker.TrackActivityAsync(
+                actionKey: ActionWeightRegistry.InventoryDischarge,
+                category: ActionWeightRegistry.CategoryDischarge,
+                description: $"Descargó por venta artículo Ref #{item.Reference} (${request.SaleValue:N0})",
+                weightScore: 6,
+                entityName: "Item",
+                entityReference: item.Reference.ToString(),
+                cancellationToken: cancellationToken);
+        }
+
         return Result.Success(true);
     }
 }
@@ -146,10 +198,12 @@ public record ToggleItemActiveCommand(int Reference, bool IsActive) : ICommand<b
 public class ToggleItemActiveCommandHandler : ICommandHandler<ToggleItemActiveCommand, bool>
 {
     private readonly IInventoryRepository _repository;
+    private readonly IUserActivityTracker? _activityTracker;
 
-    public ToggleItemActiveCommandHandler(IInventoryRepository repository)
+    public ToggleItemActiveCommandHandler(IInventoryRepository repository, IUserActivityTracker? activityTracker = null)
     {
         _repository = repository;
+        _activityTracker = activityTracker;
     }
 
     public async Task<Result<bool>> Handle(ToggleItemActiveCommand request, CancellationToken cancellationToken)
@@ -167,6 +221,19 @@ public class ToggleItemActiveCommandHandler : ICommandHandler<ToggleItemActiveCo
         }
 
         await _repository.SaveChangesAsync(cancellationToken);
+
+        if (_activityTracker != null)
+        {
+            await _activityTracker.TrackActivityAsync(
+                actionKey: ActionWeightRegistry.InventoryToggleActive,
+                category: ActionWeightRegistry.CategoryAuditQuick,
+                description: $"{(request.IsActive ? "Activó" : "Desactivó")} artículo Ref #{request.Reference} en auditoría de catálogo",
+                weightScore: 1,
+                entityName: "Item",
+                entityReference: request.Reference.ToString(),
+                cancellationToken: cancellationToken);
+        }
+
         return Result.Success(true);
     }
 }
@@ -195,10 +262,12 @@ public class UpdateJewelItemCommandValidator : AbstractValidator<UpdateJewelItem
 public class UpdateJewelItemCommandHandler : ICommandHandler<UpdateJewelItemCommand, bool>
 {
     private readonly IInventoryRepository _repository;
+    private readonly IUserActivityTracker? _activityTracker;
 
-    public UpdateJewelItemCommandHandler(IInventoryRepository repository)
+    public UpdateJewelItemCommandHandler(IInventoryRepository repository, IUserActivityTracker? activityTracker = null)
     {
         _repository = repository;
+        _activityTracker = activityTracker;
     }
 
     public async Task<Result<bool>> Handle(UpdateJewelItemCommand request, CancellationToken cancellationToken)
@@ -227,6 +296,19 @@ public class UpdateJewelItemCommandHandler : ICommandHandler<UpdateJewelItemComm
         }
 
         await _repository.SaveChangesAsync(cancellationToken);
+
+        if (_activityTracker != null)
+        {
+            await _activityTracker.TrackActivityAsync(
+                actionKey: ActionWeightRegistry.InventoryUpdateJewel,
+                category: ActionWeightRegistry.CategoryUpdate,
+                description: $"Actualizó Joya Ref #{request.Reference} - {request.Description}",
+                weightScore: 4,
+                entityName: "Item",
+                entityReference: request.Reference.ToString(),
+                cancellationToken: cancellationToken);
+        }
+
         return Result.Success(true);
     }
 }
@@ -254,10 +336,12 @@ public class UpdateWatchItemCommandValidator : AbstractValidator<UpdateWatchItem
 public class UpdateWatchItemCommandHandler : ICommandHandler<UpdateWatchItemCommand, bool>
 {
     private readonly IInventoryRepository _repository;
+    private readonly IUserActivityTracker? _activityTracker;
 
-    public UpdateWatchItemCommandHandler(IInventoryRepository repository)
+    public UpdateWatchItemCommandHandler(IInventoryRepository repository, IUserActivityTracker? activityTracker = null)
     {
         _repository = repository;
+        _activityTracker = activityTracker;
     }
 
     public async Task<Result<bool>> Handle(UpdateWatchItemCommand request, CancellationToken cancellationToken)
@@ -285,6 +369,19 @@ public class UpdateWatchItemCommandHandler : ICommandHandler<UpdateWatchItemComm
         }
 
         await _repository.SaveChangesAsync(cancellationToken);
+
+        if (_activityTracker != null)
+        {
+            await _activityTracker.TrackActivityAsync(
+                actionKey: ActionWeightRegistry.InventoryUpdateWatch,
+                category: ActionWeightRegistry.CategoryUpdate,
+                description: $"Actualizó Reloj Ref #{request.Reference} - {request.Description} (Caja #{request.CaseNumber})",
+                weightScore: 4,
+                entityName: "Item",
+                entityReference: request.Reference.ToString(),
+                cancellationToken: cancellationToken);
+        }
+
         return Result.Success(true);
     }
 }
@@ -297,10 +394,12 @@ public record DischargeItemByReferenceCommand(
 public class DischargeItemByReferenceCommandHandler : ICommandHandler<DischargeItemByReferenceCommand, bool>
 {
     private readonly IInventoryRepository _repository;
+    private readonly IUserActivityTracker? _activityTracker;
 
-    public DischargeItemByReferenceCommandHandler(IInventoryRepository repository)
+    public DischargeItemByReferenceCommandHandler(IInventoryRepository repository, IUserActivityTracker? activityTracker = null)
     {
         _repository = repository;
+        _activityTracker = activityTracker;
     }
 
     public async Task<Result<bool>> Handle(DischargeItemByReferenceCommand request, CancellationToken cancellationToken)
@@ -318,6 +417,19 @@ public class DischargeItemByReferenceCommandHandler : ICommandHandler<DischargeI
 
         item.Discharge(request.SaleDate, request.SaleValue);
         await _repository.SaveChangesAsync(cancellationToken);
+
+        if (_activityTracker != null)
+        {
+            await _activityTracker.TrackActivityAsync(
+                actionKey: ActionWeightRegistry.InventoryDischarge,
+                category: ActionWeightRegistry.CategoryDischarge,
+                description: $"Descargó por venta artículo Ref #{request.Reference} (${request.SaleValue:N0})",
+                weightScore: 6,
+                entityName: "Item",
+                entityReference: request.Reference.ToString(),
+                cancellationToken: cancellationToken);
+        }
+
         return Result.Success(true);
     }
 }

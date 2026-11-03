@@ -16,6 +16,23 @@
                     OnClick="@(() => Navigation.NavigateTo("/inventory"))" />
     </SoftHeroHeader>
 
+    @if (!string.IsNullOrEmpty(_lastRegisteredReference))
+    {
+        <div class="row justify-content-center mb-3">
+            <div class="col-12 col-xl-10">
+                <div class="alert alert-success d-flex align-items-center justify-content-between shadow-sm rounded-3 py-2 px-3 border-success-subtle mb-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-check-circle-fill fs-5 text-success"></i>
+                        <span>Reloj registrado exitosamente: <strong>Referencia #@_lastRegisteredReference</strong>. Formulario listo para el siguiente reloj.</span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-link text-success p-0 text-decoration-none" @onclick="() => _lastRegisteredReference = null">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
     <div class="row justify-content-center">
         <div class="col-12 col-xl-10">
             <!-- 1. Marca, Género y Proveedor -->
@@ -173,6 +190,7 @@
     };
 
     private bool _isSubmitting = false;
+    private string? _lastRegisteredReference;
 
     protected override async Task OnInitializedAsync()
     {
@@ -270,14 +288,19 @@
                 return;
             }
 
+            var refText = result.Value.FormattedReference;
+            _lastRegisteredReference = refText;
+            ClearForm();
+
             await ModalService.SuccessAsync(new ConfirmOptions
             {
                 Title = "¡Reloj Registrado Exitosamente!",
-                Content = $"Se ha asignado la Referencia #{result.Value.FormattedReference} al nuevo reloj registrado.",
-                OkText = "Ir al Inventario",
+                Content = $"Se ha asignado la Referencia #{refText} al nuevo reloj registrado. El formulario queda listo para ingresar el siguiente reloj.",
+                OkText = "Registrar Siguiente Reloj",
                 OnOk = (e) =>
                 {
-                    Navigation.NavigateTo("/inventory");
+                    ClearForm();
+                    StateHasChanged();
                     return Task.CompletedTask;
                 }
             });

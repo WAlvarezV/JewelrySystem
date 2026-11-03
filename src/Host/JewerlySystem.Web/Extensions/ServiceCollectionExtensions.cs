@@ -43,6 +43,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITenantConnectionProvider>(sp => sp.GetRequiredService<WebTenantContext>());
 
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IUserActivityTracker, UserActivityService>();
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(UserActivityService).Assembly);
+        });
         services.AddScoped<AuditInterceptor>();
         services.AddDbContext<JewerlyDbContext>((sp, options) =>
         {

@@ -1,0 +1,567 @@
+@page "/audit/productivity"
+@page "/inventory/audit-activity"
+@page "/admin/productivity"
+@attribute [Authorize]
+@using AntDesign
+@using JewerlySystem.Common.Application
+@using JewerlySystem.Common.Domain
+@using JewerlySystem.Common.Infrastructure.Tenant
+@using MediatR
+@inject ISender Sender
+@inject IMessageService Message
+@inject ITenantContext TenantContext
+
+<div class="productivity-dashboard-container">
+    <SoftHeroHeader Title="Monitor de Productividad y Auditoría"
+                    Subtitle="Trazabilidad operativa de registros nuevos, actualizaciones y auditoría física clasificada por esfuerzo"
+                    Icon="bi-speedometer2">
+        <SoftButton Text="Ajustar Ponderaciones"
+                    Icon="sliders"
+                    Type="ButtonType.Dashed"
+                    OnClick="() => _showWeightsModal = true" />
+        <SoftButton Text="Actualizar"
+                    Icon="reload"
+                    Type="ButtonType.Primary"
+                    OnClick="LoadReportAsync" />
+    </SoftHeroHeader>
+
+    <!-- Barra de Filtros y Rango de Fechas -->
+    <div class="filter-card shadow-sm rounded-3 mb-4 p-3 bg-white border">
+        <div class="row g-3 align-items-center">
+            <div class="col-12 col-lg-auto d-flex flex-wrap gap-1">
+                <button type="button" class="btn btn-sm @(_activePreset == "today" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ApplyPreset("today"))">Hoy</button>
+                <button type="button" class="btn btn-sm @(_activePreset == "yesterday" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ApplyPreset("yesterday"))">Ayer</button>
+                <button type="button" class="btn btn-sm @(_activePreset == "week" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ApplyPreset("week"))">Esta Semana</button>
+                <button type="button" class="btn btn-sm @(_activePreset == "month" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ApplyPreset("month"))">Este Mes</button>
+                <button type="button" class="btn btn-sm @(_activePreset == "all" ? "btn-primary" : "btn-outline-secondary")" @onclick="@(() => ApplyPreset("all"))">Todo</button>
+            </div>
+
+            <div class="col-12 col-sm-auto d-flex align-items-center gap-2">
+                <DatePicker TValue="DateTime?" @bind-Value="_dateFrom" Format="yyyy-MM-dd" Style="width: 130px;" />
+                <span class="text-muted small">a</span>
+                <DatePicker TValue="DateTime?" @bind-Value="_dateTo" Format="yyyy-MM-dd" Style="width: 130px;" />
+                <button type="button" class="btn btn-sm btn-outline-primary" @onclick="LoadReportAsync">
+                    <i class="bi bi-funnel"></i> Filtrar
+                </button>
+            </div>
+
+            <div class="col-12 col-sm-auto ms-lg-auto d-flex align-items-center gap-2">
+                <span class="text-muted small fw-semibold">Modo Visualización:</span>
+                <RadioGroup TValue="string" @bind-Value="_viewMode" ButtonStyle="RadioButtonStyle.Solid" OnChange="OnViewModeChanged">
+                    <Radio RadioButton Value="@("weighted")">Puntos Ponderados</Radio>
+                    <Radio RadioButton Value="@("count")">Conteo Operaciones</Radio>
+                </RadioGroup>
+            </div>
+        </div>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="text-center py-5">
+            <Spin Size="SpinSize.Large" Tip="Calculando métricas de productividad y auditoría..." />
+        </div>
+    }
+    else if (_report == null)
+    {
+        <SoftInlineNotice Type="SoftInlineNotice.NoticeType.Warning"
+                          Title="Sin Información"
+                          Message="No se pudieron calcular las métricas para el rango seleccionado." />
+    }
+    else
+    {
+        <!-- 1. Tarjetas KPI Ejecutivas -->
+        <div class="metrics-grid mb-4">
+            <div class="metric-card">
+                <div class="metric-icon bg-primary-subtle text-primary">
+                    <i class="bi bi-trophy"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Puntos Ponderados Totales</span>
+                    <span class="metric-value text-primary">@_report.Summary.TotalWeightedPoints.ToString("N0") pts</span>
+                    <span class="metric-subtext text-muted small">@_report.Summary.TotalActionsCount operaciones totales</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon bg-success-subtle text-success">
+                    <i class="bi bi-gem"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Nuevos Registros</span>
+                    <span class="metric-value text-success">@_report.Summary.TotalNewRecordsCount und</span>
+                    <span class="metric-subtext text-muted small">@_report.Summary.TotalNewRecordsPoints pts (10 pts c/u)</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon bg-info-subtle text-info">
+                    <i class="bi bi-pencil-square"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Actualizaciones Realizadas</span>
+                    <span class="metric-value text-info">@_report.Summary.TotalUpdatesCount und</span>
+                    <span class="metric-subtext text-muted small">@_report.Summary.TotalUpdatesPoints pts (4 pts c/u)</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon bg-warning-subtle text-warning">
+                    <i class="bi bi-check2-circle"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Activaciones / Verificaciones</span>
+                    <span class="metric-value text-warning">@_report.Summary.TotalQuickAuditsCount und</span>
+                    <span class="metric-subtext text-muted small">@_report.Summary.TotalQuickAuditsPoints pts (1 pt c/u)</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon bg-gold-subtle text-warning-emphasis">
+                    <i class="bi bi-award-fill"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Líder del Periodo</span>
+                    <span class="metric-value text-truncate" title="@_report.Summary.TopPerformerName">
+                        @GetShortUserName(_report.Summary.TopPerformerName)
+                    </span>
+                    <span class="metric-subtext text-muted small">@_report.Summary.TopPerformerPoints pts aportados</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Gráficos Analíticos Visuales (2 Columnas) -->
+        <div class="row g-4 mb-4">
+            <!-- Gráfico Comparativo por Colaborador -->
+            <div class="col-12 col-xl-8">
+                <div class="section-card p-3 shadow-sm rounded-3 bg-white border h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-bar-chart-line text-primary fs-5"></i>
+                            <h6 class="fw-bold mb-0">Rendimiento Comparativo por Colaborador</h6>
+                        </div>
+                        <SoftTag Color="blue">@_barChartItems.Count Colaboradores</SoftTag>
+                    </div>
+                    <SoftBarChart Items="@_barChartItems" MetricSuffix="@(_viewMode == "weighted" ? "pts" : "ops")" />
+                </div>
+            </div>
+
+            <!-- Gráfico Donut de Distribución del Esfuerzo -->
+            <div class="col-12 col-xl-4">
+                <div class="section-card p-3 shadow-sm rounded-3 bg-white border h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-pie-chart text-success fs-5"></i>
+                            <h6 class="fw-bold mb-0">Distribución de Carga de Trabajo</h6>
+                        </div>
+                        <SoftTag Color="green">Global</SoftTag>
+                    </div>
+                    <SoftDonutChart Slices="@_donutSlices"
+                                    CenterValue="@(_viewMode == "weighted" ? _report.Summary.TotalWeightedPoints.ToString("N0") : _report.Summary.TotalActionsCount.ToString("N0"))"
+                                    CenterTitle="@(_viewMode == "weighted" ? "Puntos Totales" : "Operaciones")" />
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Tabla Detallada por Colaborador -->
+        <div class="section-card p-3 shadow-sm rounded-3 bg-white border mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-people text-dark fs-5"></i>
+                    <h5 class="fw-bold mb-0">Detalle de Actividad y Ponderaciones por Usuario</h5>
+                </div>
+                <div class="text-muted small">
+                    Mostrando @_report.UserPerformances.Count colaboradores activos
+                </div>
+            </div>
+
+            <Table TItem="UserPerformanceDto"
+                   DataSource="@_report.UserPerformances"
+                   Responsive="true"
+                   Size="TableSize.Middle">
+                <PropertyColumn Property="c => c.UserName" Title="Colaborador">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="user-avatar-circle">@GetInitials(context.UserName)</span>
+                        <div>
+                            <div class="fw-semibold text-dark">@context.UserName</div>
+                            <div class="text-muted small">Participación: @context.TeamSharePercent.ToString("F1")%</div>
+                        </div>
+                    </div>
+                </PropertyColumn>
+
+                <PropertyColumn Property="c => c.TotalPoints" Title="Puntos Ponderados">
+                    <div style="min-width: 140px;">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold fs-6 text-primary">@context.TotalPoints.ToString("N0") pts</span>
+                            <span class="text-muted small">@context.TotalActions ops</span>
+                        </div>
+                        <Progress Percent="@context.TeamSharePercent" ShowInfo="false" StrokeColor="@("#701C2C")" Size="ProgressSize.Small" />
+                    </div>
+                </PropertyColumn>
+
+                <PropertyColumn Property="c => c.NewRecordsCount" Title="Nuevos Registros">
+                    <div>
+                        <span class="badge bg-success-subtle text-success px-2 py-1 rounded-pill fw-bold">
+                            <i class="bi bi-plus-circle me-1"></i>@context.NewRecordsCount und
+                        </span>
+                        <div class="text-muted small mt-1">@context.NewRecordsPoints pts</div>
+                    </div>
+                </PropertyColumn>
+
+                <PropertyColumn Property="c => c.UpdatesCount" Title="Actualizaciones">
+                    <div>
+                        <span class="badge bg-info-subtle text-info px-2 py-1 rounded-pill fw-bold">
+                            <i class="bi bi-pencil me-1"></i>@context.UpdatesCount und
+                        </span>
+                        <div class="text-muted small mt-1">@context.UpdatesPoints pts</div>
+                    </div>
+                </PropertyColumn>
+
+                <PropertyColumn Property="c => c.QuickAuditsCount" Title="Activaciones en Lista">
+                    <div>
+                        <span class="badge bg-warning-subtle text-warning px-2 py-1 rounded-pill fw-bold">
+                            <i class="bi bi-check2-circle me-1"></i>@context.QuickAuditsCount und
+                        </span>
+                        <div class="text-muted small mt-1">@context.QuickAuditsPoints pts</div>
+                    </div>
+                </PropertyColumn>
+
+                <PropertyColumn Property="c => c.DischargesCount" Title="Descargos / Bajas">
+                    <div>
+                        <span class="badge bg-danger-subtle text-danger px-2 py-1 rounded-pill fw-bold">
+                            <i class="bi bi-arrow-down-left-square me-1"></i>@context.DischargesCount und
+                        </span>
+                        <div class="text-muted small mt-1">@context.DischargesPoints pts</div>
+                    </div>
+                </PropertyColumn>
+
+                <PropertyColumn Property="c => c.LastActivityAt" Title="Última Acción">
+                    <span class="text-muted small">
+                        @(context.LastActivityAt?.ToLocalTime().ToString("dd/MM/yyyy hh:mm tt") ?? "N/A")
+                    </span>
+                </PropertyColumn>
+
+                <ActionColumn Title="Trazabilidad">
+                    <button type="button" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1 rounded-pill px-3"
+                            @onclick="@(() => OpenUserDrawer(context))">
+                        <i class="bi bi-journal-text"></i> Bitácora
+                    </button>
+                </ActionColumn>
+            </Table>
+        </div>
+    }
+</div>
+
+<!-- Drawer de Trazabilidad Segundo a Segundo -->
+@if (_selectedUser != null)
+{
+    <SoftDrawer IsOpen="@_isDrawerOpen"
+                Title="@($"Bitácora de Auditoría: {_selectedUser.UserName}")"
+                Subtitle="Historial cronológico de eventos registrados en el periodo"
+                Icon="bi bi-clock-history"
+                Width="540"
+                OnClose="@(() => _isDrawerOpen = false)">
+        
+        <div class="user-drawer-stats p-3 bg-light rounded-3 mb-3 border">
+            <div class="row g-2 text-center">
+                <div class="col-4">
+                    <div class="text-muted small">Puntos Totales</div>
+                    <div class="fw-bold fs-5 text-primary">@_selectedUser.TotalPoints pts</div>
+                </div>
+                <div class="col-4">
+                    <div class="text-muted small">Nuevos Registros</div>
+                    <div class="fw-bold fs-5 text-success">@_selectedUser.NewRecordsCount und</div>
+                </div>
+                <div class="col-4">
+                    <div class="text-muted small">Activaciones</div>
+                    <div class="fw-bold fs-5 text-warning">@_selectedUser.QuickAuditsCount und</div>
+                </div>
+            </div>
+        </div>
+
+        @{
+            var userLogs = _report?.RecentLogs.Where(l => l.UserName == _selectedUser.UserName).ToList() ?? [];
+        }
+
+        @if (!userLogs.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-inbox fs-2 d-block mb-2 opacity-50"></i>
+                No hay eventos detallados registrados en la bitácora para este usuario.
+            </div>
+        }
+        else
+        {
+            <Timeline Mode="TimelineMode.Left">
+                @foreach (var log in userLogs)
+                {
+                    <TimelineItem Color="@GetTimelineColor(log.Category)">
+                        <div class="timeline-log-item mb-2">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <span class="fw-bold text-dark small">
+                                    <i class="bi @log.Icon me-1" style="color: @log.ColorHex;"></i>
+                                    @log.ActionName
+                                </span>
+                                <span class="badge" style="background-color: @log.ColorHex; color: #fff;">
+                                    +@log.WeightScore pts
+                                </span>
+                            </div>
+                            <div class="timeline-desc text-secondary small mt-1">
+                                @log.Description
+                            </div>
+                            <div class="timeline-time text-muted small mt-1" style="font-size: 0.75rem;">
+                                <i class="bi bi-clock me-1"></i>@log.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy hh:mm:ss tt")
+                                @if (!string.IsNullOrEmpty(log.EntityReference))
+                                {
+                                    <span class="ms-2 badge bg-light text-dark border">Ref #@(log.EntityReference)</span>
+                                }
+                            </div>
+                        </div>
+                    </TimelineItem>
+                }
+            </Timeline>
+        }
+    </SoftDrawer>
+}
+
+<!-- Modal de Configuración y Simulación de Ponderaciones -->
+<Modal Title="@("Configuración de Ponderaciones de Esfuerzo")"
+       Visible="@_showWeightsModal"
+       OnOk="ApplyCustomWeights"
+       OnCancel="() => _showWeightsModal = false"
+       OkText="@("Aplicar y Recalcular")"
+       CancelText="@("Cerrar")"
+       Width="680">
+    <div class="p-2">
+        <p class="text-muted small mb-3">
+            Ajusta los puntos asignados a cada acción para evaluar la productividad según la complejidad operativa requerida en tienda:
+        </p>
+
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle">
+                <thead>
+                    <tr class="table-light small">
+                        <th>Acción Operativa</th>
+                        <th>Categoría</th>
+                        <th>Icono</th>
+                        <th style="width: 120px;">Puntos (Peso)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var def in ActionWeightRegistry.Definitions.Values)
+                    {
+                        var weightVal = _customWeights.GetValueOrDefault(def.ActionKey, def.DefaultWeight);
+                        <tr>
+                            <td>
+                                <div class="fw-semibold text-dark">@def.DisplayName</div>
+                                <div class="text-muted small">@def.ActionKey</div>
+                            </td>
+                            <td>
+                                <SoftTag Color="blue">@def.Category</SoftTag>
+                            </td>
+                            <td>
+                                <i class="bi @def.Icon fs-5" style="color: @def.ColorHex;"></i>
+                            </td>
+                            <td>
+                                <AntDesign.InputNumber TValue="int"
+                                                       Min="0"
+                                                       Max="100"
+                                                       Value="@weightVal"
+                                                       ValueChanged="@((int val) => _customWeights[def.ActionKey] = val)"
+                                                       Size="InputSize.Small" />
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+            <span class="text-muted small">Los cambios se aplicarán inmediatamente a la vista actual.</span>
+            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="ResetWeights">
+                <i class="bi bi-arrow-counterclockwise"></i> Restablecer por Defecto
+            </button>
+        </div>
+    </div>
+</Modal>
+
+@code {
+    private DateTime? _dateFrom;
+    private DateTime? _dateTo;
+    private string _activePreset = "month";
+    private string _viewMode = "weighted";
+    private bool _isLoading = true;
+    private UserProductivityReportDto? _report;
+    private UserPerformanceDto? _selectedUser;
+    private bool _isDrawerOpen;
+    private bool _showWeightsModal;
+
+    private Dictionary<string, int> _customWeights = new(StringComparer.OrdinalIgnoreCase);
+    private List<SoftBarChart.BarChartItem> _barChartItems = [];
+    private List<SoftDonutChart.DonutSlice> _donutSlices = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        ApplyPreset("month", reload: false);
+        InitCustomWeights();
+        await LoadReportAsync();
+    }
+
+    private void InitCustomWeights()
+    {
+        _customWeights.Clear();
+        foreach (var (key, def) in ActionWeightRegistry.Definitions)
+        {
+            _customWeights[key] = def.DefaultWeight;
+        }
+    }
+
+    private void ApplyPreset(string preset, bool reload = true)
+    {
+        _activePreset = preset;
+        var now = DateTime.UtcNow;
+
+        switch (preset)
+        {
+            case "today":
+                _dateFrom = now.Date;
+                _dateTo = now.Date.AddDays(1).AddTicks(-1);
+                break;
+            case "yesterday":
+                _dateFrom = now.Date.AddDays(-1);
+                _dateTo = now.Date.AddTicks(-1);
+                break;
+            case "week":
+                var diff = (7 + (now.DayOfWeek - DayOfWeek.Monday)) % 7;
+                _dateFrom = now.Date.AddDays(-diff);
+                _dateTo = now;
+                break;
+            case "month":
+                _dateFrom = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+                _dateTo = now;
+                break;
+            case "all":
+                _dateFrom = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                _dateTo = now;
+                break;
+        }
+
+        if (reload)
+        {
+            _ = LoadReportAsync();
+        }
+    }
+
+    private async Task LoadReportAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            var query = new GetUserProductivityQuery(
+                DateFrom: _dateFrom,
+                DateTo: _dateTo,
+                CustomWeights: _customWeights);
+
+            var result = await Sender.Send(query);
+            if (result.IsSuccess)
+            {
+                _report = result.Value;
+                BuildChartData();
+            }
+            else
+            {
+                Message.Error(result.Error.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            Message.Error($"Error al consultar datos de productividad: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void BuildChartData()
+    {
+        if (_report == null) return;
+
+        // 1. Gráfico de Barras por Usuario
+        _barChartItems = _report.UserPerformances.Select(u =>
+        {
+            var total = _viewMode == "weighted" ? u.TotalPoints : u.TotalActions;
+            var newRecords = _viewMode == "weighted" ? u.NewRecordsPoints : u.NewRecordsCount;
+            var updates = _viewMode == "weighted" ? u.UpdatesPoints : u.UpdatesCount;
+            var audits = _viewMode == "weighted" ? u.QuickAuditsPoints : u.QuickAuditsCount;
+            var others = total - (newRecords + updates + audits);
+            if (others < 0) others = 0;
+
+            return new SoftBarChart.BarChartItem(
+                Label: u.UserName,
+                TotalValue: total,
+                NewValue: newRecords,
+                UpdateValue: updates,
+                AuditValue: audits,
+                OtherValue: others
+            );
+        }).ToList();
+
+        // 2. Gráfico Donut de Distribución
+        _donutSlices = _report.ActionDistribution.Select(d => new SoftDonutChart.DonutSlice(
+            Label: d.DisplayName,
+            Value: _viewMode == "weighted" ? d.TotalPoints : d.TotalCount,
+            ColorHex: d.ColorHex,
+            Percentage: d.PercentageOfPoints,
+            Icon: d.Icon
+        )).ToList();
+    }
+
+    private void OnViewModeChanged(string val)
+    {
+        _viewMode = val;
+        BuildChartData();
+    }
+
+    private void OpenUserDrawer(UserPerformanceDto user)
+    {
+        _selectedUser = user;
+        _isDrawerOpen = true;
+    }
+
+    private async Task ApplyCustomWeights()
+    {
+        _showWeightsModal = false;
+        await LoadReportAsync();
+        Message.Success("Ponderaciones aplicadas correctamente.");
+    }
+
+    private void ResetWeights()
+    {
+        InitCustomWeights();
+    }
+
+    private static string GetShortUserName(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName)) return "N/A";
+        if (fullName.Contains('@')) return fullName.Split('@')[0];
+        return fullName;
+    }
+
+    private static string GetInitials(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "?";
+        var parts = name.Split(new[] { ' ', '@', '.' }, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2)
+            return $"{char.ToUpper(parts[0][0])}{char.ToUpper(parts[1][0])}";
+        return name.Substring(0, Math.Min(2, name.Length)).ToUpperInvariant();
+    }
+
+    private static string GetTimelineColor(string category) => category switch
+    {
+        ActionWeightRegistry.CategoryNewRecord => "green",
+        ActionWeightRegistry.CategoryUpdate => "blue",
+        ActionWeightRegistry.CategoryAuditQuick => "gold",
+        ActionWeightRegistry.CategoryDischarge => "red",
+        _ => "gray"
+    };
+}

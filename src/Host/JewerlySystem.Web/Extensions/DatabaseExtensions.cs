@@ -35,6 +35,7 @@ public static class DatabaseExtensions
 
                 await using var tenantDb = new JewerlyDbContext(optionsBuilder.Options);
                 await tenantDb.Database.EnsureCreatedAsync();
+                await EnsureUserActivityLogsTableAsync(tenantDb, logger);
 
                 // 3. Seed navigation modules and security
                 if (tenant.Id == "pomona")
@@ -155,7 +156,9 @@ public static class DatabaseExtensions
                     new MenuItem { Id = Guid.Parse("66666666-6666-6666-6666-666666666671"), ModuleKey = "ADMIN", Name = "Menús de Navegación", Route = "/admin/menus", Icon = "bi-menu-button-wide-fill", Order = 5, IsActive = true },
                     new MenuItem { Id = Guid.Parse("66666666-6666-6666-6666-666666666660"), ModuleKey = "ADMIN", Name = "Mi Perfil", Route = "/profile", Icon = "bi-person-circle", Order = 0, IsActive = true },
                     new MenuItem { Id = Guid.Parse("66666666-6666-6666-6666-666666666672"), ModuleKey = "ADMIN", Name = "Seguridad & Passkeys", Route = "/auth/passkeys", Icon = "bi-shield-lock-fill", Order = 6, IsActive = true },
-                    new MenuItem { Id = Guid.Parse("66666666-6666-6666-6666-666666666673"), ModuleKey = "ADMIN", Name = "Autenticador Móvil (MFA)", Route = "/auth/mfa", Icon = "bi-phone", Order = 7, IsActive = true }
+                    new MenuItem { Id = Guid.Parse("66666666-6666-6666-6666-666666666673"), ModuleKey = "ADMIN", Name = "Autenticador Móvil (MFA)", Route = "/auth/mfa", Icon = "bi-phone", Order = 7, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("22222222-2222-2222-2222-222222222228"), ModuleKey = "INVENTORY", Name = "Auditoría de Actividad", Route = "/inventory/audit-activity", Icon = "bi-graph-up-arrow", Order = 6, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("66666666-6666-6666-6666-666666666668"), ModuleKey = "ADMIN", Name = "Productividad y Auditoría", Route = "/audit/productivity", Icon = "bi-speedometer2", Order = 8, IsActive = true }
                 );
                 await oroPlataDb.SaveChangesAsync();
             }
@@ -377,6 +380,36 @@ public static class DatabaseExtensions
         catch (Exception ex)
         {
             logger.LogWarning(ex, "No se pudo ejecutar DeactivateInitialInventoryOnceAsync en tenant '{TenantId}'.", tenantId);
+        }
+    }
+
+    private static async Task EnsureUserActivityLogsTableAsync(JewerlyDbContext tenantDb, ILogger logger)
+    {
+        try
+        {
+            await tenantDb.Database.ExecuteSqlRawAsync(@"
+                CREATE TABLE IF NOT EXISTS ""UserActivityLogs"" (
+                    ""Id"" BIGSERIAL PRIMARY KEY,
+                    ""TenantId"" VARCHAR(50) NOT NULL,
+                    ""UserId"" VARCHAR(450) NOT NULL,
+                    ""UserName"" VARCHAR(256) NOT NULL,
+                    ""ModuleKey"" VARCHAR(50) NOT NULL,
+                    ""ActionKey"" VARCHAR(100) NOT NULL,
+                    ""Category"" VARCHAR(100) NOT NULL,
+                    ""Description"" VARCHAR(500) NOT NULL,
+                    ""WeightScore"" INT NOT NULL,
+                    ""EntityName"" VARCHAR(100) NOT NULL,
+                    ""EntityReference"" VARCHAR(100),
+                    ""CreatedAt"" TIMESTAMP WITHOUT TIME ZONE NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS ""IX_UserActivityLogs_TenantId_CreatedAt"" ON ""UserActivityLogs"" (""TenantId"", ""CreatedAt"" DESC);
+                CREATE INDEX IF NOT EXISTS ""IX_UserActivityLogs_TenantId_UserId_CreatedAt"" ON ""UserActivityLogs"" (""TenantId"", ""UserId"", ""CreatedAt"" DESC);
+                CREATE INDEX IF NOT EXISTS ""IX_UserActivityLogs_TenantId_ActionKey"" ON ""UserActivityLogs"" (""TenantId"", ""ActionKey"");
+            ");
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Could not ensure UserActivityLogs table exists: {Message}", ex.Message);
         }
     }
 }

@@ -1,0 +1,89 @@
+@namespace JewerlySystem.Common.Presentation.Components.Molecules
+
+<div class="soft-bar-chart-container">
+    @if (Items == null || !Items.Any())
+    {
+        <div class="text-center py-4 text-muted small">
+            <i class="bi bi-bar-chart fs-3 d-block mb-1 opacity-50"></i>
+            Sin actividad para graficar en el rango seleccionado
+        </div>
+    }
+    else
+    {
+        <div class="soft-bar-chart-legend mb-3 d-flex flex-wrap gap-3">
+            <span class="legend-item"><span class="legend-dot bg-new-record"></span> Registros Nuevos</span>
+            <span class="legend-item"><span class="legend-dot bg-update"></span> Actualizaciones</span>
+            <span class="legend-item"><span class="legend-dot bg-audit"></span> Activaciones en Lista</span>
+            <span class="legend-item"><span class="legend-dot bg-other"></span> Otras Acciones</span>
+        </div>
+
+        <div class="bar-rows d-flex flex-column gap-3">
+            @{
+                var maxValue = Items.Max(x => x.TotalValue);
+                if (maxValue <= 0) maxValue = 1;
+            }
+            @foreach (var item in Items)
+            {
+                var percentWidth = Math.Min(100, Math.Max(3, (double)item.TotalValue / maxValue * 100));
+                <div class="bar-row">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <div class="bar-user-info d-flex align-items-center gap-2">
+                            <span class="bar-avatar">@GetInitials(item.Label)</span>
+                            <span class="bar-user-name fw-semibold text-truncate" title="@item.Label">@item.Label</span>
+                        </div>
+                        <div class="bar-metrics text-end">
+                            <span class="bar-total-badge">@item.TotalValue.ToString("N0") @MetricSuffix</span>
+                        </div>
+                    </div>
+
+                    <div class="bar-track">
+                        <div class="bar-fill-segmented" style="width: @percentWidth.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)%;">
+                            @if (item.NewValue > 0)
+                            {
+                                var segPct = (double)item.NewValue / item.TotalValue * 100;
+                                <div class="bar-segment seg-new" style="width: @segPct.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)%;" title="Nuevos: @item.NewValue @MetricSuffix"></div>
+                            }
+                            @if (item.UpdateValue > 0)
+                            {
+                                var segPct = (double)item.UpdateValue / item.TotalValue * 100;
+                                <div class="bar-segment seg-update" style="width: @segPct.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)%;" title="Actualizaciones: @item.UpdateValue @MetricSuffix"></div>
+                            }
+                            @if (item.AuditValue > 0)
+                            {
+                                var segPct = (double)item.AuditValue / item.TotalValue * 100;
+                                <div class="bar-segment seg-audit" style="width: @segPct.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)%;" title="Activaciones: @item.AuditValue @MetricSuffix"></div>
+                            }
+                            @if (item.OtherValue > 0)
+                            {
+                                var segPct = (double)item.OtherValue / item.TotalValue * 100;
+                                <div class="bar-segment seg-other" style="width: @segPct.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)%;" title="Otras operaciones: @item.OtherValue @MetricSuffix"></div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    public record BarChartItem(
+        string Label,
+        int TotalValue,
+        int NewValue,
+        int UpdateValue,
+        int AuditValue,
+        int OtherValue = 0);
+
+    [Parameter] public IReadOnlyList<BarChartItem> Items { get; set; } = [];
+    [Parameter] public string MetricSuffix { get; set; } = "pts";
+
+    private static string GetInitials(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "?";
+        var parts = name.Split(new[] { ' ', '@', '.' }, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2)
+            return $"{char.ToUpper(parts[0][0])}{char.ToUpper(parts[1][0])}";
+        return name.Substring(0, Math.Min(2, name.Length)).ToUpperInvariant();
+    }
+}

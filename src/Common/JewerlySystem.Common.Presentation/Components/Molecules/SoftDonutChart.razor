@@ -1,0 +1,79 @@
+@namespace JewerlySystem.Common.Presentation.Components.Molecules
+
+<div class="soft-donut-chart-container text-center">
+    @if (Slices == null || !Slices.Any() || Slices.All(s => s.Value <= 0))
+    {
+        <div class="text-center py-4 text-muted small">
+            <i class="bi bi-pie-chart fs-3 d-block mb-1 opacity-50"></i>
+            Sin distribución de acciones en este periodo
+        </div>
+    }
+    else
+    {
+        <div class="donut-svg-wrapper mb-3">
+            <svg viewBox="0 0 160 160" class="donut-svg" width="180" height="180">
+                <circle cx="80" cy="80" r="54" class="donut-track" />
+                @{
+                    const double circumference = 339.292; // 2 * PI * 54
+                    double accumulatedOffset = 0;
+                    var total = Slices.Sum(s => (double)s.Value);
+                    if (total <= 0) total = 1;
+                }
+                @foreach (var slice in Slices.Where(s => s.Value > 0))
+                {
+                    var slicePct = (double)slice.Value / total;
+                    var arcLength = slicePct * circumference;
+                    var dashArray = $"{arcLength.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)} {circumference.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}";
+                    var offset = (-accumulatedOffset).ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+                    accumulatedOffset += arcLength;
+
+                    <circle cx="80" cy="80" r="54"
+                            class="donut-segment"
+                            stroke="@slice.ColorHex"
+                            stroke-dasharray="@dashArray"
+                            stroke-dashoffset="@offset" />
+                }
+                <!-- Center Info -->
+                <text x="80" y="75" text-anchor="middle" class="donut-center-val">@CenterValue</text>
+                <text x="80" y="93" text-anchor="middle" class="donut-center-lbl">@CenterTitle</text>
+            </svg>
+        </div>
+
+        <div class="donut-legend text-start">
+            <div class="d-flex flex-column gap-2">
+                @foreach (var slice in Slices.Where(s => s.Value > 0).Take(6))
+                {
+                    <div class="d-flex align-items-center justify-content-between small">
+                        <div class="d-flex align-items-center gap-2 overflow-hidden text-truncate">
+                            <span class="legend-color-box" style="background-color: @slice.ColorHex;"></span>
+                            <span class="text-truncate text-secondary" title="@slice.Label">
+                                @if (!string.IsNullOrEmpty(slice.Icon))
+                                {
+                                    <i class="bi @slice.Icon me-1"></i>
+                                }
+                                @slice.Label
+                            </span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-2">
+                            <span class="fw-semibold text-dark">@slice.Value.ToString("N0")</span>
+                            <span class="badge bg-light text-muted border">@slice.Percentage.ToString("F1")%</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    public record DonutSlice(
+        string Label,
+        int Value,
+        string ColorHex,
+        double Percentage,
+        string Icon = "");
+
+    [Parameter] public IReadOnlyList<DonutSlice> Slices { get; set; } = [];
+    [Parameter] public string CenterValue { get; set; } = "0";
+    [Parameter] public string CenterTitle { get; set; } = "Total";
+}

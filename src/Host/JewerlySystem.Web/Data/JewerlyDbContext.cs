@@ -1,3 +1,4 @@
+using JewerlySystem.Common.Domain;
 using JewerlySystem.Modules.Auth.Domain;
 using JewerlySystem.Modules.Auth.Infrastructure;
 using JewerlySystem.Modules.Cash.Domain;
@@ -37,6 +38,9 @@ public class JewerlyDbContext : IdentityDbContext<ApplicationUser>
     // Invoicing
     public DbSet<Invoice> Invoices => Set<Invoice>();
 
+    // Audit & Activity Logs
+    public DbSet<UserActivityLog> UserActivityLogs => Set<UserActivityLog>();
+
     public JewerlyDbContext(DbContextOptions<JewerlyDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -50,5 +54,25 @@ public class JewerlyDbContext : IdentityDbContext<ApplicationUser>
         builder.ApplyConfigurationsFromAssembly(typeof(Modules.Cash.Infrastructure.DailyRecordConfig).Assembly);
         builder.ApplyConfigurationsFromAssembly(typeof(Modules.Customers.Infrastructure.PersonConfig).Assembly);
         builder.ApplyConfigurationsFromAssembly(typeof(Modules.Invoicing.Infrastructure.InvoiceConfig).Assembly);
+
+        builder.Entity<UserActivityLog>(b =>
+        {
+            b.ToTable("UserActivityLogs");
+            b.HasKey(x => x.Id);
+            b.Property(x => x.Id).ValueGeneratedOnAdd();
+            b.Property(x => x.TenantId).HasMaxLength(50).IsRequired();
+            b.Property(x => x.UserId).HasMaxLength(450).IsRequired();
+            b.Property(x => x.UserName).HasMaxLength(256).IsRequired();
+            b.Property(x => x.ModuleKey).HasMaxLength(50).IsRequired();
+            b.Property(x => x.ActionKey).HasMaxLength(100).IsRequired();
+            b.Property(x => x.Category).HasMaxLength(100).IsRequired();
+            b.Property(x => x.Description).HasMaxLength(500).IsRequired();
+            b.Property(x => x.EntityName).HasMaxLength(100).IsRequired();
+            b.Property(x => x.EntityReference).HasMaxLength(100);
+
+            b.HasIndex(x => new { x.TenantId, x.CreatedAt });
+            b.HasIndex(x => new { x.TenantId, x.UserId, x.CreatedAt });
+            b.HasIndex(x => new { x.TenantId, x.ActionKey });
+        });
     }
 }

@@ -1,4 +1,5 @@
 using FluentValidation.TestHelper;
+using JewerlySystem.Common.Domain;
 using JewerlySystem.Modules.Inventory.Application;
 using JewerlySystem.Modules.Inventory.Application.Commands;
 using JewerlySystem.Modules.Inventory.Application.DTOs;
@@ -238,5 +239,64 @@ public class InventoryTests
         // Assert
         Assert.True(result.IsFailure);
         Assert.Equal("Items.NotFound", result.Error.Code);
+    }
+
+    [Fact]
+    public async Task ToggleItemActiveCommandHandler_ShouldTrackActivity_WithWeight1()
+    {
+        // Arrange
+        var repository = Substitute.For<IInventoryRepository>();
+        var tracker = Substitute.For<JewerlySystem.Common.Application.IUserActivityTracker>();
+        var item = new Item(reference: 555, costValue: 50_000, dateOfEntry: DateTime.UtcNow, description: "Pulsera", itemTypeId: 1) { Active = false };
+        repository.GetItemByReferenceAsync(555, Arg.Any<CancellationToken>()).Returns(item);
+        var handler = new ToggleItemActiveCommandHandler(repository, tracker);
+
+        // Act
+        var result = await handler.Handle(new ToggleItemActiveCommand(555, true), CancellationToken.None);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        await tracker.Received(1).TrackActivityAsync(
+            actionKey: ActionWeightRegistry.InventoryToggleActive,
+            category: ActionWeightRegistry.CategoryAuditQuick,
+            description: Arg.Any<string>(),
+            weightScore: 1,
+            entityName: "Item",
+            entityReference: "555",
+            cancellationToken: Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task CreateJewelItemCommandHandler_ShouldTrackActivity_WithWeight10()
+    {
+        // Arrange
+        var repository = Substitute.For<IInventoryRepository>();
+        var tracker = Substitute.For<JewerlySystem.Common.Application.IUserActivityTracker>();
+        repository.CreateJewelItemAtomicAsync(Arg.Any<Item>(), Arg.Any<Jewel>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new CreateItemResponse(100, 777)));
+
+        var handler = new CreateJewelItemCommandHandler(repository, tracker);
+        var command = new CreateJewelItemCommand(
+            CostValue: 150_000,
+            DateOfEntry: DateTime.UtcNow,
+            Description: "Cadena Figaro 18k",
+            ItemTypeId: 1,
+            Weight: 7.5,
+            GramValue: 260_000
+        );
+
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        await tracker.Received(1).TrackActivityAsync(
+            actionKey: ActionWeightRegistry.InventoryCreateJewel,
+            category: ActionWeightRegistry.CategoryNewRecord,
+            description: Arg.Any<string>(),
+            weightScore: 10,
+            entityName: "Item",
+            entityReference: "777",
+            cancellationToken: Arg.Any<CancellationToken>());
     }
 }

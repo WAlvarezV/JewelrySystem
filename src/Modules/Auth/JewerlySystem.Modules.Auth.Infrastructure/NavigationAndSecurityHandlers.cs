@@ -155,6 +155,36 @@ public class NavigationAndSecurityHandlers :
                 });
                 await _dbContext.SaveChangesAsync(ct);
             }
+
+            if (!await _dbContext.MenuItems.AnyAsync(m => m.Route == "/inventory/audit-activity", ct))
+            {
+                _dbContext.MenuItems.Add(new()
+                {
+                    Id = Guid.Parse("22222222-2222-2222-2222-222222222228"),
+                    ModuleKey = "INVENTORY",
+                    Name = "Auditoría de Actividad",
+                    Route = "/inventory/audit-activity",
+                    Icon = "bi-graph-up-arrow",
+                    Order = 6,
+                    IsActive = true
+                });
+                await _dbContext.SaveChangesAsync(ct);
+            }
+
+            if (!await _dbContext.MenuItems.AnyAsync(m => m.Route == "/audit/productivity", ct))
+            {
+                _dbContext.MenuItems.Add(new()
+                {
+                    Id = Guid.Parse("66666666-6666-6666-6666-666666666668"),
+                    ModuleKey = "ADMIN",
+                    Name = "Productividad y Auditoría",
+                    Route = "/audit/productivity",
+                    Icon = "bi-speedometer2",
+                    Order = 8,
+                    IsActive = true
+                });
+                await _dbContext.SaveChangesAsync(ct);
+            }
         }
 
         // 2. Ensure default roles exist including 'Admin'
@@ -277,7 +307,7 @@ public class NavigationAndSecurityHandlers :
 
                         var allowedModuleKeys = await _dbContext.MenuItems
                             .AsNoTracking()
-                            .Where(m => m.Route == "/profile" || allowedRoutes.Contains(m.Route))
+                            .Where(m => m.Route == "/profile" || m.Route == "/audit/productivity" || m.Route == "/inventory/audit-activity" || allowedRoutes.Contains(m.Route))
                             .Select(m => m.ModuleKey)
                             .Distinct()
                             .ToListAsync(cancellationToken);
@@ -335,8 +365,8 @@ public class NavigationAndSecurityHandlers :
                             .Select(p => p.MenuRoute)
                             .ToListAsync(cancellationToken);
 
-                        // Profile is always allowed for any authenticated user
-                        allItems = allItems.Where(m => m.Route == "/profile" || allowedRoutes.Contains(m.Route, StringComparer.OrdinalIgnoreCase)).ToList();
+                        // Profile and productivity/audit menus are always visible to all roles
+                        allItems = allItems.Where(m => m.Route == "/profile" || m.Route == "/audit/productivity" || m.Route == "/inventory/audit-activity" || allowedRoutes.Contains(m.Route, StringComparer.OrdinalIgnoreCase)).ToList();
                     }
                 }
             }

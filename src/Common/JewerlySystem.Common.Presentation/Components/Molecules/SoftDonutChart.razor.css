@@ -1,0 +1,51 @@
+.soft-donut-chart-container {
+    width: 100%;
+}
+
+.donut-svg-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.donut-svg {
+    transform: rotate(-90deg);
+}
+
+.donut-track {
+    fill: none;
+    stroke: #F3F4F6;
+    stroke-width: 14;
+}
+
+.donut-segment {
+    fill: none;
+    stroke-width: 14;
+    transition: stroke-dashoffset 0.4s ease, stroke-dasharray 0.4s ease;
+}
+
+.donut-center-val {
+    transform: rotate(90deg);
+    transform-origin: 80px 80px;
+    font-size: 1.25rem;
+    font-weight: 800;
+    fill: #111827;
+}
+
+.donut-center-lbl {
+    transform: rotate(90deg);
+    transform-origin: 80px 80px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    fill: #6B7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.legend-color-box {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    display: inline-block;
+    flex-shrink: 0;
+}
