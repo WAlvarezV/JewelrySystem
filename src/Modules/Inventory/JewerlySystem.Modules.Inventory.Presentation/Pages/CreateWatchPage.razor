@@ -39,7 +39,16 @@
                 </div>
 
                 <div class="row g-3">
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-4">
+                        <SoftTooltipLabel Label="N° de Referencia" Required="true" TooltipText="Número físico o código de inventario del reloj" />
+                        <AntDesign.InputNumber TValue="int?"
+                                               @bind-Value="_formModel.Reference"
+                                               Min="1"
+                                               Placeholder="Ej. 3363"
+                                               Style="width: 100%; font-weight: bold; font-size: 1.05rem;" />
+                    </div>
+
+                    <div class="col-12 col-md-4">
                         <SoftTooltipLabel Label="Marca del Reloj" Required="true" TooltipText="Fabricante o marca registrada del reloj" />
                         <Select TItem="BrandDto"
                                 TItemValue="int"
@@ -51,7 +60,7 @@
                                 Placeholder="Seleccione marca..." />
                     </div>
 
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-4">
                         <SoftTooltipLabel Label="Proveedor / Origen" TooltipText="Origen o proveedor de la pieza" />
                         <Select TItem="JewerlySystem.Modules.Customers.Application.DTOs.PersonDto"
                                 TItemValue="int?"
@@ -197,6 +206,7 @@
     {
         _formModel = new WatchFormModel
         {
+            Reference = Reference,
             BrandId = 0,
             GenderType = GenderType.Hombre,
             CostValue = 0,
@@ -215,6 +225,12 @@
 
     private async Task HandleSubmitAsync()
     {
+        if (!_formModel.Reference.HasValue || _formModel.Reference.Value <= 0)
+        {
+            Message.Warning("Debe ingresar el número de referencia del reloj.");
+            return;
+        }
+
         if (_formModel.BrandId <= 0)
         {
             Message.Warning("Debe seleccionar una marca de reloj válida.");
@@ -251,7 +267,8 @@
                 GenderType: _formModel.GenderType,
                 CaseNumber: _formModel.CaseNumber,
                 BrandId: _formModel.BrandId,
-                ProviderId: _formModel.ProviderId
+                ProviderId: _formModel.ProviderId,
+                Reference: _formModel.Reference
             );
 
             var result = await Sender.Send(cmd);
@@ -261,7 +278,7 @@
                 return;
             }
 
-            Message.Success($"¡Reloj registrado con éxito con referencia #{result.Value}!");
+            Message.Success($"¡Reloj #{_formModel.Reference} registrado con éxito con referencia #{result.Value}!");
             Navigation.NavigateTo("/inventory");
         }
         catch (Exception ex)
@@ -276,6 +293,7 @@
 
     public class WatchFormModel
     {
+        public int? Reference { get; set; }
         public int BrandId { get; set; }
         public GenderType GenderType { get; set; } = GenderType.Hombre;
         public int? ProviderId { get; set; }

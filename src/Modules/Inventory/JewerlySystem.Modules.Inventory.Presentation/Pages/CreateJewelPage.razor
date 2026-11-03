@@ -37,7 +37,16 @@
                 </div>
 
                 <div class="row g-3">
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-4">
+                        <SoftTooltipLabel Label="N° de Referencia" Required="true" TooltipText="Número físico o código de inventario de la joya" />
+                        <AntDesign.InputNumber TValue="int?"
+                                               @bind-Value="_formModel.Reference"
+                                               Min="1"
+                                               Placeholder="Ej. 9493"
+                                               Style="width: 100%; font-weight: bold; font-size: 1.05rem;" />
+                    </div>
+
+                    <div class="col-12 col-md-4">
                         <SoftTooltipLabel Label="Tipo de Joya (Catálogo)" Required="true" TooltipText="Categoría física del artículo a ingresar" />
                         <Select TItem="ItemTypeDto"
                                 TItemValue="int"
@@ -49,7 +58,7 @@
                                 Placeholder="Seleccione tipo de joya..." />
                     </div>
 
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-4">
                         <SoftTooltipLabel Label="Proveedor / Origen" TooltipText="Tercero proveedor o stock interno de la joyería" />
                         <Select TItem="JewerlySystem.Modules.Customers.Application.DTOs.PersonDto"
                                 TItemValue="int?"
@@ -248,6 +257,12 @@
 
     private async Task HandleSubmitAsync()
     {
+        if (!_formModel.Reference.HasValue || _formModel.Reference.Value <= 0)
+        {
+            Message.Warning("Debe ingresar el número de referencia de la joya.");
+            return;
+        }
+
         if (_formModel.ItemTypeId <= 0)
         {
             Message.Warning("Debe seleccionar un tipo de joya válido.");
@@ -285,7 +300,8 @@
                 Weight: _formModel.Weight,
                 GramValue: _formModel.GramValue,
                 Length: _formModel.Length,
-                ProviderId: _formModel.ProviderId
+                ProviderId: _formModel.ProviderId,
+                Reference: _formModel.Reference
             );
 
             var result = await Sender.Send(cmd);
@@ -295,7 +311,7 @@
                 return;
             }
 
-            Message.Success($"¡Joya registrada con éxito en inventario con ID #{result.Value}!");
+            Message.Success($"¡Joya #{_formModel.Reference} registrada con éxito en inventario con ID #{result.Value}!");
             Navigation.NavigateTo("/inventory");
         }
         catch (Exception ex)
@@ -310,6 +326,7 @@
 
     public class JewelFormModel
     {
+        public int? Reference { get; set; }
         public int ItemTypeId { get; set; } = 1;
         public int? ProviderId { get; set; }
         public double Weight { get; set; }

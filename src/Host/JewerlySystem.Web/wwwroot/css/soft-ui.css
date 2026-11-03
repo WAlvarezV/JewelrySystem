@@ -490,6 +490,23 @@ body[data-theme="pomona-emerald"],
     box-shadow: var(--soft-box-shadow) !important;
 }
 
+/* Luxury Auth Card (Login / Passkeys / MFA) */
+.login-card {
+    max-width: 440px !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid rgba(0, 0, 0, 0.07) !important;
+}
+
+.pomona-login-header {
+    border-top-left-radius: 18px !important;
+    border-top-right-radius: 18px !important;
+}
+
 .ant-card-head,
 .card-header {
     border-bottom: 1px solid var(--soft-border-color) !important;

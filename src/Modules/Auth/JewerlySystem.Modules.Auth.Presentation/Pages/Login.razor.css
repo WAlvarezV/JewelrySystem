@@ -2,3 +2,82 @@
     letter-spacing: 0.4rem;
     font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
 }
+
+.login-card {
+    max-width: 440px;
+    width: 100%;
+    margin: 0 auto;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid rgba(0, 0, 0, 0.07) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pomona-login-header {
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+}
+
+.form-control {
+    border-radius: 10px !important;
+    border: 1.5px solid #E2E8F0 !important;
+    padding: 0.65rem 0.95rem !important;
+    font-size: 0.95rem !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+.form-control:focus {
+    border-color: var(--brand-primary, #701C2C) !important;
+    box-shadow: 0 0 0 3px rgba(112, 28, 44, 0.15) !important;
+    outline: none !important;
+}
+
+.input-group-text {
+    border-radius: 10px 0 0 10px !important;
+    border: 1.5px solid #E2E8F0 !important;
+    border-right: none !important;
+    background-color: #F8FAFC !important;
+    padding: 0.65rem 0.85rem !important;
+}
+
+.input-group .form-control {
+    border-radius: 0 10px 10px 0 !important;
+}
+
+.login-submit-btn {
+    border-radius: 10px !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px !important;
+    transition: all 0.2s ease !important;
+}
+
+.login-passkey-btn {
+    border-radius: 10px !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    border: 1.5px solid #E2E8F0 !important;
+    background: #ffffff !important;
+    transition: all 0.2s ease !important;
+}
+
+.login-passkey-btn:hover {
+    background: #F8FAFC !important;
+    border-color: #CBD5E1 !important;
+}
+
+@media (max-width: 576px) {
+    .login-card {
+        border-radius: 14px !important;
+        margin: 0.5rem auto;
+    }
+    
+    .form-control {
+        font-size: 16px !important; /* Prevents auto-zoom in iOS Safari */
+        min-height: 44px !important;
+    }
+}
