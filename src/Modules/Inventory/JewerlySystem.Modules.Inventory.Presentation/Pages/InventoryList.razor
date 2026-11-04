@@ -8,10 +8,21 @@
 @inject ModalService ModalService
 
 <div class="inventory-container step-fade-in">
-    <!-- Hero Header -->
+    <!-- Hero Header con Selector de Grupos Unificado -->
     <SoftHeroHeader Title="@(_activeGroup == "JEWELRY" ? "Catálogo de Joyería" : "Catálogo de Relojería")"
-                    Subtitle="@(_activeGroup == "JEWELRY" ? "Control de piezas en metales preciosos, pesajes, valorización y stock activo" : "Control de piezas de alta gama, marcas, seriales de caja y valor comercial")"
+                    Subtitle="@(_activeGroup == "JEWELRY" ? "Control de metales preciosos, pesajes y stock activo" : "Control de alta gama, marcas y seriales")"
                     Icon="@(_activeGroup == "JEWELRY" ? "bi bi-gem" : "bi bi-watch")">
+        <div class="header-group-switcher me-1 me-lg-2">
+            <RadioGroup @bind-Value="_activeGroup" ButtonStyle="@RadioButtonStyle.Solid">
+                <Radio RadioButton="true" Value="@("JEWELRY")">
+                    <span><i class="bi bi-gem me-1 text-warning"></i> <b>Joyería</b> (@_jewelryItems.Count(x => x.Active)/@_jewelryItems.Count)</span>
+                </Radio>
+                <Radio RadioButton="true" Value="@("WATCHES")">
+                    <span><i class="bi bi-watch me-1 text-primary"></i> <b>Relojes</b> (@_watchItems.Count(x => x.Active)/@_watchItems.Count)</span>
+                </Radio>
+            </RadioGroup>
+        </div>
+
         <SoftButton Icon="reload" OnClick="LoadInventoryCatalogAsync">Actualizar</SoftButton>
         <SoftButton Text="Consolidado"
                     Icon="pie-chart"
@@ -40,52 +51,10 @@
         }
     </SoftHeroHeader>
 
-    <!-- Group Selector (Joyería vs Relojes) -->
-    <div class="group-switcher-bar d-flex align-items-center justify-content-between flex-wrap gap-2 my-2 my-md-3 p-2.5 p-md-3 bg-white rounded-3 shadow-sm border">
-        <div class="d-flex align-items-center gap-3">
-            <RadioGroup @bind-Value="_activeGroup" ButtonStyle="@RadioButtonStyle.Solid">
-                <Radio RadioButton="true" Value="@("JEWELRY")">
-                    <span class="fs-6"><i class="bi bi-gem me-1 text-warning"></i> <b>Grupo Joyería</b> (@_jewelryItems.Count(x => x.Active)/@_jewelryItems.Count activas)</span>
-                </Radio>
-                <Radio RadioButton="true" Value="@("WATCHES")">
-                    <span class="fs-6"><i class="bi bi-watch me-1 text-primary"></i> <b>Grupo Relojes</b> (@_watchItems.Count(x => x.Active)/@_watchItems.Count activos)</span>
-                </Radio>
-            </RadioGroup>
-        </div>
-
-        <div class="d-none d-md-flex align-items-center gap-2 text-muted small pe-2">
-            <span>Módulo Activo: <b>INVENTARIO</b> &bull;</span>
-            <span>Categoría: <b>@(_activeGroup == "JEWELRY" ? "Metales Preciosos" : "Alta Relojería")</b></span>
-        </div>
-    </div>
-
-    <!-- Inventory Adjustment & Audit Mode Banner -->
-    <div class="alert alert-warning border-warning border-opacity-25 bg-warning bg-opacity-10 rounded-3 p-2.5 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2 shadow-xs">
-        <div class="d-flex align-items-center gap-2">
-            <i class="bi bi-sliders text-warning fs-5"></i>
-            <div>
-                <strong class="text-dark">Ajuste de Inventario Físico:</strong>
-                <span class="text-muted ms-1 small">Todos los artículos continúan visibles en el catálogo. Usa el interruptor <b>(Switch)</b> para activar únicamente las piezas confirmadas en tienda.</span>
-            </div>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-white text-dark border px-2 py-1 small">
-                @if (_activeGroup == "JEWELRY")
-                {
-                    <text>Joyas: <b>@_jewelryItems.Count(x => x.Active)</b> activas de @_jewelryItems.Count</text>
-                }
-                else
-                {
-                    <text>Relojes: <b>@_watchItems.Count(x => x.Active)</b> activos de @_watchItems.Count</text>
-                }
-            </span>
-        </div>
-    </div>
-
     @if (_activeGroup == "JEWELRY")
     {
         <!-- Métricas del Grupo Joyería -->
-        <div class="metrics-grid mb-4">
+        <div class="metrics-grid mb-2">
             <div class="metric-card">
                 <div class="metric-icon bg-warning-subtle text-warning">
                     <i class="bi bi-gem"></i>
@@ -129,7 +98,7 @@
 
         <!-- Barra de Búsqueda y Filtros Joyería -->
         <SoftFilterCard>
-            <div class="row g-2 g-md-3 align-items-center py-1">
+            <div class="row g-2 align-items-center">
                 <div class="col-12 col-md-5 col-lg-4">
                     <div class="d-flex align-items-center gap-1">
                         <div class="input-group">
@@ -300,7 +269,7 @@
     else
     {
         <!-- Métricas del Grupo Relojes -->
-        <div class="metrics-grid mb-4">
+        <div class="metrics-grid mb-2">
             <div class="metric-card">
                 <div class="metric-icon bg-info-subtle text-info">
                     <i class="bi bi-watch"></i>
@@ -344,7 +313,7 @@
 
         <!-- Barra de Búsqueda y Filtros Relojes -->
         <SoftFilterCard>
-            <div class="row g-2 g-md-3 align-items-center py-1">
+            <div class="row g-2 align-items-center">
                 <div class="col-12 col-lg-3 col-xl-3">
                     <div class="d-flex align-items-center gap-1">
                         <div class="input-group">
