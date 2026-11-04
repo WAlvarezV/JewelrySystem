@@ -94,6 +94,7 @@
 
             <Table TItem="JewelSummaryDto"
                    DataSource="@_data.Jewelry"
+                   RowKey="@(c => c.Key)"
                    Responsive="true"
                    Size="TableSize.Middle">
                 <PropertyColumn Property="c => c.Type" Title="Tipo de Joya">
@@ -141,6 +142,7 @@
 
             <Table TItem="WatchSummaryDto"
                    DataSource="@_data.Watches"
+                   RowKey="@(c => c.Key)"
                    Responsive="true"
                    Size="TableSize.Middle">
                 <PropertyColumn Property="c => c.Type" Title="Marca / Modelo">

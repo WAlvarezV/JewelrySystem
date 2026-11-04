@@ -61,14 +61,16 @@ public record JewelSummaryDto(
     int Quantity,
     double Weight,
     long SaleValue,
-    long CostValue);
+    long CostValue,
+    string Key = "");
 
 public record WatchSummaryDto(
     string Type,
     string Other,
     int Quantity,
     long SaleValue,
-    long CostValue);
+    long CostValue,
+    string Key = "");
 
 public record InventoryConsolidatedDto(
     List<JewelSummaryDto> Jewelry,

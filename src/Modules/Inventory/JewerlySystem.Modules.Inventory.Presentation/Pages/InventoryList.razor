@@ -23,7 +23,6 @@
             </RadioGroup>
         </div>
 
-        <SoftButton Icon="reload" OnClick="LoadInventoryCatalogAsync">Actualizar</SoftButton>
         <SoftButton Text="Consolidado"
                     Icon="pie-chart"
                     Type="ButtonType.Dashed"
@@ -33,22 +32,6 @@
                     Danger="true"
                     Type="ButtonType.Default"
                     OnClick="@(() => Navigation.NavigateTo("/inventory/discharge"))" />
-        @if (_activeGroup == "JEWELRY")
-        {
-            <SoftButton Type="@ButtonType.Primary"
-                        Icon="plus-circle"
-                        OnClick="OpenCreateJewelDrawer">
-                Nueva Joya
-            </SoftButton>
-        }
-        else
-        {
-            <SoftButton Type="@ButtonType.Primary"
-                        Icon="plus-circle"
-                        OnClick="OpenCreateWatchDrawer">
-                Nuevo Reloj
-            </SoftButton>
-        }
     </SoftHeroHeader>
 
     @if (_activeGroup == "JEWELRY")
@@ -136,7 +119,7 @@
                             EnableSearch="true"
                             Placeholder="Tipo de joya..." />
                 </div>
-                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="col-12 col-sm-6 col-md-3 col-lg-2">
                     <Select TItemValue="string"
                             TItem="StatusFilterOption"
                             DataSource="@_statusFilterOptions"
@@ -146,16 +129,38 @@
                             EnableSearch="true"
                             Placeholder="Estado..." />
                 </div>
-                <div class="col-12 col-md-12 col-lg-2">
-                    <button class="btn @(HasJewelryFilters ? "btn-outline-danger" : "btn-outline-secondary text-muted") w-100 d-flex align-items-center justify-content-center gap-1"
-                            type="button"
-                            style="height: 38px;"
-                            disabled="@(!HasJewelryFilters)"
-                            title="Restablecer todos los filtros de joyería"
-                            @onclick="ResetJewelryFilters">
-                        <i class="bi bi-arrow-counterclockwise"></i>
-                        <span class="fw-medium">Limpiar filtros</span>
-                    </button>
+                <div class="col-12 col-md-12 col-lg-3">
+                    <div class="d-flex align-items-center justify-content-end gap-2">
+                        <Tooltip Title="Restablecer todos los filtros" Placement="Placement.Top">
+                            <button class="btn @(HasJewelryFilters ? "btn-outline-danger" : "btn-outline-secondary text-muted") flex-grow-1 flex-lg-grow-0 d-flex align-items-center justify-content-center gap-1 filter-action-btn"
+                                    type="button"
+                                    style="height: 38px; min-width: 85px;"
+                                    disabled="@(!HasJewelryFilters)"
+                                    title="Restablecer todos los filtros de joyería"
+                                    @onclick="ResetJewelryFilters">
+                                <i class="bi bi-arrow-counterclockwise"></i>
+                                <span class="fw-medium small">Limpiar</span>
+                            </button>
+                        </Tooltip>
+
+                        <Tooltip Title="Actualizar catálogo" Placement="Placement.Top">
+                            <button class="btn btn-outline-secondary d-flex align-items-center justify-content-center filter-icon-btn"
+                                    type="button"
+                                    title="Actualizar catálogo"
+                                    @onclick="LoadInventoryCatalogAsync">
+                                <i class="bi bi-arrow-clockwise fs-5"></i>
+                            </button>
+                        </Tooltip>
+
+                        <Tooltip Title="Registrar Nueva Joya" Placement="Placement.Top">
+                            <button class="btn btn-primary d-flex align-items-center justify-content-center filter-icon-btn btn-create-accent"
+                                    type="button"
+                                    title="Registrar Nueva Joya"
+                                    @onclick="OpenCreateJewelDrawer">
+                                <i class="bi bi-plus-lg fs-5"></i>
+                            </button>
+                        </Tooltip>
+                    </div>
                 </div>
             </div>
         </SoftFilterCard>
@@ -361,7 +366,7 @@
                             EnableSearch="true"
                             Placeholder="Género..." />
                 </div>
-                <div class="col-6 col-sm-6 col-md-3 col-lg-3 col-xl-3">
+                <div class="col-6 col-sm-6 col-md-3 col-lg-2 col-xl-2">
                     <Select TItemValue="string"
                             TItem="StatusFilterOption"
                             DataSource="@_statusFilterOptions"
@@ -371,16 +376,38 @@
                             EnableSearch="true"
                             Placeholder="Estado..." />
                 </div>
-                <div class="col-6 col-sm-6 col-md-3 col-lg-2 col-xl-2">
-                    <button class="btn @(HasWatchFilters ? "btn-outline-danger" : "btn-outline-secondary text-muted") w-100 d-flex align-items-center justify-content-center gap-1"
-                            type="button"
-                            style="height: 38px;"
-                            disabled="@(!HasWatchFilters)"
-                            title="Restablecer todos los filtros de relojes"
-                            @onclick="ResetWatchFilters">
-                        <i class="bi bi-arrow-counterclockwise"></i>
-                        <span class="fw-medium">Limpiar</span>
-                    </button>
+                <div class="col-12 col-sm-6 col-md-3 col-lg-3 col-xl-3">
+                    <div class="d-flex align-items-center justify-content-end gap-2">
+                        <Tooltip Title="Restablecer todos los filtros" Placement="Placement.Top">
+                            <button class="btn @(HasWatchFilters ? "btn-outline-danger" : "btn-outline-secondary text-muted") flex-grow-1 flex-lg-grow-0 d-flex align-items-center justify-content-center gap-1 filter-action-btn"
+                                    type="button"
+                                    style="height: 38px; min-width: 85px;"
+                                    disabled="@(!HasWatchFilters)"
+                                    title="Restablecer todos los filtros de relojes"
+                                    @onclick="ResetWatchFilters">
+                                <i class="bi bi-arrow-counterclockwise"></i>
+                                <span class="fw-medium small">Limpiar</span>
+                            </button>
+                        </Tooltip>
+
+                        <Tooltip Title="Actualizar catálogo" Placement="Placement.Top">
+                            <button class="btn btn-outline-secondary d-flex align-items-center justify-content-center filter-icon-btn"
+                                    type="button"
+                                    title="Actualizar catálogo"
+                                    @onclick="LoadInventoryCatalogAsync">
+                                <i class="bi bi-arrow-clockwise fs-5"></i>
+                            </button>
+                        </Tooltip>
+
+                        <Tooltip Title="Registrar Nuevo Reloj" Placement="Placement.Top">
+                            <button class="btn btn-primary d-flex align-items-center justify-content-center filter-icon-btn btn-create-accent"
+                                    type="button"
+                                    title="Registrar Nuevo Reloj"
+                                    @onclick="OpenCreateWatchDrawer">
+                                <i class="bi bi-plus-lg fs-5"></i>
+                            </button>
+                        </Tooltip>
+                    </div>
                 </div>
             </div>
         </SoftFilterCard>

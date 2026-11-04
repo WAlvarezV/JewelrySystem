@@ -167,18 +167,29 @@ public class GetConsolidatedInventoryQueryHandler : IQueryHandler<GetConsolidate
             var totalCost = grp.Sum(x => (long)x.CostValue);
             var totalSale = grp.Sum(x => (long)(x.SaleValue ?? (int)(relatedJewels.FirstOrDefault(j => j.ItemId == x.Id)?.GramValue * relatedJewels.FirstOrDefault(j => j.ItemId == x.Id)?.Weight ?? x.CostValue * 1.3)));
 
-            jewelSummary.Add(new JewelSummaryDto(tName, qty, totalWeight, totalSale, totalCost));
+            jewelSummary.Add(new JewelSummaryDto(tName, qty, totalWeight, totalSale, totalCost, $"jewel_{grp.Key}"));
         }
 
-        var watchSummary = new List<WatchSummaryDto>();
-        foreach (var grp in watchItems.GroupBy(i => i.Id))
+        var watchItemsWithDetail = watchItems.Select(item =>
         {
-            var item = grp.First();
             var watch = allWatches.FirstOrDefault(w => w.ItemId == item.Id);
             var brandName = watch != null ? brands.FirstOrDefault(b => b.Id == watch.BrandId)?.Name ?? "Marca General" : "Reloj";
             var gender = watch?.GenderType.ToString() ?? "Unisex";
+            var cost = (long)item.CostValue;
+            var sale = (long)(item.SaleValue ?? (long)(item.CostValue * 1.3));
+            return new { item, brandName, gender, cost, sale };
+        }).ToList();
 
-            watchSummary.Add(new WatchSummaryDto(brandName, gender, 1, item.SaleValue ?? (long)(item.CostValue * 1.3), item.CostValue));
+        var watchSummary = new List<WatchSummaryDto>();
+        foreach (var grp in watchItemsWithDetail.GroupBy(w => new { w.brandName, w.gender }))
+        {
+            var brand = grp.Key.brandName;
+            var gender = grp.Key.gender;
+            var qty = grp.Count();
+            var totalCost = grp.Sum(x => x.cost);
+            var totalSale = grp.Sum(x => x.sale);
+
+            watchSummary.Add(new WatchSummaryDto(brand, gender, qty, totalSale, totalCost, $"watch_{brand}_{gender}"));
         }
 
         return Result.Success(new InventoryConsolidatedDto(jewelSummary, watchSummary));
