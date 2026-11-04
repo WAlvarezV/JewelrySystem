@@ -1,0 +1,222 @@
+name: PostgreSQL Database Backup to Google Drive
+
+on:
+  schedule:
+    # Se ejecuta todos los días a las 05:00 UTC (00:00 hora de Colombia COT)
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+    inputs:
+      retention_days:
+        description: 'Días de retención (respaldos con más de estos días serán eliminados automáticamente)'
+        required: true
+        default: '15'
+        type: string
+      backup_prefix:
+        description: 'Prefijo del archivo de respaldo'
+        required: false
+        default: 'IntZaioNJewerly'
+        type: string
+
+concurrency:
+  group: database-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: Backup PostgreSQL & Sync to Google Drive
+    runs-on: ubuntu-latest
+
+    env:
+      RETENTION_DAYS: ${{ inputs.retention_days || '15' }}
+      BACKUP_PREFIX: ${{ inputs.backup_prefix || 'IntZaioNJewerly' }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL Client & Rclone
+        run: |
+          echo "::group::Instalando PostgreSQL Client 17 y Rclone"
+          sudo install -d /etc/apt/keyrings
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/keyrings/postgresql.gpg
+          echo "deb [signed-by=/etc/apt/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-17 rclone jq
+          echo "PostgreSQL client:"
+          pg_dump --version
+          echo "Rclone:"
+          rclone version | head -n 1
+          echo "::endgroup::"
+
+      - name: Validate Configuration Secrets
+        env:
+          RAILWAY_DATABASE_URL: ${{ secrets.RAILWAY_DATABASE_URL }}
+          GDRIVE_SERVICE_ACCOUNT_KEY: ${{ secrets.GDRIVE_SERVICE_ACCOUNT_KEY }}
+          RCLONE_CONFIG: ${{ secrets.RCLONE_CONFIG }}
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+        run: |
+          echo "Validando secretos configurados en el repositorio..."
+          MISSING=0
+          if [ -z "$RAILWAY_DATABASE_URL" ]; then
+            echo "::error::Falta el secreto 'RAILWAY_DATABASE_URL'. Configúralo en Settings -> Secrets and variables -> Actions."
+            MISSING=1
+          fi
+
+          if [ -z "$GDRIVE_SERVICE_ACCOUNT_KEY" ] && [ -z "$RCLONE_CONFIG" ]; then
+            echo "::error::Debes configurar 'GDRIVE_SERVICE_ACCOUNT_KEY' (recomendado) o 'RCLONE_CONFIG' para conectar a Google Drive."
+            MISSING=1
+          fi
+
+          if [ -n "$GDRIVE_SERVICE_ACCOUNT_KEY" ] && [ -z "$GDRIVE_FOLDER_ID" ]; then
+            echo "::error::Al usar Service Account, debes configurar el secreto 'GDRIVE_FOLDER_ID' con el ID de la carpeta compartida."
+            MISSING=1
+          fi
+
+          if [ "$MISSING" -eq 1 ]; then
+            echo "Por favor consulta 'scripts/backup/README.md' para ver el instructivo de configuración paso a paso."
+            exit 1
+          fi
+          echo "Todos los secretos requeridos están presentes."
+
+      - name: Configure Rclone for Google Drive
+        env:
+          GDRIVE_SA_KEY: ${{ secrets.GDRIVE_SERVICE_ACCOUNT_KEY }}
+          CUSTOM_RCLONE_CONFIG: ${{ secrets.RCLONE_CONFIG }}
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+        run: |
+          mkdir -p ~/.config/rclone
+          if [ -n "$GDRIVE_SA_KEY" ]; then
+            echo "Configurando Rclone con Google Cloud Service Account..."
+            printf '%s\n' "$GDRIVE_SA_KEY" > /tmp/gdrive_sa.json
+            
+            # Validar formato JSON
+            if ! jq empty /tmp/gdrive_sa.json 2>/dev/null; then
+              echo "::error::El secreto GDRIVE_SERVICE_ACCOUNT_KEY no contiene un JSON válido."
+              exit 1
+            fi
+
+            cat <<EOF > ~/.config/rclone/rclone.conf
+[gdrive]
+type = drive
+scope = drive
+service_account_file = /tmp/gdrive_sa.json
+root_folder_id = $GDRIVE_FOLDER_ID
+EOF
+          else
+            echo "Configurando Rclone mediante archivo RCLONE_CONFIG personalizado..."
+            printf '%s\n' "$CUSTOM_RCLONE_CONFIG" > ~/.config/rclone/rclone.conf
+          fi
+
+          echo "Probando conexión con Google Drive..."
+          rclone lsf gdrive: --max-depth 1 || {
+            echo "::warning::No se pudieron listar archivos iniciales (la carpeta puede estar vacía o verificar permisos de la Service Account)."
+          }
+
+      - name: Verify PostgreSQL Database Connection
+        env:
+          RAILWAY_DATABASE_URL: ${{ secrets.RAILWAY_DATABASE_URL }}
+        run: |
+          echo "Verificando conectividad con la base de datos PostgreSQL de Railway..."
+          psql "$RAILWAY_DATABASE_URL" -c "SELECT current_database() AS database, current_user AS user, version() AS version;"
+
+      - name: Generate Database Backup (pg_dump)
+        id: dump
+        env:
+          RAILWAY_DATABASE_URL: ${{ secrets.RAILWAY_DATABASE_URL }}
+        run: |
+          TIMESTAMP=$(date +'%Y%m%d_%H%M%S')
+          FILENAME="${BACKUP_PREFIX}_${TIMESTAMP}.dump"
+          echo "Iniciando respaldo de PostgreSQL hacia: $FILENAME"
+
+          # Formato custom (-Fc) con compresión nivel 9 (máxima integridad y restauración eficiente con pg_restore)
+          pg_dump "$RAILWAY_DATABASE_URL" \
+            --format=custom \
+            --compress=9 \
+            --verbose \
+            --file="$FILENAME" 2>&1 | tail -n 25
+
+          if [ ! -f "$FILENAME" ]; then
+            echo "::error::Error crítico: el archivo de respaldo '$FILENAME' no fue creado."
+            exit 1
+          fi
+
+          FILESIZE=$(du -h "$FILENAME" | cut -f1)
+          FILEBYTES=$(stat -c%s "$FILENAME")
+          SHA256=$(sha256sum "$FILENAME" | cut -d' ' -f1)
+
+          echo "Respaldo generado con éxito."
+          echo "Archivo: $FILENAME"
+          echo "Tamaño: $FILESIZE ($FILEBYTES bytes)"
+          echo "SHA256: $SHA256"
+
+          echo "filename=$FILENAME" >> $GITHUB_OUTPUT
+          echo "filesize=$FILESIZE" >> $GITHUB_OUTPUT
+          echo "filebytes=$FILEBYTES" >> $GITHUB_OUTPUT
+          echo "sha256=$SHA256" >> $GITHUB_OUTPUT
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+
+      - name: Upload Backup to Google Drive
+        env:
+          FILENAME: ${{ steps.dump.outputs.filename }}
+        run: |
+          echo "Subiendo '$FILENAME' a Google Drive..."
+          rclone copy "$FILENAME" gdrive: --progress --stats-one-line
+          
+          # Verificar presencia en destino
+          if rclone lsf gdrive: | grep -q "$FILENAME"; then
+            echo "Verificación exitosa: '$FILENAME' se encuentra en Google Drive."
+          else
+            echo "::error::No se pudo encontrar '$FILENAME' en Google Drive tras la subida."
+            exit 1
+          fi
+
+      - name: Apply Retention Policy (Purge Old Backups)
+        id: retention
+        run: |
+          echo "=========================================================="
+          echo "Política de retención: eliminando respaldos con más de $RETENTION_DAYS días"
+          echo "=========================================================="
+          
+          CANDIDATES=$(rclone lsf gdrive: --min-age "${RETENTION_DAYS}d" || true)
+
+          if [ -z "$CANDIDATES" ]; then
+            echo "No se encontraron respaldos antiguos para eliminar (todos tienen menos de $RETENTION_DAYS días)."
+            echo "purged_count=0" >> $GITHUB_OUTPUT
+          else
+            echo "Respaldos candidatos a depuración:"
+            echo "$CANDIDATES"
+            rclone delete --min-age "${RETENTION_DAYS}d" gdrive: --verbose
+            PURGED_COUNT=$(echo "$CANDIDATES" | sed '/^\s*$/d' | wc -l)
+            echo "purged_count=$PURGED_COUNT" >> $GITHUB_OUTPUT
+            echo "Se eliminaron $PURGED_COUNT respaldos antiguos satisfactoriamente."
+          fi
+
+      - name: Upload Backup as Temporary GitHub Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.dump.outputs.filename }}
+          path: ${{ steps.dump.outputs.filename }}
+          retention-days: 3
+          if-no-files-found: warn
+
+      - name: Generate GitHub Actions Run Summary
+        if: always()
+        run: |
+          cat <<EOF >> $GITHUB_STEP_SUMMARY
+          ## 📦 Reporte de Copia de Seguridad PostgreSQL (Railway -> Google Drive)
+
+          | Detalle | Valor |
+          |---|---|
+          | **Estado del Job** | ${{ job.status == 'success' && '✅ Exitoso' || '❌ Con Fallas' }} |
+          | **Archivo Generado** | \`${{ steps.dump.outputs.filename }}\` |
+          | **Tamaño del Respaldo** | ${{ steps.dump.outputs.filesize }} (${{ steps.dump.outputs.filebytes }} bytes) |
+          | **Checksum SHA-256** | \`${{ steps.dump.outputs.sha256 }}\` |
+          | **Política de Retención** | Máximo $RETENTION_DAYS días |
+          | **Respaldos Viejos Depurados** | ${{ steps.retention.outputs.purged_count || '0' }} archivo(s) |
+          | **Copia Temporal en GitHub Artifacts** | Disponible por 3 días |
+
+          ### 📂 Listado de Respaldos Actuales en Google Drive
+          \`\`\`text
+          $(rclone ls gdrive: 2>&1 || echo "No disponible")
+          \`\`\`
+          EOF
