@@ -136,7 +136,6 @@
                                     type="button"
                                     style="height: 38px; min-width: 85px;"
                                     disabled="@(!HasJewelryFilters)"
-                                    title="Restablecer todos los filtros de joyería"
                                     @onclick="ResetJewelryFilters">
                                 <i class="bi bi-arrow-counterclockwise"></i>
                                 <span class="fw-medium small">Limpiar</span>
@@ -146,7 +145,6 @@
                         <Tooltip Title="Actualizar catálogo" Placement="Placement.Top">
                             <button class="btn btn-outline-secondary d-flex align-items-center justify-content-center filter-icon-btn"
                                     type="button"
-                                    title="Actualizar catálogo"
                                     @onclick="LoadInventoryCatalogAsync">
                                 <i class="bi bi-arrow-clockwise fs-5"></i>
                             </button>
@@ -155,7 +153,6 @@
                         <Tooltip Title="Registrar Nueva Joya" Placement="Placement.Top">
                             <button class="btn btn-primary d-flex align-items-center justify-content-center filter-icon-btn btn-create-accent"
                                     type="button"
-                                    title="Registrar Nueva Joya"
                                     @onclick="OpenCreateJewelDrawer">
                                 <i class="bi bi-plus-lg fs-5"></i>
                             </button>
@@ -383,7 +380,6 @@
                                     type="button"
                                     style="height: 38px; min-width: 85px;"
                                     disabled="@(!HasWatchFilters)"
-                                    title="Restablecer todos los filtros de relojes"
                                     @onclick="ResetWatchFilters">
                                 <i class="bi bi-arrow-counterclockwise"></i>
                                 <span class="fw-medium small">Limpiar</span>
@@ -393,7 +389,6 @@
                         <Tooltip Title="Actualizar catálogo" Placement="Placement.Top">
                             <button class="btn btn-outline-secondary d-flex align-items-center justify-content-center filter-icon-btn"
                                     type="button"
-                                    title="Actualizar catálogo"
                                     @onclick="LoadInventoryCatalogAsync">
                                 <i class="bi bi-arrow-clockwise fs-5"></i>
                             </button>
@@ -402,7 +397,6 @@
                         <Tooltip Title="Registrar Nuevo Reloj" Placement="Placement.Top">
                             <button class="btn btn-primary d-flex align-items-center justify-content-center filter-icon-btn btn-create-accent"
                                     type="button"
-                                    title="Registrar Nuevo Reloj"
                                     @onclick="OpenCreateWatchDrawer">
                                 <i class="bi bi-plus-lg fs-5"></i>
                             </button>
