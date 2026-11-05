@@ -1,8 +1,11 @@
 using JewerlySystem.Common.Application;
+using JewerlySystem.Common.Application.Documentation.Abstractions;
 using JewerlySystem.Common.Application.Emailing;
 using JewerlySystem.Common.Application.Voice;
 using JewerlySystem.Common.Infrastructure;
+using JewerlySystem.Common.Infrastructure.Documentation;
 using JewerlySystem.Common.Infrastructure.Emailing;
+using JewerlySystem.Common.Presentation.Services;
 using JewerlySystem.Modules.Auth.Infrastructure;
 using JewerlySystem.Modules.Cash.Infrastructure;
 using JewerlySystem.Modules.Contracts.Infrastructure;
@@ -47,8 +50,14 @@ public static class ServiceCollectionExtensions
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(typeof(UserActivityService).Assembly);
+            cfg.RegisterServicesFromAssembly(typeof(ICommand).Assembly);
         });
         services.AddScoped<AuditInterceptor>();
+
+        // Documentation & Interactive User Manuals
+        services.AddScoped<IDocumentationProvider, FileDocumentationProvider>();
+        services.AddSingleton<HelpRouteRegistry>();
+        services.AddSingleton<IHelpRouteRegistry>(sp => sp.GetRequiredService<HelpRouteRegistry>());
         services.AddDbContext<JewerlyDbContext>((sp, options) =>
         {
             var tenantConn = sp.GetService<ITenantConnectionProvider>();

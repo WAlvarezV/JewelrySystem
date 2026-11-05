@@ -1,0 +1,240 @@
+@page "/manual"
+@page "/documentation/user-manual"
+@namespace JewerlySystem.Web.Components.Pages
+@using AntDesign
+@using MediatR
+@using Microsoft.AspNetCore.Authorization
+@using JewerlySystem.Common.Application.Documentation.DTOs
+@using JewerlySystem.Common.Application.Documentation.Queries
+@using JewerlySystem.Common.Presentation.Components.Organisms
+@attribute [Authorize]
+@inject ISender Sender
+@inject IJSRuntime JsRuntime
+
+<PageTitle>Manual de Usuario | Pomona Joyería</PageTitle>
+
+<div class="user-manual-page pb-5">
+    <SoftHeroHeader Title="Manual de Usuario del Sistema"
+                    Subtitle="Documentación interactiva, guías operativas paso a paso y manual de referencia del sistema."
+                    Icon="bi-book-half"
+                    ShowHelpButton="false">
+        <Actions>
+            <button type="button" class="btn btn-sm btn-light border d-inline-flex align-items-center gap-1.5 px-3 py-1.5 shadow-2xs fw-semibold"
+                    @onclick="ReloadCurrentDoc">
+                <i class="bi bi-arrow-clockwise"></i>
+                <span>Actualizar</span>
+            </button>
+        </Actions>
+    </SoftHeroHeader>
+
+    <!-- Selector de Módulo -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4 p-2 bg-white">
+        <div class="d-flex align-items-center gap-2 overflow-auto py-1 px-1 module-pills-bar">
+            <button type="button" class="btn btn-sm @(_selectedModule == "Inventory" ? "btn-primary" : "btn-light border") d-inline-flex align-items-center gap-1.5 rounded-pill px-3 py-1.5"
+                    @onclick='() => SelectModule("Inventory", "docs/modules/Inventory/ManualUsuario.md", "Inventario & Catálogo")'>
+                <i class="bi bi-gem"></i>
+                <span>Inventario, Joyas & Relojes</span>
+            </button>
+            <button type="button" class="btn btn-sm @(_selectedModule == "Contracts" ? "btn-primary" : "btn-light border") d-inline-flex align-items-center gap-1.5 rounded-pill px-3 py-1.5"
+                    @onclick='() => SelectModule("Contracts", "docs/modules/Inventory/ManualUsuario.md", "Contratos & Empeños")'>
+                <i class="bi bi-file-earmark-text"></i>
+                <span>Contratos & Empeños</span>
+            </button>
+            <button type="button" class="btn btn-sm @(_selectedModule == "Cash" ? "btn-primary" : "btn-light border") d-inline-flex align-items-center gap-1.5 rounded-pill px-3 py-1.5"
+                    @onclick='() => SelectModule("Cash", "docs/modules/Inventory/ManualUsuario.md", "Caja & Arqueo")'>
+                <i class="bi bi-cash-stack"></i>
+                <span>Caja & Arqueo</span>
+            </button>
+            <button type="button" class="btn btn-sm @(_selectedModule == "Customers" ? "btn-primary" : "btn-light border") d-inline-flex align-items-center gap-1.5 rounded-pill px-3 py-1.5"
+                    @onclick='() => SelectModule("Customers", "docs/modules/Inventory/ManualUsuario.md", "Clientes")'>
+                <i class="bi bi-people"></i>
+                <span>Clientes</span>
+            </button>
+            <button type="button" class="btn btn-sm @(_selectedModule == "Invoicing" ? "btn-primary" : "btn-light border") d-inline-flex align-items-center gap-1.5 rounded-pill px-3 py-1.5"
+                    @onclick='() => SelectModule("Invoicing", "docs/modules/Inventory/ManualUsuario.md", "Facturación")'>
+                <i class="bi bi-receipt"></i>
+                <span>Facturación</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Contenido del Manual -->
+    <div class="card border-0 shadow-sm rounded-3 bg-white p-4 p-md-5">
+        @if (_isLoading)
+        {
+            <div class="text-center py-5">
+                <Spin Tip="Cargando documentación del módulo..." Size="@SpinSize.Large" />
+            </div>
+        }
+        else if (_hasError)
+        {
+            <Alert Message="No se pudo cargar el manual" Description="@_errorMessage" Type="@AlertType.Warning" ShowIcon="true" />
+        }
+        else if (_docData != null)
+        {
+            <div class="manual-markdown-body" id="user-manual-viewer">
+                @((MarkupString)_docData.HtmlContent)
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .module-pills-bar button {
+        white-space: nowrap;
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+    .manual-markdown-body {
+        font-size: 15px;
+        line-height: 1.8;
+        color: #334155;
+    }
+    .manual-markdown-body details {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 14px 20px;
+        margin: 20px 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+    .manual-markdown-body details[open] {
+        border-color: #fbcfe8;
+        box-shadow: 0 4px 16px rgba(112, 28, 44, 0.08);
+    }
+    .manual-markdown-body summary {
+        cursor: pointer;
+        outline: none;
+        user-select: none;
+        font-weight: 600;
+    }
+    .manual-markdown-body h1 {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--brand-primary, #701C2C);
+        margin-top: 20px;
+        margin-bottom: 14px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+    .manual-markdown-body h2 {
+        font-size: 19px;
+        font-weight: 600;
+        color: #831843;
+        margin-top: 20px;
+        margin-bottom: 12px;
+    }
+    .manual-markdown-body h3 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1e293b;
+        margin-top: 18px;
+        margin-bottom: 10px;
+    }
+    .manual-markdown-body img {
+        display: block;
+        max-width: 100% !important;
+        height: auto !important;
+        margin: 20px auto !important;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        cursor: zoom-in;
+    }
+    .manual-markdown-body table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        font-size: 14px;
+        display: block;
+        overflow-x: auto;
+    }
+    .manual-markdown-body th {
+        background-color: #fdf2f4;
+        color: var(--brand-primary, #701C2C);
+        font-weight: 600;
+        padding: 12px 14px;
+        text-align: left;
+        border-bottom: 2px solid #fbcfe8;
+    }
+    .manual-markdown-body td {
+        padding: 10px 14px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .manual-markdown-body pre {
+        background: #f8fafc;
+        padding: 16px;
+        border-radius: 8px;
+        overflow-x: auto;
+    }
+    .manual-markdown-body blockquote {
+        border-left: 4px solid var(--brand-primary, #701C2C);
+        background-color: #fff1f2;
+        padding: 12px 18px;
+        margin: 16px 0;
+        border-radius: 0 8px 8px 0;
+        color: #9f1239;
+    }
+</style>
+
+@code {
+    private string _selectedModule = "Inventory";
+    private string _currentDocPath = "docs/modules/Inventory/ManualUsuario.md";
+    private string _currentTitle = "Manual de Inventario & Catálogo";
+    private bool _isLoading = true;
+    private bool _hasError;
+    private string _errorMessage = string.Empty;
+    private DocumentationPageDto? _docData;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadManualAsync();
+    }
+
+    private async Task SelectModule(string moduleKey, string docPath, string title)
+    {
+        _selectedModule = moduleKey;
+        _currentDocPath = docPath;
+        _currentTitle = title;
+        await LoadManualAsync();
+    }
+
+    private async Task ReloadCurrentDoc()
+    {
+        await LoadManualAsync();
+    }
+
+    private async Task LoadManualAsync()
+    {
+        _isLoading = true;
+        _hasError = false;
+
+        var result = await Sender.Send(new GetDocumentationPageQuery(_currentTitle, _currentDocPath));
+        if (result.IsSuccess)
+        {
+            _docData = result.Value;
+        }
+        else
+        {
+            _hasError = true;
+            _errorMessage = result.Error.Message;
+        }
+
+        _isLoading = false;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_docData != null && !_isLoading && !_hasError)
+        {
+            try
+            {
+                await JsRuntime.InvokeVoidAsync("docLightbox.init", "#user-manual-viewer");
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+    }
+}

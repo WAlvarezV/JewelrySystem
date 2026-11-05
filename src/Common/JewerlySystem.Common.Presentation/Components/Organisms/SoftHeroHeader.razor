@@ -16,10 +16,16 @@
             }
         </div>
     </div>
-    @if (EffectiveActions != null)
+    @if (EffectiveActions != null || ShowHelpButton)
     {
         <div class="soft-hero-actions">
             @EffectiveActions
+            @if (ShowHelpButton)
+            {
+                <HelpButton DocumentPath="@HelpDocumentPath"
+                            Title="@(string.IsNullOrEmpty(HelpTitle) ? $"Ayuda — {Title}" : HelpTitle)"
+                            SectionAnchor="@HelpSectionAnchor" />
+            }
         </div>
     }
 </div>
@@ -31,6 +37,10 @@
     [Parameter] public string? IconClass { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter] public RenderFragment? Actions { get; set; }
+    [Parameter] public bool ShowHelpButton { get; set; } = true;
+    [Parameter] public string? HelpDocumentPath { get; set; }
+    [Parameter] public string? HelpTitle { get; set; }
+    [Parameter] public string? HelpSectionAnchor { get; set; }
 
     private string? EffectiveIcon => !string.IsNullOrWhiteSpace(IconClass) ? IconClass : Icon;
     private RenderFragment? EffectiveActions => Actions ?? ChildContent;

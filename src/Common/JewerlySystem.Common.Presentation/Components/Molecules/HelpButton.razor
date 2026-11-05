@@ -1,0 +1,203 @@
+@namespace JewerlySystem.Common.Presentation.Components.Molecules
+@using AntDesign
+@using MediatR
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.JSInterop
+@using JewerlySystem.Common.Application.Documentation.DTOs
+@using JewerlySystem.Common.Application.Documentation.Queries
+@using JewerlySystem.Common.Presentation.Components.Organisms
+@using JewerlySystem.Common.Presentation.Services
+@inject ISender Sender
+@inject IJSRuntime JsRuntime
+@inject NavigationManager Navigation
+@inject IHelpRouteRegistry RouteRegistry
+
+@if (ShowTrigger)
+{
+    <button class="help-btn-minimal" @onclick="OpenHelp" type="button" disabled="@_loading" title="Ver manual de usuario y ayuda">
+        <i class="bi bi-question-circle"></i>
+        <span>Ayuda</span>
+    </button>
+}
+
+<SoftDrawer Title="@_activeTitle"
+            Visible="@_visible"
+            OnClose="CloseHelp"
+            Width="820"
+            Description="Manual de usuario interactivo paso a paso. Haga clic en cualquier captura para ampliarla.">
+    <ChildContent>
+        @if (_loading)
+        {
+            <div style="text-align: center; padding: 60px 0;">
+                <Spin Tip="Cargando manual de usuario..." Size="@SpinSize.Large" />
+            </div>
+        }
+        else if (_isUpcoming)
+        {
+            <div style="text-align: center; padding: 40px 20px; background-color: #f8fafc; border-radius: 12px; border: 1px dashed #cbd5e1; margin-top: 20px;">
+                <i class="bi bi-clock-history fs-1 text-primary mb-3 d-block"></i>
+                <h4 style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">
+                    Documentación del Módulo en Elaboración
+                </h4>
+                <p style="font-size: 14px; color: #64748b; max-width: 520px; margin: 0 auto 24px; line-height: 1.6;">
+                    La guía paso a paso para el módulo <strong>@_activeModuleName</strong> se encuentra en proceso de redacción. Mientras tanto, puede consultar el manual de Inventario.
+                </p>
+                <button type="button" class="btn btn-primary" @onclick="LoadFallbackDoc">
+                    <i class="bi bi-book me-1"></i> Ver Manual de Inventario
+                </button>
+            </div>
+        }
+        else if (_hasError)
+        {
+            <Alert Message="Atención" Description="@_errorMessage" Type="@AlertType.Warning" ShowIcon="true" />
+        }
+        else if (_docData != null)
+        {
+            <div class="drawer-markdown-body" id="@_containerId">
+                @((MarkupString)_docData.HtmlContent)
+            </div>
+        }
+    </ChildContent>
+    <FooterContent>
+        <div class="d-flex align-items-center justify-content-between w-100 py-1">
+            <span class="text-muted small">
+                <i class="bi bi-info-circle me-1"></i> Guía contextual del sistema
+            </span>
+            <a href="manual" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1.5" @onclick="CloseHelp">
+                <i class="bi bi-book-half"></i>
+                <span>Ver Manual Completo</span>
+            </a>
+        </div>
+    </FooterContent>
+</SoftDrawer>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? DocumentPath { get; set; }
+    [Parameter] public string? SectionAnchor { get; set; }
+    [Parameter] public bool ShowTrigger { get; set; } = true;
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+
+    private bool _visible;
+    private bool _previousOpen;
+    private bool _scrollPending;
+
+    private readonly string _containerId = $"help-doc-{Guid.NewGuid():N}";
+    private string ContainerSelector => $"#{_containerId}";
+    private bool _loading;
+    private bool _hasError;
+    private bool _isUpcoming;
+    private string _errorMessage = string.Empty;
+    private string _activeTitle = "Ayuda del Sistema";
+    private string _activeModuleName = "Inventario";
+    private string? _activeSectionAnchor;
+    private DocumentationPageDto? _docData;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Open && !_previousOpen)
+        {
+            _previousOpen = true;
+            await OpenHelp();
+        }
+        else if (!Open && _previousOpen)
+        {
+            _previousOpen = false;
+            _visible = false;
+        }
+    }
+
+    public async Task OpenHelp()
+    {
+        _visible = true;
+        _scrollPending = true;
+        _isUpcoming = false;
+        _hasError = false;
+
+        string relativeUri = Navigation.ToBaseRelativePath(Navigation.Uri);
+        HelpRouteInfo routeInfo = RouteRegistry.GetHelpInfoForRoute(relativeUri);
+
+        _activeModuleName = routeInfo.ModuleName;
+        _activeTitle = Title ?? routeInfo.CustomTitle ?? $"Ayuda — {routeInfo.ModuleName}";
+        _activeSectionAnchor = SectionAnchor ?? routeInfo.SectionAnchor;
+
+        string targetPath = DocumentPath ?? routeInfo.DocumentPath ?? "docs/modules/Inventory/ManualUsuario.md";
+
+        if (string.IsNullOrEmpty(targetPath))
+        {
+            _isUpcoming = true;
+            _loading = false;
+            StateHasChanged();
+            return;
+        }
+
+        if (_docData == null)
+        {
+            await LoadDoc(targetPath);
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task LoadDoc(string path)
+    {
+        _loading = true;
+        _hasError = false;
+        _isUpcoming = false;
+
+        GetDocumentationPageQuery query = new(_activeTitle, path);
+        var result = await Sender.Send(query);
+
+        if (result.IsSuccess)
+        {
+            _docData = result.Value;
+        }
+        else
+        {
+            _hasError = true;
+            _errorMessage = result.Error.Message;
+        }
+
+        _loading = false;
+    }
+
+    private async Task LoadFallbackDoc()
+    {
+        _activeTitle = "Manual de Usuario — Inventario";
+        _activeSectionAnchor = null;
+        await LoadDoc("docs/modules/Inventory/ManualUsuario.md");
+        StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_visible && _docData != null && !_hasError && !_isUpcoming)
+        {
+            try
+            {
+                await JsRuntime.InvokeVoidAsync("docLightbox.init", ContainerSelector);
+                if (_scrollPending && !string.IsNullOrEmpty(_activeSectionAnchor))
+                {
+                    _scrollPending = false;
+                    await JsRuntime.InvokeVoidAsync("docLightbox.scrollToSection", ContainerSelector, _activeSectionAnchor);
+                }
+            }
+            catch
+            {
+                // JavaScript exceptions ignored if interop not yet ready
+            }
+        }
+    }
+
+    private async Task CloseHelp()
+    {
+        _visible = false;
+
+        if (_previousOpen)
+        {
+            _previousOpen = false;
+            await OpenChanged.InvokeAsync(false);
+        }
+    }
+}
