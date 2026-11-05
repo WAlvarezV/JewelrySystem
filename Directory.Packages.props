@@ -4,7 +4,8 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-        <!-- Security fix for transitive dependency -->
+    <!-- Security fix for transitive dependency -->
+    <PackageVersion Include="SkiaSharp" Version="4.154.0" />
     <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
     <!-- Entity Framework Core & Identity (.NET 10) -->
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.14" />
@@ -14,7 +15,6 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.14" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.14" />
     <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.14" />
-
     <!-- Blazor & ASP.NET Core Abstractions -->
     <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="10.0.14" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.14" />
@@ -25,17 +25,14 @@
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.14" />
     <PackageVersion Include="AntDesign" Version="1.6.2" />
     <PackageVersion Include="Markdig" Version="1.4.2" />
-
     <!-- MediatR & FluentValidation (CQRS & Validation) -->
     <PackageVersion Include="MediatR" Version="14.2.0" />
     <PackageVersion Include="FluentValidation" Version="12.2.0" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.2.0" />
-
     <!-- Passkeys (FIDO2/WebAuthn) & MFA TOTP -->
     <PackageVersion Include="Fido2" Version="4.3.1" />
     <PackageVersion Include="Fido2.Models" Version="4.3.1" />
     <PackageVersion Include="QRCoder" Version="1.8.1" />
-
     <!-- Testing & Architecture -->
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="xunit" Version="2.9.3" />
@@ -46,4 +43,3 @@
     <PackageVersion Include="Microsoft.Playwright" Version="1.64.1" />
   </ItemGroup>
 </Project>
-

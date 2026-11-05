@@ -20,5 +20,6 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
     <PackageReference Include="AntDesign" />
+    <PackageReference Include="SkiaSharp" />
   </ItemGroup>
 </Project>

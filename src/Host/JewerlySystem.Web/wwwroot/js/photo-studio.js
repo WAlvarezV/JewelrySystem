@@ -72,7 +72,7 @@ window.photoStudio = {
         return await window.photoStudio.startLiveCamera(videoElementId, nextMode);
     },
 
-    captureLiveFrame: function (videoElementId, options) {
+    captureLiveFrame: function (videoElementId, prefix) {
         return new Promise(function (resolve, reject) {
             try {
                 var video = document.getElementById(videoElementId);
@@ -86,15 +86,19 @@ window.photoStudio = {
                 tempCanvas.height = video.videoHeight;
                 var tempCtx = tempCanvas.getContext("2d");
                 tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
-                var rawDataUrl = tempCanvas.toDataURL("image/jpeg", 0.95);
 
-                // Detener stream una vez tomada la foto
                 window.photoStudio.stopLiveCamera();
 
-                // Procesar imagen con estandarización de vitrina
-                window.photoStudio.processDataUrl(rawDataUrl, options)
-                    .then(resolve)
-                    .catch(reject);
+                tempCanvas.toBlob(function (blob) {
+                    if (!blob) {
+                        reject("No se pudo obtener el fotograma de la cámara.");
+                        return;
+                    }
+                    var file = new File([blob], "webcam_snap.jpg", { type: "image/jpeg" });
+                    window.photoStudio.uploadAndProcessPhoto(file, prefix || "item")
+                        .then(resolve)
+                        .catch(reject);
+                }, "image/jpeg", 0.95);
             } catch (err) {
                 reject("Error capturando fotograma: " + err.toString());
             }
@@ -104,6 +108,99 @@ window.photoStudio = {
     resetFileInput: function (inputId) {
         var el = document.getElementById(inputId);
         if (el) el.value = "";
+    },
+
+    uploadAndProcessPhoto: function (file, prefix) {
+        return new Promise(function (resolve, reject) {
+            try {
+                if (!file) {
+                    reject("No se seleccionó ningún archivo de imagen.");
+                    return;
+                }
+
+                var formData = new FormData();
+                formData.append("file", file);
+                formData.append("prefix", prefix || "item");
+
+                fetch("/api/inventory/upload-raw-photo", {
+                    method: "POST",
+                    body: formData,
+                    credentials: "same-origin"
+                })
+                .then(function (res) {
+                    if (!res.ok) {
+                        return res.json().then(function (err) {
+                            throw new Error(err.error || ("Error al subir fotografía (" + res.status + ")"));
+                        }).catch(function (fallbackErr) {
+                            throw new Error(fallbackErr.message || ("Error en el servidor (" + res.status + ")"));
+                        });
+                    }
+                    return res.json();
+                })
+                .then(function (data) {
+                    if (!data.success || !data.jobId) {
+                        throw new Error("Respuesta inválida del servidor.");
+                    }
+                    // Sondear estado del procesamiento en segundo plano
+                    window.photoStudio._pollPhotoJob(data.jobId, data.rawUrl, resolve, reject);
+                })
+                .catch(function (err) {
+                    reject(err.message || err.toString());
+                });
+            } catch (err) {
+                reject(err.toString());
+            }
+        });
+    },
+
+    _pollPhotoJob: function (jobId, rawUrl, resolve, reject) {
+        var attempts = 0;
+        var maxAttempts = 35; // 35 * 350ms = ~12 segundos
+
+        var interval = setInterval(function () {
+            attempts++;
+            fetch("/api/inventory/photo-job/" + jobId, {
+                credentials: "same-origin"
+            })
+            .then(function (res) { return res.json(); })
+            .then(function (job) {
+                if (job.status === "Completed") {
+                    clearInterval(interval);
+                    resolve({
+                        standardizedUrl: job.standardizedUrl || rawUrl,
+                        rawUrl: job.rawUrl || rawUrl,
+                        isFallback: false
+                    });
+                } else if (job.status === "Failed" || attempts >= maxAttempts) {
+                    clearInterval(interval);
+                    // GARANTÍA: Si falla la estandarización o excede tiempo, siempre se entrega la foto original asegurada
+                    resolve({
+                        standardizedUrl: rawUrl,
+                        rawUrl: rawUrl,
+                        isFallback: true
+                    });
+                }
+            })
+            .catch(function () {
+                if (attempts >= maxAttempts) {
+                    clearInterval(interval);
+                    resolve({
+                        standardizedUrl: rawUrl,
+                        rawUrl: rawUrl,
+                        isFallback: true
+                    });
+                }
+            });
+        }, 350);
+    },
+
+    processPhotoFromInput: function (inputId, prefix) {
+        var input = document.getElementById(inputId);
+        if (!input || !input.files || input.files.length === 0) {
+            return Promise.reject("No se ha seleccionado ningún archivo.");
+        }
+        var file = input.files[0];
+        return window.photoStudio.uploadAndProcessPhoto(file, prefix);
     },
 
     processImageFromFile: function (inputId, options) {

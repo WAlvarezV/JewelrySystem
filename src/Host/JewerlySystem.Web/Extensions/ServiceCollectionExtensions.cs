@@ -74,6 +74,7 @@ public static class ServiceCollectionExtensions
 
         // Inventory Image Intelligence & Catalog Service
         services.AddScoped<IInventoryImageService, InventoryImageService>();
+        services.AddSingleton<IInventoryPhotoJobManager, InventoryPhotoJobManager>();
 
         // Voice AI Intelligence & Operations
         services.AddVoiceIntelligence();

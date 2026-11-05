@@ -26,6 +26,10 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents(options =>
     {
         options.DetailedErrors = true;
+    })
+    .AddHubOptions(options =>
+    {
+        options.MaximumReceiveMessageSize = 32 * 1024 * 1024; // 32MB
     });
 builder.Services.AddAntDesign();
 builder.Services.AddColombiaLocalization();

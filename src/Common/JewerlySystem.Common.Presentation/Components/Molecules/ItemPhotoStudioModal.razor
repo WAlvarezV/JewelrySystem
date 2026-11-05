@@ -38,19 +38,36 @@
             <!-- 1. Vista Previa de la Imagen Procesada -->
             <div class="preview-container text-center">
                 <div class="preview-frame shadow-sm border rounded">
-                    <img src="@_processedPreviewDataUrl" alt="Previsualización de Joya / Reloj" class="img-fluid rounded" />
+                    <img src="@(_showRaw ? _rawPhotoUrl : _processedPreviewDataUrl)" alt="Previsualización de Joya / Reloj" class="img-fluid rounded" />
                 </div>
 
                 <div class="d-flex justify-content-center align-items-center gap-2 mt-3 flex-wrap">
-                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-                        <i class="bi bi-check2-all me-1"></i> Fondo Blanco Puro (#FFFFFF)
-                    </span>
-                    <span class="badge bg-warning-subtle text-dark border border-warning-subtle px-2 py-1">
-                        <i class="bi bi-shield-check me-1"></i> Sello Universal de Calidad
-                    </span>
-                    <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">
-                        <i class="bi bi-file-earmark-image me-1"></i> WebP Optimizado
-                    </span>
+                    @if (!_isFallback)
+                    {
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                            <i class="bi bi-check2-all me-1"></i> Fondo Blanco Vitrina (#FFFFFF)
+                        </span>
+                        <span class="badge bg-warning-subtle text-dark border border-warning-subtle px-2 py-1">
+                            <i class="bi bi-shield-check me-1"></i> Sello Universal de Calidad
+                        </span>
+                        <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">
+                            <i class="bi bi-file-earmark-image me-1"></i> WebP Optimizado
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+                            <i class="bi bi-shield-fill-check me-1"></i> Foto Original Asegurada en Servidor
+                        </span>
+                    }
+
+                    @if (!string.IsNullOrEmpty(_rawPhotoUrl) && _rawPhotoUrl != _processedPreviewDataUrl)
+                    {
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" @onclick="() => _showRaw = !_showRaw">
+                            <i class="bi @(_showRaw ? "bi-magic" : "bi-eye") me-1"></i>
+                            @(_showRaw ? "Ver con Fondo Blanco y Sello" : "Ver Foto Original sin Editar")
+                        </button>
+                    }
                 </div>
 
                 <div class="d-flex justify-content-center align-items-center gap-3 mt-4">
@@ -150,13 +167,13 @@
 
             <div class="studio-specs-notice mt-3 p-3 rounded border">
                 <div class="d-flex align-items-center gap-2 mb-1 text-primary fw-bold small">
-                    <i class="bi bi-magic text-warning"></i>
-                    <span>Estandarización Automática de Fotografía:</span>
+                    <i class="bi bi-shield-check text-warning"></i>
+                    <span>Garantía de Respaldo y Estandarización en Segundo Plano:</span>
                 </div>
                 <ul class="specs-list mb-0 small text-muted">
-                    <li><i class="bi bi-check-circle-fill text-success me-1"></i> <strong>Fondo blanco puro (#FFFFFF)</strong>: ilumina y elimina sombras del fondo de mesa o vitrina.</li>
-                    <li><i class="bi bi-check-circle-fill text-success me-1"></i> <strong>Marca de agua genérica</strong>: <em>FINE JEWELRY & LUXURY TIMEPIECES • PIEZA VERIFICADA</em> estampada sutilmente con ribete dorado.</li>
-                    <li><i class="bi bi-check-circle-fill text-success me-1"></i> <strong>Compresión WebP (&lt; 80 KB)</strong>: carga ultra veloz garantizada en celular y catálogo.</li>
+                    <li><i class="bi bi-check-circle-fill text-success me-1"></i> <strong>Respaldo instantáneo</strong>: la foto original del teléfono se asegura de inmediato en el servidor para que nunca se pierda.</li>
+                    <li><i class="bi bi-check-circle-fill text-success me-1"></i> <strong>Procesamiento en segundo plano</strong>: motor SkiaSharp de servidor normaliza a fondo blanco (#FFFFFF) y estampa el sello universal de lujo.</li>
+                    <li><i class="bi bi-check-circle-fill text-success me-1"></i> <strong>WebP ultraligero (&lt; 80 KB)</strong>: entrega máxima resolución en vitrina con carga instantánea en cualquier celular.</li>
                 </ul>
             </div>
         }
@@ -164,7 +181,7 @@
         @if (_isProcessing)
         {
             <div class="processing-overlay">
-                <Spin Tip="Estandarizando fondo blanco y sellando fotografía..." />
+                <Spin Tip="@(_processingStage ?? "Asegurando foto original y estandarizando en segundo plano...")" />
             </div>
         }
     </div>
@@ -174,7 +191,7 @@
     [Parameter] public bool Visible { get; set; }
     [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
     [Parameter] public string Title { get; set; } = "Estudio Fotográfico de Joyería & Relojes";
-    [Parameter] public string Subtitle { get; set; } = "Fotografíe la pieza o cargue una imagen. Se estandarizará automáticamente a fondo blanco de vitrina (#FFFFFF) y sello oficial.";
+    [Parameter] public string Subtitle { get; set; } = "Fotografíe la pieza o cargue una imagen. Se respaldará de inmediato y se estandarizará a fondo blanco de vitrina (#FFFFFF).";
     [Parameter] public string Prefix { get; set; } = "item";
     [Parameter] public EventCallback<string> OnImageSaved { get; set; }
 
@@ -183,13 +200,26 @@
     private readonly string _videoElementId = "live_video_" + Guid.NewGuid().ToString("N")[..8];
 
     private bool _isProcessing = false;
+    private string? _processingStage;
     private bool _isSaving = false;
     private bool _isLiveCameraActive = false;
+    private bool _showRaw = false;
+    private bool _isFallback = false;
+
     private string? _processedPreviewDataUrl;
+    private string? _rawPhotoUrl;
+
+    public class PhotoProcessResult
+    {
+        public string StandardizedUrl { get; set; } = string.Empty;
+        public string RawUrl { get; set; } = string.Empty;
+        public bool IsFallback { get; set; }
+    }
 
     private async Task StartLiveCameraAsync()
     {
         _isProcessing = true;
+        _processingStage = "Iniciando visor de cámara...";
         StateHasChanged();
 
         try
@@ -197,9 +227,7 @@
             _isLiveCameraActive = true;
             StateHasChanged();
 
-            // Esperar brevemente a que el elemento <video> esté en el DOM
             await Task.Delay(100);
-
             await JSRuntime.InvokeVoidAsync("photoStudio.startLiveCamera", _videoElementId, "environment");
         }
         catch (Exception ex)
@@ -210,6 +238,7 @@
         finally
         {
             _isProcessing = false;
+            _processingStage = null;
             StateHasChanged();
         }
     }
@@ -243,20 +272,16 @@
     private async Task CaptureLiveCameraAsync()
     {
         _isProcessing = true;
+        _processingStage = "Asegurando captura y estandarizando en segundo plano...";
         StateHasChanged();
 
         try
         {
-            var options = new
-            {
-                maxDimension = 900,
-                quality = 0.85,
-                applyWhitening = true,
-                applyWatermark = true
-            };
-
-            var dataUrl = await JSRuntime.InvokeAsync<string>("photoStudio.captureLiveFrame", _videoElementId, options);
-            _processedPreviewDataUrl = dataUrl;
+            var result = await JSRuntime.InvokeAsync<PhotoProcessResult>("photoStudio.captureLiveFrame", _videoElementId, Prefix);
+            _processedPreviewDataUrl = result.StandardizedUrl;
+            _rawPhotoUrl = result.RawUrl;
+            _isFallback = result.IsFallback;
+            _showRaw = false;
             _isLiveCameraActive = false;
         }
         catch (Exception ex)
@@ -266,6 +291,7 @@
         finally
         {
             _isProcessing = false;
+            _processingStage = null;
             StateHasChanged();
         }
     }
@@ -273,31 +299,32 @@
     private async Task HandleFileChosenAsync(string inputId)
     {
         _isProcessing = true;
+        _processingStage = "Asegurando fotografía en servidor y procesando en segundo plano...";
         StateHasChanged();
 
         try
         {
-            var options = new
-            {
-                maxDimension = 900,
-                quality = 0.85,
-                applyWhitening = true,
-                applyWatermark = true
-            };
+            var result = await JSRuntime.InvokeAsync<PhotoProcessResult>("photoStudio.processPhotoFromInput", inputId, Prefix);
+            _processedPreviewDataUrl = result.StandardizedUrl;
+            _rawPhotoUrl = result.RawUrl;
+            _isFallback = result.IsFallback;
+            _showRaw = false;
 
-            var dataUrl = await JSRuntime.InvokeAsync<string>("photoStudio.processImageFromFile", inputId, options);
-            _processedPreviewDataUrl = dataUrl;
-
-            // Limpiar el valor del input para permitir volver a disparar el evento si repite foto
             await JSRuntime.InvokeVoidAsync("photoStudio.resetFileInput", inputId);
+
+            if (_isFallback)
+            {
+                Message.Info("La fotografía fue asegurada exitosamente en el servidor.");
+            }
         }
         catch (Exception ex)
         {
-            Message.Error($"Error procesando fotografía: {ex.Message}");
+            Message.Error($"Error asegurando y procesando fotografía: {ex.Message}");
         }
         finally
         {
             _isProcessing = false;
+            _processingStage = null;
             StateHasChanged();
         }
     }
@@ -305,24 +332,35 @@
     private void ResetProcessing()
     {
         _processedPreviewDataUrl = null;
+        _rawPhotoUrl = null;
+        _showRaw = false;
+        _isFallback = false;
         StateHasChanged();
     }
 
     private async Task ConfirmAndSaveAsync()
     {
-        if (string.IsNullOrEmpty(_processedPreviewDataUrl)) return;
+        var targetUrl = _showRaw ? _rawPhotoUrl : _processedPreviewDataUrl;
+        if (string.IsNullOrEmpty(targetUrl)) return;
 
         _isSaving = true;
         StateHasChanged();
 
         try
         {
-            var savedUrl = await ImageService.SaveBase64ImageAsync(_processedPreviewDataUrl, Prefix);
-            Message.Success("¡Fotografía estandarizada y guardada exitosamente!");
+            string finalUrl = targetUrl;
+
+            // Si por alguna razón vino como DataURL Base64, persistirlo
+            if (targetUrl.StartsWith("data:image", StringComparison.OrdinalIgnoreCase))
+            {
+                finalUrl = await ImageService.SaveBase64ImageAsync(targetUrl, Prefix);
+            }
+
+            Message.Success("¡Fotografía asegurada y asignada al artículo exitosamente!");
 
             if (OnImageSaved.HasDelegate)
             {
-                await OnImageSaved.InvokeAsync(savedUrl);
+                await OnImageSaved.InvokeAsync(finalUrl);
             }
 
             await CloseModal();
@@ -342,6 +380,8 @@
     {
         await StopLiveCameraAsync();
         _processedPreviewDataUrl = null;
+        _rawPhotoUrl = null;
+        _showRaw = false;
         Visible = false;
         if (VisibleChanged.HasDelegate)
         {
