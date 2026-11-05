@@ -3,6 +3,7 @@ using JewerlySystem.Common.Domain;
 using JewerlySystem.Modules.Inventory.Application;
 using JewerlySystem.Modules.Inventory.Application.Commands;
 using JewerlySystem.Modules.Inventory.Application.DTOs;
+using JewerlySystem.Modules.Inventory.Application.Queries;
 using JewerlySystem.Modules.Inventory.Domain;
 using NSubstitute;
 using Xunit;
@@ -298,5 +299,102 @@ public class InventoryTests
             entityName: "Item",
             entityReference: "777",
             cancellationToken: Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task GetItemHistoryQueryHandler_ShouldReturnTimelineWithWhoWhenAndWhatOperation()
+    {
+        // Arrange
+        var repository = Substitute.For<IInventoryRepository>();
+        var item = new Item(
+            reference: 505,
+            costValue: 300_000,
+            dateOfEntry: new DateTime(2026, 10, 15, 10, 0, 0, DateTimeKind.Utc),
+            description: "Anillo de Esmeralda",
+            itemTypeId: 1
+        )
+        {
+            Id = 50,
+            CreatedAt = new DateTime(2026, 10, 15, 10, 0, 0, DateTimeKind.Utc),
+            CreatedBy = "walvarez",
+            LastModifiedAt = new DateTime(2026, 10, 20, 14, 30, 0, DateTimeKind.Utc),
+            LastModifiedBy = "ggil"
+        };
+
+        var jewel = new Jewel(50, 4.8, 280_000);
+        var itemTypes = new List<ItemType> { new(1, "Anillo") };
+
+        var activityLogs = new List<UserActivityLog>
+        {
+            new("pomona", "user-1", "ggil", "INVENTORY", ActionWeightRegistry.InventoryUpdateJewel,
+                ActionWeightRegistry.CategoryUpdate, "Actualizó peso de la joya Ref #505 a 4.8g", 4, "Item", "505")
+            {
+                Id = 1002,
+                CreatedAt = new DateTime(2026, 10, 20, 14, 30, 0, DateTimeKind.Utc)
+            },
+            new("pomona", "user-2", "walvarez", "INVENTORY", ActionWeightRegistry.InventoryCreateJewel,
+                ActionWeightRegistry.CategoryNewRecord, "Creó Joya Ref #505 - Anillo de Esmeralda (4.50g)", 10, "Item", "505")
+            {
+                Id = 1001,
+                CreatedAt = new DateTime(2026, 10, 15, 10, 0, 0, DateTimeKind.Utc)
+            }
+        };
+
+        repository.GetItemByReferenceAsync(505, Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<Item?>(item));
+        repository.GetJewelByItemIdAsync(50, Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<Jewel?>(jewel));
+        repository.GetWatchByItemIdAsync(50, Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<Watch?>(null));
+        repository.GetItemTypesAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<IReadOnlyList<ItemType>>(itemTypes));
+        repository.GetBrandsAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<IReadOnlyList<Brand>>(new List<Brand>()));
+        repository.GetItemActivityLogsAsync("505", Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<IReadOnlyList<UserActivityLog>>(activityLogs));
+
+        var handler = new GetItemHistoryQueryHandler(repository);
+        var query = new GetItemHistoryQuery(505);
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        var history = result.Value;
+        Assert.Equal(505, history.Reference);
+        Assert.Equal("walvarez", history.CreatedBy);
+        Assert.Equal("ggil", history.LastModifiedBy);
+        Assert.NotEmpty(history.Events);
+
+        // Verifica que los eventos contengan quién, cuándo y qué operación se hizo
+        var firstEvent = history.Events.First(); // Más reciente
+        Assert.Equal("ggil", firstEvent.PerformedBy);
+        Assert.Equal("Actualización de Joya", firstEvent.Operation);
+        Assert.Equal(new DateTime(2026, 10, 20, 14, 30, 0, DateTimeKind.Utc), firstEvent.Timestamp);
+
+        var creationEvent = history.Events.Last(); // Creación
+        Assert.Equal("walvarez", creationEvent.PerformedBy);
+        Assert.Equal("Creación de Joya", creationEvent.Operation);
+        Assert.Equal(new DateTime(2026, 10, 15, 10, 0, 0, DateTimeKind.Utc), creationEvent.Timestamp);
+    }
+
+    [Fact]
+    public async Task GetItemHistoryQueryHandler_WhenItemNotFound_ShouldReturnNotFoundFailure()
+    {
+        // Arrange
+        var repository = Substitute.For<IInventoryRepository>();
+        repository.GetItemByReferenceAsync(999, Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<Item?>(null));
+
+        var handler = new GetItemHistoryQueryHandler(repository);
+        var query = new GetItemHistoryQuery(999);
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        Assert.False(result.IsSuccess);
+        Assert.Equal("Items.NotFound", result.Error.Code);
     }
 }

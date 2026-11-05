@@ -1,3 +1,4 @@
+using JewerlySystem.Common.Domain;
 using JewerlySystem.Modules.Inventory.Application;
 using JewerlySystem.Modules.Inventory.Application.DTOs;
 using JewerlySystem.Modules.Inventory.Domain;
@@ -84,6 +85,15 @@ public class InventoryRepository : IInventoryRepository
     public async Task<IReadOnlyList<ItemType>> GetItemTypesAsync(CancellationToken ct = default)
     {
         return await _dbContext.ItemTypes.AsNoTracking().OrderBy(t => t.Name).ToListAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<UserActivityLog>> GetItemActivityLogsAsync(string reference, CancellationToken ct = default)
+    {
+        return await _dbContext.UserActivityLogs
+            .AsNoTracking()
+            .Where(x => x.EntityName == "Item" && x.EntityReference == reference)
+            .OrderByDescending(x => x.CreatedAt)
+            .ToListAsync(ct);
     }
 
     public async Task<int> GetNextItemReferenceAsync(CancellationToken ct = default)

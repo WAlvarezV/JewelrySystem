@@ -1,0 +1,17 @@
+{
+  "name": "manual-capacitacion",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Genera la versión de capacitación (Word y PDF) de los manuales de usuario a partir de src/Host/JewerlySystem.Web/wwwroot/docs/modules/<Modulo>/ManualUsuario.md",
+  "scripts": {
+    "build": "node build-manual.js",
+    "pdf": "powershell -NoProfile -ExecutionPolicy Bypass -File finalize.ps1",
+    "preview": "powershell -NoProfile -ExecutionPolicy Bypass -File finalize.ps1 -Preview",
+    "inventario": "node build-manual.js inventario && powershell -NoProfile -ExecutionPolicy Bypass -File finalize.ps1"
+  },
+  "dependencies": {
+    "@ant-design/icons-svg": "4.6.0",
+    "docx": "9.11.0",
+    "playwright-core": "1.62.1"
+  }
+}

@@ -1,0 +1,202 @@
+@namespace JewerlySystem.Modules.Inventory.Presentation.Components
+@inject ISender Sender
+@inject IMessageService Message
+
+<SoftDrawer Visible="@IsOpen"
+            Title="@($"Historial y Auditoría — Ref #{Reference}")"
+            Width="560"
+            Placement="DrawerPlacement.Right"
+            OnClose="HandleClose">
+    <div class="audit-history-panel">
+        @if (_isLoading)
+        {
+            <div class="audit-loading-container">
+                <Icon Type="loading" Theme="@IconThemeType.Outline" Style="font-size: 24px; color: #1890ff;" />
+                <span class="mt-2 text-muted">Cargando historial cronológico del artículo...</span>
+            </div>
+        }
+        else if (_history != null)
+        {
+            <!-- Tarjeta de Resumen y Estado -->
+            <div class="audit-summary-card mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <span class="badge-type me-1">@_history.ItemType</span>
+                        <strong class="item-ref-title">Ref #@_history.Reference</strong>
+                    </div>
+                    <div>
+                        @if (_history.DateOfSale != null)
+                        {
+                            <SoftTag Color="red">Descargado / Vendido</SoftTag>
+                        }
+                        else if (_history.Active)
+                        {
+                            <SoftTag Color="green">Activo en Catálogo</SoftTag>
+                        }
+                        else
+                        {
+                            <SoftTag Color="default">Inactivo</SoftTag>
+                        }
+                    </div>
+                </div>
+
+                <div class="audit-item-desc text-muted mb-2">
+                    @_history.Description
+                </div>
+
+                <div class="audit-stats-grid">
+                    <div class="stat-col">
+                        <span class="stat-label">Costo Registro:</span>
+                        <span class="stat-value">@_history.CostValue.ToString("C0")</span>
+                    </div>
+
+                    @if (_history.Weight.HasValue)
+                    {
+                        <div class="stat-col">
+                            <span class="stat-label">Gramaje:</span>
+                            <span class="stat-value">@_history.Weight.Value.ToString("F2") g</span>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(_history.CaseNumber))
+                    {
+                        <div class="stat-col">
+                            <span class="stat-label">Caja / Marca:</span>
+                            <span class="stat-value">#@_history.CaseNumber (@(_history.BrandName ?? "S/M"))</span>
+                        </div>
+                    }
+
+                    <div class="stat-col">
+                        <span class="stat-label">Creado por:</span>
+                        <span class="stat-value text-primary">@_history.CreatedBy</span>
+                    </div>
+
+                    <div class="stat-col">
+                        <span class="stat-label">Fecha Creación:</span>
+                        <span class="stat-value">@_history.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+
+                    @if (_history.LastModifiedAt.HasValue)
+                    {
+                        <div class="stat-col">
+                            <span class="stat-label">Última Edición:</span>
+                            <span class="stat-value text-secondary">
+                                @_history.LastModifiedAt.Value.ToString("dd/MM/yyyy HH:mm") (@(_history.LastModifiedBy ?? "Sistema"))
+                            </span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Trazabilidad Cronológica -->
+            <div class="audit-section-header mb-3">
+                <Icon Type="history" Theme="@IconThemeType.Outline" Style="color: #0f766e; margin-right: 6px;" />
+                <span>Línea de Tiempo de Operaciones (@_history.Events.Count eventos)</span>
+            </div>
+
+            @if (_history.Events.Any())
+            {
+                <Timeline Mode="@TimelineMode.Left" Class="audit-timeline">
+                    @foreach (var entry in _history.Events)
+                    {
+                        <TimelineItem Color="@entry.TagColor">
+                            <div class="timeline-event-content">
+                                <div class="timeline-event-header">
+                                    <SoftTag Color="@entry.TagColor">@entry.Operation</SoftTag>
+                                    <span class="timeline-timestamp">
+                                        <Icon Type="clock-circle" Theme="@IconThemeType.Outline" Style="margin-right: 2px;" />
+                                        @entry.Timestamp.ToString("dd/MM/yyyy HH:mm:ss")
+                                    </span>
+                                </div>
+
+                                <div class="timeline-user-bar">
+                                    <Icon Type="user" Theme="@IconThemeType.Outline" Style="margin-right: 4px; color: #64748b;" />
+                                    <span class="user-name">@entry.PerformedBy</span>
+                                    <span class="category-pill">@entry.Category</span>
+                                </div>
+
+                                <div class="timeline-event-body">
+                                    @entry.Description
+                                </div>
+                            </div>
+                        </TimelineItem>
+                    }
+                </Timeline>
+            }
+            else
+            {
+                <div class="text-center py-4 text-muted">
+                    <Icon Type="info-circle" Theme="@IconThemeType.Outline" Style="font-size: 24px; margin-bottom: 8px;" />
+                    <p>No se encontraron eventos registrados para este artículo.</p>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-center py-4 text-muted">
+                <Icon Type="exclamation-circle" Theme="@IconThemeType.Outline" Style="font-size: 24px; margin-bottom: 8px; color: #faad14;" />
+                <p>No se encontró la información del artículo o referencia seleccionada.</p>
+            </div>
+        }
+    </div>
+</SoftDrawer>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public int? Reference { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private bool _isLoading;
+    private int? _lastLoadedReference;
+    private ItemHistoryResponseDto? _history;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsOpen && Reference.HasValue && Reference.Value != _lastLoadedReference)
+        {
+            await LoadHistoryAsync(Reference.Value);
+        }
+        else if (!IsOpen)
+        {
+            _lastLoadedReference = null;
+        }
+    }
+
+    private async Task LoadHistoryAsync(int reference)
+    {
+        try
+        {
+            _isLoading = true;
+            _history = null;
+            _lastLoadedReference = reference;
+            StateHasChanged();
+
+            var result = await Sender.Send(new GetItemHistoryQuery(reference));
+            if (result.IsSuccess)
+            {
+                _history = result.Value;
+            }
+            else
+            {
+                Message.Error(result.Error.Message ?? "No se pudo cargar el historial del artículo.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Message.Error($"Error cargando historial: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleClose()
+    {
+        if (OnClose.HasDelegate)
+        {
+            await OnClose.InvokeAsync();
+        }
+    }
+}

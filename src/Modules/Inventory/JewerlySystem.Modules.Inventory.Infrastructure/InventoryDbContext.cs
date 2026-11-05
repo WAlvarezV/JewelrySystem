@@ -1,3 +1,4 @@
+using JewerlySystem.Common.Domain;
 using JewerlySystem.Common.Infrastructure;
 using JewerlySystem.Modules.Inventory.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ public class InventoryDbContext : DbContext
     public DbSet<Watch> Watches => Set<Watch>();
     public DbSet<Brand> Brands => Set<Brand>();
     public DbSet<ItemType> ItemTypes => Set<ItemType>();
+    public DbSet<UserActivityLog> UserActivityLogs => Set<UserActivityLog>();
 
     public InventoryDbContext(DbContextOptions<InventoryDbContext> options, AuditInterceptor? auditInterceptor = null)
         : base(options)
@@ -32,5 +34,11 @@ public class InventoryDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ItemConfig).Assembly);
+
+        modelBuilder.Entity<UserActivityLog>(b =>
+        {
+            b.ToTable("UserActivityLogs");
+            b.HasKey(x => x.Id);
+        });
     }
 }

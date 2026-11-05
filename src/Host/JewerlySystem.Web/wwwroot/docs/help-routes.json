@@ -1,0 +1,32 @@
+{
+  "/inventory": {
+    "moduleName": "Inventory",
+    "documentPath": "docs/modules/Inventory/ManualUsuario.md",
+    "sectionAnchor": "proceso-1-catalogo",
+    "customTitle": "Ayuda — Catálogo de Inventario"
+  },
+  "/jewelry": {
+    "moduleName": "Inventory",
+    "documentPath": "docs/modules/Inventory/ManualUsuario.md",
+    "sectionAnchor": "proceso-1-catalogo",
+    "customTitle": "Ayuda — Catálogo de Joyería"
+  },
+  "/watches": {
+    "moduleName": "Inventory",
+    "documentPath": "docs/modules/Inventory/ManualUsuario.md",
+    "sectionAnchor": "proceso-1-catalogo",
+    "customTitle": "Ayuda — Catálogo de Relojería"
+  },
+  "/inventory/discharge": {
+    "moduleName": "Inventory",
+    "documentPath": "docs/modules/Inventory/ManualUsuario.md",
+    "sectionAnchor": "proceso-5-descargo",
+    "customTitle": "Ayuda — Descargo y Venta de Artículos"
+  },
+  "/inventory/consolidated": {
+    "moduleName": "Inventory",
+    "documentPath": "docs/modules/Inventory/ManualUsuario.md",
+    "sectionAnchor": "proceso-1-catalogo",
+    "customTitle": "Ayuda — Consolidado de Inventario"
+  }
+}

@@ -246,8 +246,12 @@
                             }
                         </div>
                     </ActionColumn>
-                    <ActionColumn Title="Acciones" Align="ColumnAlign.Center" Width="140px">
+                    <ActionColumn Title="Acciones" Align="ColumnAlign.Center" Width="175px">
                         <div class="d-flex align-items-center justify-content-center gap-1">
+                            <SoftActionButton Icon="history"
+                                              TooltipText="Historial del Artículo"
+                                              OnClick="@(() => OpenItemHistory(context.Reference))" />
+
                             <SoftActionButton Icon="eye"
                                               TooltipText="Ver Detalle"
                                               OnClick="@(() => OpenViewJewelDrawer(context))" />
@@ -489,8 +493,12 @@
                             }
                         </div>
                     </ActionColumn>
-                    <ActionColumn Title="Acciones" Align="ColumnAlign.Center" Width="140px">
+                    <ActionColumn Title="Acciones" Align="ColumnAlign.Center" Width="175px">
                         <div class="d-flex align-items-center justify-content-center gap-1">
+                            <SoftActionButton Icon="history"
+                                              TooltipText="Historial del Artículo"
+                                              OnClick="@(() => OpenItemHistory(context.Reference))" />
+
                             <SoftActionButton Icon="eye"
                                               TooltipText="Ver Detalle"
                                               OnClick="@(() => OpenViewWatchDrawer(context))" />
@@ -887,6 +895,7 @@
         </ChildContent>
         <FooterContent>
             <SoftButton OnClick="@(() => _drawerDetailVisible = false)">Cerrar</SoftButton>
+            <SoftButton Type="@ButtonType.Dashed" Icon="history" OnClick="@(() => OpenItemHistory(_detailReference))">Historial</SoftButton>
             <SoftButton Type="@ButtonType.Default" Icon="edit" OnClick="SwitchFromDetailToEdit">Editar Artículo</SoftButton>
             @if (_detailActive)
             {
@@ -1064,6 +1073,11 @@
             </SoftButton>
         </FooterContent>
     </SoftDrawer>
+
+    <!-- Panel de Historial y Auditoría del Artículo -->
+    <ItemAuditHistoryPanel IsOpen="@_historyPanelOpen"
+                           Reference="@_selectedHistoryReference"
+                           OnClose="CloseItemHistory" />
 </div>
 
 @code {
@@ -1072,6 +1086,22 @@
 
     private string _activeGroup = "JEWELRY";
     private bool _isLoading = true;
+
+    // Estado del Historial de Artículo
+    private bool _historyPanelOpen;
+    private int? _selectedHistoryReference;
+
+    private void OpenItemHistory(int reference)
+    {
+        _selectedHistoryReference = reference;
+        _historyPanelOpen = true;
+    }
+
+    private void CloseItemHistory()
+    {
+        _historyPanelOpen = false;
+        _selectedHistoryReference = null;
+    }
 
     // Master Catalog Data
     private List<JewelListItemDto> _jewelryItems = new();
