@@ -152,8 +152,46 @@
                 </div>
             </SoftFormBox>
 
-            <!-- 3. Descripción -->
-            <SoftFormBox Title="3. Descripción del Artículo"
+            <!-- 3. Fotografía de Vitrina & Catálogo -->
+            <SoftFormBox Title="3. Fotografía de Vitrina & Catálogo"
+                         InfoTooltip="Captura con celular normalizada a fondo blanco puro (#FFFFFF) y sello de autenticidad">
+                @if (!string.IsNullOrEmpty(_formModel.ImageUrl))
+                {
+                    <div class="d-flex align-items-center gap-3 p-3 bg-white rounded border">
+                        <div style="width: 90px; height: 90px; background: #fff; border-radius: 8px; border: 1px solid #e8e8e8; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                            <img src="@_formModel.ImageUrl" alt="Joya" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+                        </div>
+                        <div class="flex-grow-1">
+                            <span class="badge bg-success-subtle text-success border border-success-subtle mb-1">
+                                <i class="bi bi-check-circle-fill me-1"></i> Fotografía Estandarizada (&lt; 80 KB WebP)
+                            </span>
+                            <p class="small text-muted mb-2">Fondo blanco puro vitrina (#FFFFFF) y sello genérico de alta gama aplicado.</p>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" @onclick="() => _photoStudioModalVisible = true">
+                                    <i class="bi bi-camera me-1"></i> Repetir / Cambiar Foto
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2" @onclick="() => _formModel.ImageUrl = null">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="p-3 bg-white rounded border text-center">
+                        <button type="button" class="btn btn-primary rounded-pill px-4 py-2" @onclick="() => _photoStudioModalVisible = true">
+                            <i class="bi bi-camera-fill me-1 fs-5"></i> Tomar Foto con Cámara / Celular (Estudio Blanco)
+                        </button>
+                        <p class="small text-muted mt-2 mb-0">
+                            <i class="bi bi-magic me-1 text-warning"></i> La fotografía capturada con la cámara de su celular será estandarizada automáticamente a fondo blanco puro de vitrina con sello de autenticidad.
+                        </p>
+                    </div>
+                }
+            </SoftFormBox>
+
+            <!-- 4. Descripción -->
+            <SoftFormBox Title="4. Descripción del Artículo"
                          InfoTooltip="Detalle de metal (oro 18k, 14k, plata), piedras preciosas, tallas, grabado...">
                 <SoftVoiceTextArea @bind-Value="_formModel.Description"
                                    Label="Descripción de la Joya"
@@ -186,6 +224,13 @@
     </div>
 </div>
 
+<!-- Modal de Estudio Fotográfico con Celular -->
+<ItemPhotoStudioModal @bind-Visible="_photoStudioModalVisible"
+                      Title="Fotografiar Joya con Celular"
+                      Subtitle="Capture la joya con la cámara trasera de su celular. Se estandarizará automáticamente a fondo blanco puro de vitrina (#FFFFFF) y sello genérico oficial."
+                      Prefix="jewel"
+                      OnImageSaved="@(url => { _formModel.ImageUrl = url; StateHasChanged(); })" />
+
 @code {
     [Parameter] public int? ItemTypeId { get; set; }
 
@@ -197,6 +242,7 @@
     private int _saleValue = 0;
     private bool _isSubmitting = false;
     private string? _lastRegisteredReference;
+    private bool _photoStudioModalVisible = false;
 
     private bool NeedLengthField => _formModel.ItemTypeId is 3 or 4; // Cadenas (3) o Pulseras (4)
 
@@ -241,7 +287,8 @@
             GramValue = 0,
             GramSaleValue = 0,
             Weight = 0,
-            Description = string.Empty
+            Description = string.Empty,
+            ImageUrl = null
         };
         RecalculateValues();
     }
@@ -261,7 +308,8 @@
             GramSaleValue = prevGramSaleValue,
             Weight = 0,
             Length = null,
-            Description = string.Empty
+            Description = string.Empty,
+            ImageUrl = null
         };
         RecalculateValues();
     }
@@ -332,7 +380,8 @@
                 Weight: _formModel.Weight,
                 GramValue: _formModel.GramValue,
                 Length: _formModel.Length,
-                ProviderId: _formModel.ProviderId
+                ProviderId: _formModel.ProviderId,
+                ImageUrl: _formModel.ImageUrl
             );
 
             var result = await Sender.Send(cmd);
@@ -378,5 +427,6 @@
         public int GramSaleValue { get; set; } = 0;
         public int? Length { get; set; }
         public string Description { get; set; } = string.Empty;
+        public string? ImageUrl { get; set; }
     }
 }

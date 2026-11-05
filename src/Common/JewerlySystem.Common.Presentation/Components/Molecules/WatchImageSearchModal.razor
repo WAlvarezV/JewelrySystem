@@ -1,0 +1,251 @@
+@using Microsoft.JSInterop
+@using JewerlySystem.Common.Application.Inventory
+@inject IJSRuntime JSRuntime
+@inject IInventoryImageService ImageService
+@inject IMessageService Message
+
+<Modal Visible="@Visible"
+       VisibleChanged="@VisibleChanged"
+       Title="Búsqueda Inteligente de Imagen de Relojería"
+       Footer="@null"
+       Width="820"
+       Centered="true"
+       DestroyOnClose="true"
+       OnCancel="@CloseModal">
+
+    <div class="watch-search-modal">
+        <!-- Barra de Búsqueda de Parámetros de Reloj -->
+        <div class="search-params-box p-3 rounded mb-3 border">
+            <div class="row g-2 align-items-end">
+                <div class="col-12 col-md-4">
+                    <label class="form-label small fw-bold text-muted mb-1">Marca:</label>
+                    <Input Placeholder="Ej. Rolex, Casio, Seiko..." @bind-Value="_brandQuery" />
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label small fw-bold text-muted mb-1">Modelo:</label>
+                    <Input Placeholder="Ej. Submariner, PRX, G-Shock..." @bind-Value="_modelQuery" />
+                </div>
+                <div class="col-12 col-md-4 d-flex gap-2">
+                    <Button Type="@ButtonType.Primary"
+                            Icon="search"
+                            Block="true"
+                            Loading="@_isSearching"
+                            OnClick="@ExecuteSearchAsync">
+                        Buscar
+                    </Button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Banner de Fallback Directo de Cámara Móvil -->
+        <div class="fallback-camera-banner d-flex align-items-center justify-content-between p-3 rounded mb-3 border">
+            <div class="d-flex align-items-center gap-3">
+                <div class="camera-icon-badge">
+                    <i class="bi bi-camera-fill"></i>
+                </div>
+                <div>
+                    <h5 class="mb-0 fw-bold">¿No encuentras el modelo o es una pieza personalizada?</h5>
+                    <span class="small text-muted">Fotografía la pieza física con la cámara de tu celular. El sistema aplicará fondo blanco puro y sello de calidad.</span>
+                </div>
+            </div>
+            <Button Type="@ButtonType.Dashed"
+                    OnClick="@OpenPhotoStudio">
+                <i class="bi bi-camera me-1"></i> Tomar Foto con Celular
+            </Button>
+        </div>
+
+        <!-- Resultados de la Búsqueda -->
+        @if (_isSearching)
+        {
+            <div class="text-center py-5">
+                <Spin Tip="Consultando catálogos de relojería..." />
+            </div>
+        }
+        else if (_searchResults.Count > 0)
+        {
+            <div class="results-header d-flex justify-content-between align-items-center mb-2">
+                <span class="small text-muted fw-bold">
+                    <i class="bi bi-images me-1 text-primary"></i> Se encontraron @_searchResults.Count imágenes disponibles. Haga clic para seleccionar:
+                </span>
+                <span class="badge bg-light text-muted border">Selección en 1 Clic</span>
+            </div>
+
+            <div class="watch-grid">
+                @foreach (var item in _searchResults)
+                {
+                    <div class="watch-card @(item == _selectedItem ? "selected" : "")"
+                         @onclick="() => SelectImageAsync(item)">
+                        <div class="watch-img-wrap">
+                            <img src="@item.ThumbnailUrl" alt="@item.Title" loading="lazy" />
+                            <span class="source-badge">@item.Source</span>
+                        </div>
+                        <div class="watch-card-info">
+                            <p class="watch-card-title" title="@item.Title">@item.Title</p>
+                            <span class="btn-choose">
+                                <i class="bi bi-check2"></i> Seleccionar
+                            </span>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else if (_hasSearched)
+        {
+            <div class="empty-state text-center py-5">
+                <div class="empty-icon text-muted mb-2">
+                    <i class="bi bi-search fs-1"></i>
+                </div>
+                <h5 class="fw-bold text-dark">No se encontraron imágenes para esta combinación</h5>
+                <p class="text-muted small mb-3">Intente buscando únicamente por la Marca o el Modelo, o utilice la cámara para fotografiar el reloj físico.</p>
+                <Button Type="@ButtonType.Primary"
+                        Size="@ButtonSize.Large"
+                        OnClick="@OpenPhotoStudio">
+                    <i class="bi bi-camera me-1"></i> Tomar Foto con Cámara / Celular
+                </Button>
+            </div>
+        }
+
+        @if (_isProcessingSelection)
+        {
+            <div class="selection-overlay">
+                <Spin Tip="Estandarizando fondo blanco puro y sellando fotografía..." />
+            </div>
+        }
+    </div>
+</Modal>
+
+<!-- Modal de Estudio Fotográfico de Cámara Integrado -->
+<ItemPhotoStudioModal @bind-Visible="_photoStudioVisible"
+                      Title="Fotografiar Reloj Físico"
+                      Subtitle="Tome la fotografía del reloj con la cámara trasera de su celular. Se normalizará a fondo blanco y marca de agua oficial."
+                      Prefix="watch"
+                      OnImageSaved="@HandleStudioPhotoSaved" />
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
+    [Parameter] public string Brand { get; set; } = string.Empty;
+    [Parameter] public string Model { get; set; } = string.Empty;
+    [Parameter] public string CaseNumber { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> OnImageSelected { get; set; }
+
+    private string _brandQuery = string.Empty;
+    private string _modelQuery = string.Empty;
+    private bool _isSearching = false;
+    private bool _hasSearched = false;
+    private bool _isProcessingSelection = false;
+    private bool _photoStudioVisible = false;
+
+    private List<ImageSearchResult> _searchResults = new();
+    private ImageSearchResult? _selectedItem;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Visible && !_hasSearched)
+        {
+            _brandQuery = Brand;
+            _modelQuery = Model;
+            if (!string.IsNullOrWhiteSpace(_brandQuery) || !string.IsNullOrWhiteSpace(_modelQuery))
+            {
+                await ExecuteSearchAsync();
+            }
+        }
+    }
+
+    private async Task ExecuteSearchAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_brandQuery) && string.IsNullOrWhiteSpace(_modelQuery))
+        {
+            Message.Warning("Ingrese la marca o el modelo del reloj a buscar.");
+            return;
+        }
+
+        _isSearching = true;
+        _hasSearched = true;
+        StateHasChanged();
+
+        try
+        {
+            _searchResults = await ImageService.SearchWatchImagesAsync(_brandQuery, _modelQuery, CaseNumber);
+        }
+        catch (Exception ex)
+        {
+            Message.Error($"Error consultando catálogo: {ex.Message}");
+            _searchResults = new();
+        }
+        finally
+        {
+            _isSearching = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SelectImageAsync(ImageSearchResult item)
+    {
+        _selectedItem = item;
+        _isProcessingSelection = true;
+        StateHasChanged();
+
+        try
+        {
+            // Procesar la imagen seleccionada en Canvas para asegurar estandarización uniforme:
+            // fondo blanco puro #FFFFFF + marca de agua genérica + WebP < 80KB
+            var options = new
+            {
+                maxDimension = 900,
+                quality = 0.85,
+                applyWhitening = true,
+                applyWatermark = true
+            };
+
+            var dataUrl = await JSRuntime.InvokeAsync<string>("photoStudio.processDataUrl", item.ImageUrl, options);
+
+            // Guardar localmente en el servidor
+            var savedUrl = await ImageService.SaveBase64ImageAsync(dataUrl, "watch");
+
+            Message.Success("¡Fotografía seleccionada, estandarizada y asignada!");
+
+            if (OnImageSelected.HasDelegate)
+            {
+                await OnImageSelected.InvokeAsync(savedUrl);
+            }
+
+            await CloseModal();
+        }
+        catch (Exception ex)
+        {
+            Message.Error($"Error al estandarizar la imagen seleccionada: {ex.Message}");
+        }
+        finally
+        {
+            _isProcessingSelection = false;
+            StateHasChanged();
+        }
+    }
+
+    private void OpenPhotoStudio()
+    {
+        _photoStudioVisible = true;
+    }
+
+    private async Task HandleStudioPhotoSaved(string savedUrl)
+    {
+        if (OnImageSelected.HasDelegate)
+        {
+            await OnImageSelected.InvokeAsync(savedUrl);
+        }
+        await CloseModal();
+    }
+
+    private async Task CloseModal()
+    {
+        Visible = false;
+        _hasSearched = false;
+        _searchResults.Clear();
+        _selectedItem = null;
+        if (VisibleChanged.HasDelegate)
+        {
+            await VisibleChanged.InvokeAsync(false);
+        }
+    }
+}

@@ -126,7 +126,9 @@ public class GetItemByReferenceQueryHandler : IQueryHandler<GetItemByReferenceQu
             typeName,
             item.ProviderId,
             jewel?.ToDto(),
-            watch?.ToDto()
+            watch?.ToDto(),
+            item.ImageUrl,
+            item.ThumbnailUrl
         );
 
         return Result.Success<ItemDetailDto?>(detail);
@@ -245,7 +247,9 @@ public class GetInventoryCatalogQueryHandler : IQueryHandler<GetInventoryCatalog
                     brandId,
                     brandName ?? "General",
                     w?.GenderType ?? GenderType.Unisex,
-                    w?.CaseNumber ?? "-"
+                    w?.CaseNumber ?? "-",
+                    w?.Model ?? "",
+                    item.ImageUrl
                 ));
             }
             else // Jewelry
@@ -267,7 +271,8 @@ public class GetInventoryCatalogQueryHandler : IQueryHandler<GetInventoryCatalog
                     item.ProviderId,
                     j?.Weight ?? 0,
                     j?.GramValue ?? 0,
-                    j?.Length
+                    j?.Length,
+                    item.ImageUrl
                 ));
             }
         }

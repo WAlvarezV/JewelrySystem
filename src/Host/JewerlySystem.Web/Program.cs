@@ -1,3 +1,4 @@
+using JewerlySystem.Web.Endpoints;
 using JewerlySystem.Web.Extensions;
 using Microsoft.AspNetCore.HttpOverrides;
 
@@ -64,6 +65,7 @@ app.UseAuthorization();
 
 // Map Endpoints & Interactive Blazor Components
 app.MapAuthEndpoints();
+app.MapInventoryImageEndpoints();
 app.MapAppRazorComponents();
 
 // Database Initialization & Startup Seeding

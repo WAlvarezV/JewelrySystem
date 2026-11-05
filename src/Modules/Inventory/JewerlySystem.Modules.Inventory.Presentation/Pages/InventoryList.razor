@@ -202,6 +202,20 @@
                        Responsive="true"
                        Size="TableSize.Middle"
                        RowKey="@(x => x.Id.ToString())">
+                    <PropertyColumn Property="c => c.ImageUrl" Title="Foto" Width="60px">
+                        @if (!string.IsNullOrEmpty(context.ImageUrl))
+                        {
+                            <div class="table-img-thumb" @onclick="@(() => OpenImagePreview(context.ImageUrl, context.Description))" title="Ver foto">
+                                <img src="@context.ImageUrl" alt="@context.Description" loading="lazy" />
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="table-img-placeholder" title="Sin foto">
+                                <i class="bi bi-gem"></i>
+                            </div>
+                        }
+                    </PropertyColumn>
                     <PropertyColumn Property="c => c.Reference" Title="Referencia" Width="110px">
                         <span class="ref-badge">#@context.Reference.ToString("D4")</span>
                     </PropertyColumn>
@@ -450,14 +464,31 @@
                        Responsive="true"
                        Size="TableSize.Middle"
                        RowKey="@(x => x.Id.ToString())">
+                    <PropertyColumn Property="c => c.ImageUrl" Title="Foto" Width="60px">
+                        @if (!string.IsNullOrEmpty(context.ImageUrl))
+                        {
+                            <div class="table-img-thumb" @onclick="@(() => OpenImagePreview(context.ImageUrl, $"{context.BrandName} {context.Model}"))" title="Ver foto">
+                                <img src="@context.ImageUrl" alt="@context.Description" loading="lazy" />
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="table-img-placeholder" title="Sin foto">
+                                <i class="bi bi-watch"></i>
+                            </div>
+                        }
+                    </PropertyColumn>
                     <PropertyColumn Property="c => c.Reference" Title="Referencia" Width="110px">
                         <span class="ref-badge">#@context.Reference.ToString("D4")</span>
                     </PropertyColumn>
-                    <PropertyColumn Property="c => c.BrandName" Title="Marca" Width="130px">
+                    <PropertyColumn Property="c => c.BrandName" Title="Marca" Width="120px">
                         <SoftTag Color="cyan">
                             <i class="bi bi-watch me-1"></i>
                             @context.BrandName
                         </SoftTag>
+                    </PropertyColumn>
+                    <PropertyColumn Property="c => c.Model" Title="Modelo" Width="130px">
+                        <span class="fw-semibold text-dark">@(string.IsNullOrEmpty(context.Model) ? "-" : context.Model)</span>
                     </PropertyColumn>
                     <PropertyColumn Property="c => c.CaseNumber" Title="Caja / Serial" Width="130px">
                         <span class="fw-semibold text-dark">@context.CaseNumber</span>
@@ -719,14 +750,21 @@
                 <SoftFormBox Title="2. Identificación y Precios"
                              InfoTooltip="Serial de tapa o caja y valores de costo y venta de vitrina">
                     <div class="row g-3 align-items-end">
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-3">
                             <FormItem Label="Nro. de Caja / Serial" Required="true">
                                 <Input Placeholder="Ej. W-984210"
                                        @bind-Value="_watchFormModel.CaseNumber" />
                             </FormItem>
                         </div>
 
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-3">
+                            <FormItem Label="Modelo del Reloj" Required="true">
+                                <Input Placeholder="Ej. Submariner Date"
+                                       @bind-Value="_watchFormModel.Model" />
+                            </FormItem>
+                        </div>
+
+                        <div class="col-12 col-md-3">
                             <FormItem Label="Valor Costo ($)" Required="true">
                                 <AntDesign.InputNumber TValue="int"
                                                        @bind-Value="_watchFormModel.CostValue"
@@ -738,7 +776,7 @@
                             </FormItem>
                         </div>
 
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-3">
                             <FormItem Label="Valor Venta Sugerido ($)">
                                 <AntDesign.InputNumber TValue="int"
                                                        @bind-Value="_watchFormModel.SaleValue"
@@ -762,8 +800,42 @@
                     </div>
                 </SoftFormBox>
 
-                <!-- 3. Descripción -->
-                <SoftFormBox Title="3. Descripción del Reloj"
+                <!-- 3. Fotografía de Vitrina & Catálogo -->
+                <SoftFormBox Title="3. Fotografía de Vitrina & Catálogo"
+                             InfoTooltip="Fotografía estandarizada a fondo blanco puro (#FFFFFF) y sello genérico de autenticidad">
+                    @if (!string.IsNullOrEmpty(_watchFormModel.ImageUrl))
+                    {
+                        <div class="d-flex align-items-center gap-3 p-2 bg-light rounded border">
+                            <div style="width: 70px; height: 70px; background: #fff; border-radius: 6px; border: 1px solid #e8e8e8; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                <img src="@_watchFormModel.ImageUrl" alt="Reloj" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+                            </div>
+                            <div class="flex-grow-1">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle mb-1">
+                                    <i class="bi bi-check2-circle me-1"></i> Imagen Estandarizada (&lt; 60 KB WebP)
+                                </span>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-xs btn-outline-primary rounded-pill px-2" @onclick="OpenSearchForNewWatch">Cambiar Foto</button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2" @onclick="OpenCameraForNewWatch">Cámara Celular</button>
+                                    <button type="button" class="btn btn-xs btn-outline-danger rounded-pill px-2" @onclick="() => _watchFormModel.ImageUrl = null">Quitar</button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" @onclick="OpenSearchForNewWatch">
+                                <i class="bi bi-search me-1"></i> Buscar Foto por Marca y Modelo
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" @onclick="OpenCameraForNewWatch">
+                                <i class="bi bi-camera me-1"></i> Tomar con Celular
+                            </button>
+                        </div>
+                    }
+                </SoftFormBox>
+
+                <!-- 4. Descripción -->
+                <SoftFormBox Title="4. Descripción del Reloj"
                              InfoTooltip="Modelo, movimiento automático, cuarzo, pulso, cristal, estado estético...">
                     <SoftVoiceTextArea @bind-Value="_watchFormModel.Description"
                                        Label="Descripción Detallada"
@@ -816,6 +888,51 @@
                 </div>
             </div>
 
+            <!-- Fotografía de Vitrina & Catálogo -->
+            <SoftFormBox Title="Fotografía de Vitrina & Catálogo">
+                @if (!string.IsNullOrEmpty(_detailImageUrl))
+                {
+                    <div class="detail-photo-hero text-center">
+                        <div class="detail-photo-frame" @onclick="@(() => OpenImagePreview(_detailImageUrl, _detailDescription))">
+                            <img src="@_detailImageUrl" alt="@_detailDescription" />
+                            <span class="photo-overlay-zoom">
+                                <i class="bi bi-zoom-in me-1"></i> Ampliar
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-center align-items-center gap-2 mt-2 flex-wrap">
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small">
+                                <i class="bi bi-check2-circle me-1"></i> Fondo Blanco Vitrina (#FFFFFF)
+                            </span>
+                            <span class="badge bg-warning-subtle text-dark border border-warning-subtle px-2 py-1 small">
+                                <i class="bi bi-shield-check me-1"></i> Sello Universal de Calidad
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-center gap-2 mt-3">
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" @onclick="OpenPhotoPickerForDetail">
+                                <i class="bi bi-arrow-repeat me-1"></i> Actualizar Fotografía
+                            </button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="p-3 bg-light rounded-3 border text-center">
+                        <p class="text-muted small mb-2">Este artículo aún no cuenta con fotografía estandarizada en el catálogo.</p>
+                        <div class="d-flex justify-content-center gap-2 flex-wrap">
+                            @if (!_detailIsJewel)
+                            {
+                                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" @onclick="OpenSearchForDetail">
+                                    <i class="bi bi-search me-1"></i> Buscar Foto por Marca y Modelo
+                                </button>
+                            }
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" @onclick="OpenCameraForDetail">
+                                <i class="bi bi-camera me-1"></i> Tomar con Celular (Fondo Blanco)
+                            </button>
+                        </div>
+                    </div>
+                }
+            </SoftFormBox>
+
             <SoftFormBox Title="Descripción y Características">
                 <p class="fs-6 text-dark mb-0 fw-medium">@_detailDescription</p>
             </SoftFormBox>
@@ -849,6 +966,10 @@
                         <div class="col-6 col-md-4">
                             <span class="text-muted small d-block">Marca</span>
                             <strong class="text-dark">@_detailTitle</strong>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <span class="text-muted small d-block">Modelo</span>
+                            <strong class="text-dark">@(string.IsNullOrEmpty(_detailModel) ? "-" : _detailModel)</strong>
                         </div>
                         <div class="col-6 col-md-4">
                             <span class="text-muted small d-block">Número de Caja / Serial</span>
@@ -985,7 +1106,31 @@
                     </div>
                 </SoftFormBox>
 
-                <SoftFormBox Title="3. Descripción de la Joya">
+                <SoftFormBox Title="3. Fotografía de la Joya">
+                    @if (!string.IsNullOrEmpty(_editJewelModel.ImageUrl))
+                    {
+                        <div class="d-flex align-items-center gap-3 p-2 bg-light rounded border">
+                            <div style="width: 70px; height: 70px; background: #fff; border-radius: 6px; border: 1px solid #e8e8e8; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                <img src="@_editJewelModel.ImageUrl" alt="Joya" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+                            </div>
+                            <div>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle mb-1">Fondo Blanco Vitrina (#FFFFFF)</span>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-xs btn-outline-primary rounded-pill px-2" @onclick="OpenCameraForEditJewel">Cambiar Foto</button>
+                                    <button type="button" class="btn btn-xs btn-outline-danger rounded-pill px-2" @onclick="() => _editJewelModel.ImageUrl = null">Quitar</button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" @onclick="OpenCameraForEditJewel">
+                            <i class="bi bi-camera me-1"></i> Tomar Foto con Celular (Fondo Blanco)
+                        </button>
+                    }
+                </SoftFormBox>
+
+                <SoftFormBox Title="4. Descripción de la Joya">
                     <SoftVoiceTextArea @bind-Value="_editJewelModel.Description"
                                        Label="Descripción"
                                        Required="true"
@@ -1013,12 +1158,12 @@
             <Form Model="@_editWatchModel" Layout="@FormLayout.Vertical">
                 <SoftFormBox Title="1. Identificación del Reloj">
                     <div class="row g-3">
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-3">
                             <FormItem Label="N° de Referencia">
                                 <Input Value="@_editWatchModel.Reference.ToString("D4")" Disabled="true" />
                             </FormItem>
                         </div>
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-3">
                             <FormItem Label="Marca" Required="true">
                                 <Select TItem="BrandDto"
                                         TItemValue="int"
@@ -1029,7 +1174,13 @@
                                         EnableSearch="true" />
                             </FormItem>
                         </div>
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-3">
+                            <FormItem Label="Modelo del Reloj" Required="true">
+                                <Input Placeholder="Ej. Submariner Date"
+                                       @bind-Value="_editWatchModel.Model" />
+                            </FormItem>
+                        </div>
+                        <div class="col-12 col-md-3">
                             <FormItem Label="Género" Required="true">
                                 <Select TItem="GenderTypeOption"
                                         TItemValue="GenderType"
@@ -1056,7 +1207,37 @@
                     </div>
                 </SoftFormBox>
 
-                <SoftFormBox Title="2. Descripción del Reloj">
+                <SoftFormBox Title="2. Fotografía del Reloj">
+                    @if (!string.IsNullOrEmpty(_editWatchModel.ImageUrl))
+                    {
+                        <div class="d-flex align-items-center gap-3 p-2 bg-light rounded border">
+                            <div style="width: 70px; height: 70px; background: #fff; border-radius: 6px; border: 1px solid #e8e8e8; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                <img src="@_editWatchModel.ImageUrl" alt="Reloj" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+                            </div>
+                            <div class="flex-grow-1">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle mb-1">Fondo Blanco Vitrina (#FFFFFF)</span>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-xs btn-outline-primary rounded-pill px-2" @onclick="OpenSearchForEditWatch">Cambiar</button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2" @onclick="OpenCameraForEditWatch">Cámara Celular</button>
+                                    <button type="button" class="btn btn-xs btn-outline-danger rounded-pill px-2" @onclick="() => _editWatchModel.ImageUrl = null">Quitar</button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" @onclick="OpenSearchForEditWatch">
+                                <i class="bi bi-search me-1"></i> Buscar Foto por Marca y Modelo
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" @onclick="OpenCameraForEditWatch">
+                                <i class="bi bi-camera me-1"></i> Tomar con Celular
+                            </button>
+                        </div>
+                    }
+                </SoftFormBox>
+
+                <SoftFormBox Title="3. Descripción del Reloj">
                     <SoftVoiceTextArea @bind-Value="_editWatchModel.Description"
                                        Label="Descripción"
                                        Required="true"
@@ -1078,6 +1259,32 @@
     <ItemAuditHistoryPanel IsOpen="@_historyPanelOpen"
                            Reference="@_selectedHistoryReference"
                            OnClose="CloseItemHistory" />
+
+    <!-- Modal de Ampliación de Fotografía (Lightbox) -->
+    <Modal Visible="@_imagePreviewModalVisible"
+           Title="@_imagePreviewTitle"
+           Footer="@null"
+           Centered="true"
+           Width="680"
+           OnCancel="@(() => _imagePreviewModalVisible = false)">
+        <div class="text-center p-3" style="background: #ffffff; border-radius: 8px;">
+            <img src="@_imagePreviewUrl" alt="@_imagePreviewTitle" style="max-width: 100%; max-height: 520px; object-fit: contain; border-radius: 6px;" />
+        </div>
+    </Modal>
+
+    <!-- Modal de Búsqueda Inteligente de Relojes -->
+    <WatchImageSearchModal @bind-Visible="@_watchSearchModalVisible"
+                           Brand="@_watchSearchBrand"
+                           Model="@_watchSearchModel"
+                           CaseNumber="@_watchSearchCaseNumber"
+                           OnImageSelected="@HandleWatchImageSelected" />
+
+    <!-- Modal de Estudio Fotográfico con Celular -->
+    <ItemPhotoStudioModal @bind-Visible="@_photoStudioModalVisible"
+                          Title="@(_activeStudioIsJewel ? "Fotografiar Joya con Celular" : "Fotografiar Reloj con Celular")"
+                          Subtitle="Capture la pieza con la cámara trasera de su celular. Se normalizará a fondo blanco vitrina (#FFFFFF) y marca de agua genérica oficial."
+                          Prefix="@(_activeStudioIsJewel ? "jewel" : "watch")"
+                          OnImageSaved="@HandleStudioPhotoSaved" />
 </div>
 
 @code {
@@ -1198,6 +1405,151 @@
     private bool _detailActive;
     private int? _detailProviderId;
     private string _detailProviderName = string.Empty;
+    private string? _detailImageUrl;
+    private string _detailModel = string.Empty;
+
+    // Image Preview & Studio State
+    private bool _imagePreviewModalVisible;
+    private string _imagePreviewUrl = string.Empty;
+    private string _imagePreviewTitle = string.Empty;
+
+    private bool _watchSearchModalVisible;
+    private string _watchSearchBrand = string.Empty;
+    private string _watchSearchModel = string.Empty;
+    private string _watchSearchCaseNumber = string.Empty;
+    private Action<string>? _onWatchImageChosen;
+
+    private bool _photoStudioModalVisible;
+    private bool _activeStudioIsJewel;
+    private Action<string>? _onStudioPhotoSaved;
+
+    private void OpenImagePreview(string url, string title)
+    {
+        _imagePreviewUrl = url;
+        _imagePreviewTitle = title;
+        _imagePreviewModalVisible = true;
+    }
+
+    private void OpenSearchForDetail()
+    {
+        _watchSearchBrand = _detailTitle;
+        _watchSearchModel = _detailModel;
+        _watchSearchCaseNumber = _detailCaseNumber;
+        _onWatchImageChosen = async url =>
+        {
+            await AssignPhotoToCurrentDetail(url);
+        };
+        _watchSearchModalVisible = true;
+    }
+
+    private void OpenCameraForDetail()
+    {
+        _activeStudioIsJewel = _detailIsJewel;
+        _onStudioPhotoSaved = async url =>
+        {
+            await AssignPhotoToCurrentDetail(url);
+        };
+        _photoStudioModalVisible = true;
+    }
+
+    private void OpenPhotoPickerForDetail()
+    {
+        if (_detailIsJewel)
+        {
+            OpenCameraForDetail();
+        }
+        else
+        {
+            OpenSearchForDetail();
+        }
+    }
+
+    private async Task AssignPhotoToCurrentDetail(string url)
+    {
+        _detailImageUrl = url;
+        var res = await Sender.Send(new UpdateItemImageCommand(_detailReference, url));
+        if (res.IsSuccess)
+        {
+            Message.Success($"Fotografía asignada a la Ref #{_detailReference} exitosamente.");
+            await LoadInventoryCatalogAsync();
+        }
+        else
+        {
+            Message.Error(res.Error.Message);
+        }
+        StateHasChanged();
+    }
+
+    private void OpenSearchForNewWatch()
+    {
+        var brand = _brands.FirstOrDefault(b => b.Id == _watchFormModel.BrandId)?.Name ?? string.Empty;
+        _watchSearchBrand = brand;
+        _watchSearchModel = _watchFormModel.Model;
+        _watchSearchCaseNumber = _watchFormModel.CaseNumber;
+        _onWatchImageChosen = url =>
+        {
+            _watchFormModel.ImageUrl = url;
+            StateHasChanged();
+        };
+        _watchSearchModalVisible = true;
+    }
+
+    private void OpenCameraForNewWatch()
+    {
+        _activeStudioIsJewel = false;
+        _onStudioPhotoSaved = url =>
+        {
+            _watchFormModel.ImageUrl = url;
+            StateHasChanged();
+        };
+        _photoStudioModalVisible = true;
+    }
+
+    private void OpenSearchForEditWatch()
+    {
+        var brand = _brands.FirstOrDefault(b => b.Id == _editWatchModel.BrandId)?.Name ?? string.Empty;
+        _watchSearchBrand = brand;
+        _watchSearchModel = _editWatchModel.Model;
+        _watchSearchCaseNumber = _editWatchModel.CaseNumber;
+        _onWatchImageChosen = url =>
+        {
+            _editWatchModel.ImageUrl = url;
+            StateHasChanged();
+        };
+        _watchSearchModalVisible = true;
+    }
+
+    private void OpenCameraForEditWatch()
+    {
+        _activeStudioIsJewel = false;
+        _onStudioPhotoSaved = url =>
+        {
+            _editWatchModel.ImageUrl = url;
+            StateHasChanged();
+        };
+        _photoStudioModalVisible = true;
+    }
+
+    private void OpenCameraForEditJewel()
+    {
+        _activeStudioIsJewel = true;
+        _onStudioPhotoSaved = url =>
+        {
+            _editJewelModel.ImageUrl = url;
+            StateHasChanged();
+        };
+        _photoStudioModalVisible = true;
+    }
+
+    private void HandleWatchImageSelected(string url)
+    {
+        _onWatchImageChosen?.Invoke(url);
+    }
+
+    private void HandleStudioPhotoSaved(string url)
+    {
+        _onStudioPhotoSaved?.Invoke(url);
+    }
 
     // Edit Drawers State
     private bool _drawerEditJewelVisible;
@@ -1512,7 +1864,7 @@
                     .ToList();
 
                 _watchItems = result.Value.Watches
-                    .Select(w => w with { SearchIndex = NormalizeSearchText($"{w.Reference} {w.BrandName} {w.CaseNumber} {w.GenderType} {w.Description}") })
+                    .Select(w => w with { SearchIndex = NormalizeSearchText($"{w.Reference} {w.BrandName} {w.Model} {w.CaseNumber} {w.GenderType} {w.Description}") })
                     .ToList();
 
                 _itemTypes = result.Value.ItemTypes;
@@ -1617,7 +1969,8 @@
                 Weight: _jewelFormModel.Weight,
                 GramValue: _jewelFormModel.GramValue,
                 Length: _jewelFormModel.Length,
-                ProviderId: _jewelFormModel.ProviderId
+                ProviderId: _jewelFormModel.ProviderId,
+                ImageUrl: _jewelFormModel.ImageUrl
             );
 
             var result = await Sender.Send(cmd);
@@ -1653,11 +2006,13 @@
         _watchFormModel = new WatchFormModel
         {
             BrandId = _brands.FirstOrDefault()?.Id ?? 1,
+            Model = string.Empty,
             GenderType = GenderType.Hombre,
             CostValue = 0,
             SaleValue = 0,
             CaseNumber = string.Empty,
-            Description = string.Empty
+            Description = string.Empty,
+            ImageUrl = null
         };
         _drawerWatchVisible = true;
     }
@@ -1672,6 +2027,12 @@
         if (_watchFormModel.BrandId <= 0)
         {
             Message.Warning("Debe seleccionar una marca de reloj válida.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_watchFormModel.Model))
+        {
+            Message.Warning("El modelo del reloj es requerido.");
             return;
         }
 
@@ -1704,7 +2065,9 @@
                 GenderType: _watchFormModel.GenderType,
                 CaseNumber: _watchFormModel.CaseNumber.Trim(),
                 BrandId: _watchFormModel.BrandId,
-                ProviderId: _watchFormModel.ProviderId
+                Model: _watchFormModel.Model.Trim(),
+                ProviderId: _watchFormModel.ProviderId,
+                ImageUrl: _watchFormModel.ImageUrl
             );
 
             var result = await Sender.Send(cmd);
@@ -1743,17 +2106,20 @@
         public int GramSaleValue { get; set; } = 0;
         public int? Length { get; set; }
         public string Description { get; set; } = string.Empty;
+        public string? ImageUrl { get; set; }
     }
 
     public class WatchFormModel
     {
         public int BrandId { get; set; }
+        public string Model { get; set; } = string.Empty;
         public GenderType GenderType { get; set; } = GenderType.Hombre;
         public int? ProviderId { get; set; }
         public string CaseNumber { get; set; } = string.Empty;
         public int CostValue { get; set; } = 0;
         public int SaleValue { get; set; } = 0;
         public string Description { get; set; } = string.Empty;
+        public string? ImageUrl { get; set; }
     }
 
     public class EditJewelModel
@@ -1766,17 +2132,20 @@
         public int CostValue { get; set; }
         public int? Length { get; set; }
         public string Description { get; set; } = string.Empty;
+        public string? ImageUrl { get; set; }
     }
 
     public class EditWatchModel
     {
         public int Reference { get; set; }
         public int BrandId { get; set; }
+        public string Model { get; set; } = string.Empty;
         public GenderType GenderType { get; set; } = GenderType.Hombre;
         public int? ProviderId { get; set; }
         public string CaseNumber { get; set; } = string.Empty;
         public int CostValue { get; set; }
         public string Description { get; set; } = string.Empty;
+        public string? ImageUrl { get; set; }
     }
 
     private void OpenViewJewelDrawer(JewelListItemDto jewel)
@@ -1796,6 +2165,8 @@
         _detailActive = jewel.Active;
         _detailProviderId = jewel.ProviderId;
         _detailProviderName = _providers.FirstOrDefault(p => p.Id == jewel.ProviderId)?.FullName ?? "Stock Interno / General";
+        _detailImageUrl = jewel.ImageUrl;
+        _detailModel = string.Empty;
         _drawerDetailVisible = true;
     }
 
@@ -1815,6 +2186,8 @@
         _detailActive = watch.Active;
         _detailProviderId = watch.ProviderId;
         _detailProviderName = _providers.FirstOrDefault(p => p.Id == watch.ProviderId)?.FullName ?? "Stock Interno / General";
+        _detailImageUrl = watch.ImageUrl;
+        _detailModel = watch.Model;
         _drawerDetailVisible = true;
     }
 
@@ -1829,7 +2202,8 @@
             GramValue = jewel.GramValue,
             CostValue = jewel.CostValue,
             Length = jewel.Length,
-            ProviderId = jewel.ProviderId
+            ProviderId = jewel.ProviderId,
+            ImageUrl = jewel.ImageUrl
         };
         _drawerEditJewelVisible = true;
     }
@@ -1840,11 +2214,13 @@
         {
             Reference = watch.Reference,
             BrandId = watch.BrandId,
+            Model = watch.Model,
             Description = watch.Description,
             CaseNumber = watch.CaseNumber,
             GenderType = watch.GenderType,
             CostValue = watch.CostValue,
-            ProviderId = watch.ProviderId
+            ProviderId = watch.ProviderId,
+            ImageUrl = watch.ImageUrl
         };
         _drawerEditWatchVisible = true;
     }
@@ -1896,7 +2272,8 @@
                 _editJewelModel.GramValue,
                 _editJewelModel.CostValue,
                 _editJewelModel.Length,
-                _editJewelModel.ProviderId
+                _editJewelModel.ProviderId,
+                _editJewelModel.ImageUrl
             );
 
             var res = await Sender.Send(cmd);
@@ -1925,17 +2302,25 @@
             return;
         }
 
+        if (string.IsNullOrWhiteSpace(_editWatchModel.Model))
+        {
+            Message.Error("El modelo del reloj es obligatorio.");
+            return;
+        }
+
         _isSavingEditWatch = true;
         try
         {
             var cmd = new UpdateWatchItemCommand(
                 _editWatchModel.Reference,
                 _editWatchModel.BrandId,
+                _editWatchModel.Model.Trim(),
                 _editWatchModel.Description.Trim(),
                 _editWatchModel.CaseNumber?.Trim() ?? "-",
                 _editWatchModel.GenderType,
                 _editWatchModel.CostValue,
-                _editWatchModel.ProviderId
+                _editWatchModel.ProviderId,
+                _editWatchModel.ImageUrl
             );
 
             var res = await Sender.Send(cmd);

@@ -1,0 +1,221 @@
+@using Microsoft.JSInterop
+@using JewerlySystem.Common.Application.Inventory
+@inject IJSRuntime JSRuntime
+@inject IInventoryImageService ImageService
+@inject IMessageService Message
+
+<Modal Visible="@Visible"
+       VisibleChanged="@VisibleChanged"
+       Title="@Title"
+       Footer="@null"
+       Width="680"
+       Centered="true"
+       DestroyOnClose="true"
+       OnCancel="@CloseModal">
+
+    <div class="photo-studio-modal">
+        <p class="studio-description text-muted mb-3">
+            @Subtitle
+        </p>
+
+        <!-- Inputs ocultos para captura directa de cámara móvil y selección de archivo -->
+        <input type="file"
+               id="@_cameraInputId"
+               accept="image/*"
+               capture="environment"
+               class="d-none"
+               @onchange="() => HandleFileChosenAsync(_cameraInputId)" />
+
+        <input type="file"
+               id="@_fileInputId"
+               accept="image/png, image/jpeg, image/webp"
+               class="d-none"
+               @onchange="() => HandleFileChosenAsync(_fileInputId)" />
+
+        @if (string.IsNullOrEmpty(_processedPreviewDataUrl))
+        {
+            <!-- Panel de Captura Inicial -->
+            <div class="capture-actions-grid">
+                <div class="capture-card primary-capture" @onclick="TriggerCamera">
+                    <div class="icon-circle gold-circle">
+                        <i class="bi bi-camera-fill"></i>
+                    </div>
+                    <h4>Tomar Foto con Celular</h4>
+                    <p>Activa la cámara trasera del dispositivo móvil para fotografiar la joya o reloj en vitrina.</p>
+                    <span class="btn btn-sm btn-primary rounded-pill px-3 mt-2">
+                        <i class="bi bi-camera me-1"></i> Abrir Cámara
+                    </span>
+                </div>
+
+                <div class="capture-card secondary-capture" @onclick="TriggerFileUpload">
+                    <div class="icon-circle neutral-circle">
+                        <i class="bi bi-folder2-open"></i>
+                    </div>
+                    <h4>Subir desde Archivo</h4>
+                    <p>Carga una fotografía existente (JPG, PNG, WebP) desde tu computador o galería.</p>
+                    <span class="btn btn-sm btn-outline-secondary rounded-pill px-3 mt-2">
+                        <i class="bi bi-upload me-1"></i> Explorar Archivo
+                    </span>
+                </div>
+            </div>
+
+            <div class="studio-specs-notice mt-3 p-3 rounded border">
+                <div class="d-flex align-items-center gap-2 mb-1 text-primary fw-bold small">
+                    <i class="bi bi-magic text-warning"></i>
+                    <span>Estandarización Automática de Fotografía:</span>
+                </div>
+                <ul class="specs-list mb-0 small text-muted">
+                    <li><i class="bi bi-check-circle-fill text-success me-1"></i> <strong>Fondo blanco puro (#FFFFFF)</strong>: ilumina y elimina sombras del fondo de mesa o vitrina.</li>
+                    <li><i class="bi bi-check-circle-fill text-success me-1"></i> <strong>Marca de agua genérica</strong>: <em>FINE JEWELRY & LUXURY TIMEPIECES • PIEZA VERIFICADA</em> estampada sutilmente.</li>
+                    <li><i class="bi bi-check-circle-fill text-success me-1"></i> <strong>Compresión WebP (&lt; 80 KB)</strong>: carga ultra veloz garantizada en celular y catálogo.</li>
+                </ul>
+            </div>
+        }
+        else
+        {
+            <!-- Vista Previa de la Imagen Procesada -->
+            <div class="preview-container text-center">
+                <div class="preview-frame shadow-sm border rounded">
+                    <img src="@_processedPreviewDataUrl" alt="Previsualización de Joya / Reloj" class="img-fluid rounded" />
+                </div>
+
+                <div class="d-flex justify-content-center align-items-center gap-2 mt-3 flex-wrap">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                        <i class="bi bi-check2-all me-1"></i> Fondo Blanco Puro (#FFFFFF)
+                    </span>
+                    <span class="badge bg-warning-subtle text-dark border border-warning-subtle px-2 py-1">
+                        <i class="bi bi-shield-check me-1"></i> Sello Universal de Calidad
+                    </span>
+                    <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">
+                        <i class="bi bi-file-earmark-image me-1"></i> WebP Optimizado
+                    </span>
+                </div>
+
+                <div class="d-flex justify-content-center align-items-center gap-3 mt-4">
+                    <Button Type="@ButtonType.Default"
+                            Size="@ButtonSize.Large"
+                            OnClick="@ResetProcessing"
+                            Disabled="@_isSaving">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Repetir Fotografía
+                    </Button>
+
+                    <Button Type="@ButtonType.Primary"
+                            Size="@ButtonSize.Large"
+                            Loading="@_isSaving"
+                            OnClick="@ConfirmAndSaveAsync">
+                        <i class="bi bi-check-circle me-1"></i> Guardar y Asignar al Artículo
+                    </Button>
+                </div>
+            </div>
+        }
+
+        @if (_isProcessing)
+        {
+            <div class="processing-overlay">
+                <Spin Tip="Estandarizando fondo blanco y sellando fotografía..." />
+            </div>
+        }
+    </div>
+</Modal>
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
+    [Parameter] public string Title { get; set; } = "Estudio Fotográfico de Joyería & Relojes";
+    [Parameter] public string Subtitle { get; set; } = "Captura con la cámara trasera de tu celular o carga una foto. Se normalizará a fondo blanco de vitrina con sello de autenticidad.";
+    [Parameter] public string Prefix { get; set; } = "item";
+    [Parameter] public EventCallback<string> OnImageSaved { get; set; }
+
+    private readonly string _cameraInputId = "camera_input_" + Guid.NewGuid().ToString("N")[..8];
+    private readonly string _fileInputId = "file_input_" + Guid.NewGuid().ToString("N")[..8];
+
+    private bool _isProcessing = false;
+    private bool _isSaving = false;
+    private string? _processedPreviewDataUrl;
+
+    private async Task TriggerCamera()
+    {
+        await JSRuntime.InvokeVoidAsync("eval", $"document.getElementById('{_cameraInputId}').click()");
+    }
+
+    private async Task TriggerFileUpload()
+    {
+        await JSRuntime.InvokeVoidAsync("eval", $"document.getElementById('{_fileInputId}').click()");
+    }
+
+    private async Task HandleFileChosenAsync(string inputId)
+    {
+        _isProcessing = true;
+        StateHasChanged();
+
+        try
+        {
+            // Ejecutar procesamiento en Canvas (redimensión, fondo blanco, marca de agua genérica y WebP)
+            var options = new
+            {
+                maxDimension = 900,
+                quality = 0.85,
+                applyWhitening = true,
+                applyWatermark = true
+            };
+
+            var dataUrl = await JSRuntime.InvokeAsync<string>("photoStudio.processImageFromFile", inputId, options);
+            _processedPreviewDataUrl = dataUrl;
+        }
+        catch (Exception ex)
+        {
+            Message.Error($"Error procesando fotografía: {ex.Message}");
+        }
+        finally
+        {
+            _isProcessing = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ResetProcessing()
+    {
+        _processedPreviewDataUrl = null;
+        StateHasChanged();
+    }
+
+    private async Task ConfirmAndSaveAsync()
+    {
+        if (string.IsNullOrEmpty(_processedPreviewDataUrl)) return;
+
+        _isSaving = true;
+        StateHasChanged();
+
+        try
+        {
+            var savedUrl = await ImageService.SaveBase64ImageAsync(_processedPreviewDataUrl, Prefix);
+            Message.Success("¡Fotografía estandarizada y guardada exitosamente!");
+
+            if (OnImageSaved.HasDelegate)
+            {
+                await OnImageSaved.InvokeAsync(savedUrl);
+            }
+
+            await CloseModal();
+        }
+        catch (Exception ex)
+        {
+            Message.Error($"Error al guardar la fotografía: {ex.Message}");
+        }
+        finally
+        {
+            _isSaving = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task CloseModal()
+    {
+        _processedPreviewDataUrl = null;
+        Visible = false;
+        if (VisibleChanged.HasDelegate)
+        {
+            await VisibleChanged.InvokeAsync(false);
+        }
+    }
+}

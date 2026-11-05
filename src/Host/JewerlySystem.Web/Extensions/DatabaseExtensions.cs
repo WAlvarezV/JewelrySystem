@@ -36,6 +36,7 @@ public static class DatabaseExtensions
                 await using var tenantDb = new JewerlyDbContext(optionsBuilder.Options);
                 await tenantDb.Database.EnsureCreatedAsync();
                 await EnsureUserActivityLogsTableAsync(tenantDb, logger);
+                await EnsureInventoryColumnsAsync(tenantDb, logger);
 
                 // 3. Seed navigation modules and security
                 if (tenant.Id == "pomona")
@@ -410,6 +411,22 @@ public static class DatabaseExtensions
         catch (Exception ex)
         {
             logger.LogWarning(ex, "Could not ensure UserActivityLogs table exists: {Message}", ex.Message);
+        }
+    }
+
+    private static async Task EnsureInventoryColumnsAsync(JewerlyDbContext tenantDb, ILogger logger)
+    {
+        try
+        {
+            await tenantDb.Database.ExecuteSqlRawAsync(@"
+                ALTER TABLE ""Items"" ADD COLUMN IF NOT EXISTS ""ImageUrl"" VARCHAR(1000);
+                ALTER TABLE ""Items"" ADD COLUMN IF NOT EXISTS ""ThumbnailUrl"" VARCHAR(1000);
+                ALTER TABLE ""Watches"" ADD COLUMN IF NOT EXISTS ""Model"" VARCHAR(150);
+            ");
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Note on inventory columns migration: {Message}", ex.Message);
         }
     }
 }

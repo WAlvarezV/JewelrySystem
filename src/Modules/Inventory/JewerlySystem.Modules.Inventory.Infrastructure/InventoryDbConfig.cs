@@ -32,6 +32,8 @@ public class ItemConfig : IEntityTypeConfiguration<Item>
         builder.ToTable("Items");
         builder.HasKey(p => p.Id);
         builder.Property(p => p.Description).HasMaxLength(2000);
+        builder.Property(p => p.ImageUrl).HasMaxLength(1000).IsRequired(false);
+        builder.Property(p => p.ThumbnailUrl).HasMaxLength(1000).IsRequired(false);
     }
 }
 
@@ -55,5 +57,6 @@ public class WatchConfig : IEntityTypeConfiguration<Watch>
         builder.Property(p => p.GenderType)
             .HasMaxLength(30)
             .HasConversion(converter);
+        builder.Property(p => p.Model).HasMaxLength(150).IsRequired(false);
     }
 }

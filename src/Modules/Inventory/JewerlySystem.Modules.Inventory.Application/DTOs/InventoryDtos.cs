@@ -12,7 +12,9 @@ public record ItemDto(
     string Description,
     bool Active,
     int ItemTypeId,
-    int? ProviderId);
+    int? ProviderId,
+    string? ImageUrl = null,
+    string? ThumbnailUrl = null);
 
 public record JewelDto(
     int Id,
@@ -26,6 +28,7 @@ public record WatchDto(
     int ItemId,
     GenderType GenderType,
     string CaseNumber,
+    string Model,
     int BrandId);
 
 public record BrandDto(
@@ -54,7 +57,9 @@ public record ItemDetailDto(
     string ItemTypeName,
     int? ProviderId,
     JewelDto? Jewel,
-    WatchDto? Watch);
+    WatchDto? Watch,
+    string? ImageUrl = null,
+    string? ThumbnailUrl = null);
 
 public record JewelSummaryDto(
     string Type,
@@ -90,7 +95,8 @@ public record JewelListItemDto(
     int? ProviderId,
     double Weight,
     int GramValue,
-    int? Length)
+    int? Length,
+    string? ImageUrl = null)
 {
     public string SearchIndex { get; init; } = string.Empty;
 }
@@ -109,7 +115,9 @@ public record WatchListItemDto(
     int BrandId,
     string BrandName,
     GenderType GenderType,
-    string CaseNumber)
+    string CaseNumber,
+    string Model,
+    string? ImageUrl = null)
 {
     public string SearchIndex { get; init; } = string.Empty;
 }

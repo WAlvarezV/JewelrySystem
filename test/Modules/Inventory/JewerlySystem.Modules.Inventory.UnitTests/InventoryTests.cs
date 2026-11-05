@@ -98,7 +98,9 @@ public class InventoryTests
             ItemTypeId: 5,
             GenderType: GenderType.Hombre,
             CaseNumber: "T137.410.11",
-            BrandId: 2
+            Model: "PRX Powermatic 80",
+            BrandId: 2,
+            ImageUrl: "/uploads/inventory/catalog/watch_test.webp"
         );
 
         // Act
@@ -110,8 +112,8 @@ public class InventoryTests
         Assert.Equal(2, result.Value.Reference);
         Assert.Equal("0002", result.Value.FormattedReference);
         await repository.Received(1).CreateWatchItemAtomicAsync(
-            Arg.Is<Item>(i => i.CostValue == 1_200_000 && i.Description == "Reloj Tissot PRX"),
-            Arg.Is<Watch>(w => w.CaseNumber == "T137.410.11" && w.BrandId == 2),
+            Arg.Is<Item>(i => i.CostValue == 1_200_000 && i.Description == "Reloj Tissot PRX" && i.ImageUrl == "/uploads/inventory/catalog/watch_test.webp"),
+            Arg.Is<Watch>(w => w.CaseNumber == "T137.410.11" && w.BrandId == 2 && w.Model == "PRX Powermatic 80"),
             Arg.Any<CancellationToken>()
         );
     }
@@ -121,7 +123,7 @@ public class InventoryTests
     {
         // Arrange
         var validator = new CreateWatchItemCommandValidator();
-        var command = new CreateWatchItemCommand(0, DateTime.UtcNow, "Reloj", 5, GenderType.Hombre, "SN123", 1);
+        var command = new CreateWatchItemCommand(0, DateTime.UtcNow, "Reloj", 5, GenderType.Hombre, "SN123", "Submariner", 1);
 
         // Act
         var result = validator.TestValidate(command);
@@ -396,5 +398,64 @@ public class InventoryTests
         // Assert
         Assert.False(result.IsSuccess);
         Assert.Equal("Items.NotFound", result.Error.Code);
+    }
+
+    [Fact]
+    public async Task UpdateWatchItemCommandHandler_ShouldUpdateModelAndImageUrl()
+    {
+        // Arrange
+        var repository = Substitute.For<IInventoryRepository>();
+        var item = new Item(105, 500_000, DateTime.UtcNow, "Reloj Vintage", 5) { Id = 30 };
+        var watch = new Watch(30, GenderType.Hombre, "SN-OLD", 1, "Antiguo") { Id = 30 };
+
+        repository.GetItemByReferenceAsync(105, Arg.Any<CancellationToken>()).Returns(item);
+        repository.GetWatchByItemIdAsync(30, Arg.Any<CancellationToken>()).Returns(watch);
+
+        var handler = new UpdateWatchItemCommandHandler(repository);
+        var command = new UpdateWatchItemCommand(
+            Reference: 105,
+            BrandId: 3,
+            Model: "Submariner 41mm",
+            Description: "Reloj Rolex Submariner Edición Especial",
+            CaseNumber: "SN-NEW-99",
+            GenderType: GenderType.Hombre,
+            CostValue: 650_000,
+            ProviderId: 2,
+            ImageUrl: "/uploads/inventory/catalog/watch_sub.webp"
+        );
+
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal("Submariner 41mm", watch.Model);
+        Assert.Equal("SN-NEW-99", watch.CaseNumber);
+        Assert.Equal(3, watch.BrandId);
+        Assert.Equal("/uploads/inventory/catalog/watch_sub.webp", item.ImageUrl);
+        Assert.Equal("/uploads/inventory/catalog/watch_sub.webp", item.ThumbnailUrl);
+        await repository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task UpdateItemImageCommandHandler_ShouldSetImageUrlAndThumbnailUrl()
+    {
+        // Arrange
+        var repository = Substitute.For<IInventoryRepository>();
+        var item = new Item(200, 300_000, DateTime.UtcNow, "Anillo Esmeralda", 1) { Id = 40 };
+
+        repository.GetItemByReferenceAsync(200, Arg.Any<CancellationToken>()).Returns(item);
+
+        var handler = new UpdateItemImageCommandHandler(repository);
+        var command = new UpdateItemImageCommand(200, "/uploads/inventory/catalog/jewel_emerald.webp");
+
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal("/uploads/inventory/catalog/jewel_emerald.webp", item.ImageUrl);
+        Assert.Equal("/uploads/inventory/catalog/jewel_emerald.webp", item.ThumbnailUrl);
+        await repository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 }

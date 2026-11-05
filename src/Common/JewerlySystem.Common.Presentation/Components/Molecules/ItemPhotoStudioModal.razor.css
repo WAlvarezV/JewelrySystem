@@ -1,0 +1,118 @@
+.photo-studio-modal {
+    position: relative;
+    padding: 0.5rem 0;
+}
+
+.studio-description {
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.capture-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+@media (max-width: 600px) {
+    .capture-actions-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.capture-card {
+    background: #ffffff;
+    border: 2px dashed #d9d9d9;
+    border-radius: 12px;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s ease-in-out;
+}
+
+.capture-card:hover {
+    border-color: #d4af37;
+    background: #faf8f2;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15);
+}
+
+.icon-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.gold-circle {
+    background: linear-gradient(135deg, #fdf8e6 0%, #faecd0 100%);
+    color: #b8860b;
+    border: 1px solid #ebd49d;
+}
+
+.neutral-circle {
+    background: #f0f2f5;
+    color: #595959;
+    border: 1px solid #d9d9d9;
+}
+
+.capture-card h4 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #1f1f1f;
+}
+
+.capture-card p {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+    min-height: 2.5rem;
+}
+
+.studio-specs-notice {
+    background: #fcfbf9;
+    border-color: #eeddbb !important;
+}
+
+.specs-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.specs-list li {
+    margin-bottom: 0.25rem;
+}
+
+.preview-frame {
+    max-width: 380px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 8px;
+    border: 1px solid #e8e8e8;
+}
+
+.preview-frame img {
+    max-height: 340px;
+    object-fit: contain;
+    background: #ffffff;
+}
+
+.processing-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    border-radius: 8px;
+}

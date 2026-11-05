@@ -1,0 +1,139 @@
+.watch-search-modal {
+    position: relative;
+    min-height: 250px;
+}
+
+.search-params-box {
+    background: #fafafa;
+}
+
+.fallback-camera-banner {
+    background: #fdfbf7;
+    border-color: #f3e5c8 !important;
+}
+
+.camera-icon-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #faecd0;
+    color: #b8860b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.watch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 1rem;
+    max-height: 440px;
+    overflow-y: auto;
+    padding: 4px;
+}
+
+.watch-card {
+    background: #ffffff;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+}
+
+.watch-card:hover {
+    border-color: #d4af37;
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+    transform: translateY(-2px);
+}
+
+.watch-card.selected {
+    border-color: #52c41a;
+    box-shadow: 0 0 0 2px #52c41a;
+}
+
+.watch-img-wrap {
+    position: relative;
+    width: 100%;
+    height: 140px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 6px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.watch-img-wrap img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.source-badge {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    background: rgba(0, 0, 0, 0.65);
+    color: #ffffff;
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.watch-card-info {
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+}
+
+.watch-card-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #333;
+    line-height: 1.3;
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.btn-choose {
+    display: block;
+    text-align: center;
+    font-size: 0.75rem;
+    color: #1890ff;
+    font-weight: 600;
+    background: #f0f7ff;
+    padding: 3px 6px;
+    border-radius: 4px;
+    transition: background 0.15s;
+}
+
+.watch-card:hover .btn-choose {
+    background: #1890ff;
+    color: #ffffff;
+}
+
+.selection-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    border-radius: 8px;
+}

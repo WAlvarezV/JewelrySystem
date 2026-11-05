@@ -17,7 +17,9 @@ public static class InventoryMappingExtensions
         i.Description,
         i.Active,
         i.ItemTypeId,
-        i.ProviderId
+        i.ProviderId,
+        i.ImageUrl,
+        i.ThumbnailUrl
     );
 
     public static readonly Expression<Func<Jewel, JewelDto>> JewelDtoProjection = j => new JewelDto(
@@ -33,6 +35,7 @@ public static class InventoryMappingExtensions
         w.ItemId,
         w.GenderType,
         w.CaseNumber,
+        w.Model,
         w.BrandId
     );
 
@@ -56,7 +59,9 @@ public static class InventoryMappingExtensions
         item.Description,
         item.Active,
         item.ItemTypeId,
-        item.ProviderId
+        item.ProviderId,
+        item.ImageUrl,
+        item.ThumbnailUrl
     );
 
     public static JewelDto ToDto(this Jewel jewel) => new(
@@ -72,6 +77,7 @@ public static class InventoryMappingExtensions
         watch.ItemId,
         watch.GenderType,
         watch.CaseNumber,
+        watch.Model,
         watch.BrandId
     );
 

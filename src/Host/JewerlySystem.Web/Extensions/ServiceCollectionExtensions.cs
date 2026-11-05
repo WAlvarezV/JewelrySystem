@@ -1,6 +1,7 @@
 using JewerlySystem.Common.Application;
 using JewerlySystem.Common.Application.Documentation.Abstractions;
 using JewerlySystem.Common.Application.Emailing;
+using JewerlySystem.Common.Application.Inventory;
 using JewerlySystem.Common.Application.Voice;
 using JewerlySystem.Common.Infrastructure;
 using JewerlySystem.Common.Infrastructure.Documentation;
@@ -70,6 +71,9 @@ public static class ServiceCollectionExtensions
         // Emailing & Templates
         services.AddSingleton<IEmailTemplateService, EmailTemplateService>();
         services.AddHttpClient<IEmailSender, ResendEmailSender>();
+
+        // Inventory Image Intelligence & Catalog Service
+        services.AddScoped<IInventoryImageService, InventoryImageService>();
 
         // Voice AI Intelligence & Operations
         services.AddVoiceIntelligence();

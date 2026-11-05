@@ -26,6 +26,7 @@ public static class ActionWeightRegistry
     public const string InventoryCreateWatch = "Inventory_CreateWatch";
     public const string InventoryUpdateJewel = "Inventory_UpdateJewel";
     public const string InventoryUpdateWatch = "Inventory_UpdateWatch";
+    public const string InventoryUpdateImage = "Inventory_UpdateImage";
     public const string InventoryToggleActive = "Inventory_ToggleActive";
     public const string InventoryDischarge = "Inventory_Discharge";
 
@@ -74,6 +75,15 @@ public static class ActionWeightRegistry
                 4,
                 "bi-pencil-square",
                 "#2563EB"), // Azul medio
+
+            [InventoryUpdateImage] = new(
+                InventoryUpdateImage,
+                "INVENTORY",
+                "Actualización de Fotografía",
+                CategoryUpdate,
+                2,
+                "bi-camera",
+                "#8B5CF6"), // Púrpura
 
             [InventoryToggleActive] = new(
                 InventoryToggleActive,

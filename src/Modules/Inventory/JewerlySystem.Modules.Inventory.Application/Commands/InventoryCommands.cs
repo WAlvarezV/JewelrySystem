@@ -14,7 +14,8 @@ public record CreateJewelItemCommand(
     double Weight,
     int GramValue,
     int? Length = null,
-    int? ProviderId = null) : ICommand<CreateItemResponse>;
+    int? ProviderId = null,
+    string? ImageUrl = null) : ICommand<CreateItemResponse>;
 
 public class CreateJewelItemCommandValidator : AbstractValidator<CreateJewelItemCommand>
 {
@@ -46,7 +47,9 @@ public class CreateJewelItemCommandHandler : ICommandHandler<CreateJewelItemComm
             dateOfEntry: request.DateOfEntry,
             description: request.Description,
             itemTypeId: request.ItemTypeId,
-            providerId: request.ProviderId
+            providerId: request.ProviderId,
+            imageUrl: request.ImageUrl,
+            thumbnailUrl: request.ImageUrl
         );
 
         var jewel = new Jewel(
@@ -85,8 +88,10 @@ public record CreateWatchItemCommand(
     int ItemTypeId,
     GenderType GenderType,
     string CaseNumber,
+    string Model,
     int BrandId,
-    int? ProviderId = null) : ICommand<CreateItemResponse>;
+    int? ProviderId = null,
+    string? ImageUrl = null) : ICommand<CreateItemResponse>;
 
 public class CreateWatchItemCommandValidator : AbstractValidator<CreateWatchItemCommand>
 {
@@ -118,14 +123,17 @@ public class CreateWatchItemCommandHandler : ICommandHandler<CreateWatchItemComm
             dateOfEntry: request.DateOfEntry,
             description: request.Description,
             itemTypeId: request.ItemTypeId,
-            providerId: request.ProviderId
+            providerId: request.ProviderId,
+            imageUrl: request.ImageUrl,
+            thumbnailUrl: request.ImageUrl
         );
 
         var watch = new Watch(
             itemId: 0,
             genderType: request.GenderType,
             caseNumber: request.CaseNumber,
-            brandId: request.BrandId
+            brandId: request.BrandId,
+            model: request.Model
         );
 
         var response = await _repository.CreateWatchItemAtomicAsync(item, watch, cancellationToken);
@@ -246,7 +254,8 @@ public record UpdateJewelItemCommand(
     int GramValue,
     int CostValue,
     int? Length = null,
-    int? ProviderId = null) : ICommand<bool>;
+    int? ProviderId = null,
+    string? ImageUrl = null) : ICommand<bool>;
 
 public class UpdateJewelItemCommandValidator : AbstractValidator<UpdateJewelItemCommand>
 {
@@ -282,6 +291,11 @@ public class UpdateJewelItemCommandHandler : ICommandHandler<UpdateJewelItemComm
         item.Description = request.Description;
         item.CostValue = request.CostValue;
         item.ProviderId = request.ProviderId;
+        if (!string.IsNullOrEmpty(request.ImageUrl))
+        {
+            item.ImageUrl = request.ImageUrl;
+            item.ThumbnailUrl = request.ImageUrl;
+        }
 
         var jewel = await _repository.GetJewelByItemIdAsync(item.Id, cancellationToken);
         if (jewel != null)
@@ -316,11 +330,13 @@ public class UpdateJewelItemCommandHandler : ICommandHandler<UpdateJewelItemComm
 public record UpdateWatchItemCommand(
     int Reference,
     int BrandId,
+    string Model,
     string Description,
     string CaseNumber,
     GenderType GenderType,
     int CostValue,
-    int? ProviderId = null) : ICommand<bool>;
+    int? ProviderId = null,
+    string? ImageUrl = null) : ICommand<bool>;
 
 public class UpdateWatchItemCommandValidator : AbstractValidator<UpdateWatchItemCommand>
 {
@@ -355,17 +371,23 @@ public class UpdateWatchItemCommandHandler : ICommandHandler<UpdateWatchItemComm
         item.Description = request.Description;
         item.CostValue = request.CostValue;
         item.ProviderId = request.ProviderId;
+        if (!string.IsNullOrEmpty(request.ImageUrl))
+        {
+            item.ImageUrl = request.ImageUrl;
+            item.ThumbnailUrl = request.ImageUrl;
+        }
 
         var watch = await _repository.GetWatchByItemIdAsync(item.Id, cancellationToken);
         if (watch != null)
         {
             watch.BrandId = request.BrandId;
+            watch.Model = request.Model;
             watch.CaseNumber = request.CaseNumber;
             watch.GenderType = request.GenderType;
         }
         else
         {
-            await _repository.AddWatchAsync(new Watch(item.Id, request.GenderType, request.CaseNumber, request.BrandId), cancellationToken);
+            await _repository.AddWatchAsync(new Watch(item.Id, request.GenderType, request.CaseNumber, request.BrandId, request.Model), cancellationToken);
         }
 
         await _repository.SaveChangesAsync(cancellationToken);
@@ -377,6 +399,57 @@ public class UpdateWatchItemCommandHandler : ICommandHandler<UpdateWatchItemComm
                 category: ActionWeightRegistry.CategoryUpdate,
                 description: $"Actualizó Reloj Ref #{request.Reference} - {request.Description} (Caja #{request.CaseNumber})",
                 weightScore: 4,
+                entityName: "Item",
+                entityReference: request.Reference.ToString(),
+                cancellationToken: cancellationToken);
+        }
+
+        return Result.Success(true);
+    }
+}
+
+public record UpdateItemImageCommand(int Reference, string ImageUrl) : ICommand<bool>;
+
+public class UpdateItemImageCommandValidator : AbstractValidator<UpdateItemImageCommand>
+{
+    public UpdateItemImageCommandValidator()
+    {
+        RuleFor(x => x.Reference).GreaterThan(0).WithMessage("La referencia es obligatoria.");
+        RuleFor(x => x.ImageUrl).NotEmpty().WithMessage("La URL de la imagen es obligatoria.");
+    }
+}
+
+public class UpdateItemImageCommandHandler : ICommandHandler<UpdateItemImageCommand, bool>
+{
+    private readonly IInventoryRepository _repository;
+    private readonly IUserActivityTracker? _activityTracker;
+
+    public UpdateItemImageCommandHandler(IInventoryRepository repository, IUserActivityTracker? activityTracker = null)
+    {
+        _repository = repository;
+        _activityTracker = activityTracker;
+    }
+
+    public async Task<Result<bool>> Handle(UpdateItemImageCommand request, CancellationToken cancellationToken)
+    {
+        var item = await _repository.GetItemByReferenceAsync(request.Reference, cancellationToken);
+        if (item == null)
+        {
+            return Result.Failure<bool>(Error.NotFound("Items.NotFound", $"Artículo con referencia #{request.Reference} no encontrado."));
+        }
+
+        item.ImageUrl = request.ImageUrl;
+        item.ThumbnailUrl = request.ImageUrl;
+
+        await _repository.SaveChangesAsync(cancellationToken);
+
+        if (_activityTracker != null)
+        {
+            await _activityTracker.TrackActivityAsync(
+                actionKey: ActionWeightRegistry.InventoryUpdateImage,
+                category: ActionWeightRegistry.CategoryUpdate,
+                description: $"Actualizó fotografía de artículo Ref #{request.Reference}",
+                weightScore: 2,
                 entityName: "Item",
                 entityReference: request.Reference.ToString(),
                 cancellationToken: cancellationToken);

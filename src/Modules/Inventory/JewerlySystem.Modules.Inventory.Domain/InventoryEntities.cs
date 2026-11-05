@@ -35,6 +35,8 @@ public class Item : AuditableEntity<int>
     public bool Active { get; set; } = true;
     public int ItemTypeId { get; set; }
     public int? ProviderId { get; set; }
+    public string? ImageUrl { get; set; }
+    public string? ThumbnailUrl { get; set; }
 
     public Item() { }
 
@@ -44,7 +46,9 @@ public class Item : AuditableEntity<int>
         DateTime dateOfEntry,
         string description,
         int itemTypeId,
-        int? providerId = null)
+        int? providerId = null,
+        string? imageUrl = null,
+        string? thumbnailUrl = null)
     {
         Reference = reference;
         CostValue = costValue;
@@ -52,6 +56,8 @@ public class Item : AuditableEntity<int>
         Description = description ?? string.Empty;
         ItemTypeId = itemTypeId;
         ProviderId = providerId;
+        ImageUrl = imageUrl;
+        ThumbnailUrl = thumbnailUrl;
         Active = true;
     }
 
@@ -86,15 +92,17 @@ public class Watch : Entity<int>
     public int ItemId { get; set; }
     public GenderType GenderType { get; set; }
     public string CaseNumber { get; set; } = string.Empty;
+    public string Model { get; set; } = string.Empty;
     public int BrandId { get; set; }
 
     public Watch() { }
 
-    public Watch(int itemId, GenderType genderType, string caseNumber, int brandId)
+    public Watch(int itemId, GenderType genderType, string caseNumber, int brandId, string? model = null)
     {
         ItemId = itemId;
         GenderType = genderType;
         CaseNumber = caseNumber ?? string.Empty;
         BrandId = brandId;
+        Model = model ?? string.Empty;
     }
 }
