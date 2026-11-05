@@ -1,5 +1,6 @@
 @using Microsoft.JSInterop
 @using JewerlySystem.Common.Application.Inventory
+@implements IAsyncDisposable
 @inject IJSRuntime JSRuntime
 @inject IInventoryImageService ImageService
 @inject IMessageService Message
@@ -8,7 +9,7 @@
        VisibleChanged="@VisibleChanged"
        Title="@Title"
        Footer="@null"
-       Width="680"
+       Width="720"
        Centered="true"
        DestroyOnClose="true"
        OnCancel="@CloseModal">
@@ -18,62 +19,23 @@
             @Subtitle
         </p>
 
-        <!-- Inputs ocultos para captura directa de cámara móvil y selección de archivo -->
+        <!-- Inputs para captura nativa del celular y explorador de archivos -->
         <input type="file"
                id="@_cameraInputId"
                accept="image/*"
                capture="environment"
-               class="d-none"
+               style="position: absolute; opacity: 0; width: 0.1px; height: 0.1px; overflow: hidden; z-index: -1;"
                @onchange="() => HandleFileChosenAsync(_cameraInputId)" />
 
         <input type="file"
                id="@_fileInputId"
-               accept="image/png, image/jpeg, image/webp"
-               class="d-none"
+               accept="image/png, image/jpeg, image/webp, image/*"
+               style="position: absolute; opacity: 0; width: 0.1px; height: 0.1px; overflow: hidden; z-index: -1;"
                @onchange="() => HandleFileChosenAsync(_fileInputId)" />
 
-        @if (string.IsNullOrEmpty(_processedPreviewDataUrl))
+        @if (!string.IsNullOrEmpty(_processedPreviewDataUrl))
         {
-            <!-- Panel de Captura Inicial -->
-            <div class="capture-actions-grid">
-                <div class="capture-card primary-capture" @onclick="TriggerCamera">
-                    <div class="icon-circle gold-circle">
-                        <i class="bi bi-camera-fill"></i>
-                    </div>
-                    <h4>Tomar Foto con Celular</h4>
-                    <p>Activa la cámara trasera del dispositivo móvil para fotografiar la joya o reloj en vitrina.</p>
-                    <span class="btn btn-sm btn-primary rounded-pill px-3 mt-2">
-                        <i class="bi bi-camera me-1"></i> Abrir Cámara
-                    </span>
-                </div>
-
-                <div class="capture-card secondary-capture" @onclick="TriggerFileUpload">
-                    <div class="icon-circle neutral-circle">
-                        <i class="bi bi-folder2-open"></i>
-                    </div>
-                    <h4>Subir desde Archivo</h4>
-                    <p>Carga una fotografía existente (JPG, PNG, WebP) desde tu computador o galería.</p>
-                    <span class="btn btn-sm btn-outline-secondary rounded-pill px-3 mt-2">
-                        <i class="bi bi-upload me-1"></i> Explorar Archivo
-                    </span>
-                </div>
-            </div>
-
-            <div class="studio-specs-notice mt-3 p-3 rounded border">
-                <div class="d-flex align-items-center gap-2 mb-1 text-primary fw-bold small">
-                    <i class="bi bi-magic text-warning"></i>
-                    <span>Estandarización Automática de Fotografía:</span>
-                </div>
-                <ul class="specs-list mb-0 small text-muted">
-                    <li><i class="bi bi-check-circle-fill text-success me-1"></i> <strong>Fondo blanco puro (#FFFFFF)</strong>: ilumina y elimina sombras del fondo de mesa o vitrina.</li>
-                    <li><i class="bi bi-check-circle-fill text-success me-1"></i> <strong>Marca de agua genérica</strong>: <em>FINE JEWELRY & LUXURY TIMEPIECES • PIEZA VERIFICADA</em> estampada sutilmente.</li>
-                    <li><i class="bi bi-check-circle-fill text-success me-1"></i> <strong>Compresión WebP (&lt; 80 KB)</strong>: carga ultra veloz garantizada en celular y catálogo.</li>
-                </ul>
-            </div>
-        }
-        else
-        {
-            <!-- Vista Previa de la Imagen Procesada -->
+            <!-- 1. Vista Previa de la Imagen Procesada -->
             <div class="preview-container text-center">
                 <div class="preview-frame shadow-sm border rounded">
                     <img src="@_processedPreviewDataUrl" alt="Previsualización de Joya / Reloj" class="img-fluid rounded" />
@@ -108,6 +70,96 @@
                 </div>
             </div>
         }
+        else if (_isLiveCameraActive)
+        {
+            <!-- 2. Visor de Cámara Web / Cámara en Vivo en Pantalla -->
+            <div class="live-camera-wrapper">
+                <video id="@_videoElementId" autoplay playsinline muted class="live-video-player"></video>
+                
+                <div class="live-viewfinder-reticle">
+                    <div class="reticle-corner top-left"></div>
+                    <div class="reticle-corner top-right"></div>
+                    <div class="reticle-corner bottom-left"></div>
+                    <div class="reticle-corner bottom-right"></div>
+                    <div class="reticle-guide-text">Encuadre la pieza aquí</div>
+                </div>
+
+                <div class="live-camera-controls">
+                    <button type="button"
+                            class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm"
+                            @onclick="CaptureLiveCameraAsync"
+                            disabled="@_isProcessing">
+                        <i class="bi bi-camera-fill me-1"></i> Capturar Foto
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-outline-light rounded-pill px-3"
+                            @onclick="SwitchCameraFacingAsync"
+                            title="Alternar entre cámara frontal y trasera">
+                        <i class="bi bi-arrow-repeat me-1"></i> Cambiar
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-secondary rounded-pill px-3"
+                            @onclick="StopLiveCameraAsync">
+                        Volver
+                    </button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- 3. Panel de Opciones de Captura -->
+            <div class="capture-actions-grid">
+                <!-- Tarjeta 1: Cámara Nativa del Celular (vía label HTML nativo, sin bloqueos de navegador) -->
+                <label for="@_cameraInputId" class="capture-card primary-capture">
+                    <div class="icon-circle gold-circle">
+                        <i class="bi bi-phone-fill"></i>
+                    </div>
+                    <h4>Cámara del Celular</h4>
+                    <p>Abre la cámara trasera de su celular con enfoque táctil y máxima resolución física.</p>
+                    <span class="btn btn-sm btn-primary rounded-pill px-3 mt-2">
+                        <i class="bi bi-camera me-1"></i> Abrir Cámara
+                    </span>
+                </label>
+
+                <!-- Tarjeta 2: Cámara Web en Pantalla (para Laptop/PC o navegador con Webcam) -->
+                <div class="capture-card webrtc-capture" @onclick="StartLiveCameraAsync">
+                    <div class="icon-circle blue-circle">
+                        <i class="bi bi-camera-video-fill"></i>
+                    </div>
+                    <h4>Cámara Web / Visor</h4>
+                    <p>Activa la cámara web de su PC o visor en vivo con recuadro de encuadre en pantalla.</p>
+                    <span class="btn btn-sm btn-outline-primary rounded-pill px-3 mt-2">
+                        <i class="bi bi-play-circle me-1"></i> Iniciar Visor
+                    </span>
+                </div>
+
+                <!-- Tarjeta 3: Carga de Archivo / Galería -->
+                <label for="@_fileInputId" class="capture-card secondary-capture">
+                    <div class="icon-circle neutral-circle">
+                        <i class="bi bi-images"></i>
+                    </div>
+                    <h4>Galería / Archivos</h4>
+                    <p>Seleccione una foto existente (JPG, PNG, WebP) desde su fototeca o computador.</p>
+                    <span class="btn btn-sm btn-outline-secondary rounded-pill px-3 mt-2">
+                        <i class="bi bi-folder2-open me-1"></i> Explorar
+                    </span>
+                </label>
+            </div>
+
+            <div class="studio-specs-notice mt-3 p-3 rounded border">
+                <div class="d-flex align-items-center gap-2 mb-1 text-primary fw-bold small">
+                    <i class="bi bi-magic text-warning"></i>
+                    <span>Estandarización Automática de Fotografía:</span>
+                </div>
+                <ul class="specs-list mb-0 small text-muted">
+                    <li><i class="bi bi-check-circle-fill text-success me-1"></i> <strong>Fondo blanco puro (#FFFFFF)</strong>: ilumina y elimina sombras del fondo de mesa o vitrina.</li>
+                    <li><i class="bi bi-check-circle-fill text-success me-1"></i> <strong>Marca de agua genérica</strong>: <em>FINE JEWELRY & LUXURY TIMEPIECES • PIEZA VERIFICADA</em> estampada sutilmente con ribete dorado.</li>
+                    <li><i class="bi bi-check-circle-fill text-success me-1"></i> <strong>Compresión WebP (&lt; 80 KB)</strong>: carga ultra veloz garantizada en celular y catálogo.</li>
+                </ul>
+            </div>
+        }
 
         @if (_isProcessing)
         {
@@ -122,25 +174,100 @@
     [Parameter] public bool Visible { get; set; }
     [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
     [Parameter] public string Title { get; set; } = "Estudio Fotográfico de Joyería & Relojes";
-    [Parameter] public string Subtitle { get; set; } = "Captura con la cámara trasera de tu celular o carga una foto. Se normalizará a fondo blanco de vitrina con sello de autenticidad.";
+    [Parameter] public string Subtitle { get; set; } = "Fotografíe la pieza o cargue una imagen. Se estandarizará automáticamente a fondo blanco de vitrina (#FFFFFF) y sello oficial.";
     [Parameter] public string Prefix { get; set; } = "item";
     [Parameter] public EventCallback<string> OnImageSaved { get; set; }
 
     private readonly string _cameraInputId = "camera_input_" + Guid.NewGuid().ToString("N")[..8];
     private readonly string _fileInputId = "file_input_" + Guid.NewGuid().ToString("N")[..8];
+    private readonly string _videoElementId = "live_video_" + Guid.NewGuid().ToString("N")[..8];
 
     private bool _isProcessing = false;
     private bool _isSaving = false;
+    private bool _isLiveCameraActive = false;
     private string? _processedPreviewDataUrl;
 
-    private async Task TriggerCamera()
+    private async Task StartLiveCameraAsync()
     {
-        await JSRuntime.InvokeVoidAsync("eval", $"document.getElementById('{_cameraInputId}').click()");
+        _isProcessing = true;
+        StateHasChanged();
+
+        try
+        {
+            _isLiveCameraActive = true;
+            StateHasChanged();
+
+            // Esperar brevemente a que el elemento <video> esté en el DOM
+            await Task.Delay(100);
+
+            await JSRuntime.InvokeVoidAsync("photoStudio.startLiveCamera", _videoElementId, "environment");
+        }
+        catch (Exception ex)
+        {
+            _isLiveCameraActive = false;
+            Message.Warning(ex.Message);
+        }
+        finally
+        {
+            _isProcessing = false;
+            StateHasChanged();
+        }
     }
 
-    private async Task TriggerFileUpload()
+    private async Task StopLiveCameraAsync()
     {
-        await JSRuntime.InvokeVoidAsync("eval", $"document.getElementById('{_fileInputId}').click()");
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("photoStudio.stopLiveCamera");
+        }
+        catch { }
+        finally
+        {
+            _isLiveCameraActive = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SwitchCameraFacingAsync()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("photoStudio.switchLiveCamera", _videoElementId);
+        }
+        catch (Exception ex)
+        {
+            Message.Warning($"No se pudo cambiar de cámara: {ex.Message}");
+        }
+    }
+
+    private async Task CaptureLiveCameraAsync()
+    {
+        _isProcessing = true;
+        StateHasChanged();
+
+        try
+        {
+            var options = new
+            {
+                maxDimension = 900,
+                quality = 0.85,
+                applyWhitening = true,
+                applyWatermark = true
+            };
+
+            var dataUrl = await JSRuntime.InvokeAsync<string>("photoStudio.captureLiveFrame", _videoElementId, options);
+            _processedPreviewDataUrl = dataUrl;
+            _isLiveCameraActive = false;
+        }
+        catch (Exception ex)
+        {
+            Message.Error($"Error capturando foto: {ex.Message}");
+        }
+        finally
+        {
+            _isProcessing = false;
+            StateHasChanged();
+        }
     }
 
     private async Task HandleFileChosenAsync(string inputId)
@@ -150,7 +277,6 @@
 
         try
         {
-            // Ejecutar procesamiento en Canvas (redimensión, fondo blanco, marca de agua genérica y WebP)
             var options = new
             {
                 maxDimension = 900,
@@ -161,6 +287,9 @@
 
             var dataUrl = await JSRuntime.InvokeAsync<string>("photoStudio.processImageFromFile", inputId, options);
             _processedPreviewDataUrl = dataUrl;
+
+            // Limpiar el valor del input para permitir volver a disparar el evento si repite foto
+            await JSRuntime.InvokeVoidAsync("photoStudio.resetFileInput", inputId);
         }
         catch (Exception ex)
         {
@@ -211,11 +340,21 @@
 
     private async Task CloseModal()
     {
+        await StopLiveCameraAsync();
         _processedPreviewDataUrl = null;
         Visible = false;
         if (VisibleChanged.HasDelegate)
         {
             await VisibleChanged.InvokeAsync(false);
         }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("photoStudio.stopLiveCamera");
+        }
+        catch { }
     }
 }

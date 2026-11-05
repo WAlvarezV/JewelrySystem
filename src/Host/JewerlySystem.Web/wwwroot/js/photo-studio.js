@@ -6,6 +6,106 @@
  * - Compresión optimizada WebP (< 80 KB)
  */
 window.photoStudio = {
+    _currentStream: null,
+    _currentFacingMode: "environment",
+
+    startLiveCamera: async function (videoElementId, facingMode) {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            throw new Error("Su navegador o conexión no soporta cámara en vivo en pantalla (requiere HTTPS o localhost). Utilice la opción 'Cámara del Celular'.");
+        }
+
+        window.photoStudio.stopLiveCamera();
+
+        var desiredMode = facingMode || window.photoStudio._currentFacingMode || "environment";
+
+        var constraints = {
+            video: {
+                facingMode: { ideal: desiredMode },
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            },
+            audio: false
+        };
+
+        try {
+            var stream = await navigator.mediaDevices.getUserMedia(constraints);
+            var video = document.getElementById(videoElementId);
+            if (!video) throw new Error("No se encontró el elemento de video en pantalla.");
+            video.srcObject = stream;
+            await video.play();
+            window.photoStudio._currentStream = stream;
+            window.photoStudio._currentFacingMode = desiredMode;
+            return true;
+        } catch (err) {
+            // Fallback genérico para PC / laptops donde no hay 'environment'
+            try {
+                var fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                var videoEl = document.getElementById(videoElementId);
+                if (videoEl) {
+                    videoEl.srcObject = fallbackStream;
+                    await videoEl.play();
+                    window.photoStudio._currentStream = fallbackStream;
+                    return true;
+                }
+            } catch (fbErr) {
+                console.error("Camera access failed:", fbErr);
+            }
+            throw new Error("No se pudo acceder a la cámara. Verifique que concedió permisos de cámara en el navegador o utilice la opción 'Cámara del Celular'.");
+        }
+    },
+
+    stopLiveCamera: function () {
+        if (window.photoStudio._currentStream) {
+            try {
+                window.photoStudio._currentStream.getTracks().forEach(function (track) {
+                    track.stop();
+                });
+            } catch (e) {
+                console.warn("Error deteniendo cámara:", e);
+            }
+            window.photoStudio._currentStream = null;
+        }
+    },
+
+    switchLiveCamera: async function (videoElementId) {
+        var nextMode = window.photoStudio._currentFacingMode === "user" ? "environment" : "user";
+        return await window.photoStudio.startLiveCamera(videoElementId, nextMode);
+    },
+
+    captureLiveFrame: function (videoElementId, options) {
+        return new Promise(function (resolve, reject) {
+            try {
+                var video = document.getElementById(videoElementId);
+                if (!video || !video.videoWidth || !video.videoHeight) {
+                    reject("El visor de video no está listo o la cámara no ha iniciado.");
+                    return;
+                }
+
+                var tempCanvas = document.createElement("canvas");
+                tempCanvas.width = video.videoWidth;
+                tempCanvas.height = video.videoHeight;
+                var tempCtx = tempCanvas.getContext("2d");
+                tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+                var rawDataUrl = tempCanvas.toDataURL("image/jpeg", 0.95);
+
+                // Detener stream una vez tomada la foto
+                window.photoStudio.stopLiveCamera();
+
+                // Procesar imagen con estandarización de vitrina
+                window.photoStudio.processDataUrl(rawDataUrl, options)
+                    .then(resolve)
+                    .catch(reject);
+            } catch (err) {
+                reject("Error capturando fotograma: " + err.toString());
+            }
+        });
+    },
+
+    resetFileInput: function (inputId) {
+        var el = document.getElementById(inputId);
+        if (el) el.value = "";
+    },
+
     processImageFromFile: function (inputId, options) {
         return new Promise(function (resolve, reject) {
             try {
