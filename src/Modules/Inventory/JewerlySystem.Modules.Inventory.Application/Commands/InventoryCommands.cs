@@ -1,5 +1,6 @@
 using FluentValidation;
 using JewerlySystem.Common.Application;
+using JewerlySystem.Common.Application.Inventory;
 using JewerlySystem.Common.Domain;
 using JewerlySystem.Modules.Inventory.Application.DTOs;
 using JewerlySystem.Modules.Inventory.Domain;
@@ -272,11 +273,16 @@ public class UpdateJewelItemCommandHandler : ICommandHandler<UpdateJewelItemComm
 {
     private readonly IInventoryRepository _repository;
     private readonly IUserActivityTracker? _activityTracker;
+    private readonly IInventoryImageService? _imageService;
 
-    public UpdateJewelItemCommandHandler(IInventoryRepository repository, IUserActivityTracker? activityTracker = null)
+    public UpdateJewelItemCommandHandler(
+        IInventoryRepository repository,
+        IUserActivityTracker? activityTracker = null,
+        IInventoryImageService? imageService = null)
     {
         _repository = repository;
         _activityTracker = activityTracker;
+        _imageService = imageService;
     }
 
     public async Task<Result<bool>> Handle(UpdateJewelItemCommand request, CancellationToken cancellationToken)
@@ -291,10 +297,33 @@ public class UpdateJewelItemCommandHandler : ICommandHandler<UpdateJewelItemComm
         item.Description = request.Description;
         item.CostValue = request.CostValue;
         item.ProviderId = request.ProviderId;
-        if (!string.IsNullOrEmpty(request.ImageUrl))
+
+        if (item.ImageUrl != request.ImageUrl)
         {
+            bool isRemoval = string.IsNullOrEmpty(request.ImageUrl) && !string.IsNullOrEmpty(item.ImageUrl);
+            var oldImage = item.ImageUrl;
             item.ImageUrl = request.ImageUrl;
             item.ThumbnailUrl = request.ImageUrl;
+
+            if (isRemoval)
+            {
+                if (!string.IsNullOrEmpty(oldImage) && _imageService != null)
+                {
+                    _imageService.DeleteImage(oldImage);
+                }
+
+                if (_activityTracker != null)
+                {
+                    await _activityTracker.TrackActivityAsync(
+                        actionKey: ActionWeightRegistry.InventoryRemoveImage,
+                        category: ActionWeightRegistry.CategoryUpdate,
+                        description: $"Eliminó la fotografía de vitrina/catálogo del artículo Ref #{request.Reference}",
+                        weightScore: 2,
+                        entityName: "Item",
+                        entityReference: request.Reference.ToString(),
+                        cancellationToken: cancellationToken);
+                }
+            }
         }
 
         var jewel = await _repository.GetJewelByItemIdAsync(item.Id, cancellationToken);
@@ -353,11 +382,16 @@ public class UpdateWatchItemCommandHandler : ICommandHandler<UpdateWatchItemComm
 {
     private readonly IInventoryRepository _repository;
     private readonly IUserActivityTracker? _activityTracker;
+    private readonly IInventoryImageService? _imageService;
 
-    public UpdateWatchItemCommandHandler(IInventoryRepository repository, IUserActivityTracker? activityTracker = null)
+    public UpdateWatchItemCommandHandler(
+        IInventoryRepository repository,
+        IUserActivityTracker? activityTracker = null,
+        IInventoryImageService? imageService = null)
     {
         _repository = repository;
         _activityTracker = activityTracker;
+        _imageService = imageService;
     }
 
     public async Task<Result<bool>> Handle(UpdateWatchItemCommand request, CancellationToken cancellationToken)
@@ -371,10 +405,33 @@ public class UpdateWatchItemCommandHandler : ICommandHandler<UpdateWatchItemComm
         item.Description = request.Description;
         item.CostValue = request.CostValue;
         item.ProviderId = request.ProviderId;
-        if (!string.IsNullOrEmpty(request.ImageUrl))
+
+        if (item.ImageUrl != request.ImageUrl)
         {
+            bool isRemoval = string.IsNullOrEmpty(request.ImageUrl) && !string.IsNullOrEmpty(item.ImageUrl);
+            var oldImage = item.ImageUrl;
             item.ImageUrl = request.ImageUrl;
             item.ThumbnailUrl = request.ImageUrl;
+
+            if (isRemoval)
+            {
+                if (!string.IsNullOrEmpty(oldImage) && _imageService != null)
+                {
+                    _imageService.DeleteImage(oldImage);
+                }
+
+                if (_activityTracker != null)
+                {
+                    await _activityTracker.TrackActivityAsync(
+                        actionKey: ActionWeightRegistry.InventoryRemoveImage,
+                        category: ActionWeightRegistry.CategoryUpdate,
+                        description: $"Eliminó la fotografía de vitrina/catálogo del artículo Ref #{request.Reference}",
+                        weightScore: 2,
+                        entityName: "Item",
+                        entityReference: request.Reference.ToString(),
+                        cancellationToken: cancellationToken);
+                }
+            }
         }
 
         var watch = await _repository.GetWatchByItemIdAsync(item.Id, cancellationToken);
@@ -423,11 +480,16 @@ public class UpdateItemImageCommandHandler : ICommandHandler<UpdateItemImageComm
 {
     private readonly IInventoryRepository _repository;
     private readonly IUserActivityTracker? _activityTracker;
+    private readonly IInventoryImageService? _imageService;
 
-    public UpdateItemImageCommandHandler(IInventoryRepository repository, IUserActivityTracker? activityTracker = null)
+    public UpdateItemImageCommandHandler(
+        IInventoryRepository repository,
+        IUserActivityTracker? activityTracker = null,
+        IInventoryImageService? imageService = null)
     {
         _repository = repository;
         _activityTracker = activityTracker;
+        _imageService = imageService;
     }
 
     public async Task<Result<bool>> Handle(UpdateItemImageCommand request, CancellationToken cancellationToken)
@@ -438,10 +500,17 @@ public class UpdateItemImageCommandHandler : ICommandHandler<UpdateItemImageComm
             return Result.Failure<bool>(Error.NotFound("Items.NotFound", $"Artículo con referencia #{request.Reference} no encontrado."));
         }
 
+        var oldImageUrl = item.ImageUrl;
         item.ImageUrl = request.ImageUrl;
         item.ThumbnailUrl = request.ImageUrl;
 
         await _repository.SaveChangesAsync(cancellationToken);
+
+        // Si la foto anterior era local y cambió por una nueva, eliminar la anterior del almacenamiento
+        if (!string.IsNullOrEmpty(oldImageUrl) && oldImageUrl != request.ImageUrl && _imageService != null)
+        {
+            _imageService.DeleteImage(oldImageUrl);
+        }
 
         if (_activityTracker != null)
         {
@@ -449,6 +518,68 @@ public class UpdateItemImageCommandHandler : ICommandHandler<UpdateItemImageComm
                 actionKey: ActionWeightRegistry.InventoryUpdateImage,
                 category: ActionWeightRegistry.CategoryUpdate,
                 description: $"Actualizó fotografía de artículo Ref #{request.Reference}",
+                weightScore: 2,
+                entityName: "Item",
+                entityReference: request.Reference.ToString(),
+                cancellationToken: cancellationToken);
+        }
+
+        return Result.Success(true);
+    }
+}
+
+public record RemoveItemImageCommand(int Reference) : ICommand<bool>;
+
+public class RemoveItemImageCommandValidator : AbstractValidator<RemoveItemImageCommand>
+{
+    public RemoveItemImageCommandValidator()
+    {
+        RuleFor(x => x.Reference).GreaterThan(0).WithMessage("La referencia es obligatoria.");
+    }
+}
+
+public class RemoveItemImageCommandHandler : ICommandHandler<RemoveItemImageCommand, bool>
+{
+    private readonly IInventoryRepository _repository;
+    private readonly IUserActivityTracker? _activityTracker;
+    private readonly IInventoryImageService? _imageService;
+
+    public RemoveItemImageCommandHandler(
+        IInventoryRepository repository,
+        IUserActivityTracker? activityTracker = null,
+        IInventoryImageService? imageService = null)
+    {
+        _repository = repository;
+        _activityTracker = activityTracker;
+        _imageService = imageService;
+    }
+
+    public async Task<Result<bool>> Handle(RemoveItemImageCommand request, CancellationToken cancellationToken)
+    {
+        var item = await _repository.GetItemByReferenceAsync(request.Reference, cancellationToken);
+        if (item == null)
+        {
+            return Result.Failure<bool>(Error.NotFound("Items.NotFound", $"Artículo con referencia #{request.Reference} no encontrado."));
+        }
+
+        var oldImageUrl = item.ImageUrl;
+        item.ImageUrl = null;
+        item.ThumbnailUrl = null;
+
+        await _repository.SaveChangesAsync(cancellationToken);
+
+        // Eliminar archivo físico de almacenamiento si existía
+        if (!string.IsNullOrEmpty(oldImageUrl) && _imageService != null)
+        {
+            _imageService.DeleteImage(oldImageUrl);
+        }
+
+        if (_activityTracker != null)
+        {
+            await _activityTracker.TrackActivityAsync(
+                actionKey: ActionWeightRegistry.InventoryRemoveImage,
+                category: ActionWeightRegistry.CategoryUpdate,
+                description: $"Eliminó la fotografía de vitrina/catálogo del artículo Ref #{request.Reference}",
                 weightScore: 2,
                 entityName: "Item",
                 entityReference: request.Reference.ToString(),

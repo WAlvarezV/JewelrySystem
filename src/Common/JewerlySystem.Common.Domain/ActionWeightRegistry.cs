@@ -27,6 +27,7 @@ public static class ActionWeightRegistry
     public const string InventoryUpdateJewel = "Inventory_UpdateJewel";
     public const string InventoryUpdateWatch = "Inventory_UpdateWatch";
     public const string InventoryUpdateImage = "Inventory_UpdateImage";
+    public const string InventoryRemoveImage = "Inventory_RemoveImage";
     public const string InventoryToggleActive = "Inventory_ToggleActive";
     public const string InventoryDischarge = "Inventory_Discharge";
 
@@ -84,6 +85,15 @@ public static class ActionWeightRegistry
                 2,
                 "bi-camera",
                 "#8B5CF6"), // Púrpura
+
+            [InventoryRemoveImage] = new(
+                InventoryRemoveImage,
+                "INVENTORY",
+                "Eliminación de Fotografía",
+                CategoryUpdate,
+                2,
+                "bi-trash",
+                "#EF4444"), // Rojo
 
             [InventoryToggleActive] = new(
                 InventoryToggleActive,

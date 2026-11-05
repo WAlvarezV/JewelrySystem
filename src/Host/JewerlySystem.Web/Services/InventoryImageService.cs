@@ -289,6 +289,41 @@ public partial class InventoryImageService : IInventoryImageService
         return $"/uploads/inventory/catalog/{fileName}";
     }
 
+    public bool DeleteImage(string? imageUrl)
+    {
+        if (string.IsNullOrWhiteSpace(imageUrl)) return false;
+
+        // Validar que solo borre archivos dentro de /uploads/inventory/catalog/ para prevenir path traversal
+        if (!imageUrl.StartsWith("/uploads/inventory/catalog/", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        try
+        {
+            var webRoot = _env.WebRootPath;
+            if (string.IsNullOrEmpty(webRoot))
+            {
+                webRoot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            }
+
+            var fileName = Path.GetFileName(imageUrl);
+            var fullPath = Path.Combine(webRoot, "uploads", "inventory", "catalog", fileName);
+
+            if (File.Exists(fullPath))
+            {
+                File.Delete(fullPath);
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "No se pudo eliminar el archivo físico de la imagen {ImageUrl}", imageUrl);
+        }
+
+        return false;
+    }
+
     private static string CleanTitle(string raw)
     {
         if (string.IsNullOrWhiteSpace(raw)) return "Pieza de Relojería";

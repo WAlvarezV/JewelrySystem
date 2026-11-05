@@ -164,6 +164,8 @@ public class GetItemHistoryQueryHandler : IQueryHandler<GetItemHistoryQuery, Ite
             ActionWeightRegistry.InventoryCreateWatch => ("Creación de Reloj", "blue", "plus-circle"),
             ActionWeightRegistry.InventoryUpdateJewel => ("Actualización de Joya", "purple", "edit"),
             ActionWeightRegistry.InventoryUpdateWatch => ("Actualización de Reloj", "purple", "edit"),
+            ActionWeightRegistry.InventoryUpdateImage => ("Actualización de Fotografía", "geekblue", "camera"),
+            ActionWeightRegistry.InventoryRemoveImage => ("Eliminación de Fotografía", "red", "delete"),
             ActionWeightRegistry.InventoryDischarge => ("Descargo por Venta", "red", "export"),
             ActionWeightRegistry.InventoryToggleActive => ("Auditoría de Catálogo", "cyan", "check-circle"),
             _ => (category switch

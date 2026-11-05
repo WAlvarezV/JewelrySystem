@@ -907,10 +907,18 @@
                                 <i class="bi bi-shield-check me-1"></i> Sello Universal de Calidad
                             </span>
                         </div>
-                        <div class="d-flex justify-content-center gap-2 mt-3">
+                        <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
                             <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" @onclick="OpenPhotoPickerForDetail">
                                 <i class="bi bi-arrow-repeat me-1"></i> Actualizar Fotografía
                             </button>
+                            <Popconfirm Title="¿Está seguro de eliminar la fotografía de este artículo? Esta acción quedará registrada en el historial de auditoría."
+                                        OkText="Sí, eliminar"
+                                        CancelText="Cancelar"
+                                        OnConfirm="RemoveDetailPhotoAsync">
+                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                                    <i class="bi bi-trash me-1"></i> Eliminar Foto
+                                </button>
+                            </Popconfirm>
                         </div>
                     </div>
                 }
@@ -1478,6 +1486,32 @@
             Message.Error(res.Error.Message);
         }
         StateHasChanged();
+    }
+
+    private async Task RemoveDetailPhotoAsync()
+    {
+        try
+        {
+            var res = await Sender.Send(new RemoveItemImageCommand(_detailReference));
+            if (res.IsSuccess)
+            {
+                _detailImageUrl = null;
+                Message.Success($"Fotografía de la Ref #{_detailReference} eliminada exitosamente.");
+                await LoadInventoryCatalogAsync();
+            }
+            else
+            {
+                Message.Error(res.Error.Message ?? "No se pudo eliminar la fotografía.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Message.Error($"Error al eliminar la foto: {ex.Message}");
+        }
+        finally
+        {
+            StateHasChanged();
+        }
     }
 
     private void OpenSearchForNewWatch()

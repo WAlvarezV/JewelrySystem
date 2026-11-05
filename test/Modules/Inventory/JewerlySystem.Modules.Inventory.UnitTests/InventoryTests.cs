@@ -1,4 +1,6 @@
 using FluentValidation.TestHelper;
+using JewerlySystem.Common.Application;
+using JewerlySystem.Common.Application.Inventory;
 using JewerlySystem.Common.Domain;
 using JewerlySystem.Modules.Inventory.Application;
 using JewerlySystem.Modules.Inventory.Application.Commands;
@@ -457,5 +459,44 @@ public class InventoryTests
         Assert.Equal("/uploads/inventory/catalog/jewel_emerald.webp", item.ImageUrl);
         Assert.Equal("/uploads/inventory/catalog/jewel_emerald.webp", item.ThumbnailUrl);
         await repository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task RemoveItemImageCommandHandler_ShouldRemoveImageAndTrackAudit()
+    {
+        // Arrange
+        var repository = Substitute.For<IInventoryRepository>();
+        var activityTracker = Substitute.For<IUserActivityTracker>();
+        var imageService = Substitute.For<IInventoryImageService>();
+
+        var item = new Item(201, 350_000, DateTime.UtcNow, "Reloj de Oro", 5)
+        {
+            Id = 41,
+            ImageUrl = "/uploads/inventory/catalog/watch_test.webp",
+            ThumbnailUrl = "/uploads/inventory/catalog/watch_test.webp"
+        };
+
+        repository.GetItemByReferenceAsync(201, Arg.Any<CancellationToken>()).Returns(item);
+
+        var handler = new RemoveItemImageCommandHandler(repository, activityTracker, imageService);
+        var command = new RemoveItemImageCommand(201);
+
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Null(item.ImageUrl);
+        Assert.Null(item.ThumbnailUrl);
+        await repository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        imageService.Received(1).DeleteImage("/uploads/inventory/catalog/watch_test.webp");
+        await activityTracker.Received(1).TrackActivityAsync(
+            actionKey: ActionWeightRegistry.InventoryRemoveImage,
+            category: ActionWeightRegistry.CategoryUpdate,
+            description: Arg.Is<string>(d => d.Contains("201")),
+            weightScore: 2,
+            entityName: "Item",
+            entityReference: "201",
+            cancellationToken: Arg.Any<CancellationToken>());
     }
 }
