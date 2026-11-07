@@ -68,7 +68,7 @@ public class NavigationAndSecurityHandlers :
     private async Task EnsureNavigationSeededAsync(CancellationToken ct)
     {
         var dbName = _dbContext.Database.GetDbConnection().Database ?? "default";
-        if (_seededTenants.ContainsKey(dbName))
+        if (_seededTenants.ContainsKey(dbName) && await _dbContext.AppModules.AnyAsync(ct) && await _dbContext.MenuItems.AnyAsync(ct))
         {
             return;
         }
@@ -76,31 +76,43 @@ public class NavigationAndSecurityHandlers :
         await _seedLock.WaitAsync(ct);
         try
         {
-            if (_seededTenants.ContainsKey(dbName))
+            if (_seededTenants.ContainsKey(dbName) && await _dbContext.AppModules.AnyAsync(ct) && await _dbContext.MenuItems.AnyAsync(ct))
             {
                 return;
             }
 
-            // 1. Seed Modules and Menus if missing
-        if (!await _dbContext.AppModules.AnyAsync(ct))
-        {
-            var defaultModules = new List<AppModule>
+            // 1. Seed or update canonical Modules
+            var canonicalModules = new List<AppModule>
             {
-                new() { Id = Guid.NewGuid(), Key = "CONTRACTS", Name = "Contratos", Icon = "bi-file-earmark-text", Description = "Gestión de contratos de compraventa y empeño", Order = 1, IsActive = true },
-                new() { Id = Guid.NewGuid(), Key = "INVENTORY", Name = "Inventario", Icon = "bi-box-seam", Description = "Control de stock de joyas y relojería", Order = 2, IsActive = true },
-                new() { Id = Guid.NewGuid(), Key = "CUSTOMERS", Name = "Clientes", Icon = "bi-people", Description = "Directorio y clientes", Order = 3, IsActive = true },
-                new() { Id = Guid.NewGuid(), Key = "CASH", Name = "Caja", Icon = "bi-cash-stack", Description = "Arqueo y control diario de caja", Order = 4, IsActive = true },
-                new() { Id = Guid.NewGuid(), Key = "INVOICING", Name = "Facturación", Icon = "bi-receipt", Description = "Emisión y control de facturas", Order = 5, IsActive = true },
-                new() { Id = Guid.NewGuid(), Key = "ADMIN", Name = "Seguridad", Icon = "bi-shield-lock", Description = "Usuarios, módulos, menús, roles y permisos", Order = 6, IsActive = true }
+                new() { Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), Key = "CONTRACTS", Name = "Contratos", Icon = "bi-file-earmark-text", Description = "Gestión de contratos de compraventa y empeño", Order = 1, IsActive = true },
+                new() { Id = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), Key = "INVENTORY", Name = "Inventario", Icon = "bi-box-seam", Description = "Control de stock de joyas y relojería", Order = 2, IsActive = true },
+                new() { Id = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"), Key = "CUSTOMERS", Name = "Clientes", Icon = "bi-people", Description = "Directorio y clientes", Order = 3, IsActive = true },
+                new() { Id = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd"), Key = "CASH", Name = "Caja", Icon = "bi-cash-stack", Description = "Arqueo y control diario de caja", Order = 4, IsActive = true },
+                new() { Id = Guid.Parse("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), Key = "INVOICING", Name = "Facturación", Icon = "bi-receipt", Description = "Emisión y control de facturas", Order = 5, IsActive = true },
+                new() { Id = Guid.Parse("ffffffff-ffff-ffff-ffff-ffffffffffff"), Key = "ADMIN", Name = "Seguridad", Icon = "bi-shield-lock", Description = "Usuarios, módulos, menús, roles y permisos", Order = 6, IsActive = true }
             };
 
-            _dbContext.AppModules.AddRange(defaultModules);
+            var existingModules = await _dbContext.AppModules.ToListAsync(ct);
+            foreach (var mod in canonicalModules)
+            {
+                var existing = existingModules.FirstOrDefault(m => string.Equals(m.Key, mod.Key, StringComparison.OrdinalIgnoreCase));
+                if (existing == null)
+                {
+                    _dbContext.AppModules.Add(mod);
+                }
+                else
+                {
+                    existing.Name = mod.Name;
+                    existing.Icon = mod.Icon;
+                    existing.Description = mod.Description;
+                    existing.Order = mod.Order;
+                    existing.IsActive = true;
+                }
+            }
             await _dbContext.SaveChangesAsync(ct);
-        }
 
-        if (!await _dbContext.MenuItems.AnyAsync(ct))
-        {
-            var defaultMenus = new List<MenuItem>
+            // 2. Seed or update canonical Menus
+            var canonicalMenus = new List<MenuItem>
             {
                 new() { Id = Guid.Parse("11111111-1111-1111-1111-111111111111"), ModuleKey = "CONTRACTS", Name = "Todos los Contratos", Route = "/contracts", Icon = "bi-file-earmark-text", Order = 1, IsActive = true },
                 new() { Id = Guid.Parse("11111111-1111-1111-1111-111111111112"), ModuleKey = "CONTRACTS", Name = "Nuevo Contrato", Route = "/contracts/new", Icon = "bi-plus-circle", Order = 2, IsActive = true },
@@ -111,6 +123,7 @@ public class NavigationAndSecurityHandlers :
                 new() { Id = Guid.Parse("22222222-2222-2222-2222-222222222224"), ModuleKey = "INVENTORY", Name = "Nuevo Reloj", Route = "/inventory/watches/new", Icon = "bi-watch", Order = 3, IsActive = true },
                 new() { Id = Guid.Parse("22222222-2222-2222-2222-222222222225"), ModuleKey = "INVENTORY", Name = "Descargar Artículo", Route = "/inventory/discharge", Icon = "bi-box-arrow-right", Order = 4, IsActive = true },
                 new() { Id = Guid.Parse("22222222-2222-2222-2222-222222222226"), ModuleKey = "INVENTORY", Name = "Consolidado de Inventario", Route = "/inventory/consolidated", Icon = "bi-pie-chart", Order = 5, IsActive = true },
+                new() { Id = Guid.Parse("22222222-2222-2222-2222-222222222228"), ModuleKey = "INVENTORY", Name = "Auditoría de Actividad", Route = "/inventory/audit-activity", Icon = "bi-graph-up-arrow", Order = 6, IsActive = true },
 
                 new() { Id = Guid.Parse("33333333-3333-3333-3333-333333333333"), ModuleKey = "CUSTOMERS", Name = "Directorio de Clientes", Route = "/customers", Icon = "bi-people", Order = 1, IsActive = true },
                 new() { Id = Guid.Parse("33333333-3333-3333-3333-333333333334"), ModuleKey = "CUSTOMERS", Name = "Nuevo Cliente / Proveedor", Route = "/customers/new", Icon = "bi-person-plus", Order = 2, IsActive = true },
@@ -121,165 +134,159 @@ public class NavigationAndSecurityHandlers :
                 new() { Id = Guid.Parse("55555555-5555-5555-5555-555555555555"), ModuleKey = "INVOICING", Name = "Facturas Emitidas", Route = "/invoices", Icon = "bi-receipt", Order = 1, IsActive = true },
                 new() { Id = Guid.Parse("55555555-5555-5555-5555-555555555556"), ModuleKey = "INVOICING", Name = "Nueva Factura", Route = "/invoices/new", Icon = "bi-plus-circle", Order = 2, IsActive = true },
 
+                new() { Id = Guid.Parse("66666666-6666-6666-6666-666666666660"), ModuleKey = "ADMIN", Name = "Mi Perfil", Route = "/profile", Icon = "bi-person-circle", Order = 0, IsActive = true },
                 new() { Id = Guid.Parse("66666666-6666-6666-6666-666666666661"), ModuleKey = "ADMIN", Name = "Usuarios del Sistema", Route = "/admin/users", Icon = "bi-people-fill", Order = 1, IsActive = true },
                 new() { Id = Guid.Parse("66666666-6666-6666-6666-666666666662"), ModuleKey = "ADMIN", Name = "Configuración de Módulos", Route = "/admin/modules", Icon = "bi-grid-fill", Order = 2, IsActive = true },
                 new() { Id = Guid.Parse("66666666-6666-6666-6666-666666666663"), ModuleKey = "ADMIN", Name = "Configuración de Menús", Route = "/admin/menus", Icon = "bi-list-ul", Order = 3, IsActive = true },
                 new() { Id = Guid.Parse("66666666-6666-6666-6666-666666666664"), ModuleKey = "ADMIN", Name = "Roles de Seguridad", Route = "/admin/roles", Icon = "bi-person-badge", Order = 4, IsActive = true },
                 new() { Id = Guid.Parse("66666666-6666-6666-6666-666666666665"), ModuleKey = "ADMIN", Name = "Matriz de Permisos", Route = "/admin/permissions", Icon = "bi-shield-check", Order = 5, IsActive = true },
                 new() { Id = Guid.Parse("66666666-6666-6666-6666-666666666666"), ModuleKey = "ADMIN", Name = "Mis Passkeys", Route = "/auth/passkeys", Icon = "bi-fingerprint", Order = 6, IsActive = true },
-                new() { Id = Guid.Parse("66666666-6666-6666-6666-666666666667"), ModuleKey = "ADMIN", Name = "Autenticador Móvil (MFA)", Route = "/auth/mfa", Icon = "bi-shield-lock-fill", Order = 7, IsActive = true }
+                new() { Id = Guid.Parse("66666666-6666-6666-6666-666666666667"), ModuleKey = "ADMIN", Name = "Autenticador Móvil (MFA)", Route = "/auth/mfa", Icon = "bi-shield-lock-fill", Order = 7, IsActive = true },
+                new() { Id = Guid.Parse("66666666-6666-6666-6666-666666666668"), ModuleKey = "ADMIN", Name = "Productividad y Auditoría", Route = "/audit/productivity", Icon = "bi-speedometer2", Order = 8, IsActive = true }
             };
 
-            _dbContext.MenuItems.AddRange(defaultMenus);
-            await _dbContext.SaveChangesAsync(ct);
-        }
-        else
-        {
-            if (!await _dbContext.MenuItems.AnyAsync(m => m.Route == "/profile", ct))
+            var existingMenus = await _dbContext.MenuItems.ToListAsync(ct);
+            foreach (var menu in canonicalMenus)
             {
-                _dbContext.MenuItems.Add(new()
+                var existing = existingMenus.FirstOrDefault(m => string.Equals(m.Route, menu.Route, StringComparison.OrdinalIgnoreCase));
+                if (existing == null)
                 {
-                    Id = Guid.Parse("66666666-6666-6666-6666-666666666660"),
-                    ModuleKey = "ADMIN",
-                    Name = "Mi Perfil",
-                    Route = "/profile",
-                    Icon = "bi-person-circle",
-                    Order = 0,
-                    IsActive = true
-                });
-                await _dbContext.SaveChangesAsync(ct);
-            }
-
-            if (!await _dbContext.MenuItems.AnyAsync(m => m.Route == "/auth/mfa", ct))
-            {
-                _dbContext.MenuItems.Add(new()
-                {
-                    Id = Guid.Parse("66666666-6666-6666-6666-666666666667"),
-                    ModuleKey = "ADMIN",
-                    Name = "Autenticador Móvil (MFA)",
-                    Route = "/auth/mfa",
-                    Icon = "bi-shield-lock-fill",
-                    Order = 7,
-                    IsActive = true
-                });
-                await _dbContext.SaveChangesAsync(ct);
-            }
-
-            if (!await _dbContext.MenuItems.AnyAsync(m => m.Route == "/inventory/audit-activity", ct))
-            {
-                _dbContext.MenuItems.Add(new()
-                {
-                    Id = Guid.Parse("22222222-2222-2222-2222-222222222228"),
-                    ModuleKey = "INVENTORY",
-                    Name = "Auditoría de Actividad",
-                    Route = "/inventory/audit-activity",
-                    Icon = "bi-graph-up-arrow",
-                    Order = 6,
-                    IsActive = true
-                });
-                await _dbContext.SaveChangesAsync(ct);
-            }
-
-            if (!await _dbContext.MenuItems.AnyAsync(m => m.Route == "/audit/productivity", ct))
-            {
-                _dbContext.MenuItems.Add(new()
-                {
-                    Id = Guid.Parse("66666666-6666-6666-6666-666666666668"),
-                    ModuleKey = "ADMIN",
-                    Name = "Productividad y Auditoría",
-                    Route = "/audit/productivity",
-                    Icon = "bi-speedometer2",
-                    Order = 8,
-                    IsActive = true
-                });
-                await _dbContext.SaveChangesAsync(ct);
-            }
-        }
-
-        // 2. Ensure default roles exist including 'Admin'
-        string[] roles = ["Admin", "Administrador", "Supervisor", "Tasador", "Cajero", "Vendedor"];
-        foreach (var role in roles)
-        {
-            if (!await _roleManager.RoleExistsAsync(role))
-            {
-                await _roleManager.CreateAsync(new IdentityRole(role));
-            }
-        }
-
-        // 3. Ensure Administrators exist with role 'Admin' and 'Administrador'
-        string[] adminEmails = ["walvarez@ingnova.team", "walvarez@bezion.tech", "jmalvarezc@bezion.tech", "admin@joyeriapomona.com"];
-        foreach (var adminEmail in adminEmails)
-        {
-            var adminUser = await _userManager.FindByEmailAsync(adminEmail)
-                ?? await _userManager.FindByNameAsync(adminEmail);
-
-            if (adminUser != null)
-            {
-                if (!await _userManager.IsInRoleAsync(adminUser, "Admin"))
-                {
-                    await _userManager.AddToRoleAsync(adminUser, "Admin");
-                }
-                if (!await _userManager.IsInRoleAsync(adminUser, "Administrador"))
-                {
-                    await _userManager.AddToRoleAsync(adminUser, "Administrador");
-                }
-            }
-            else if (adminEmail == "walvarez@ingnova.team")
-            {
-                adminUser = new ApplicationUser
-                {
-                    UserName = adminEmail,
-                    Email = adminEmail,
-                    EmailConfirmed = true,
-                    IsActive = true,
-                    CreatedAt = DateTime.UtcNow
-                };
-                var createRes = await _userManager.CreateAsync(adminUser, "#Wa3215252.");
-                if (createRes.Succeeded)
-                {
-                    await _userManager.AddToRoleAsync(adminUser, "Admin");
-                    await _userManager.AddToRoleAsync(adminUser, "Administrador");
-                }
-            }
-        }
-
-        // 4. Ensure Role 'Admin' and 'Administrador' have ALL permissions granted on all menus
-        var allMenus = await _dbContext.MenuItems.ToListAsync(ct);
-        foreach (var menu in allMenus)
-        {
-            foreach (var roleName in new[] { "Admin", "Administrador" })
-            {
-                var perm = await _dbContext.RolePermissions
-                    .FirstOrDefaultAsync(p => p.RoleName == roleName && p.MenuRoute == menu.Route, ct);
-
-                if (perm == null)
-                {
-                    _dbContext.RolePermissions.Add(new RolePermission
-                    {
-                        Id = Guid.NewGuid(),
-                        RoleName = roleName,
-                        ModuleKey = menu.ModuleKey,
-                        MenuRoute = menu.Route,
-                        CanView = true,
-                        CanCreate = true,
-                        CanEdit = true,
-                        CanDelete = true,
-                        CanAdmin = true
-                    });
+                    _dbContext.MenuItems.Add(menu);
                 }
                 else
                 {
-                    perm.CanView = true;
-                    perm.CanCreate = true;
-                    perm.CanEdit = true;
-                    perm.CanDelete = true;
-                    perm.CanAdmin = true;
+                    existing.Name = menu.Name;
+                    existing.Icon = menu.Icon;
+                    existing.ModuleKey = menu.ModuleKey;
+                    existing.Order = menu.Order;
+                    existing.IsActive = true;
                 }
             }
-        }
+            await _dbContext.SaveChangesAsync(ct);
 
-        await _dbContext.SaveChangesAsync(ct);
-        _seededTenants[dbName] = true;
+            // 3. Ensure default roles exist
+            string[] roles = ["Admin", "Administrador", "Supervisor", "Tasador", "Cajero", "Vendedor"];
+            foreach (var role in roles)
+            {
+                if (!await _roleManager.RoleExistsAsync(role))
+                {
+                    await _roleManager.CreateAsync(new IdentityRole(role));
+                }
+            }
+
+            // 4. Ensure Administrators exist with role 'Admin' and 'Administrador'
+            string[] adminEmails = ["walvarez@ingnova.team", "walvarez@bezion.tech", "jmalvarezc@bezion.tech", "admin@joyeriapomona.com"];
+            foreach (var adminEmail in adminEmails)
+            {
+                var adminUser = await _userManager.FindByEmailAsync(adminEmail)
+                    ?? await _userManager.FindByNameAsync(adminEmail);
+
+                if (adminUser != null)
+                {
+                    if (!await _userManager.IsInRoleAsync(adminUser, "Admin"))
+                    {
+                        await _userManager.AddToRoleAsync(adminUser, "Admin");
+                    }
+                    if (!await _userManager.IsInRoleAsync(adminUser, "Administrador"))
+                    {
+                        await _userManager.AddToRoleAsync(adminUser, "Administrador");
+                    }
+                }
+                else
+                {
+                    adminUser = new ApplicationUser
+                    {
+                        UserName = adminEmail,
+                        Email = adminEmail,
+                        EmailConfirmed = true,
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    string pass = adminEmail.Contains("jmalvarezc") ? "BeZ10N73ch" : "#Wa3215252.";
+                    var createRes = await _userManager.CreateAsync(adminUser, pass);
+                    if (createRes.Succeeded)
+                    {
+                        await _userManager.AddToRoleAsync(adminUser, "Admin");
+                        await _userManager.AddToRoleAsync(adminUser, "Administrador");
+                    }
+                }
+            }
+
+            // 5. Ensure Permissions across all roles
+            var allMenus = await _dbContext.MenuItems.ToListAsync(ct);
+            var existingPerms = await _dbContext.RolePermissions.ToListAsync(ct);
+
+            foreach (var menu in allMenus)
+            {
+                foreach (var role in roles)
+                {
+                    var perm = existingPerms.FirstOrDefault(p =>
+                        string.Equals(p.RoleName, role, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(p.MenuRoute, menu.Route, StringComparison.OrdinalIgnoreCase));
+
+                    bool canView = false;
+                    bool canCreate = false;
+                    bool canEdit = false;
+                    bool canDelete = false;
+                    bool canAdmin = false;
+
+                    if (role.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
+                        role.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+                    {
+                        canView = canCreate = canEdit = canDelete = canAdmin = true;
+                    }
+                    else if (role.Equals("Supervisor", StringComparison.OrdinalIgnoreCase))
+                    {
+                        canView = true;
+                        canCreate = canEdit = !menu.Route.StartsWith("/admin");
+                    }
+                    else if (role.Equals("Tasador", StringComparison.OrdinalIgnoreCase))
+                    {
+                        canView = menu.ModuleKey == "CONTRACTS" || menu.ModuleKey == "INVENTORY" || menu.Route == "/profile";
+                        canCreate = canEdit = canView;
+                    }
+                    else if (role.Equals("Cajero", StringComparison.OrdinalIgnoreCase))
+                    {
+                        canView = menu.ModuleKey == "CASH" || menu.ModuleKey == "INVOICING" || menu.ModuleKey == "CONTRACTS" || menu.Route == "/profile";
+                        canCreate = canEdit = canView;
+                    }
+                    else if (role.Equals("Vendedor", StringComparison.OrdinalIgnoreCase))
+                    {
+                        canView = menu.ModuleKey == "INVOICING" || menu.ModuleKey == "CUSTOMERS" || menu.ModuleKey == "INVENTORY" || menu.Route == "/profile";
+                        canCreate = canView;
+                    }
+
+                    if (canView)
+                    {
+                        if (perm == null)
+                        {
+                            _dbContext.RolePermissions.Add(new RolePermission
+                            {
+                                Id = Guid.NewGuid(),
+                                RoleName = role,
+                                ModuleKey = menu.ModuleKey,
+                                MenuRoute = menu.Route,
+                                CanView = canView,
+                                CanCreate = canCreate,
+                                CanEdit = canEdit,
+                                CanDelete = canDelete,
+                                CanAdmin = canAdmin
+                            });
+                        }
+                        else
+                        {
+                            perm.CanView = canView;
+                            perm.CanCreate = canCreate;
+                            perm.CanEdit = canEdit;
+                            perm.CanDelete = canDelete;
+                            perm.CanAdmin = canAdmin;
+                        }
+                    }
+                }
+            }
+
+            await _dbContext.SaveChangesAsync(ct);
+            _seededTenants[dbName] = true;
         }
         finally
         {
@@ -298,6 +305,20 @@ public class NavigationAndSecurityHandlers :
                 .OrderBy(m => m.Order)
                 .Select(m => new AppModuleDto(m.Id, m.Key, m.Name, m.Icon, m.Description, m.Order, m.IsActive))
                 .ToListAsync(cancellationToken);
+
+            if (modules.Count == 0)
+            {
+                var dbName = _dbContext.Database.GetDbConnection().Database ?? "default";
+                _seededTenants.TryRemove(dbName, out _);
+                await EnsureNavigationSeededAsync(cancellationToken);
+
+                modules = await _dbContext.AppModules
+                    .AsNoTracking()
+                    .Where(m => m.IsActive)
+                    .OrderBy(m => m.Order)
+                    .Select(m => new AppModuleDto(m.Id, m.Key, m.Name, m.Icon, m.Description, m.Order, m.IsActive))
+                    .ToListAsync(cancellationToken);
+            }
 
             if (!string.IsNullOrWhiteSpace(request.UserId))
             {
@@ -386,6 +407,29 @@ public class NavigationAndSecurityHandlers :
                     RequiredPermission = m.RequiredPermission
                 })
                 .ToListAsync(cancellationToken);
+
+            if (allItems.Count == 0)
+            {
+                var dbName = _dbContext.Database.GetDbConnection().Database ?? "default";
+                _seededTenants.TryRemove(dbName, out _);
+                await EnsureNavigationSeededAsync(cancellationToken);
+
+                allItems = await query
+                    .OrderBy(m => m.Order)
+                    .Select(m => new MenuDto
+                    {
+                        Id = m.Id,
+                        ModuleKey = m.ModuleKey,
+                        ParentId = m.ParentId,
+                        Name = m.Name,
+                        Route = m.Route,
+                        Icon = m.Icon,
+                        Order = m.Order,
+                        IsActive = m.IsActive,
+                        RequiredPermission = m.RequiredPermission
+                    })
+                    .ToListAsync(cancellationToken);
+            }
 
             if (!string.IsNullOrWhiteSpace(request.UserId))
             {

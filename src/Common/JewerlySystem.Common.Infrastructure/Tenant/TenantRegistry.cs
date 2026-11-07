@@ -53,7 +53,7 @@ public class TenantRegistry : ITenantRegistry
             DefaultTheme: "pomona-imperial",
             SymbolUrl: "images/pomona-symbol-white.png",
             LogoUrl: "images/pomona-logo-square.png",
-            AllowedUserEmails: new List<string> { "walvarez@ingnova.team", "walvarez@bezion.tech", "admin@joyeriapomona.com", "william.alvarezv@gmail.com", "joglisjjc@gmail.com" }
+            AllowedUserEmails: new List<string> { "walvarez@ingnova.team", "walvarez@bezion.tech", "jmalvarezc@bezion.tech", "admin@joyeriapomona.com", "william.alvarezv@gmail.com", "joglisjjc@gmail.com" }
         ));
 
         // 3. Register Tenant: Joyería Oro & Plata
@@ -65,7 +65,7 @@ public class TenantRegistry : ITenantRegistry
             DefaultTheme: "oroplata-classic",
             SymbolUrl: "images/tenants/oro-plata/oroplata-symbol.svg",
             LogoUrl: "images/tenants/oro-plata/oroplata-logo.png",
-            AllowedUserEmails: new List<string> { "walvarez@ingnova.team", "walvarez@bezion.tech" }
+            AllowedUserEmails: new List<string> { "walvarez@ingnova.team", "walvarez@bezion.tech", "jmalvarezc@bezion.tech", "admin@joyeriapomona.com" }
         ));
 
         // 4. Register Tenant: Joyería BeZion (Test)
@@ -99,14 +99,16 @@ public class TenantRegistry : ITenantRegistry
             DefaultTheme: "pomona-sapphire",
             SymbolUrl: "images/tenants/oro-plata/oroplata-symbol.svg",
             LogoUrl: "images/tenants/oro-plata/oroplata-logo.png",
-            AllowedUserEmails: new List<string> { "walvarez@bezion.tech", "jmalvarezc@bezion.tech", "walvarez@ingnova.team" }
+            AllowedUserEmails: new List<string> { "walvarez@bezion.tech", "jmalvarezc@bezion.tech", "walvarez@ingnova.team", "admin@joyeriapomona.com" }
         ));
     }
 
     public IReadOnlyList<TenantInfo> GetAllTenants() => _tenants;
 
     public TenantInfo? GetTenant(string tenantId) =>
-        _tenants.FirstOrDefault(t => string.Equals(t.Id, tenantId, StringComparison.OrdinalIgnoreCase));
+        _tenants.FirstOrDefault(t =>
+            string.Equals(t.Id, tenantId, StringComparison.OrdinalIgnoreCase) ||
+            (string.Equals(t.Id, "oro-plata", StringComparison.OrdinalIgnoreCase) && string.Equals(tenantId, "oroplata", StringComparison.OrdinalIgnoreCase)));
 
     public TenantInfo GetDefaultTenant() =>
         GetTenant(_defaultTenantId) ?? _tenants.First();
