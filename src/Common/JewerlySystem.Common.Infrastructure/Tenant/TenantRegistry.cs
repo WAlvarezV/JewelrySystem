@@ -35,7 +35,8 @@ public class TenantRegistry : ITenantRegistry
         var rawOroPlataCs = configuration.GetConnectionString("OroPlataCs");
         string oroPlataCs;
 
-        if (!string.IsNullOrWhiteSpace(rawOroPlataCs))
+        if (!string.IsNullOrWhiteSpace(rawOroPlataCs) &&
+            !(rawOroPlataCs.Contains("localhost", StringComparison.OrdinalIgnoreCase) && !defaultCs.Contains("localhost", StringComparison.OrdinalIgnoreCase)))
         {
             oroPlataCs = NormalizeNpgsqlConnectionString(rawOroPlataCs);
         }
@@ -71,7 +72,8 @@ public class TenantRegistry : ITenantRegistry
         // 4. Register Tenant: Joyería BeZion (Test)
         var rawBeZionCs = configuration.GetConnectionString("BeZionCs");
         string bezionCs;
-        if (!string.IsNullOrWhiteSpace(rawBeZionCs))
+        if (!string.IsNullOrWhiteSpace(rawBeZionCs) &&
+            !(rawBeZionCs.Contains("localhost", StringComparison.OrdinalIgnoreCase) && !defaultCs.Contains("localhost", StringComparison.OrdinalIgnoreCase)))
         {
             bezionCs = NormalizeNpgsqlConnectionString(rawBeZionCs);
         }
