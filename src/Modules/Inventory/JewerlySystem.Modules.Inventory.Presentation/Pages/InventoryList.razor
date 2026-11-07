@@ -151,10 +151,11 @@
                         </Tooltip>
 
                         <Tooltip Title="Registrar Nueva Joya" Placement="Placement.Top">
-                            <button class="btn btn-primary d-flex align-items-center justify-content-center filter-icon-btn btn-create-accent"
+                            <button class="btn btn-primary d-flex align-items-center justify-content-center gap-1 filter-icon-btn btn-create-accent px-2 px-lg-0 flex-grow-1 flex-lg-grow-0"
                                     type="button"
                                     @onclick="OpenCreateJewelDrawer">
                                 <i class="bi bi-plus-lg fs-5"></i>
+                                <span class="d-inline d-lg-none fw-semibold small">Nueva Joya</span>
                             </button>
                         </Tooltip>
                     </div>
@@ -197,6 +198,86 @@
             }
             else
             {
+                <!-- Vista Móvil de Tarjetas Interactivas (< 768px) -->
+                <div class="d-md-none mobile-inventory-cards p-2">
+                    @foreach (var item in FilteredJewelry.Take(30))
+                    {
+                        <div class="mobile-inv-card mb-2.5 p-3 rounded-3 bg-white border shadow-2xs">
+                            <div class="d-flex align-items-start gap-2.5 mb-2">
+                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                {
+                                    <div class="mobile-inv-thumb flex-shrink-0" @onclick="@(() => OpenImagePreview(item.ImageUrl, item.Description))">
+                                        <img src="@item.ImageUrl" alt="@item.Description" loading="lazy" />
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="mobile-inv-thumb placeholder flex-shrink-0" @onclick="@(() => OpenViewJewelDrawer(item))">
+                                        <i class="bi bi-gem"></i>
+                                    </div>
+                                }
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="d-flex align-items-center justify-content-between gap-1 mb-1">
+                                        <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                                            <span class="ref-badge">#@item.Reference.ToString("D4")</span>
+                                            <SoftTag Color="gold">
+                                                <i class="bi bi-gem me-1"></i>@item.ItemTypeName
+                                            </SoftTag>
+                                        </div>
+                                        <Switch Checked="@item.Active"
+                                                Size="InputSize.Small"
+                                                Loading="@(_togglingRef == item.Reference)"
+                                                Disabled="@(_togglingRef == item.Reference)"
+                                                OnChange="@((bool val) => ToggleItemActiveAsync(item.Reference, val))" />
+                                    </div>
+                                    <div class="fw-medium text-dark small text-break">
+                                        @item.Description
+                                        @if (item.Length.HasValue && item.Length.Value > 0)
+                                        {
+                                            <span class="badge bg-light text-muted border ms-1">@item.Length cm</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-1 py-1.5 px-2 rounded-2 bg-light border mb-2 text-center">
+                                <div class="col-4 border-end">
+                                    <span class="d-block text-muted" style="font-size: 0.65rem; text-transform: uppercase;">Peso</span>
+                                    <strong class="text-dark small">@item.Weight.ToString("F2") g</strong>
+                                </div>
+                                <div class="col-4 border-end">
+                                    <span class="d-block text-muted" style="font-size: 0.65rem; text-transform: uppercase;">Costo</span>
+                                    <strong class="cost-text small">@item.CostValue.ToString("C0")</strong>
+                                </div>
+                                <div class="col-4">
+                                    <span class="d-block text-muted" style="font-size: 0.65rem; text-transform: uppercase;">Venta Sug.</span>
+                                    <strong class="sale-text small">@((item.SaleValue ?? (int)(item.CostValue * 1.3)).ToString("C0"))</strong>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-center justify-content-between gap-1.5 pt-1">
+                                <button type="button" class="btn btn-sm btn-light border flex-grow-1 py-1" @onclick="@(() => OpenViewJewelDrawer(item))">
+                                    <i class="bi bi-eye text-primary"></i> <span class="small">Detalle</span>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-light border flex-grow-1 py-1" @onclick="@(() => OpenEditJewelDrawer(item))">
+                                    <i class="bi bi-pencil text-secondary"></i> <span class="small">Editar</span>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-light border py-1 px-2" @onclick="@(() => OpenItemHistory(item.Reference))" title="Historial">
+                                    <i class="bi bi-clock-history text-muted"></i>
+                                </button>
+                                @if (item.Active)
+                                {
+                                    <button type="button" class="btn btn-sm btn-primary flex-grow-1 py-1" @onclick="@(() => Navigation.NavigateTo($"/inventory/discharge?ref={item.Reference}"))">
+                                        <i class="bi bi-bag-check"></i> <span class="small">Vender</span>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Tabla Desktop / Tablet (≥ 768px) -->
+                <div class="d-none d-md-block">
                 <Table TItem="JewelListItemDto"
                        DataSource="@FilteredJewelry"
                        Responsive="true"
@@ -283,6 +364,7 @@
                         </div>
                     </ActionColumn>
                 </Table>
+                </div>
             }
         </div>
     }
@@ -413,10 +495,11 @@
                         </Tooltip>
 
                         <Tooltip Title="Registrar Nuevo Reloj" Placement="Placement.Top">
-                            <button class="btn btn-primary d-flex align-items-center justify-content-center filter-icon-btn btn-create-accent"
+                            <button class="btn btn-primary d-flex align-items-center justify-content-center gap-1 filter-icon-btn btn-create-accent px-2 px-lg-0 flex-grow-1 flex-lg-grow-0"
                                     type="button"
                                     @onclick="OpenCreateWatchDrawer">
                                 <i class="bi bi-plus-lg fs-5"></i>
+                                <span class="d-inline d-lg-none fw-semibold small">Nuevo Reloj</span>
                             </button>
                         </Tooltip>
                     </div>
@@ -459,6 +542,84 @@
             }
             else
             {
+                <!-- Vista Móvil de Tarjetas Interactivas Relojes (< 768px) -->
+                <div class="d-md-none mobile-inventory-cards p-2">
+                    @foreach (var item in FilteredWatches.Take(30))
+                    {
+                        <div class="mobile-inv-card mb-2.5 p-3 rounded-3 bg-white border shadow-2xs">
+                            <div class="d-flex align-items-start gap-2.5 mb-2">
+                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                {
+                                    <div class="mobile-inv-thumb flex-shrink-0" @onclick="@(() => OpenImagePreview(item.ImageUrl, $"{item.BrandName} {item.Model}"))">
+                                        <img src="@item.ImageUrl" alt="@item.Description" loading="lazy" />
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="mobile-inv-thumb placeholder flex-shrink-0" @onclick="@(() => OpenViewWatchDrawer(item))">
+                                        <i class="bi bi-watch"></i>
+                                    </div>
+                                }
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="d-flex align-items-center justify-content-between gap-1 mb-1">
+                                        <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                                            <span class="ref-badge">#@item.Reference.ToString("D4")</span>
+                                            <SoftTag Color="cyan">
+                                                <i class="bi bi-watch me-1"></i>@item.BrandName
+                                            </SoftTag>
+                                            @if (!string.IsNullOrEmpty(item.Model))
+                                            {
+                                                <span class="fw-bold text-dark small">@item.Model</span>
+                                            }
+                                        </div>
+                                        <Switch Checked="@item.Active"
+                                                Size="InputSize.Small"
+                                                Loading="@(_togglingRef == item.Reference)"
+                                                Disabled="@(_togglingRef == item.Reference)"
+                                                OnChange="@((bool val) => ToggleItemActiveAsync(item.Reference, val))" />
+                                    </div>
+                                    <div class="text-muted small text-break">@item.Description</div>
+                                </div>
+                            </div>
+
+                            <div class="row g-1 py-1.5 px-2 rounded-2 bg-light border mb-2 text-center">
+                                <div class="col-4 border-end">
+                                    <span class="d-block text-muted" style="font-size: 0.65rem; text-transform: uppercase;">Serial / Caja</span>
+                                    <strong class="text-dark small text-truncate d-block">@item.CaseNumber</strong>
+                                </div>
+                                <div class="col-4 border-end">
+                                    <span class="d-block text-muted" style="font-size: 0.65rem; text-transform: uppercase;">Costo</span>
+                                    <strong class="cost-text small">@item.CostValue.ToString("C0")</strong>
+                                </div>
+                                <div class="col-4">
+                                    <span class="d-block text-muted" style="font-size: 0.65rem; text-transform: uppercase;">Venta Sug.</span>
+                                    <strong class="sale-text small">@((item.SaleValue ?? (int)(item.CostValue * 1.3)).ToString("C0"))</strong>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-center justify-content-between gap-1.5 pt-1">
+                                <button type="button" class="btn btn-sm btn-light border flex-grow-1 py-1" @onclick="@(() => OpenViewWatchDrawer(item))">
+                                    <i class="bi bi-eye text-primary"></i> <span class="small">Detalle</span>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-light border flex-grow-1 py-1" @onclick="@(() => OpenEditWatchDrawer(item))">
+                                    <i class="bi bi-pencil text-secondary"></i> <span class="small">Editar</span>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-light border py-1 px-2" @onclick="@(() => OpenItemHistory(item.Reference))" title="Historial">
+                                    <i class="bi bi-clock-history text-muted"></i>
+                                </button>
+                                @if (item.Active)
+                                {
+                                    <button type="button" class="btn btn-sm btn-primary flex-grow-1 py-1" @onclick="@(() => Navigation.NavigateTo($"/inventory/discharge?ref={item.Reference}"))">
+                                        <i class="bi bi-bag-check"></i> <span class="small">Vender</span>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Tabla Desktop / Tablet (≥ 768px) -->
+                <div class="d-none d-md-block">
                 <Table TItem="WatchListItemDto"
                        DataSource="@FilteredWatches"
                        Responsive="true"
@@ -547,6 +708,7 @@
                         </div>
                     </ActionColumn>
                 </Table>
+                </div>
             }
         </div>
     }
@@ -652,7 +814,7 @@
                     </div>
 
                     <!-- Botones de margen sugerido joya drawer -->
-                    <div class="p-2 mb-3 rounded bg-light border d-flex flex-wrap align-items-center gap-2">
+                    <div class="p-2 mb-2 rounded bg-light border d-flex flex-wrap align-items-center gap-2">
                         <span class="small text-muted fw-bold"><i class="bi bi-magic me-1 text-primary"></i>Fijar Margen Rápido:</span>
                         <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" @onclick="() => ApplyDrawerJewelMarkup(20)">+20%</button>
                         <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" @onclick="() => ApplyDrawerJewelMarkup(25)">+25%</button>
@@ -660,10 +822,56 @@
                         <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" @onclick="() => ApplyDrawerJewelMarkup(40)">+40%</button>
                         <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" @onclick="() => ApplyDrawerJewelMarkup(50)">+50%</button>
                     </div>
+
+                    @if (_calculatedJewelCost > 0 || _calculatedJewelSale > 0)
+                    {
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="p-2 rounded-3 bg-danger-subtle border border-danger-subtle d-flex flex-column">
+                                    <span class="text-muted" style="font-size: 0.68rem; font-weight: 700; text-transform: uppercase;">Costo Total</span>
+                                    <span class="fw-bold text-danger tabular-nums fs-6">@_calculatedJewelCost.ToString("C0")</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-2 rounded-3 bg-success-subtle border border-success-subtle d-flex flex-column">
+                                    <span class="text-muted" style="font-size: 0.68rem; font-weight: 700; text-transform: uppercase;">Venta Sugerida</span>
+                                    <span class="fw-bold text-success tabular-nums fs-6">@_calculatedJewelSale.ToString("C0")</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
                 </SoftFormBox>
 
-                <!-- 3. Descripción -->
-                <SoftFormBox Title="3. Descripción del Artículo"
+                <!-- 3. Fotografía de Vitrina & Catálogo -->
+                <SoftFormBox Title="3. Fotografía de Vitrina & Catálogo"
+                             InfoTooltip="Captura con cámara de celular normalizada a fondo blanco puro (#FFFFFF)">
+                    @if (!string.IsNullOrEmpty(_jewelFormModel.ImageUrl))
+                    {
+                        <div class="d-flex align-items-center flex-wrap gap-3 p-2 bg-light rounded border">
+                            <div style="width: 70px; height: 70px; min-width: 70px; background: #fff; border-radius: 6px; border: 1px solid #e8e8e8; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                <img src="@_jewelFormModel.ImageUrl" alt="Joya" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+                            </div>
+                            <div class="flex-grow-1 min-w-0">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle mb-1">
+                                    <i class="bi bi-check2-circle me-1"></i> Fondo Blanco Vitrina (#FFFFFF)
+                                </span>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <button type="button" class="btn btn-xs btn-outline-primary rounded-pill px-2" @onclick="OpenCameraForNewJewel">Cambiar Foto</button>
+                                    <button type="button" class="btn btn-xs btn-outline-danger rounded-pill px-2" @onclick="@(() => { _jewelFormModel.ImageUrl = null; })">Quitar</button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 w-100 w-sm-auto" @onclick="OpenCameraForNewJewel">
+                            <i class="bi bi-camera me-1"></i> Tomar Foto con Celular (Fondo Blanco)
+                        </button>
+                    }
+                </SoftFormBox>
+
+                <!-- 4. Descripción -->
+                <SoftFormBox Title="4. Descripción del Artículo"
                              InfoTooltip="Detalle de metal (oro 18k, 14k, plata), piedras preciosas, tallas, grabado...">
                     <SoftVoiceTextArea @bind-Value="_jewelFormModel.Description"
                                        Label="Descripción Detallada"
@@ -862,12 +1070,12 @@
                 Width="680"
                 OnClose="@(() => _drawerDetailVisible = false)">
         <ChildContent>
-            <div class="p-3 mb-3 rounded-3 bg-light border d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="p-3 rounded-circle @(_detailIsJewel ? "bg-warning bg-opacity-10 text-warning" : "bg-info bg-opacity-10 text-info") fs-2">
+            <div class="p-3 mb-3 rounded-3 bg-light border d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-3 min-w-0">
+                    <div class="p-3 rounded-circle flex-shrink-0 @(_detailIsJewel ? "bg-warning bg-opacity-10 text-warning" : "bg-info bg-opacity-10 text-info") fs-2">
                         <i class="bi @(_detailIsJewel ? "bi-gem" : "bi-watch")"></i>
                     </div>
-                    <div>
+                    <div class="min-w-0">
                         <h4 class="fw-bold mb-0 text-dark">Ref #@_detailReference.ToString("D4")</h4>
                         <span class="text-muted small">@_detailCategory &bull; Registrado el @_detailDateOfEntry.ToString("dd/MM/yyyy")</span>
                     </div>
@@ -1559,6 +1767,17 @@
         _onStudioPhotoSaved = url =>
         {
             _editWatchModel.ImageUrl = url;
+            StateHasChanged();
+        };
+        _photoStudioModalVisible = true;
+    }
+
+    private void OpenCameraForNewJewel()
+    {
+        _activeStudioIsJewel = true;
+        _onStudioPhotoSaved = url =>
+        {
+            _jewelFormModel.ImageUrl = url;
             StateHasChanged();
         };
         _photoStudioModalVisible = true;

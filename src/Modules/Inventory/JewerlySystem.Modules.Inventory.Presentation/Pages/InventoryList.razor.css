@@ -328,3 +328,58 @@
     border-radius: 4px;
     opacity: 0.85;
 }
+
+/* ==========================================================================
+   MOBILE INTERACTIVE CARDS (< 768px)
+   ========================================================================== */
+.mobile-inv-card {
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.mobile-inv-thumb {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    border-radius: 8px;
+    background: #ffffff;
+    border: 1px solid #e8e8e8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.mobile-inv-thumb img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.mobile-inv-thumb.placeholder {
+    background: #fafafa;
+    border: 1px dashed #d9d9d9;
+    color: #bfbfbf;
+    font-size: 1.35rem;
+}
+
+@media (max-width: 767.98px) {
+    .inventory-container {
+        padding: 0 0 1.25rem 0;
+    }
+
+    .header-group-switcher {
+        width: 100%;
+    }
+
+    .header-group-switcher ::deep .ant-radio-group {
+        width: 100%;
+        display: flex;
+    }
+
+    .header-group-switcher ::deep .ant-radio-button-wrapper {
+        flex: 1 1 50%;
+        text-align: center;
+        padding: 0 8px;
+    }
+}

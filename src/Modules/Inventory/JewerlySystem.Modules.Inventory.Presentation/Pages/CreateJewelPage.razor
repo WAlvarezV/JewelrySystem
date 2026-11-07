@@ -40,12 +40,12 @@
                          InfoTooltip="Categoría de joyería y procedencia de la pieza">
                 <div class="mb-3">
                     <span class="small text-muted fw-bold d-block mb-2 text-uppercase">Categorías Frecuentes:</span>
-                    <div class="d-flex flex-wrap gap-2">
+                    <div class="d-flex flex-nowrap flex-md-wrap gap-2 overflow-auto pb-1 mobile-pills-scroll">
                         @foreach (var type in _itemTypes.Where(t => t.Id != 5))
                         {
                             bool isSelected = _formModel.ItemTypeId == type.Id;
                             <button type="button"
-                                    class="btn btn-sm @(isSelected ? "btn-primary shadow-sm" : "btn-outline-secondary") d-inline-flex align-items-center gap-1 rounded-pill px-3 py-1"
+                                    class="btn btn-sm @(isSelected ? "btn-primary shadow-sm" : "btn-outline-secondary") d-inline-flex align-items-center gap-1 rounded-pill px-3 py-1 flex-shrink-0"
                                     @onclick="() => SelectItemType(type.Id)">
                                 <i class="bi @GetItemTypeIcon(type.Id)"></i>
                                 <span>@type.Name</span>
@@ -150,6 +150,24 @@
                     <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" @onclick="() => ApplyMarkupPercent(40)">+40%</button>
                     <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" @onclick="() => ApplyMarkupPercent(50)">+50%</button>
                 </div>
+
+                @if (_costValue > 0 || _saleValue > 0)
+                {
+                    <div class="row g-2 mt-1">
+                        <div class="col-6">
+                            <div class="p-2 rounded-3 bg-danger-subtle border border-danger-subtle d-flex flex-column">
+                                <span class="text-muted" style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Costo Total Estimado</span>
+                                <span class="fw-bold text-danger tabular-nums fs-6">@_costValue.ToString("C0")</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 rounded-3 bg-success-subtle border border-success-subtle d-flex flex-column">
+                                <span class="text-muted" style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Venta Sugerida Total</span>
+                                <span class="fw-bold text-success tabular-nums fs-6">@_saleValue.ToString("C0")</span>
+                            </div>
+                        </div>
+                    </div>
+                }
             </SoftFormBox>
 
             <!-- 3. Fotografía de Vitrina & Catálogo -->
@@ -157,11 +175,11 @@
                          InfoTooltip="Captura con celular normalizada a fondo blanco puro (#FFFFFF) y sello de autenticidad">
                 @if (!string.IsNullOrEmpty(_formModel.ImageUrl))
                 {
-                    <div class="d-flex align-items-center gap-3 p-3 bg-white rounded border">
-                        <div style="width: 90px; height: 90px; background: #fff; border-radius: 8px; border: 1px solid #e8e8e8; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                    <div class="d-flex align-items-center flex-wrap flex-sm-nowrap gap-3 p-3 bg-white rounded border">
+                        <div style="width: 90px; height: 90px; min-width: 90px; background: #fff; border-radius: 8px; border: 1px solid #e8e8e8; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                             <img src="@_formModel.ImageUrl" alt="Joya" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
                         </div>
-                        <div class="flex-grow-1">
+                        <div class="flex-grow-1 min-w-0">
                             <span class="badge bg-success-subtle text-success border border-success-subtle mb-1">
                                 <i class="bi bi-check-circle-fill me-1"></i> Fotografía Estandarizada (&lt; 80 KB WebP)
                             </span>
@@ -180,8 +198,8 @@
                 else
                 {
                     <div class="p-3 bg-white rounded border text-center">
-                        <button type="button" class="btn btn-primary rounded-pill px-4 py-2" @onclick="() => _photoStudioModalVisible = true">
-                            <i class="bi bi-camera-fill me-1 fs-5"></i> Tomar Foto con Cámara / Celular (Estudio Blanco)
+                        <button type="button" class="btn btn-primary rounded-pill px-4 py-2 w-100 w-sm-auto" @onclick="() => _photoStudioModalVisible = true">
+                            <i class="bi bi-camera-fill me-1 fs-5"></i> Tomar Foto con Cámara / Celular
                         </button>
                         <p class="small text-muted mt-2 mb-0">
                             <i class="bi bi-magic me-1 text-warning"></i> La fotografía capturada con la cámara de su celular será estandarizada automáticamente a fondo blanco puro de vitrina con sello de autenticidad.
@@ -201,13 +219,13 @@
             </SoftFormBox>
 
             <!-- Acciones -->
-            <div class="d-flex justify-content-between align-items-center pt-3 pb-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-3 pb-4 form-actions-bar">
                 <SoftButton Text="Cancelar y Volver"
                             Icon="arrow-left"
                             Type="ButtonType.Dashed"
                             OnClick="@(() => Navigation.NavigateTo("/inventory"))" />
 
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 flex-wrap flex-grow-1 flex-sm-grow-0 justify-content-end">
                     <SoftButton Text="Limpiar"
                                 Icon="clear"
                                 Type="ButtonType.Default"

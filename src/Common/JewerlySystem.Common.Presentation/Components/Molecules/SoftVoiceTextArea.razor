@@ -1,8 +1,8 @@
 @namespace JewerlySystem.Common.Presentation.Components.Molecules
 @using JewerlySystem.Common.Presentation.Components.Atoms
 
-<div class="soft-voice-textarea-box">
-    <div class="d-flex align-items-center gap-2 mb-1">
+<div class="soft-voice-textarea-box w-100">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
         @if (!string.IsNullOrEmpty(Label))
         {
             <label class="form-label mb-0 fw-semibold text-dark small">
@@ -18,11 +18,20 @@
         {
             <SoftVoiceButton TargetText="@Value"
                              TargetTextChanged="OnInternalValueChanged"
+                             InterimTranscriptChanged="OnInterimChanged"
                              Language="@Language"
                              Append="@Append"
                              Label="Dictar por Voz" />
         }
     </div>
+
+    @if (!string.IsNullOrWhiteSpace(_interimPreview))
+    {
+        <div class="px-2.5 py-1.5 mb-2 rounded-2 bg-danger-subtle border border-danger-subtle small text-dark d-flex align-items-center gap-2">
+            <i class="bi bi-soundwave text-danger"></i>
+            <span class="fst-italic">@_interimPreview</span>
+        </div>
+    }
 
     <TextArea Rows="@Rows"
               Value="@Value"
@@ -46,9 +55,18 @@
     [Parameter] public string Language { get; set; } = "es-CO";
     [Parameter] public bool Append { get; set; } = true;
 
+    private string _interimPreview = string.Empty;
+
+    private void OnInterimChanged(string interim)
+    {
+        _interimPreview = interim;
+        StateHasChanged();
+    }
+
     private async Task OnInternalValueChanged(string newVal)
     {
         Value = newVal;
+        _interimPreview = string.Empty;
         await ValueChanged.InvokeAsync(Value);
     }
 }

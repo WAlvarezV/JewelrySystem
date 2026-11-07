@@ -12,6 +12,7 @@
        Width="720"
        Centered="true"
        DestroyOnClose="true"
+       Class="soft-mobile-sheet-modal"
        OnCancel="@CloseModal">
 
     <div class="photo-studio-modal">
@@ -70,9 +71,10 @@
                     }
                 </div>
 
-                <div class="d-flex justify-content-center align-items-center gap-3 mt-4">
+                <div class="d-flex justify-content-center align-items-center flex-wrap gap-2 gap-sm-3 mt-4">
                     <Button Type="@ButtonType.Default"
                             Size="@ButtonSize.Large"
+                            Class="flex-grow-1 flex-sm-grow-0"
                             OnClick="@ResetProcessing"
                             Disabled="@_isSaving">
                         <i class="bi bi-arrow-counterclockwise me-1"></i> Repetir Fotografía
@@ -80,6 +82,7 @@
 
                     <Button Type="@ButtonType.Primary"
                             Size="@ButtonSize.Large"
+                            Class="flex-grow-1 flex-sm-grow-0"
                             Loading="@_isSaving"
                             OnClick="@ConfirmAndSaveAsync">
                         <i class="bi bi-check-circle me-1"></i> Guardar y Asignar al Artículo

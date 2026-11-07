@@ -9,7 +9,7 @@
 
 <AuthorizeView>
     <Authorized>
-        <div class="app-container d-flex" style="height: 100vh; overflow: hidden;">
+        <div class="app-container d-flex" style="height: 100vh; height: 100dvh; overflow: hidden;">
             <!-- 1. PRIMARY RAIL (Luxury Module Bar - Desktop & Laptop ≥ 768px) -->
             <aside class="app-primary-rail d-none d-md-flex flex-column align-items-center py-2 text-white border-end"
                    style="width: 76px; min-width: 76px; z-index: 1020; background-color: var(--brand-rail-bg, #1B050A) !important; border-color: var(--brand-rail-border, #380C16) !important;">
@@ -138,7 +138,7 @@
             </aside>
 
             <!-- 3. MAIN CONTENT WORKSPACE -->
-            <div class="app-main-workspace flex-grow-1 d-flex flex-column h-100" style="overflow-y: auto;">
+            <div class="app-main-workspace flex-grow-1 d-flex flex-column h-100" style="overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch;">
                 <!-- Header Topbar -->
                 <header class="navbar app-header px-3 px-md-4 py-2 d-flex justify-content-between align-items-center sticky-top shadow-sm">
                     <div class="d-flex align-items-center gap-2 min-w-0">

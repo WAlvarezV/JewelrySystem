@@ -3,9 +3,15 @@ window.jewelrySpeech = {
     recognition: null,
     isListening: false,
     activeDotNetRef: null,
+    lastInterim: '',
+    lastFinalizedSegment: '',
 
     isSupported: function () {
         return ('SpeechRecognition' in window) || ('webkitSpeechRecognition' in window);
+    },
+
+    isMobileDevice: function () {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent || '');
     },
 
     start: function (dotNetHelper, lang) {
@@ -26,9 +32,13 @@ window.jewelrySpeech = {
         try {
             this.recognition = new SpeechRec();
             this.recognition.lang = lang || 'es-CO';
-            this.recognition.continuous = true;
+            // En Android móvil, continuous=true suele duplicar o dejar pegada la segunda mitad del dictado;
+            // gestionamos reinicio suave o volcado de interim para una experiencia móvil fluida.
+            this.recognition.continuous = !this.isMobileDevice();
             this.recognition.interimResults = true;
             this.activeDotNetRef = dotNetHelper;
+            this.lastInterim = '';
+            this.lastFinalizedSegment = '';
 
             this.recognition.onstart = () => {
                 this.isListening = true;
@@ -43,12 +53,21 @@ window.jewelrySpeech = {
 
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     const result = event.results[i];
+                    const piece = (result[0] && result[0].transcript) ? result[0].transcript.trim() : '';
+                    if (!piece) continue;
+
                     if (result.isFinal) {
-                        finalTranscript += result[0].transcript;
+                        // Evita duplicación acumulativa típica de Chrome en Android
+                        if (piece !== this.lastFinalizedSegment) {
+                            finalTranscript += (finalTranscript ? ' ' : '') + piece;
+                            this.lastFinalizedSegment = piece;
+                        }
                     } else {
-                        interimTranscript += result[0].transcript;
+                        interimTranscript += (interimTranscript ? ' ' : '') + piece;
                     }
                 }
+
+                this.lastInterim = finalTranscript ? '' : interimTranscript;
 
                 if (this.activeDotNetRef && (finalTranscript.length > 0 || interimTranscript.length > 0)) {
                     this.activeDotNetRef.invokeMethodAsync('OnSpeechResult', finalTranscript, interimTranscript);
@@ -60,8 +79,8 @@ window.jewelrySpeech = {
                 let message = 'Error en reconocimiento de voz.';
                 if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
                     message = 'Permiso de micrófono denegado en el navegador.';
-                } else if (event.error === 'no-speech') {
-                    return; // Silenciar si no se detectó voz temporalmente
+                } else if (event.error === 'no-speech' || event.error === 'aborted') {
+                    return; // Silenciar si no se detectó voz temporalmente o fue detenido por el usuario
                 } else if (event.error === 'audio-capture') {
                     message = 'No se detectó ningún micrófono conectado.';
                 }
@@ -73,6 +92,14 @@ window.jewelrySpeech = {
             };
 
             this.recognition.onend = () => {
+                // Si quedó texto intermedio sin confirmar al cerrarse el micrófono en móvil, volcarlo como final
+                if (this.lastInterim && this.lastInterim.trim().length > 0 && this.activeDotNetRef) {
+                    const pending = this.lastInterim.trim();
+                    this.lastInterim = '';
+                    try {
+                        this.activeDotNetRef.invokeMethodAsync('OnSpeechResult', pending, '');
+                    } catch (e) { }
+                }
                 this.isListening = false;
                 if (this.activeDotNetRef) {
                     this.activeDotNetRef.invokeMethodAsync('OnSpeechStateChanged', false);

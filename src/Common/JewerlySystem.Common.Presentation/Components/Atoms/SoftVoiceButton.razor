@@ -3,7 +3,7 @@
 @inject IJSRuntime JSRuntime
 @inject IMessageService MessageService
 
-<div class="soft-voice-button-container d-inline-flex align-items-center gap-1">
+<div class="soft-voice-button-container d-inline-flex align-items-center flex-wrap gap-1">
     <button type="button"
             class="btn @(_isListening ? "btn-danger pulse-recording" : ButtonClass) btn-sm d-inline-flex align-items-center gap-1"
             title="@(_isListening ? "Detener dictado por voz" : TooltipText)"
@@ -11,13 +11,13 @@
         <i class="bi @(_isListening ? "bi-mic-fill" : "bi-mic")"></i>
         @if (!string.IsNullOrEmpty(Label))
         {
-            <span>@(_isListening ? "Escuchando..." : Label)</span>
+            <span>@(_isListening ? "Detener" : Label)</span>
         }
     </button>
     @if (_isListening && ShowBadge)
     {
         <span class="badge bg-danger-subtle text-danger border border-danger-subtle small pulse-badge d-inline-flex align-items-center">
-            <span class="recording-dot"></span> Dictando...
+            <span class="recording-dot"></span> Escuchando...
         </span>
     }
 </div>
@@ -66,6 +66,7 @@
 
     [Parameter] public bool IsListening { get; set; }
     [Parameter] public EventCallback<bool> IsListeningChanged { get; set; }
+    [Parameter] public EventCallback<string> InterimTranscriptChanged { get; set; }
 
     private bool _isListening;
     private DotNetObjectReference<SoftVoiceButton>? _dotNetHelper;
@@ -79,6 +80,10 @@
     public async Task OnSpeechStateChanged(bool isListening)
     {
         _isListening = isListening;
+        if (!isListening)
+        {
+            await InterimTranscriptChanged.InvokeAsync(string.Empty);
+        }
         await IsListeningChanged.InvokeAsync(_isListening);
         await InvokeAsync(StateHasChanged);
     }
@@ -86,6 +91,8 @@
     [JSInvokable]
     public async Task OnSpeechResult(string finalTranscript, string interimTranscript)
     {
+        await InterimTranscriptChanged.InvokeAsync(interimTranscript ?? string.Empty);
+
         if (!string.IsNullOrWhiteSpace(finalTranscript))
         {
             string newText = finalTranscript.Trim();
@@ -100,8 +107,8 @@
 
             await TargetTextChanged.InvokeAsync(TargetText);
             await OnTranscribed.InvokeAsync(TargetText);
-            await InvokeAsync(StateHasChanged);
         }
+        await InvokeAsync(StateHasChanged);
     }
 
     [JSInvokable]
