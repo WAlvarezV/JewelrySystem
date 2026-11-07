@@ -315,6 +315,10 @@
         {
             return "linear-gradient(135deg, #141824 0%, #232B3E 100%)";
         }
+        if (_tenant?.Id == "bezion")
+        {
+            return "linear-gradient(135deg, #0A192F 0%, #1E3A8A 100%)";
+        }
         return "linear-gradient(135deg, #701C2C 0%, #4D0E1A 100%)";
     }
 
@@ -324,6 +328,10 @@
         {
             return "#C59B27";
         }
+        if (_tenant?.Id == "bezion")
+        {
+            return "#38BDF8";
+        }
         return "#D4AF37";
     }
 
@@ -332,6 +340,10 @@
         if (_tenant?.Id == "oro-plata")
         {
             return "#D4AF37";
+        }
+        if (_tenant?.Id == "bezion")
+        {
+            return "#7DD3FC";
         }
         return "#D4AF37";
     }

@@ -13,6 +13,10 @@ public class NavigationAndSecurityHandlers :
     IQueryHandler<GetNavigationMenusQuery, IReadOnlyList<MenuDto>>,
     IQueryHandler<GetUserFavoritesQuery, IReadOnlyList<MenuDto>>,
     ICommandHandler<ToggleUserFavoriteCommand, bool>,
+    IQueryHandler<GetUserPreferencesQuery, UserPreferencesDto>,
+    ICommandHandler<SaveUserPreferencesCommand, bool>,
+    ICommandHandler<ReorderFavoritesCommand, bool>,
+    ICommandHandler<ReorderModulesCommand, bool>,
     ICommandHandler<CreateModuleCommand, Guid>,
     ICommandHandler<UpdateModuleCommand, bool>,
     ICommandHandler<ToggleModuleStatusCommand, bool>,
@@ -90,6 +94,12 @@ public class NavigationAndSecurityHandlers :
                 new() { Id = Guid.NewGuid(), Key = "ADMIN", Name = "Seguridad", Icon = "bi-shield-lock", Description = "Usuarios, módulos, menús, roles y permisos", Order = 6, IsActive = true }
             };
 
+            _dbContext.AppModules.AddRange(defaultModules);
+            await _dbContext.SaveChangesAsync(ct);
+        }
+
+        if (!await _dbContext.MenuItems.AnyAsync(ct))
+        {
             var defaultMenus = new List<MenuItem>
             {
                 new() { Id = Guid.Parse("11111111-1111-1111-1111-111111111111"), ModuleKey = "CONTRACTS", Name = "Todos los Contratos", Route = "/contracts", Icon = "bi-file-earmark-text", Order = 1, IsActive = true },
@@ -120,7 +130,6 @@ public class NavigationAndSecurityHandlers :
                 new() { Id = Guid.Parse("66666666-6666-6666-6666-666666666667"), ModuleKey = "ADMIN", Name = "Autenticador Móvil (MFA)", Route = "/auth/mfa", Icon = "bi-shield-lock-fill", Order = 7, IsActive = true }
             };
 
-            _dbContext.AppModules.AddRange(defaultModules);
             _dbContext.MenuItems.AddRange(defaultMenus);
             await _dbContext.SaveChangesAsync(ct);
         }
@@ -197,37 +206,40 @@ public class NavigationAndSecurityHandlers :
             }
         }
 
-        // 3. Ensure User 'walvarez@ingnova.team' exists with role 'Admin' and password '#Wa3215252.'
-        const string adminEmail = "walvarez@ingnova.team";
-        var adminUser = await _userManager.FindByEmailAsync(adminEmail)
-            ?? await _userManager.FindByNameAsync(adminEmail);
+        // 3. Ensure Administrators exist with role 'Admin' and 'Administrador'
+        string[] adminEmails = ["walvarez@ingnova.team", "walvarez@bezion.tech", "jmalvarezc@bezion.tech", "admin@joyeriapomona.com"];
+        foreach (var adminEmail in adminEmails)
+        {
+            var adminUser = await _userManager.FindByEmailAsync(adminEmail)
+                ?? await _userManager.FindByNameAsync(adminEmail);
 
-        if (adminUser == null)
-        {
-            adminUser = new ApplicationUser
+            if (adminUser != null)
             {
-                UserName = adminEmail,
-                Email = adminEmail,
-                EmailConfirmed = true,
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow
-            };
-            var createRes = await _userManager.CreateAsync(adminUser, "#Wa3215252.");
-            if (createRes.Succeeded)
-            {
-                await _userManager.AddToRoleAsync(adminUser, "Admin");
-                await _userManager.AddToRoleAsync(adminUser, "Administrador");
+                if (!await _userManager.IsInRoleAsync(adminUser, "Admin"))
+                {
+                    await _userManager.AddToRoleAsync(adminUser, "Admin");
+                }
+                if (!await _userManager.IsInRoleAsync(adminUser, "Administrador"))
+                {
+                    await _userManager.AddToRoleAsync(adminUser, "Administrador");
+                }
             }
-        }
-        else
-        {
-            if (!await _userManager.IsInRoleAsync(adminUser, "Admin"))
+            else if (adminEmail == "walvarez@ingnova.team")
             {
-                await _userManager.AddToRoleAsync(adminUser, "Admin");
-            }
-            if (!await _userManager.IsInRoleAsync(adminUser, "Administrador"))
-            {
-                await _userManager.AddToRoleAsync(adminUser, "Administrador");
+                adminUser = new ApplicationUser
+                {
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    EmailConfirmed = true,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                };
+                var createRes = await _userManager.CreateAsync(adminUser, "#Wa3215252.");
+                if (createRes.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(adminUser, "Admin");
+                    await _userManager.AddToRoleAsync(adminUser, "Administrador");
+                }
             }
         }
 
@@ -296,7 +308,13 @@ public class NavigationAndSecurityHandlers :
                 if (user != null)
                 {
                     var roles = await _userManager.GetRolesAsync(user);
-                    bool isAdmin = roles.Any(r => r.Equals("Admin", StringComparison.OrdinalIgnoreCase) || r.Equals("Administrador", StringComparison.OrdinalIgnoreCase));
+                    bool isAdmin = roles.Any(r => r.Equals("Admin", StringComparison.OrdinalIgnoreCase) || r.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+                        || (!string.IsNullOrEmpty(user.Email) && (
+                            user.Email.Equals("walvarez@bezion.tech", StringComparison.OrdinalIgnoreCase) ||
+                            user.Email.Equals("jmalvarezc@bezion.tech", StringComparison.OrdinalIgnoreCase) ||
+                            user.Email.Equals("walvarez@ingnova.team", StringComparison.OrdinalIgnoreCase) ||
+                            user.Email.Equals("admin@joyeriapomona.com", StringComparison.OrdinalIgnoreCase)));
+
                     if (!isAdmin)
                     {
                         var allowedRoutes = await _dbContext.RolePermissions
@@ -313,6 +331,28 @@ public class NavigationAndSecurityHandlers :
                             .ToListAsync(cancellationToken);
 
                         modules = modules.Where(m => allowedModuleKeys.Contains(m.Key, StringComparer.OrdinalIgnoreCase)).ToList();
+                    }
+
+                    // Sort modules according to user's custom module order preferences if any
+                    var userPref = await _dbContext.UserPreferences.AsNoTracking().FirstOrDefaultAsync(p => p.UserId == request.UserId, cancellationToken);
+                    if (userPref != null && !string.IsNullOrWhiteSpace(userPref.ModuleOrderKeysJson))
+                    {
+                        try
+                        {
+                            var orderedKeys = JsonSerializer.Deserialize<List<string>>(userPref.ModuleOrderKeysJson) ?? [];
+                            if (orderedKeys.Count > 0)
+                            {
+                                modules = modules
+                                    .OrderBy(m =>
+                                    {
+                                        int idx = orderedKeys.FindIndex(k => string.Equals(k, m.Key, StringComparison.OrdinalIgnoreCase));
+                                        return idx >= 0 ? idx : 1000 + m.Order;
+                                    })
+                                    .ThenBy(m => m.Order)
+                                    .ToList();
+                            }
+                        }
+                        catch { }
                     }
                 }
             }
@@ -356,7 +396,13 @@ public class NavigationAndSecurityHandlers :
                 if (user != null)
                 {
                     var roles = await _userManager.GetRolesAsync(user);
-                    bool isAdmin = roles.Any(r => r.Equals("Admin", StringComparison.OrdinalIgnoreCase) || r.Equals("Administrador", StringComparison.OrdinalIgnoreCase));
+                    bool isAdmin = roles.Any(r => r.Equals("Admin", StringComparison.OrdinalIgnoreCase) || r.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+                        || (!string.IsNullOrEmpty(user.Email) && (
+                            user.Email.Equals("walvarez@bezion.tech", StringComparison.OrdinalIgnoreCase) ||
+                            user.Email.Equals("jmalvarezc@bezion.tech", StringComparison.OrdinalIgnoreCase) ||
+                            user.Email.Equals("walvarez@ingnova.team", StringComparison.OrdinalIgnoreCase) ||
+                            user.Email.Equals("admin@joyeriapomona.com", StringComparison.OrdinalIgnoreCase)));
+
                     if (!isAdmin)
                     {
                         var allowedRoutes = await _dbContext.RolePermissions
@@ -435,7 +481,10 @@ public class NavigationAndSecurityHandlers :
                 })
                 .ToListAsync(cancellationToken);
 
-            return Result.Success<IReadOnlyList<MenuDto>>(favorites);
+            var favMap = favorites.ToDictionary(m => m.Id);
+            var orderedList = favoriteIds.Where(id => favMap.ContainsKey(id)).Select(id => favMap[id]).ToList();
+
+            return Result.Success<IReadOnlyList<MenuDto>>(orderedList);
         });
 
     public Task<Result<bool>> Handle(ToggleUserFavoriteCommand request, CancellationToken cancellationToken)
@@ -480,6 +529,113 @@ public class NavigationAndSecurityHandlers :
         pref.UpdatedAtUtc = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync(cancellationToken);
 
+        return Result.Success(true);
+    });
+
+    public Task<Result<UserPreferencesDto>> Handle(GetUserPreferencesQuery request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
+    {
+        var pref = await _dbContext.UserPreferences.AsNoTracking().FirstOrDefaultAsync(p => p.UserId == request.UserId, cancellationToken);
+        var favoriteIds = new List<Guid>();
+        var moduleKeys = new List<string>();
+
+        if (pref != null)
+        {
+            if (!string.IsNullOrWhiteSpace(pref.FavoriteMenuIdsJson))
+            {
+                try
+                {
+                    favoriteIds = JsonSerializer.Deserialize<List<Guid>>(pref.FavoriteMenuIdsJson) ?? [];
+                }
+                catch { }
+            }
+
+            if (!string.IsNullOrWhiteSpace(pref.ModuleOrderKeysJson))
+            {
+                try
+                {
+                    moduleKeys = JsonSerializer.Deserialize<List<string>>(pref.ModuleOrderKeysJson) ?? [];
+                }
+                catch { }
+            }
+        }
+
+        return Result.Success(new UserPreferencesDto(favoriteIds, moduleKeys));
+    });
+
+    public Task<Result<bool>> Handle(SaveUserPreferencesCommand request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
+    {
+        var pref = await _dbContext.UserPreferences.FirstOrDefaultAsync(p => p.UserId == request.UserId, cancellationToken);
+        if (pref == null)
+        {
+            pref = new UserMenuPreference
+            {
+                UserId = request.UserId,
+                FavoriteMenuIdsJson = JsonSerializer.Serialize(request.FavoriteMenuIds),
+                ModuleOrderKeysJson = JsonSerializer.Serialize(request.ModuleOrderKeys),
+                UpdatedAtUtc = DateTime.UtcNow
+            };
+            _dbContext.UserPreferences.Add(pref);
+        }
+        else
+        {
+            pref.FavoriteMenuIdsJson = JsonSerializer.Serialize(request.FavoriteMenuIds);
+            pref.ModuleOrderKeysJson = JsonSerializer.Serialize(request.ModuleOrderKeys);
+            pref.UpdatedAtUtc = DateTime.UtcNow;
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return Result.Success(true);
+    });
+
+    public Task<Result<bool>> Handle(ReorderFavoritesCommand request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
+    {
+        var pref = await _dbContext.UserPreferences.FirstOrDefaultAsync(p => p.UserId == request.UserId, cancellationToken);
+        if (pref == null)
+        {
+            pref = new UserMenuPreference
+            {
+                UserId = request.UserId,
+                FavoriteMenuIdsJson = JsonSerializer.Serialize(request.OrderedMenuIds),
+                ModuleOrderKeysJson = "[]",
+                UpdatedAtUtc = DateTime.UtcNow
+            };
+            _dbContext.UserPreferences.Add(pref);
+        }
+        else
+        {
+            pref.FavoriteMenuIdsJson = JsonSerializer.Serialize(request.OrderedMenuIds);
+            pref.UpdatedAtUtc = DateTime.UtcNow;
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return Result.Success(true);
+    });
+
+    public Task<Result<bool>> Handle(ReorderModulesCommand request, CancellationToken cancellationToken)
+        => ExecuteAsync(async () =>
+    {
+        var pref = await _dbContext.UserPreferences.FirstOrDefaultAsync(p => p.UserId == request.UserId, cancellationToken);
+        if (pref == null)
+        {
+            pref = new UserMenuPreference
+            {
+                UserId = request.UserId,
+                FavoriteMenuIdsJson = "[]",
+                ModuleOrderKeysJson = JsonSerializer.Serialize(request.OrderedModuleKeys),
+                UpdatedAtUtc = DateTime.UtcNow
+            };
+            _dbContext.UserPreferences.Add(pref);
+        }
+        else
+        {
+            pref.ModuleOrderKeysJson = JsonSerializer.Serialize(request.OrderedModuleKeys);
+            pref.UpdatedAtUtc = DateTime.UtcNow;
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success(true);
     });
 

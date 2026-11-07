@@ -4,6 +4,7 @@
 @inject NavigationManager Navigation
 @inject ITenantContext TenantContext
 @inject IJSRuntime JS
+@inject JewerlySystem.Web.Services.IUserPreferencesStateService PreferencesService
 
 <PageTitle>@TenantContext.CurrentTenant.Name</PageTitle>
 
@@ -360,6 +361,7 @@
     protected override async Task OnInitializedAsync()
     {
         Navigation.LocationChanged += HandleLocationChanged;
+        PreferencesService.OnChange += HandlePreferencesChanged;
 
         try
         {
@@ -370,20 +372,37 @@
                 currentUserName = auth.User.Identity?.Name;
             }
 
-            var res = await Sender.Send(new GetNavigationModulesQuery(currentUserName));
-            if (res.IsSuccess && res.Value.Any())
+            await PreferencesService.InitializeAsync(currentUserName);
+            _modules = PreferencesService.Modules.ToList();
+
+            if (_modules.Any())
             {
-                _modules = res.Value.ToList();
-                var first = _modules.First();
-                _activeModuleKey = first.Key;
-                _activeModuleTitle = first.Name;
-                _activeModuleIcon = first.Icon;
+                var currentMod = _modules.FirstOrDefault(m => string.Equals(m.Key, PreferencesService.ActiveModuleKey, StringComparison.OrdinalIgnoreCase)) ?? _modules.First();
+                _activeModuleKey = currentMod.Key;
+                _activeModuleTitle = currentMod.Name;
+                _activeModuleIcon = currentMod.Icon;
             }
         }
         catch
         {
             // fallback
         }
+    }
+
+    private void HandlePreferencesChanged()
+    {
+        _modules = PreferencesService.Modules.ToList();
+        if (_modules.Any())
+        {
+            var currentMod = _modules.FirstOrDefault(m => string.Equals(m.Key, PreferencesService.ActiveModuleKey, StringComparison.OrdinalIgnoreCase));
+            if (currentMod != null)
+            {
+                _activeModuleKey = currentMod.Key;
+                _activeModuleTitle = currentMod.Name;
+                _activeModuleIcon = currentMod.Icon;
+            }
+        }
+        InvokeAsync(StateHasChanged);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -429,6 +448,7 @@
             _activeModuleTitle = module.Name;
             _activeModuleIcon = module.Icon;
             _isSiderCollapsed = false; // Despliega siempre al cambiar de módulo
+            PreferencesService.SetActiveModule(module.Key);
         }
     }
 
@@ -437,6 +457,7 @@
         _activeModuleKey = module.Key;
         _activeModuleTitle = module.Name;
         _activeModuleIcon = module.Icon;
+        PreferencesService.SetActiveModule(module.Key);
     }
 
     private void OnBottomNavClick(AppModuleDto module)
@@ -473,5 +494,6 @@
     public void Dispose()
     {
         Navigation.LocationChanged -= HandleLocationChanged;
+        PreferencesService.OnChange -= HandlePreferencesChanged;
     }
 }

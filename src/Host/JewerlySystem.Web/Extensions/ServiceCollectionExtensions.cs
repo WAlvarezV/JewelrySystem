@@ -47,6 +47,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITenantConnectionProvider>(sp => sp.GetRequiredService<WebTenantContext>());
 
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IUserPreferencesStateService, UserPreferencesStateService>();
         services.AddScoped<IUserActivityTracker, UserActivityService>();
         services.AddMediatR(cfg =>
         {

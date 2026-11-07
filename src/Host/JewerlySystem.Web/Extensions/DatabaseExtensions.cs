@@ -466,9 +466,6 @@ public static class DatabaseExtensions
     {
         try
         {
-            var adminRoleId = "9f51d7c5-d662-443d-932b-38e0bc1076a5";
-            var adminRole2Id = "43b031c0-aedd-4c6c-9bf3-5e857b09534b";
-
             // Find source password from walvarez@ingnova.team (check current tenantDb, else check pomonaDb)
             var sourceUser = await tenantDb.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == "walvarez@ingnova.team");
             if (sourceUser == null)
@@ -509,19 +506,21 @@ public static class DatabaseExtensions
                 };
                 tenantDb.Users.Add(targetUser);
                 await tenantDb.SaveChangesAsync();
-
-                // Roles
-                if (!await tenantDb.UserRoles.AnyAsync(ur => ur.UserId == targetUser.Id && ur.RoleId == adminRoleId))
-                {
-                    tenantDb.UserRoles.Add(new IdentityUserRole<string> { UserId = targetUser.Id, RoleId = adminRoleId });
-                }
-                if (!await tenantDb.UserRoles.AnyAsync(ur => ur.UserId == targetUser.Id && ur.RoleId == adminRole2Id))
-                {
-                    tenantDb.UserRoles.Add(new IdentityUserRole<string> { UserId = targetUser.Id, RoleId = adminRole2Id });
-                }
-                await tenantDb.SaveChangesAsync();
                 logger.LogInformation("Usuario {Email} aprovisionado exitosamente.", targetEmail);
             }
+
+            // Always ensure roles
+            var actualAdmin = await tenantDb.Roles.FirstOrDefaultAsync(r => r.NormalizedName == "ADMINISTRADOR");
+            var actualAdmin2 = await tenantDb.Roles.FirstOrDefaultAsync(r => r.NormalizedName == "ADMIN");
+            if (actualAdmin != null && !await tenantDb.UserRoles.AnyAsync(ur => ur.UserId == targetUser.Id && ur.RoleId == actualAdmin.Id))
+            {
+                tenantDb.UserRoles.Add(new IdentityUserRole<string> { UserId = targetUser.Id, RoleId = actualAdmin.Id });
+            }
+            if (actualAdmin2 != null && !await tenantDb.UserRoles.AnyAsync(ur => ur.UserId == targetUser.Id && ur.RoleId == actualAdmin2.Id))
+            {
+                tenantDb.UserRoles.Add(new IdentityUserRole<string> { UserId = targetUser.Id, RoleId = actualAdmin2.Id });
+            }
+            await tenantDb.SaveChangesAsync();
 
             // Ensure Person record
             var person = await tenantDb.Persons.FirstOrDefaultAsync(p => p.UserId == targetUser.Id || p.Email == targetEmail);
@@ -697,20 +696,21 @@ public static class DatabaseExtensions
                 jmUser.PasswordHash = hasher.HashPassword(jmUser, "BeZ10N73ch");
                 bezionDb.Users.Add(jmUser);
                 await bezionDb.SaveChangesAsync();
-
-                // Assign Roles
-                if (!await bezionDb.UserRoles.AnyAsync(ur => ur.UserId == jmUserId && ur.RoleId == adminRoleId))
-                {
-                    bezionDb.UserRoles.Add(new IdentityUserRole<string> { UserId = jmUserId, RoleId = adminRoleId });
-                }
-                if (!await bezionDb.UserRoles.AnyAsync(ur => ur.UserId == jmUserId && ur.RoleId == adminRole2Id))
-                {
-                    bezionDb.UserRoles.Add(new IdentityUserRole<string> { UserId = jmUserId, RoleId = adminRole2Id });
-                }
-                await bezionDb.SaveChangesAsync();
-
                 logger.LogInformation("Usuario {Email} creado exitosamente en BeZion con contraseña configurada.", jmEmail);
             }
+
+            // Always assign and ensure roles for jmUser
+            var actualAdmin = await bezionDb.Roles.FirstOrDefaultAsync(r => r.NormalizedName == "ADMINISTRADOR");
+            var actualAdmin2 = await bezionDb.Roles.FirstOrDefaultAsync(r => r.NormalizedName == "ADMIN");
+            if (actualAdmin != null && !await bezionDb.UserRoles.AnyAsync(ur => ur.UserId == jmUser.Id && ur.RoleId == actualAdmin.Id))
+            {
+                bezionDb.UserRoles.Add(new IdentityUserRole<string> { UserId = jmUser.Id, RoleId = actualAdmin.Id });
+            }
+            if (actualAdmin2 != null && !await bezionDb.UserRoles.AnyAsync(ur => ur.UserId == jmUser.Id && ur.RoleId == actualAdmin2.Id))
+            {
+                bezionDb.UserRoles.Add(new IdentityUserRole<string> { UserId = jmUser.Id, RoleId = actualAdmin2.Id });
+            }
+            await bezionDb.SaveChangesAsync();
 
             // Ensure Person record for jmalvarezc@bezion.tech
             var jmPerson = await bezionDb.Persons.FirstOrDefaultAsync(p => p.UserId == jmUser.Id || p.Email == jmEmail);

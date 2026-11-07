@@ -96,9 +96,9 @@ public class TenantRegistry : ITenantRegistry
             Name: "Joyería BeZion",
             ShortName: "BEZION",
             ConnectionString: bezionCs,
-            DefaultTheme: "pomona-imperial",
-            SymbolUrl: "images/pomona-symbol-white.png",
-            LogoUrl: "images/pomona-logo-square.png",
+            DefaultTheme: "pomona-sapphire",
+            SymbolUrl: "images/tenants/oro-plata/oroplata-symbol.svg",
+            LogoUrl: "images/tenants/oro-plata/oroplata-logo.png",
             AllowedUserEmails: new List<string> { "walvarez@bezion.tech", "jmalvarezc@bezion.tech", "walvarez@ingnova.team" }
         ));
     }

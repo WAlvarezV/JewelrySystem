@@ -93,6 +93,21 @@ public record GetUserFavoritesQuery(string UserId) : IQuery<IReadOnlyList<MenuDt
 
 public record ToggleUserFavoriteCommand(string UserId, Guid MenuId) : ICommand<bool>;
 
+public record UserPreferencesDto(
+    IReadOnlyList<Guid> FavoriteMenuIds,
+    IReadOnlyList<string> ModuleOrderKeys);
+
+public record GetUserPreferencesQuery(string UserId) : IQuery<UserPreferencesDto>;
+
+public record SaveUserPreferencesCommand(
+    string UserId,
+    IReadOnlyList<Guid> FavoriteMenuIds,
+    IReadOnlyList<string> ModuleOrderKeys) : ICommand<bool>;
+
+public record ReorderFavoritesCommand(string UserId, IReadOnlyList<Guid> OrderedMenuIds) : ICommand<bool>;
+
+public record ReorderModulesCommand(string UserId, IReadOnlyList<string> OrderedModuleKeys) : ICommand<bool>;
+
 public record CreateModuleCommand(string Key, string Name, string Icon, string Description, int Order) : ICommand<Guid>;
 
 public record UpdateModuleCommand(Guid Id, string Key, string Name, string Icon, string Description, int Order, bool IsActive) : ICommand<bool>;

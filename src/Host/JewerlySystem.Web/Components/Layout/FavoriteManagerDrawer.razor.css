@@ -1,0 +1,113 @@
+.fav-manager-section {
+    margin-bottom: 24px;
+}
+
+.fav-manager-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 12px;
+}
+
+.fav-manager-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fav-manager-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    cursor: grab;
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fav-manager-item:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.fav-manager-item.dragging {
+    opacity: 0.6;
+    border-color: var(--brand-primary, #701C2C);
+    box-shadow: 0 2px 8px rgba(112, 28, 44, 0.15);
+}
+
+.fav-manager-item-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.fav-drag-handle {
+    color: #94a3b8;
+    cursor: grab;
+    font-size: 1.1rem;
+}
+
+.fav-item-icon {
+    color: var(--brand-primary, #701C2C);
+    font-size: 1.1rem;
+}
+
+.fav-item-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #334155;
+}
+
+.fav-manager-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.fav-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    border-radius: 6px;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.fav-action-btn:hover:not(:disabled) {
+    border-color: var(--brand-primary, #701C2C);
+    color: var(--brand-primary, #701C2C);
+}
+
+.fav-action-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.fav-action-btn.danger {
+    color: #f59e0b;
+}
+
+.fav-action-btn.danger:hover {
+    border-color: #dc2626;
+    color: #dc2626;
+    background: #fef2f2;
+}
+
+.fav-manager-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 12px;
+}

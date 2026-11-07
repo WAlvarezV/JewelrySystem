@@ -1,0 +1,277 @@
+@namespace JewerlySystem.Web.Components.Layout
+@using JewerlySystem.Common.Presentation.Components.Organisms
+@using JewerlySystem.Modules.Auth.Application
+@using JewerlySystem.Web.Services
+@using AntDesign
+
+<SoftDrawer Visible="@Visible"
+            OnClose="HandleCloseAsync"
+            Title="Personalizar Navegación y Favoritos"
+            Description="Ordene sus accesos favoritos mediante arrastrar y soltar o con los controles de flechas. Los cambios se sincronizan en su perfil."
+            Width="720">
+    <ChildContent>
+        <div class="fav-manager-section">
+            <h4 class="fav-manager-title">Accesos Favoritos</h4>
+            @{
+                var favoriteItems = GetFavoriteItems();
+            }
+            @if (favoriteItems.Count == 0)
+            {
+                <div class="p-4 text-center text-muted bg-light rounded-3 border border-dashed">
+                    <i class="bi bi-star fs-3 d-block mb-2 text-warning opacity-75"></i>
+                    <span>No tiene menús marcados como favoritos. Use el ícono de estrella en el menú lateral para fijar sus accesos frecuentes.</span>
+                </div>
+            }
+            else
+            {
+                <ul class="fav-manager-list" role="listbox" aria-label="Lista de menús favoritos ordenables">
+                    @for (int index = 0; index < favoriteItems.Count; index++)
+                    {
+                        int currentIndex = index;
+                        var item = favoriteItems[currentIndex];
+                        <li class="fav-manager-item @(_draggedMenuId == item.Id ? "dragging" : "")"
+                            role="option"
+                            draggable="true"
+                            @ondragstart="() => HandleDragStart(item.Id)"
+                            @ondragover:preventDefault="true"
+                            @ondrop="() => HandleDropAsync(item.Id)">
+                            <div class="fav-manager-item-info">
+                                <i class="bi bi-grip-vertical fav-drag-handle"></i>
+                                @if (!string.IsNullOrEmpty(item.Icon))
+                                {
+                                    <i class="bi @item.Icon fav-item-icon"></i>
+                                }
+                                <span class="fav-item-name">@item.Name</span>
+                                @if (!string.IsNullOrEmpty(item.ModuleKey))
+                                {
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.72rem;">@item.ModuleKey</span>
+                                }
+                            </div>
+                            <div class="fav-manager-item-actions">
+                                <button type="button"
+                                        class="fav-action-btn"
+                                        disabled="@(currentIndex == 0)"
+                                        title="Subir posición"
+                                        aria-label="@($"Subir {item.Name}")"
+                                        @onclick="() => MoveFavoriteAsync(currentIndex, -1)">
+                                    <i class="bi bi-arrow-up"></i>
+                                </button>
+                                <button type="button"
+                                        class="fav-action-btn"
+                                        disabled="@(currentIndex == favoriteItems.Count - 1)"
+                                        title="Bajar posición"
+                                        aria-label="@($"Bajar {item.Name}")"
+                                        @onclick="() => MoveFavoriteAsync(currentIndex, 1)">
+                                    <i class="bi bi-arrow-down"></i>
+                                </button>
+                                <button type="button"
+                                        class="fav-action-btn danger"
+                                        title="Quitar de favoritos"
+                                        aria-label="@($"Quitar {item.Name} de favoritos")"
+                                        @onclick="() => RemoveFavoriteAsync(item.Id)">
+                                    <i class="bi bi-star-fill"></i>
+                                </button>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <div class="fav-manager-section mt-4">
+            <h4 class="fav-manager-title">Orden de Módulos (Barra Primaria L1)</h4>
+            @{
+                var orderedModules = GetOrderedModules();
+            }
+            <ul class="fav-manager-list" role="listbox" aria-label="Orden de módulos">
+                @for (int mIndex = 0; mIndex < orderedModules.Count; mIndex++)
+                {
+                    int currentModuleIndex = mIndex;
+                    var mod = orderedModules[currentModuleIndex];
+                    <li class="fav-manager-item @(_draggedModuleKey == mod.Key ? "dragging" : "")"
+                        role="option"
+                        draggable="true"
+                        @ondragstart="() => HandleModuleDragStart(mod.Key)"
+                        @ondragover:preventDefault="true"
+                        @ondrop="() => HandleModuleDropAsync(mod.Key)">
+                        <div class="fav-manager-item-info">
+                            <i class="bi bi-grip-vertical fav-drag-handle"></i>
+                            <i class="bi @mod.Icon fav-item-icon"></i>
+                            <span class="fav-item-name">@mod.Name</span>
+                        </div>
+                        <div class="fav-manager-item-actions">
+                            <button type="button"
+                                    class="fav-action-btn"
+                                    disabled="@(currentModuleIndex == 0)"
+                                    title="Subir módulo"
+                                    aria-label="@($"Subir módulo {mod.Name}")"
+                                    @onclick="() => MoveModuleAsync(currentModuleIndex, -1)">
+                                <i class="bi bi-arrow-up"></i>
+                            </button>
+                            <button type="button"
+                                    class="fav-action-btn"
+                                    disabled="@(currentModuleIndex == orderedModules.Count - 1)"
+                                    title="Bajar módulo"
+                                    aria-label="@($"Bajar módulo {mod.Name}")"
+                                    @onclick="() => MoveModuleAsync(currentModuleIndex, 1)">
+                                <i class="bi bi-arrow-down"></i>
+                            </button>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </div>
+    </ChildContent>
+    <FooterContent>
+        <div class="fav-manager-footer">
+            <button type="button" class="btn btn-primary px-4" @onclick="HandleCloseAsync">Cerrar</button>
+        </div>
+    </FooterContent>
+</SoftDrawer>
+
+@code {
+    [Inject] private IUserPreferencesStateService PreferencesService { get; set; } = default!;
+
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
+    [Parameter] public IReadOnlyCollection<MenuDto> AllMenus { get; set; } = [];
+    [Parameter] public IReadOnlyCollection<AppModuleDto> Modules { get; set; } = [];
+
+    private Guid? _draggedMenuId;
+    private string? _draggedModuleKey;
+
+    private List<MenuDto> GetFavoriteItems()
+    {
+        var flatMap = new Dictionary<Guid, MenuDto>();
+        FlattenMenus(AllMenus, flatMap);
+
+        var list = new List<MenuDto>();
+        foreach (var id in PreferencesService.FavoriteMenuIds)
+        {
+            if (flatMap.TryGetValue(id, out var dto))
+            {
+                list.Add(dto);
+            }
+        }
+        return list;
+    }
+
+    private IReadOnlyList<AppModuleDto> GetOrderedModules() =>
+        PreferencesService.Modules.Count > 0
+            ? PreferencesService.Modules
+            : Modules.OrderBy(m => m.Order).ToList();
+
+    private static void FlattenMenus(IEnumerable<MenuDto> items, IDictionary<Guid, MenuDto> map)
+    {
+        foreach (var item in items)
+        {
+            map[item.Id] = item;
+            if (item.Children.Count > 0)
+            {
+                FlattenMenus(item.Children, map);
+            }
+        }
+    }
+
+    private void HandleDragStart(Guid menuId)
+    {
+        _draggedMenuId = menuId;
+    }
+
+    private async Task HandleDropAsync(Guid targetMenuId)
+    {
+        if (!_draggedMenuId.HasValue || _draggedMenuId.Value == targetMenuId)
+        {
+            _draggedMenuId = null;
+            return;
+        }
+
+        var ids = PreferencesService.FavoriteMenuIds.ToList();
+        int fromIndex = ids.IndexOf(_draggedMenuId.Value);
+        int toIndex = ids.IndexOf(targetMenuId);
+
+        _draggedMenuId = null;
+
+        if (fromIndex < 0 || toIndex < 0)
+        {
+            return;
+        }
+
+        var moved = ids[fromIndex];
+        ids.RemoveAt(fromIndex);
+        ids.Insert(toIndex, moved);
+
+        await PreferencesService.ReorderFavoritesAsync(ids);
+    }
+
+    private async Task MoveFavoriteAsync(int index, int delta)
+    {
+        var ids = PreferencesService.FavoriteMenuIds.ToList();
+        int targetIndex = index + delta;
+        if (targetIndex < 0 || targetIndex >= ids.Count)
+        {
+            return;
+        }
+
+        (ids[index], ids[targetIndex]) = (ids[targetIndex], ids[index]);
+        await PreferencesService.ReorderFavoritesAsync(ids);
+    }
+
+    private async Task RemoveFavoriteAsync(Guid menuId)
+    {
+        await PreferencesService.ToggleFavoriteAsync(menuId);
+    }
+
+    private void HandleModuleDragStart(string moduleKey)
+    {
+        _draggedModuleKey = moduleKey;
+    }
+
+    private async Task HandleModuleDropAsync(string targetModuleKey)
+    {
+        if (string.IsNullOrEmpty(_draggedModuleKey) || string.Equals(_draggedModuleKey, targetModuleKey, StringComparison.OrdinalIgnoreCase))
+        {
+            _draggedModuleKey = null;
+            return;
+        }
+
+        var keys = GetOrderedModules().Select(m => m.Key).ToList();
+        int fromIndex = keys.FindIndex(k => string.Equals(k, _draggedModuleKey, StringComparison.OrdinalIgnoreCase));
+        int toIndex = keys.FindIndex(k => string.Equals(k, targetModuleKey, StringComparison.OrdinalIgnoreCase));
+
+        _draggedModuleKey = null;
+
+        if (fromIndex < 0 || toIndex < 0)
+        {
+            return;
+        }
+
+        string moved = keys[fromIndex];
+        keys.RemoveAt(fromIndex);
+        keys.Insert(toIndex, moved);
+
+        await PreferencesService.ReorderModulesAsync(keys);
+    }
+
+    private async Task MoveModuleAsync(int index, int delta)
+    {
+        var keys = GetOrderedModules().Select(m => m.Key).ToList();
+        int targetIndex = index + delta;
+        if (targetIndex < 0 || targetIndex >= keys.Count)
+        {
+            return;
+        }
+
+        (keys[index], keys[targetIndex]) = (keys[targetIndex], keys[index]);
+        await PreferencesService.ReorderModulesAsync(keys);
+    }
+
+    private async Task HandleCloseAsync()
+    {
+        Visible = false;
+        if (VisibleChanged.HasDelegate)
+        {
+            await VisibleChanged.InvokeAsync(false);
+        }
+    }
+}
