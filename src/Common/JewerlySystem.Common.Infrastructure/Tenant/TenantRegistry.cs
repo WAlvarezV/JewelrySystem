@@ -53,7 +53,7 @@ public class TenantRegistry : ITenantRegistry
             DefaultTheme: "pomona-imperial",
             SymbolUrl: "images/pomona-symbol-white.png",
             LogoUrl: "images/pomona-logo-square.png",
-            AllowedUserEmails: new List<string> { "walvarez@ingnova.team", "admin@joyeriapomona.com", "william.alvarezv@gmail.com", "joglisjjc@gmail.com" }
+            AllowedUserEmails: new List<string> { "walvarez@ingnova.team", "walvarez@bezion.tech", "admin@joyeriapomona.com", "william.alvarezv@gmail.com", "joglisjjc@gmail.com" }
         ));
 
         // 3. Register Tenant: Joyería Oro & Plata
@@ -65,7 +65,41 @@ public class TenantRegistry : ITenantRegistry
             DefaultTheme: "oroplata-classic",
             SymbolUrl: "images/tenants/oro-plata/oroplata-symbol.svg",
             LogoUrl: "images/tenants/oro-plata/oroplata-logo.png",
-            AllowedUserEmails: new List<string> { "walvarez@ingnova.team" }
+            AllowedUserEmails: new List<string> { "walvarez@ingnova.team", "walvarez@bezion.tech" }
+        ));
+
+        // 4. Register Tenant: Joyería BeZion (Test)
+        var rawBeZionCs = configuration.GetConnectionString("BeZionCs");
+        string bezionCs;
+        if (!string.IsNullOrWhiteSpace(rawBeZionCs))
+        {
+            bezionCs = NormalizeNpgsqlConnectionString(rawBeZionCs);
+        }
+        else
+        {
+            try
+            {
+                var builder = new NpgsqlConnectionStringBuilder(defaultCs)
+                {
+                    Database = "Jewerly_BeZion"
+                };
+                bezionCs = builder.ConnectionString;
+            }
+            catch
+            {
+                bezionCs = defaultCs.Replace("Database=IntZaioNJewerly", "Database=Jewerly_BeZion");
+            }
+        }
+
+        _tenants.Add(new TenantInfo(
+            Id: "bezion",
+            Name: "Joyería BeZion",
+            ShortName: "BEZION",
+            ConnectionString: bezionCs,
+            DefaultTheme: "pomona-imperial",
+            SymbolUrl: "images/pomona-symbol-white.png",
+            LogoUrl: "images/pomona-logo-square.png",
+            AllowedUserEmails: new List<string> { "walvarez@bezion.tech", "jmalvarezc@bezion.tech", "walvarez@ingnova.team" }
         ));
     }
 

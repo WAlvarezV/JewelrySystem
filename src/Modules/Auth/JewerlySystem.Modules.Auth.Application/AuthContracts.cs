@@ -167,7 +167,15 @@ public record UserProfileDto(
     bool TwoFactorEnabled,
     int PasskeyCount,
     DateTime CreatedAt,
-    DateTime? LastLoginAt);
+    DateTime? LastLoginAt,
+    string FirstName = "",
+    string FirstLastName = "",
+    string? SecondLastName = null,
+    int? IdentificationTypeId = null,
+    string IdentificationNumber = "",
+    string? Address = null,
+    DateTime? BirthDate = null,
+    DateTime? HireDate = null);
 
 public record GetUserProfileQuery(string UserIdOrEmail) : IQuery<UserProfileDto>;
 
@@ -180,3 +188,15 @@ public record ChangeUserPasswordCommand(
 public record UpdateUserProfileCommand(
     string UserIdOrEmail,
     string? PhoneNumber) : ICommand<bool>;
+
+public record UpdateUserPersonalDataCommand(
+    string UserIdOrEmail,
+    string FirstName,
+    string FirstLastName,
+    string? SecondLastName,
+    int? IdentificationTypeId,
+    string IdentificationNumber,
+    string? Address,
+    string? PhoneNumber,
+    DateTime? BirthDate,
+    DateTime? HireDate) : ICommand<bool>;

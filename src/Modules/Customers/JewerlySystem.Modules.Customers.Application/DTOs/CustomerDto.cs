@@ -9,7 +9,14 @@ public record PersonDto(
     string FullName,
     string CellPhone,
     string Email,
-    PersonType PersonType);
+    PersonType PersonType,
+    string? UserId = null,
+    string? FirstName = null,
+    string? FirstLastName = null,
+    string? SecondLastName = null,
+    string? Address = null,
+    DateTime? BirthDate = null,
+    DateTime? HireDate = null);
 
 public record IdentificationTypeDto(
     int Id,

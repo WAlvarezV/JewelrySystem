@@ -210,6 +210,9 @@
                                 </td>
                                 <td class="text-end pe-3">
                                     <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-info" title="Ficha y Datos Personales" @onclick="() => OpenPersonModal(user)">
+                                            <i class="bi bi-person-lines-fill"></i>
+                                        </button>
                                         <button class="btn btn-outline-primary" title="Asignar Rol" @onclick="() => OpenAssignRoleModal(user)">
                                             <i class="bi bi-shield-gear"></i>
                                         </button>
@@ -313,6 +316,90 @@
     </div>
 }
 
+<!-- Modal: Ficha / Datos Personales -->
+@if (_showPersonModal && _selectedUser != null)
+{
+    <div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow rounded-4">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-person-lines-fill me-2 text-primary"></i>Expediente y Datos Personales: @_selectedUser.UserName
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="() => _showPersonModal = false"></button>
+                </div>
+                <div class="modal-body p-4">
+                    @if (!string.IsNullOrEmpty(_personModalError))
+                    {
+                        <div class="alert alert-danger py-2 small mb-3">@_personModalError</div>
+                    }
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">Nombres *</label>
+                            <input @bind="_personFirstName" type="text" class="form-control" placeholder="Ej. William" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">Primer Apellido *</label>
+                            <input @bind="_personFirstLastName" type="text" class="form-control" placeholder="Ej. Alvarez" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">Segundo Apellido</label>
+                            <input @bind="_personSecondLastName" type="text" class="form-control" placeholder="Ej. Vargas" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">Tipo Identificación *</label>
+                            <select @bind="_personIdentificationTypeId" class="form-select">
+                                <option value="1">Cédula de Ciudadanía</option>
+                                <option value="2">Cédula de Extranjería</option>
+                                <option value="3">NIT</option>
+                                <option value="4">Pasaporte</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">Número Identificación *</label>
+                            <input @bind="_personIdentificationNumber" type="text" class="form-control" placeholder="Ej. 1018412345" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">Teléfono</label>
+                            <input @bind="_personPhone" type="tel" class="form-control" placeholder="Ej. 3001234567" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Dirección</label>
+                            <input @bind="_personAddress" type="text" class="form-control" placeholder="Ej. Calle 123 # 45-67" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">Fecha Nacimiento</label>
+                            <input @bind="_personBirthDate" type="date" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">Fecha Ingreso</label>
+                            <input @bind="_personHireDate" type="date" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => _showPersonModal = false">Cancelar</button>
+                    <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-2" @onclick="SavePersonProfileAsync" disabled="@_isSavingPerson">
+                        @if (_isSavingPerson)
+                        {
+                            <div class="spinner-border spinner-border-sm" role="status"></div>
+                            <span>Guardando...</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-check-lg"></i>
+                            <span>Guardar Expediente</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 <style>
     .avatar-circle {
         width: 38px;
@@ -345,6 +432,20 @@
     private bool _showRoleModal;
     private UserItemDto? _selectedUser;
     private string _selectedRoleToAssign = "Tasador";
+
+    // Person profile modal state
+    private bool _showPersonModal;
+    private string _personFirstName = "";
+    private string _personFirstLastName = "";
+    private string? _personSecondLastName;
+    private int _personIdentificationTypeId = 1;
+    private string _personIdentificationNumber = "";
+    private string? _personAddress;
+    private string _personPhone = "";
+    private DateTime? _personBirthDate;
+    private DateTime? _personHireDate;
+    private bool _isSavingPerson;
+    private string? _personModalError;
 
     private IEnumerable<UserItemDto> FilteredUsers => _users
         .Where(u =>
@@ -492,6 +593,101 @@
         catch (Exception ex)
         {
             _errorMessage = ex.Message;
+        }
+    }
+
+    private async Task OpenPersonModal(UserItemDto user)
+    {
+        _selectedUser = user;
+        _personModalError = null;
+        _personFirstName = "";
+        _personFirstLastName = "";
+        _personSecondLastName = null;
+        _personIdentificationTypeId = 1;
+        _personIdentificationNumber = "";
+        _personAddress = null;
+        _personPhone = user.PhoneNumber ?? "";
+        _personBirthDate = null;
+        _personHireDate = null;
+
+        try
+        {
+            var res = await Sender.Send(new JewerlySystem.Modules.Customers.Application.Queries.GetPersonByUserIdQuery(user.Id));
+            if (res.IsSuccess && res.Value != null)
+            {
+                var p = res.Value;
+                _personFirstName = p.FirstName ?? "";
+                _personFirstLastName = p.FirstLastName ?? "";
+                _personSecondLastName = p.SecondLastName;
+                _personIdentificationTypeId = p.IdentificationTypeId > 0 ? p.IdentificationTypeId : 1;
+                _personIdentificationNumber = p.IdentificationNumber ?? "";
+                _personAddress = p.Address;
+                _personPhone = !string.IsNullOrWhiteSpace(p.CellPhone) ? p.CellPhone : (user.PhoneNumber ?? "");
+                _personBirthDate = p.BirthDate;
+                _personHireDate = p.HireDate;
+            }
+        }
+        catch (Exception ex)
+        {
+            _personModalError = "Aviso: " + ex.Message;
+        }
+
+        _showPersonModal = true;
+    }
+
+    private async Task SavePersonProfileAsync()
+    {
+        if (_selectedUser == null) return;
+        _personModalError = null;
+
+        if (string.IsNullOrWhiteSpace(_personFirstName) || string.IsNullOrWhiteSpace(_personFirstLastName))
+        {
+            _personModalError = "Nombres y primer apellido son obligatorios.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_personIdentificationNumber))
+        {
+            _personModalError = "Número de identificación es obligatorio.";
+            return;
+        }
+
+        _isSavingPerson = true;
+        try
+        {
+            var cmd = new JewerlySystem.Modules.Customers.Application.Commands.UpsertPersonProfileCommand(
+                _selectedUser.Id,
+                _personFirstName.Trim(),
+                _personFirstLastName.Trim(),
+                _personSecondLastName?.Trim(),
+                _personIdentificationTypeId,
+                _personIdentificationNumber.Trim(),
+                _personAddress?.Trim(),
+                _personPhone?.Trim() ?? "",
+                _selectedUser.Email,
+                _personBirthDate,
+                _personHireDate
+            );
+
+            var res = await Sender.Send(cmd);
+            if (res.IsSuccess)
+            {
+                _message = $"Expediente personal de {_selectedUser.UserName} actualizado correctamente.";
+                _showPersonModal = false;
+                await LoadDataAsync();
+            }
+            else
+            {
+                _personModalError = res.Error.Message;
+            }
+        }
+        catch (Exception ex)
+        {
+            _personModalError = ex.Message;
+        }
+        finally
+        {
+            _isSavingPerson = false;
         }
     }
 }

@@ -79,6 +79,93 @@
             </div>
         </div>
 
+        <!-- Personal and Employment Information Card -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-primary-subtle text-primary p-2 rounded-3">
+                        <i class="bi bi-person-badge fs-5"></i>
+                    </span>
+                    <div>
+                        <h5 class="fw-bold mb-0">Información Personal y Laboral</h5>
+                        <div class="text-muted small">Datos de identificación, contacto y vinculación en la joyería.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                @if (!string.IsNullOrEmpty(_personalMessage))
+                {
+                    <div class="alert @(_isPersonalSuccess ? "alert-success" : "alert-danger") alert-dismissible fade show py-2 small shadow-sm mb-4" role="alert">
+                        <i class="bi @(_isPersonalSuccess ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill") me-2"></i>@_personalMessage
+                        <button type="button" class="btn-close" @onclick="() => _personalMessage = null"></button>
+                    </div>
+                }
+
+                <form @onsubmit="SavePersonalDataAsync" @onsubmit:preventDefault>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">Nombres <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" placeholder="Ej. William" @bind="_firstName" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">Primer Apellido <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" placeholder="Ej. Alvarez" @bind="_firstLastName" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">Segundo Apellido</label>
+                            <input type="text" class="form-control" placeholder="Ej. Vargas" @bind="_secondLastName" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">Tipo de Identificación <span class="text-danger">*</span></label>
+                            <select class="form-select" @bind="_identificationTypeId">
+                                <option value="1">Cédula de Ciudadanía</option>
+                                <option value="2">Cédula de Extranjería</option>
+                                <option value="3">NIT</option>
+                                <option value="4">Pasaporte</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">Número de Identificación <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" placeholder="Ej. 1018412345" @bind="_identificationNumber" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">Teléfono de Contacto</label>
+                            <input type="tel" class="form-control" placeholder="Ej. 3001234567" @bind="_phoneNumber" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-secondary">Dirección de Residencia</label>
+                            <input type="text" class="form-control" placeholder="Ej. Calle 123 # 45-67" @bind="_address" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold text-secondary">Fecha de Nacimiento</label>
+                            <input type="date" class="form-control" @bind="_birthDate" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold text-secondary">Fecha de Ingreso</label>
+                            <input type="date" class="form-control" @bind="_hireDate" />
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-end">
+                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2 shadow-sm" disabled="@_isSavingPersonal">
+                            @if (_isSavingPersonal)
+                            {
+                                <div class="spinner-border spinner-border-sm" role="status"></div>
+                                <span>Guardando...</span>
+                            }
+                            else
+                            {
+                                <i class="bi bi-save2"></i>
+                                <span>Guardar Información Personal</span>
+                            }
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <div class="row g-4">
             <!-- Left Column: Cambio de Contraseña -->
             <div class="col-lg-7">
@@ -365,6 +452,19 @@
     private string? _pwdMessage;
     private bool _isPwdSuccess;
 
+    // Personal Info Form State
+    private string _firstName = "";
+    private string _firstLastName = "";
+    private string? _secondLastName;
+    private int _identificationTypeId = 1;
+    private string _identificationNumber = "";
+    private string? _address;
+    private DateTime? _birthDate;
+    private DateTime? _hireDate;
+    private bool _isSavingPersonal = false;
+    private string? _personalMessage;
+    private bool _isPersonalSuccess;
+
     // Contact Form State
     private string _phoneNumber = "";
     private bool _isSavingContact = false;
@@ -410,6 +510,28 @@
             {
                 _profile = res.Value;
                 _phoneNumber = _profile.PhoneNumber ?? "";
+
+                try
+                {
+                    var personRes = await Sender.Send(new JewerlySystem.Modules.Customers.Application.Queries.GetPersonByUserIdQuery(_profile.Id));
+                    if (personRes.IsSuccess && personRes.Value != null)
+                    {
+                        var p = personRes.Value;
+                        _firstName = p.FirstName ?? "";
+                        _firstLastName = p.FirstLastName ?? "";
+                        _secondLastName = p.SecondLastName;
+                        _identificationTypeId = p.IdentificationTypeId > 0 ? p.IdentificationTypeId : 1;
+                        _identificationNumber = p.IdentificationNumber ?? "";
+                        _address = p.Address;
+                        _birthDate = p.BirthDate;
+                        _hireDate = p.HireDate;
+                        if (!string.IsNullOrWhiteSpace(p.CellPhone))
+                        {
+                            _phoneNumber = p.CellPhone;
+                        }
+                    }
+                }
+                catch {}
             }
             else
             {
@@ -425,6 +547,63 @@
         finally
         {
             _isLoadingProfile = false;
+        }
+    }
+
+    private async Task SavePersonalDataAsync()
+    {
+        _personalMessage = null;
+        if (string.IsNullOrWhiteSpace(_firstName) || string.IsNullOrWhiteSpace(_firstLastName))
+        {
+            _personalMessage = "Nombres y primer apellido son requeridos.";
+            _isPersonalSuccess = false;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_identificationNumber))
+        {
+            _personalMessage = "El número de identificación es requerido.";
+            _isPersonalSuccess = false;
+            return;
+        }
+
+        _isSavingPersonal = true;
+        try
+        {
+            var cmd = new JewerlySystem.Modules.Customers.Application.Commands.UpsertPersonProfileCommand(
+                _profile?.Id ?? _currentUserId,
+                _firstName.Trim(),
+                _firstLastName.Trim(),
+                _secondLastName?.Trim(),
+                _identificationTypeId,
+                _identificationNumber.Trim(),
+                _address?.Trim(),
+                _phoneNumber?.Trim() ?? "",
+                _profile?.Email ?? "",
+                _birthDate,
+                _hireDate
+            );
+
+            var res = await Sender.Send(cmd);
+            if (res.IsSuccess)
+            {
+                _personalMessage = "Información personal y laboral guardada exitosamente.";
+                _isPersonalSuccess = true;
+            }
+            else
+            {
+                _personalMessage = res.Error.Message;
+                _isPersonalSuccess = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            _personalMessage = "Error al guardar información personal: " + ex.Message;
+            _isPersonalSuccess = false;
+        }
+        finally
+        {
+            _isSavingPersonal = false;
         }
     }
 

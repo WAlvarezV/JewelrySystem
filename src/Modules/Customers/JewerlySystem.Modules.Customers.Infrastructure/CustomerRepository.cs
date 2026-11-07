@@ -23,6 +23,11 @@ public class CustomerRepository : ICustomerRepository
         return await _dbContext.Persons.FirstOrDefaultAsync(p => p.IdentificationNumber == number, ct);
     }
 
+    public async Task<Person?> GetByUserIdAsync(string userId, CancellationToken ct = default)
+    {
+        return await _dbContext.Persons.FirstOrDefaultAsync(p => p.UserId == userId, ct);
+    }
+
     public async Task<IReadOnlyList<Person>> ListAsync(PersonType? type = null, string? searchTerm = null, CancellationToken ct = default)
     {
         var query = _dbContext.Persons.AsNoTracking().AsQueryable();

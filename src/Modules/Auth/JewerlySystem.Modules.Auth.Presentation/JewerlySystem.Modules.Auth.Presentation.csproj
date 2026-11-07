@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
   <ItemGroup>
     <ProjectReference Include="..\JewerlySystem.Modules.Auth.Application\JewerlySystem.Modules.Auth.Application.csproj" />
+    <ProjectReference Include="..\..\Customers\JewerlySystem.Modules.Customers.Application\JewerlySystem.Modules.Customers.Application.csproj" />
     <ProjectReference Include="..\..\..\Common\JewerlySystem.Common.Presentation\JewerlySystem.Common.Presentation.csproj" />
   </ItemGroup>
   <ItemGroup>

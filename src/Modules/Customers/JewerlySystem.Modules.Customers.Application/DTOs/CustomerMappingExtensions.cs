@@ -14,7 +14,14 @@ public static class CustomerMappingExtensions
         p.FullName,
         p.CellPhone,
         p.Email,
-        p.PersonType
+        p.PersonType,
+        p.UserId,
+        p.FirstName,
+        p.FirstLastName,
+        p.SecondLastName,
+        p.Address,
+        p.BirthDate,
+        p.HireDate
     );
 
     public static readonly Expression<Func<IdentificationType, IdentificationTypeDto>> IdentificationTypeDtoProjection = i => new IdentificationTypeDto(
@@ -29,7 +36,14 @@ public static class CustomerMappingExtensions
         person.FullName,
         person.CellPhone,
         person.Email,
-        person.PersonType
+        person.PersonType,
+        person.UserId,
+        person.FirstName,
+        person.FirstLastName,
+        person.SecondLastName,
+        person.Address,
+        person.BirthDate,
+        person.HireDate
     );
 
     public static IdentificationTypeDto ToDto(this IdentificationType identificationType) => new(

@@ -85,3 +85,21 @@ public class GetIdentificationTypesQueryHandler : IQueryHandler<GetIdentificatio
         return Result.Success(dtos);
     }
 }
+
+public record GetPersonByUserIdQuery(string UserId) : IQuery<PersonDto?>;
+
+public class GetPersonByUserIdQueryHandler : IQueryHandler<GetPersonByUserIdQuery, PersonDto?>
+{
+    private readonly ICustomerRepository _repository;
+
+    public GetPersonByUserIdQueryHandler(ICustomerRepository repository)
+    {
+        _repository = repository;
+    }
+
+    public async Task<Result<PersonDto?>> Handle(GetPersonByUserIdQuery request, CancellationToken cancellationToken)
+    {
+        var person = await _repository.GetByUserIdAsync(request.UserId, cancellationToken);
+        return Result.Success<PersonDto?>(person?.ToDto());
+    }
+}

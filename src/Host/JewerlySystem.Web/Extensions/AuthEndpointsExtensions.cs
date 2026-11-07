@@ -30,6 +30,13 @@ public static class AuthEndpointsExtensions
             return Task.CompletedTask;
         });
 
+        app.MapGet("/bezion", context =>
+        {
+            var isAuth = context.User.Identity?.IsAuthenticated == true;
+            context.Response.Redirect(isAuth ? "/dashboard?tenant=bezion" : "/bezion/login");
+            return Task.CompletedTask;
+        });
+
         // 0.1 Multi-Tenant Switch Endpoint (Hardened - OWASP A01 / ISO 27001 A.8.2)
         app.MapGet("/api/tenants/switch", (
             string tenantId,

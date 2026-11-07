@@ -28,9 +28,16 @@ public class PersonConfig : IEntityTypeConfiguration<Person>
         builder.HasIndex(p => p.IdentificationNumber)
             .IsUnique();
 
+        builder.HasIndex(p => p.UserId);
+
+        builder.Property(p => p.UserId).HasMaxLength(450);
+        builder.Property(p => p.FirstName).HasMaxLength(100);
+        builder.Property(p => p.FirstLastName).HasMaxLength(100);
+        builder.Property(p => p.SecondLastName).HasMaxLength(100);
         builder.Property(p => p.FullName).HasMaxLength(500);
-        builder.Property(p => p.CellPhone).HasMaxLength(15);
-        builder.Property(p => p.IdentificationNumber).HasMaxLength(15);
+        builder.Property(p => p.Address).HasMaxLength(200);
+        builder.Property(p => p.CellPhone).HasMaxLength(50);
+        builder.Property(p => p.IdentificationNumber).HasMaxLength(50);
         builder.Property(p => p.Email).HasMaxLength(150);
 
         var typeConverter = new EnumToStringConverter<PersonType>();

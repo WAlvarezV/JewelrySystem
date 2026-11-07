@@ -103,3 +103,87 @@ public class UpdateCustomerCommandHandler : ICommandHandler<UpdateCustomerComman
         return Result.Success(true);
     }
 }
+
+public record UpsertPersonProfileCommand(
+    string UserId,
+    string FirstName,
+    string FirstLastName,
+    string? SecondLastName,
+    int IdentificationTypeId,
+    string IdentificationNumber,
+    string? Address,
+    string CellPhone,
+    string Email,
+    DateTime? BirthDate,
+    DateTime? HireDate) : ICommand<bool>;
+
+public class UpsertPersonProfileCommandHandler : ICommandHandler<UpsertPersonProfileCommand, bool>
+{
+    private readonly ICustomerRepository _repository;
+
+    public UpsertPersonProfileCommandHandler(ICustomerRepository repository)
+    {
+        _repository = repository;
+    }
+
+    public async Task<Result<bool>> Handle(UpsertPersonProfileCommand request, CancellationToken cancellationToken)
+    {
+        var person = await _repository.GetByUserIdAsync(request.UserId, cancellationToken);
+        if (person == null && !string.IsNullOrWhiteSpace(request.IdentificationNumber))
+        {
+            person = await _repository.GetByIdentificationAsync(request.IdentificationNumber, cancellationToken);
+        }
+
+        var fullName = string.Join(" ", new[] { request.FirstName, request.FirstLastName, request.SecondLastName }
+            .Where(s => !string.IsNullOrWhiteSpace(s))).Trim();
+
+        if (string.IsNullOrWhiteSpace(fullName))
+        {
+            fullName = request.Email;
+        }
+
+        if (person == null)
+        {
+            person = new Person(
+                identificationTypeId: request.IdentificationTypeId > 0 ? request.IdentificationTypeId : 1,
+                identificationNumber: request.IdentificationNumber,
+                fullName: fullName,
+                cellPhone: request.CellPhone,
+                email: request.Email,
+                personType: PersonType.Employee,
+                userId: request.UserId,
+                firstName: request.FirstName,
+                firstLastName: request.FirstLastName,
+                secondLastName: request.SecondLastName,
+                address: request.Address,
+                birthDate: request.BirthDate,
+                hireDate: request.HireDate
+            );
+            await _repository.AddAsync(person, cancellationToken);
+        }
+        else
+        {
+            person.UserId = request.UserId;
+            person.FirstName = request.FirstName;
+            person.FirstLastName = request.FirstLastName;
+            person.SecondLastName = request.SecondLastName;
+            person.FullName = fullName;
+            if (request.IdentificationTypeId > 0)
+                person.IdentificationTypeId = request.IdentificationTypeId;
+            if (!string.IsNullOrWhiteSpace(request.IdentificationNumber))
+                person.IdentificationNumber = request.IdentificationNumber;
+            person.Address = request.Address;
+            if (!string.IsNullOrWhiteSpace(request.CellPhone))
+                person.CellPhone = request.CellPhone;
+            if (!string.IsNullOrWhiteSpace(request.Email))
+                person.Email = request.Email;
+            person.BirthDate = request.BirthDate;
+            person.HireDate = request.HireDate;
+            if (person.PersonType != PersonType.Cliente)
+                person.PersonType = PersonType.Employee;
+        }
+
+        await _repository.SaveChangesAsync(cancellationToken);
+        return Result.Success(true);
+    }
+}

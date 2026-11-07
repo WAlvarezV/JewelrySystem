@@ -37,6 +37,7 @@ public static class DatabaseExtensions
                 await tenantDb.Database.EnsureCreatedAsync();
                 await EnsureUserActivityLogsTableAsync(tenantDb, logger);
                 await EnsureInventoryColumnsAsync(tenantDb, logger);
+                await EnsurePersonColumnsAsync(tenantDb, logger);
 
                 // 3. Seed navigation modules and security
                 if (tenant.Id == "pomona")
@@ -56,8 +57,18 @@ public static class DatabaseExtensions
                 {
                     await SeedOroPlataTenantAsync(tenantDb, registry, logger);
                 }
+                else if (tenant.Id == "bezion")
+                {
+                    await SeedBeZionTenantAsync(tenantDb, registry, logger);
+                }
 
-                // 4. Asegurar que los artículos iniciales de inventario queden desactivados una única vez para auditoría física
+                // 4. Ensure walvarez@bezion.tech exists across all 3 databases with password from walvarez@ingnova.team
+                await EnsureWalvarezBezionUserAsync(tenantDb, registry, logger);
+
+                // 5. Backfill/ensure Person record for any user in this database
+                await BackfillExistingUserPersonsAsync(tenantDb, logger);
+
+                // 6. Asegurar que los artículos iniciales de inventario queden desactivados una única vez para auditoría física
                 await DeactivateInitialInventoryOnceAsync(tenantDb, tenant.Id, logger);
 
                 logger.LogInformation("Tenant '{TenantId}' database initialized successfully.", tenant.Id);
@@ -427,6 +438,372 @@ public static class DatabaseExtensions
         catch (Exception ex)
         {
             logger.LogWarning(ex, "Note on inventory columns migration: {Message}", ex.Message);
+        }
+    }
+
+    private static async Task EnsurePersonColumnsAsync(JewerlyDbContext tenantDb, ILogger logger)
+    {
+        try
+        {
+            await tenantDb.Database.ExecuteSqlRawAsync(@"
+                ALTER TABLE ""Persons"" ADD COLUMN IF NOT EXISTS ""FirstName"" VARCHAR(100);
+                ALTER TABLE ""Persons"" ADD COLUMN IF NOT EXISTS ""FirstLastName"" VARCHAR(100);
+                ALTER TABLE ""Persons"" ADD COLUMN IF NOT EXISTS ""SecondLastName"" VARCHAR(100);
+                ALTER TABLE ""Persons"" ADD COLUMN IF NOT EXISTS ""Address"" VARCHAR(200);
+                ALTER TABLE ""Persons"" ADD COLUMN IF NOT EXISTS ""BirthDate"" TIMESTAMP WITHOUT TIME ZONE;
+                ALTER TABLE ""Persons"" ADD COLUMN IF NOT EXISTS ""HireDate"" TIMESTAMP WITHOUT TIME ZONE;
+                ALTER TABLE ""Persons"" ADD COLUMN IF NOT EXISTS ""UserId"" VARCHAR(450);
+                CREATE INDEX IF NOT EXISTS ""IX_Persons_UserId"" ON ""Persons"" (""UserId"");
+            ");
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Note on Person columns migration: {Message}", ex.Message);
+        }
+    }
+
+    private static async Task EnsureWalvarezBezionUserAsync(JewerlyDbContext tenantDb, ITenantRegistry registry, ILogger logger)
+    {
+        try
+        {
+            var adminRoleId = "9f51d7c5-d662-443d-932b-38e0bc1076a5";
+            var adminRole2Id = "43b031c0-aedd-4c6c-9bf3-5e857b09534b";
+
+            // Find source password from walvarez@ingnova.team (check current tenantDb, else check pomonaDb)
+            var sourceUser = await tenantDb.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == "walvarez@ingnova.team");
+            if (sourceUser == null)
+            {
+                var pomonaCs = registry.GetConnectionString("pomona");
+                var pomonaOptions = new DbContextOptionsBuilder<JewerlyDbContext>().UseNpgsql(pomonaCs).Options;
+                await using var pomonaDb = new JewerlyDbContext(pomonaOptions);
+                sourceUser = await pomonaDb.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == "walvarez@ingnova.team");
+            }
+
+            if (sourceUser == null)
+            {
+                logger.LogWarning("No se encontró usuario fuente walvarez@ingnova.team para copiar credenciales.");
+                return;
+            }
+
+            var targetEmail = "walvarez@bezion.tech";
+            var targetUser = await tenantDb.Users.FirstOrDefaultAsync(u => u.Email == targetEmail);
+            if (targetUser == null)
+            {
+                var newUserId = Guid.NewGuid().ToString();
+                targetUser = new ApplicationUser
+                {
+                    Id = newUserId,
+                    UserName = targetEmail,
+                    NormalizedUserName = targetEmail.ToUpperInvariant(),
+                    Email = targetEmail,
+                    NormalizedEmail = targetEmail.ToUpperInvariant(),
+                    EmailConfirmed = true,
+                    PasswordHash = sourceUser.PasswordHash,
+                    SecurityStamp = sourceUser.SecurityStamp ?? Guid.NewGuid().ToString(),
+                    ConcurrencyStamp = Guid.NewGuid().ToString(),
+                    PhoneNumber = sourceUser.PhoneNumber ?? "3001234567",
+                    PhoneNumberConfirmed = true,
+                    TwoFactorEnabled = false,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                };
+                tenantDb.Users.Add(targetUser);
+                await tenantDb.SaveChangesAsync();
+
+                // Roles
+                if (!await tenantDb.UserRoles.AnyAsync(ur => ur.UserId == targetUser.Id && ur.RoleId == adminRoleId))
+                {
+                    tenantDb.UserRoles.Add(new IdentityUserRole<string> { UserId = targetUser.Id, RoleId = adminRoleId });
+                }
+                if (!await tenantDb.UserRoles.AnyAsync(ur => ur.UserId == targetUser.Id && ur.RoleId == adminRole2Id))
+                {
+                    tenantDb.UserRoles.Add(new IdentityUserRole<string> { UserId = targetUser.Id, RoleId = adminRole2Id });
+                }
+                await tenantDb.SaveChangesAsync();
+                logger.LogInformation("Usuario {Email} aprovisionado exitosamente.", targetEmail);
+            }
+
+            // Ensure Person record
+            var person = await tenantDb.Persons.FirstOrDefaultAsync(p => p.UserId == targetUser.Id || p.Email == targetEmail);
+            if (person == null)
+            {
+                tenantDb.Persons.Add(new Modules.Customers.Domain.Person(
+                    identificationTypeId: 1,
+                    identificationNumber: "1018412345",
+                    fullName: "William Alvarez Vargas",
+                    cellPhone: targetUser.PhoneNumber ?? "3001234567",
+                    email: targetEmail,
+                    personType: Modules.Customers.Domain.PersonType.Employee,
+                    userId: targetUser.Id,
+                    firstName: "William",
+                    firstLastName: "Alvarez",
+                    secondLastName: "Vargas",
+                    address: "Calle Principal # 12-34",
+                    hireDate: DateTime.UtcNow
+                ));
+                await tenantDb.SaveChangesAsync();
+            }
+            else if (string.IsNullOrWhiteSpace(person.UserId))
+            {
+                person.UserId = targetUser.Id;
+                person.FirstName = "William";
+                person.FirstLastName = "Alvarez";
+                person.SecondLastName = "Vargas";
+                person.PersonType = Modules.Customers.Domain.PersonType.Employee;
+                await tenantDb.SaveChangesAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Error asegurando usuario walvarez@bezion.tech: {Message}", ex.Message);
+        }
+    }
+
+    private static async Task SeedBeZionTenantAsync(JewerlyDbContext bezionDb, ITenantRegistry registry, ILogger logger)
+    {
+        try
+        {
+            // 1. Ensure AppModules exist
+            if (!await bezionDb.Set<AppModule>().AnyAsync())
+            {
+                bezionDb.Set<AppModule>().AddRange(
+                    new AppModule { Id = Guid.NewGuid(), Key = "CONTRACTS", Name = "Contratos", Icon = "bi-file-earmark-text", Description = "Gestión de contratos de compraventa y empeño", Order = 1, IsActive = true },
+                    new AppModule { Id = Guid.NewGuid(), Key = "INVENTORY", Name = "Inventario", Icon = "bi-box-seam", Description = "Control de stock de joyas y relojería", Order = 2, IsActive = true },
+                    new AppModule { Id = Guid.NewGuid(), Key = "CUSTOMERS", Name = "Clientes", Icon = "bi-people", Description = "Directorio y clientes", Order = 3, IsActive = true },
+                    new AppModule { Id = Guid.NewGuid(), Key = "CASH", Name = "Caja", Icon = "bi-cash-stack", Description = "Arqueo y control diario de caja", Order = 4, IsActive = true },
+                    new AppModule { Id = Guid.NewGuid(), Key = "INVOICING", Name = "Facturación", Icon = "bi-receipt", Description = "Emisión y control de facturas", Order = 5, IsActive = true },
+                    new AppModule { Id = Guid.NewGuid(), Key = "ADMIN", Name = "Seguridad", Icon = "bi-shield-lock", Description = "Usuarios, módulos, menús, roles y permisos", Order = 6, IsActive = true }
+                );
+                await bezionDb.SaveChangesAsync();
+            }
+
+            // 2. Ensure MenuItems exist
+            if (!await bezionDb.Set<MenuItem>().AnyAsync())
+            {
+                bezionDb.Set<MenuItem>().AddRange(
+                    new MenuItem { Id = Guid.Parse("11111111-1111-1111-1111-111111111112"), ModuleKey = "CONTRACTS", Name = "Lista de Contratos", Route = "/contracts", Icon = "bi-card-list", Order = 1, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("11111111-1111-1111-1111-111111111113"), ModuleKey = "CONTRACTS", Name = "Nuevo Contrato", Route = "/contracts/new", Icon = "bi-plus-circle", Order = 2, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("22222222-2222-2222-2222-222222222223"), ModuleKey = "INVENTORY", Name = "Stock General", Route = "/inventory", Icon = "bi-box-seam", Order = 1, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("22222222-2222-2222-2222-222222222224"), ModuleKey = "INVENTORY", Name = "Nueva Joya", Route = "/inventory/jewels/new", Icon = "bi-gem", Order = 2, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("22222222-2222-2222-2222-222222222225"), ModuleKey = "INVENTORY", Name = "Nuevo Reloj", Route = "/inventory/watches/new", Icon = "bi-watch", Order = 3, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("22222222-2222-2222-2222-222222222226"), ModuleKey = "INVENTORY", Name = "Descargos", Route = "/inventory/discharge", Icon = "bi-arrow-down-left-square", Order = 4, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("22222222-2222-2222-2222-222222222227"), ModuleKey = "INVENTORY", Name = "Consolidado Stock", Route = "/inventory/consolidated", Icon = "bi-pie-chart", Order = 5, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("22222222-2222-2222-2222-222222222228"), ModuleKey = "INVENTORY", Name = "Auditoría de Actividad", Route = "/inventory/audit-activity", Icon = "bi-graph-up-arrow", Order = 6, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("33333333-3333-3333-3333-333333333334"), ModuleKey = "CUSTOMERS", Name = "Directorio Clientes", Route = "/customers", Icon = "bi-person-lines-fill", Order = 1, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("33333333-3333-3333-3333-333333333335"), ModuleKey = "CUSTOMERS", Name = "Nuevo Cliente", Route = "/customers/new", Icon = "bi-person-plus", Order = 2, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("44444444-4444-4444-4444-444444444445"), ModuleKey = "CASH", Name = "Movimiento Diario", Route = "/cash/daily", Icon = "bi-calendar-check", Order = 1, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("44444444-4444-4444-4444-444444444446"), ModuleKey = "CASH", Name = "Consolidado Histórico", Route = "/cash/consolidated", Icon = "bi-graph-up", Order = 2, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("55555555-5555-5555-5555-555555555556"), ModuleKey = "INVOICING", Name = "Lista Facturas", Route = "/invoices", Icon = "bi-receipt-cutoff", Order = 1, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("55555555-5555-5555-5555-555555555557"), ModuleKey = "INVOICING", Name = "Nueva Factura", Route = "/invoices/new", Icon = "bi-plus-circle", Order = 2, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("66666666-6666-6666-6666-666666666667"), ModuleKey = "ADMIN", Name = "Usuarios", Route = "/admin/users", Icon = "bi-people-fill", Order = 1, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("66666666-6666-6666-6666-666666666668"), ModuleKey = "ADMIN", Name = "Roles y Perfiles", Route = "/admin/roles", Icon = "bi-award-fill", Order = 2, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("66666666-6666-6666-6666-666666666669"), ModuleKey = "ADMIN", Name = "Matriz de Permisos", Route = "/admin/permissions", Icon = "bi-key-fill", Order = 3, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("66666666-6666-6666-6666-666666666670"), ModuleKey = "ADMIN", Name = "Módulos del Sistema", Route = "/admin/modules", Icon = "bi-grid-fill", Order = 4, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("66666666-6666-6666-6666-666666666671"), ModuleKey = "ADMIN", Name = "Menús de Navegación", Route = "/admin/menus", Icon = "bi-menu-button-wide-fill", Order = 5, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("66666666-6666-6666-6666-666666666660"), ModuleKey = "ADMIN", Name = "Mi Perfil", Route = "/profile", Icon = "bi-person-circle", Order = 0, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("66666666-6666-6666-6666-666666666672"), ModuleKey = "ADMIN", Name = "Seguridad & Passkeys", Route = "/auth/passkeys", Icon = "bi-shield-lock-fill", Order = 6, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("66666666-6666-6666-6666-666666666673"), ModuleKey = "ADMIN", Name = "Autenticador Móvil (MFA)", Route = "/auth/mfa", Icon = "bi-phone", Order = 7, IsActive = true },
+                    new MenuItem { Id = Guid.Parse("66666666-6666-6666-6666-666666666674"), ModuleKey = "ADMIN", Name = "Productividad y Auditoría", Route = "/audit/productivity", Icon = "bi-speedometer2", Order = 8, IsActive = true }
+                );
+                await bezionDb.SaveChangesAsync();
+            }
+
+            // 3. Ensure Roles
+            var adminRoleId = "9f51d7c5-d662-443d-932b-38e0bc1076a5";
+            var adminRole2Id = "43b031c0-aedd-4c6c-9bf3-5e857b09534b";
+
+            var roles = await bezionDb.Roles.ToListAsync();
+            if (!roles.Any(r => r.NormalizedName == "ADMINISTRADOR"))
+            {
+                bezionDb.Roles.Add(new IdentityRole { Id = adminRoleId, Name = "Administrador", NormalizedName = "ADMINISTRADOR", ConcurrencyStamp = adminRoleId });
+            }
+            if (!roles.Any(r => r.NormalizedName == "ADMIN"))
+            {
+                bezionDb.Roles.Add(new IdentityRole { Id = adminRole2Id, Name = "Admin", NormalizedName = "ADMIN", ConcurrencyStamp = adminRole2Id });
+            }
+            string[] otherRoles = ["Supervisor", "Tasador", "Cajero", "Vendedor"];
+            foreach (var rName in otherRoles)
+            {
+                if (!roles.Any(r => r.NormalizedName == rName.ToUpperInvariant()))
+                {
+                    var newId = Guid.NewGuid().ToString();
+                    bezionDb.Roles.Add(new IdentityRole { Id = newId, Name = rName, NormalizedName = rName.ToUpperInvariant(), ConcurrencyStamp = newId });
+                }
+            }
+            await bezionDb.SaveChangesAsync();
+
+            // 4. Ensure RolePermissions for Admin & Administrador across all menus
+            var allMenus = await bezionDb.Set<MenuItem>().ToListAsync();
+            foreach (var menu in allMenus)
+            {
+                foreach (var roleName in new[] { "Admin", "Administrador" })
+                {
+                    var perm = await bezionDb.Set<RolePermission>()
+                        .FirstOrDefaultAsync(p => p.RoleName == roleName && p.MenuRoute == menu.Route);
+
+                    if (perm == null)
+                    {
+                        bezionDb.Set<RolePermission>().Add(new RolePermission
+                        {
+                            Id = Guid.NewGuid(),
+                            RoleName = roleName,
+                            ModuleKey = menu.ModuleKey,
+                            MenuRoute = menu.Route,
+                            CanView = true,
+                            CanCreate = true,
+                            CanEdit = true,
+                            CanDelete = true,
+                            CanAdmin = true
+                        });
+                    }
+                }
+            }
+            await bezionDb.SaveChangesAsync();
+
+            // 5. Ensure Identification Types
+            if (!await bezionDb.IdentificationTypes.AnyAsync())
+            {
+                bezionDb.IdentificationTypes.AddRange(
+                    new Modules.Customers.Domain.IdentificationType(1, "Cédula de Ciudadanía"),
+                    new Modules.Customers.Domain.IdentificationType(2, "Cédula de Extranjería"),
+                    new Modules.Customers.Domain.IdentificationType(3, "NIT"),
+                    new Modules.Customers.Domain.IdentificationType(4, "Pasaporte")
+                );
+                await bezionDb.SaveChangesAsync();
+            }
+
+            // 6. Ensure user jmalvarezc@bezion.tech
+            var jmEmail = "jmalvarezc@bezion.tech";
+            var jmUser = await bezionDb.Users.FirstOrDefaultAsync(u => u.Email == jmEmail);
+            if (jmUser == null)
+            {
+                var jmUserId = Guid.NewGuid().ToString();
+                var hasher = new PasswordHasher<ApplicationUser>();
+                jmUser = new ApplicationUser
+                {
+                    Id = jmUserId,
+                    UserName = jmEmail,
+                    NormalizedUserName = jmEmail.ToUpperInvariant(),
+                    Email = jmEmail,
+                    NormalizedEmail = jmEmail.ToUpperInvariant(),
+                    EmailConfirmed = true,
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                    ConcurrencyStamp = Guid.NewGuid().ToString(),
+                    PhoneNumber = "3109876543",
+                    PhoneNumberConfirmed = true,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                };
+                jmUser.PasswordHash = hasher.HashPassword(jmUser, "BeZ10N73ch");
+                bezionDb.Users.Add(jmUser);
+                await bezionDb.SaveChangesAsync();
+
+                // Assign Roles
+                if (!await bezionDb.UserRoles.AnyAsync(ur => ur.UserId == jmUserId && ur.RoleId == adminRoleId))
+                {
+                    bezionDb.UserRoles.Add(new IdentityUserRole<string> { UserId = jmUserId, RoleId = adminRoleId });
+                }
+                if (!await bezionDb.UserRoles.AnyAsync(ur => ur.UserId == jmUserId && ur.RoleId == adminRole2Id))
+                {
+                    bezionDb.UserRoles.Add(new IdentityUserRole<string> { UserId = jmUserId, RoleId = adminRole2Id });
+                }
+                await bezionDb.SaveChangesAsync();
+
+                logger.LogInformation("Usuario {Email} creado exitosamente en BeZion con contraseña configurada.", jmEmail);
+            }
+
+            // Ensure Person record for jmalvarezc@bezion.tech
+            var jmPerson = await bezionDb.Persons.FirstOrDefaultAsync(p => p.UserId == jmUser.Id || p.Email == jmEmail);
+            if (jmPerson == null)
+            {
+                bezionDb.Persons.Add(new Modules.Customers.Domain.Person(
+                    identificationTypeId: 1,
+                    identificationNumber: "1018987654",
+                    fullName: "Jose Manuel Alvarez C",
+                    cellPhone: "3109876543",
+                    email: jmEmail,
+                    personType: Modules.Customers.Domain.PersonType.Employee,
+                    userId: jmUser.Id,
+                    firstName: "Jose Manuel",
+                    firstLastName: "Alvarez",
+                    secondLastName: "C",
+                    address: "Calle 45 # 67-89",
+                    hireDate: DateTime.UtcNow
+                ));
+                await bezionDb.SaveChangesAsync();
+            }
+            else if (string.IsNullOrWhiteSpace(jmPerson.UserId))
+            {
+                jmPerson.UserId = jmUser.Id;
+                jmPerson.FirstName = "Jose Manuel";
+                jmPerson.FirstLastName = "Alvarez";
+                jmPerson.SecondLastName = "C";
+                jmPerson.PersonType = Modules.Customers.Domain.PersonType.Employee;
+                await bezionDb.SaveChangesAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Note on BeZion tenant seeding: {Message}", ex.Message);
+        }
+    }
+
+    private static async Task BackfillExistingUserPersonsAsync(JewerlyDbContext tenantDb, ILogger logger)
+    {
+        try
+        {
+            var users = await tenantDb.Users.ToListAsync();
+            foreach (var user in users)
+            {
+                var person = await tenantDb.Persons.FirstOrDefaultAsync(p => p.UserId == user.Id || (user.Email != null && p.Email != null && p.Email.ToLower() == user.Email.ToLower()));
+                if (person == null)
+                {
+                    var emailPrefix = (user.Email ?? user.UserName ?? "user").Split('@')[0];
+                    var parts = emailPrefix.Split(new[] { '.', '_', '-' }, StringSplitOptions.RemoveEmptyEntries);
+                    var fName = parts.Length > 0 ? char.ToUpper(parts[0][0]) + parts[0].Substring(1) : "Colaborador";
+                    var lName = parts.Length > 1 ? char.ToUpper(parts[1][0]) + parts[1].Substring(1) : "Joyería";
+
+                    var newPerson = new Modules.Customers.Domain.Person(
+                        identificationTypeId: 1,
+                        identificationNumber: $"EMP-{user.Id.Substring(0, Math.Min(8, user.Id.Length))}",
+                        fullName: $"{fName} {lName}",
+                        cellPhone: user.PhoneNumber ?? "",
+                        email: user.Email ?? "",
+                        personType: Modules.Customers.Domain.PersonType.Employee,
+                        userId: user.Id,
+                        firstName: fName,
+                        firstLastName: lName,
+                        hireDate: DateTime.UtcNow
+                    );
+                    tenantDb.Persons.Add(newPerson);
+                }
+                else
+                {
+                    bool changed = false;
+                    if (string.IsNullOrWhiteSpace(person.UserId))
+                    {
+                        person.UserId = user.Id;
+                        changed = true;
+                    }
+                    if (string.IsNullOrWhiteSpace(person.FirstName) && !string.IsNullOrWhiteSpace(person.FullName))
+                    {
+                        var parts = person.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                        person.FirstName = parts.Length > 0 ? parts[0] : person.FullName;
+                        person.FirstLastName = parts.Length > 1 ? parts[1] : "";
+                        person.SecondLastName = parts.Length > 2 ? string.Join(" ", parts.Skip(2)) : null;
+                        changed = true;
+                    }
+                    if (changed)
+                    {
+                        tenantDb.Persons.Update(person);
+                    }
+                }
+            }
+            await tenantDb.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Note on user person backfill: {Message}", ex.Message);
         }
     }
 }

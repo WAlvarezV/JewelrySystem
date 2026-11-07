@@ -75,6 +75,9 @@
                 if (path.indexOf('/oro-plata') !== -1) {
                     tenant = 'oro-plata';
                     try { localStorage.setItem('active_tenant', 'oro-plata'); } catch(e) {}
+                } else if (path.indexOf('/bezion') !== -1) {
+                    tenant = 'bezion';
+                    try { localStorage.setItem('active_tenant', 'bezion'); } catch(e) {}
                 } else if (path.indexOf('/pomona') !== -1) {
                     tenant = 'pomona';
                     try { localStorage.setItem('active_tenant', 'pomona'); } catch(e) {}
@@ -83,15 +86,16 @@
                 }
 
                 var defaultTheme = (tenant === 'oro-plata') ? 'oroplata-classic' : 'pomona-imperial';
-                var theme = (path.indexOf('/oro-plata') !== -1 || path.indexOf('/pomona') !== -1)
+                var theme = (path.indexOf('/oro-plata') !== -1 || path.indexOf('/bezion') !== -1 || path.indexOf('/pomona') !== -1)
                     ? defaultTheme
                     : (localStorage.getItem('pomona_theme') || defaultTheme);
 
                 document.documentElement.setAttribute('data-theme', theme);
 
                 var isOroPlata = (tenant === 'oro-plata');
+                var isBeZion = (tenant === 'bezion');
                 var symbolUrl = isOroPlata ? 'images/tenants/oro-plata/oroplata-symbol.svg' : 'images/pomona-symbol-white.png';
-                var title = isOroPlata ? 'Joyería Oro & Plata' : 'Pomona Joyería & Relojería';
+                var title = isOroPlata ? 'Joyería Oro & Plata' : (isBeZion ? 'Joyería BeZion' : 'Pomona Joyería & Relojería');
 
                 document.title = title;
                 var links = document.querySelectorAll("link[rel*='icon'], link[rel='apple-touch-icon']");

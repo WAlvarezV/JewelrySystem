@@ -5,7 +5,8 @@ namespace JewerlySystem.Modules.Customers.Domain;
 public enum PersonType
 {
     Cliente = 1,
-    Proveedor = 2
+    Proveedor = 2,
+    Employee = 3
 }
 
 public class IdentificationType : Entity<int>
@@ -21,11 +22,18 @@ public class IdentificationType : Entity<int>
 
 public class Person : AuditableEntity<int>
 {
+    public string? UserId { get; set; }
     public int IdentificationTypeId { get; set; }
     public string IdentificationNumber { get; set; } = string.Empty;
+    public string FirstName { get; set; } = string.Empty;
+    public string FirstLastName { get; set; } = string.Empty;
+    public string? SecondLastName { get; set; }
     public string FullName { get; set; } = string.Empty;
+    public string? Address { get; set; }
     public string CellPhone { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
+    public DateTime? BirthDate { get; set; }
+    public DateTime? HireDate { get; set; }
     public PersonType PersonType { get; set; }
 
     public Person() { }
@@ -36,7 +44,14 @@ public class Person : AuditableEntity<int>
         string fullName,
         string cellPhone,
         string email,
-        PersonType personType)
+        PersonType personType,
+        string? userId = null,
+        string? firstName = null,
+        string? firstLastName = null,
+        string? secondLastName = null,
+        string? address = null,
+        DateTime? birthDate = null,
+        DateTime? hireDate = null)
     {
         IdentificationTypeId = identificationTypeId;
         IdentificationNumber = identificationNumber ?? string.Empty;
@@ -44,5 +59,12 @@ public class Person : AuditableEntity<int>
         CellPhone = cellPhone ?? string.Empty;
         Email = email ?? string.Empty;
         PersonType = personType;
+        UserId = userId;
+        FirstName = firstName ?? string.Empty;
+        FirstLastName = firstLastName ?? string.Empty;
+        SecondLastName = secondLastName;
+        Address = address;
+        BirthDate = birthDate;
+        HireDate = hireDate;
     }
 }
