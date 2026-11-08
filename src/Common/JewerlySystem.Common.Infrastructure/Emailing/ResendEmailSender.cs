@@ -22,7 +22,8 @@ public class ResendEmailSender : IEmailSender
     public async Task<bool> SendEmailAsync(string toEmail, string subject, string htmlContent)
     {
         var apiKey = _configuration["Resend:ApiKey"];
-        var fromEmail = _configuration["Resend:FromEmail"] ?? "onboarding@resend.dev";
+        var fromEmail = _configuration["Resend:FromEmail"] ?? "info@bezion.tech";
+        var fromName = _configuration["Resend:FromName"] ?? "BeZion Joyería";
 
         if (string.IsNullOrWhiteSpace(apiKey) || apiKey.Contains("YOUR_RESEND_API_KEY", StringComparison.OrdinalIgnoreCase))
         {
@@ -37,7 +38,7 @@ public class ResendEmailSender : IEmailSender
 
             var payload = new
             {
-                from = $"JewerlySystem <{fromEmail}>",
+                from = $"{fromName} <{fromEmail}>",
                 to = new[] { toEmail },
                 subject = subject,
                 html = htmlContent
