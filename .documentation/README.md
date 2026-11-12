@@ -20,10 +20,10 @@ Bienvenido a la documentación técnica y operativa de la solución **JewerlySys
 
 ## Resumen de Arquitectura
 
-* **Framework:** .NET 10 (C# 13)
+* **Framework:** .NET 11 (C# 15)
 * **Estilo de Arquitectura:** Monolito Modular (Modular Monolith)
 * **Motor de Base de Datos:** PostgreSQL 18.4 (x86_64)
-* **Proveedor ORM:** `Npgsql.EntityFrameworkCore.PostgreSQL` v10.0.3
+* **Proveedor ORM:** `Npgsql.EntityFrameworkCore.PostgreSQL` v11.0.0-rc.3
 * **Gestión Centralizada de Paquetes:** `Directory.Packages.props`
 * **Módulos del Sistema:**
   * **Auth:** Identidad, roles, matriz de permisos y Passkeys (FIDO2 / WebAuthn).

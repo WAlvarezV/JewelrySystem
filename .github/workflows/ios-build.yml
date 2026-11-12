@@ -12,10 +12,10 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup .NET 10
+      - name: Setup .NET 11
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: '11.0.x'
 
       - name: Install .NET MAUI Workloads
         run: |
@@ -52,7 +52,7 @@ jobs:
       - name: Build MAUI iOS Release IPA
         run: |
           dotnet publish src/Mobile/JewerlySystem.Mobile/JewerlySystem.Mobile.csproj \
-            -f net10.0-ios \
+            -f net11.0-ios \
             -c Release \
             -p:ArchiveOnBuild=true \
             -p:RuntimeIdentifier=ios-arm64
@@ -61,4 +61,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-release-ipa
-          path: src/Mobile/JewerlySystem.Mobile/bin/Release/net10.0-ios/ios-arm64/publish/*.ipa
+          path: src/Mobile/JewerlySystem.Mobile/bin/Release/net11.0-ios/ios-arm64/publish/*.ipa

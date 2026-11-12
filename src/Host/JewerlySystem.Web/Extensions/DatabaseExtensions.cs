@@ -260,27 +260,27 @@ public static class DatabaseExtensions
                 bool canDelete = false;
                 bool canAdmin = false;
 
-                if (role.Name.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
-                    role.Name.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(role.Name, "Admin", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(role.Name, "Administrador", StringComparison.OrdinalIgnoreCase))
                 {
                     canView = canCreate = canEdit = canDelete = canAdmin = true;
                 }
-                else if (role.Name.Equals("Supervisor", StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(role.Name, "Supervisor", StringComparison.OrdinalIgnoreCase))
                 {
                     canView = true;
                     canCreate = canEdit = !menu.Route.StartsWith("/admin");
                 }
-                else if (role.Name.Equals("Tasador", StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(role.Name, "Tasador", StringComparison.OrdinalIgnoreCase))
                 {
                     canView = menu.ModuleKey == "CONTRACTS" || menu.ModuleKey == "INVENTORY" || menu.Route == "/profile";
                     canCreate = canEdit = canView;
                 }
-                else if (role.Name.Equals("Cajero", StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(role.Name, "Cajero", StringComparison.OrdinalIgnoreCase))
                 {
                     canView = menu.ModuleKey == "CASH" || menu.ModuleKey == "INVOICING" || menu.ModuleKey == "CONTRACTS" || menu.Route == "/profile";
                     canCreate = canEdit = canView;
                 }
-                else if (role.Name.Equals("Vendedor", StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(role.Name, "Vendedor", StringComparison.OrdinalIgnoreCase))
                 {
                     canView = menu.ModuleKey == "INVOICING" || menu.ModuleKey == "CUSTOMERS" || menu.ModuleKey == "INVENTORY" || menu.Route == "/profile";
                     canCreate = canView;
@@ -293,7 +293,7 @@ public static class DatabaseExtensions
                         tenantDb.Set<RolePermission>().Add(new RolePermission
                         {
                             Id = Guid.NewGuid(),
-                            RoleName = role.Name,
+                            RoleName = role.Name ?? string.Empty,
                             ModuleKey = menu.ModuleKey,
                             MenuRoute = menu.Route,
                             CanView = canView,

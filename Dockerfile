@@ -1,5 +1,5 @@
 # Stage 1: Build & Publish
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:11.0 AS build
 WORKDIR /src
 
 # Copy CPM and build properties
@@ -14,7 +14,7 @@ WORKDIR /src/src/Host/JewerlySystem.Web
 RUN dotnet publish "JewerlySystem.Web.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # Stage 2: Runtime (Hardened Non-Root Container - ISO 27001 A.8.9 / OWASP A02)
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:11.0 AS final
 WORKDIR /app
 
 ENV ASPNETCORE_URLS=http://+:8080 \

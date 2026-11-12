@@ -27,12 +27,12 @@ En formato JSON para [appsettings.json](file:///E:/repos/JewelrySystem/src/Host/
 
 ---
 
-## 2. Configuración en la Solución .NET 10
+## 2. Configuración en la Solución .NET 11
 
 ### 2.1 Proveedor Centralizado (`Directory.Packages.props`)
 Se utiliza el paquete centralizado:
 ```xml
-<PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+<PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="11.0.0-rc.3" />
 ```
 
 ### 2.2 Inyección en Proyectos de Infraestructura
