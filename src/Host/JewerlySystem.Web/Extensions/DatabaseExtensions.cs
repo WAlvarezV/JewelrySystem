@@ -570,6 +570,7 @@ public static class DatabaseExtensions
                 ALTER TABLE ""Persons"" ADD COLUMN IF NOT EXISTS ""BirthDate"" TIMESTAMP WITHOUT TIME ZONE;
                 ALTER TABLE ""Persons"" ADD COLUMN IF NOT EXISTS ""HireDate"" TIMESTAMP WITHOUT TIME ZONE;
                 ALTER TABLE ""Persons"" ADD COLUMN IF NOT EXISTS ""UserId"" VARCHAR(450);
+                UPDATE ""Persons"" SET ""FirstName"" = COALESCE(""FirstName"", ''), ""FirstLastName"" = COALESCE(""FirstLastName"", '') WHERE ""FirstName"" IS NULL OR ""FirstLastName"" IS NULL;
             ");
         }
         catch (Exception ex)

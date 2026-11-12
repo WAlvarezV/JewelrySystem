@@ -23,7 +23,7 @@
     <PackageVersion Include="Microsoft.Extensions.Http" Version="11.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="11.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="11.0.0" />
-    <PackageVersion Include="AntDesign" Version="1.6.2" />
+    <PackageVersion Include="AntDesign" Version="1.6.3-dotnet11.rc3" />
     <PackageVersion Include="Markdig" Version="1.4.2" />
     <!-- MediatR & FluentValidation (CQRS & Validation) -->
     <PackageVersion Include="MediatR" Version="14.2.0" />

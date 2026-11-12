@@ -25,13 +25,13 @@ public class Person : AuditableEntity<int>
     public string? UserId { get; set; }
     public int IdentificationTypeId { get; set; }
     public string IdentificationNumber { get; set; } = string.Empty;
-    public string FirstName { get; set; } = string.Empty;
-    public string FirstLastName { get; set; } = string.Empty;
+    public string? FirstName { get; set; }
+    public string? FirstLastName { get; set; }
     public string? SecondLastName { get; set; }
     public string FullName { get; set; } = string.Empty;
     public string? Address { get; set; }
-    public string CellPhone { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
+    public string? CellPhone { get; set; }
+    public string? Email { get; set; }
     public DateTime? BirthDate { get; set; }
     public DateTime? HireDate { get; set; }
     public PersonType PersonType { get; set; }
